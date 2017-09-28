@@ -1,0 +1,28 @@
+{
+  "name": "gnosis-safe",
+  "version": "1.0.0",
+  "description": "Simple Ethereum multisig contract",
+  "main": "test/gnosisSafe.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gnosis/gnosis-safe.git"
+  },
+  "keywords": [
+    "Ethereum",
+    "Wallet",
+    "Safe"
+  ],
+  "author": "stefan@gnosis.pm",
+  "bugs": {
+    "url": "https://github.com/gnosis/gnosis-safe/issues"
+  },
+  "devDependencies": {
+    "eth-lightwallet": "*"
+  }
+}
