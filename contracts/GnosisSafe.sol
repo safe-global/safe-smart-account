@@ -31,9 +31,9 @@ contract GnosisSafe {
     mapping (bytes32 => mapping (address => bool)) public isConfirmed;
 
     enum Operation {
-        Create,
         Call,
-        DelegateCall
+        DelegateCall,
+        Create
     }
 
     modifier onlyOwner() {
@@ -194,8 +194,8 @@ contract GnosisSafe {
             require(   isOwner[signer]
                     && !isExecuted[transactionHash]
                     && !isConfirmed[transactionHash][signer]);
-            isConfirmed[transactionHash][msg.sender] = true;
-            Confirmation(msg.sender, transactionHash);
+            isConfirmed[transactionHash][signer] = true;
+            Confirmation(signer, transactionHash);
         }
     }
 
@@ -250,10 +250,10 @@ contract GnosisSafe {
             require(to.delegatecall(data));
             DelegateCallExecution(msg.sender, to, data);
         }
-        else if (operation == Operation.Create) {
+        else {
             address createdContract;
             assembly {
-                createdContract := create(0, add(data,0x20), mload(data))
+                createdContract := create(0, add(data, 0x20), mload(data))
             }
             CreateExecution(msg.sender, data, createdContract);
         }
