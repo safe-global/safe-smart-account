@@ -1,7 +1,8 @@
 {
   "name": "gnosis-safe",
   "version": "1.0.0",
-  "description": "Simple Ethereum multisig contract",
+  "description": "Ethereum multisig contract",
+  "license": "GPL-3.0",
   "main": "test/gnosisSafe.js",
   "directories": {
     "test": "test"
