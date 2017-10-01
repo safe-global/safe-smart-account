@@ -6,8 +6,8 @@ import "./GnosisSafe.sol";
 contract DailyLimitException is Exception {
 
     event DailyLimitChange(address token, uint dailyLimit);
-    event DailyLimitTransaction(address token, address receiver, uint amount);
 
+    GnosisSafe public gnosisSafe;
     mapping (address => DailyLimit) public dailyLimits;
 
     struct DailyLimit {
@@ -15,8 +15,6 @@ contract DailyLimitException is Exception {
         uint spentToday;
         uint lastDay;
     }
-
-    GnosisSafe public gnosisSafe;
 
     modifier onlyGnosisSafe() {
         require(msg.sender == address(gnosisSafe));
@@ -40,7 +38,7 @@ contract DailyLimitException is Exception {
         DailyLimitChange(token, dailyLimit);
     }
 
-    function isExecutable(address _, address to, uint value, bytes data, GnosisSafe.Operation operation)
+    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)
@@ -63,10 +61,8 @@ contract DailyLimitException is Exception {
         }
         require(   receiver != 0
                 && amount > 0);
-        if (isUnderLimit(token, amount)) {
-            DailyLimitTransaction(token, receiver, amount);
+        if (isUnderLimit(token, amount))
             return true;
-        }
         return false;
     }
 
