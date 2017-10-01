@@ -61,7 +61,7 @@ contract GnosisSafeWithDescriptions is GnosisSafe {
     function addDescription(bytes32 descriptionHash)
         internal
     {
-        if (descriptionHash > 0) {
+        if (descriptionHash != 0) {
             descriptionHashes.push(descriptionHash);
             DescriptionAddition(msg.sender, descriptionHash);
         }

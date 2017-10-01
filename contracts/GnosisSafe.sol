@@ -60,7 +60,8 @@ contract GnosisSafe {
                 && _required <= _owners.length
                 && _required >= 1);
         for (uint i = 0; i < _owners.length; i++) {
-            require(_owners[i] != 0 && !isOwner[_owners[i]]);
+            require(   _owners[i] != 0
+                    && !isOwner[_owners[i]]);
             isOwner[_owners[i]] = true;
             OwnerAddition(_owners[i]);
         }
@@ -255,6 +256,7 @@ contract GnosisSafe {
             assembly {
                 createdContract := create(0, add(data, 0x20), mload(data))
             }
+            require(createdContract != 0);
             CreateExecution(msg.sender, data, createdContract);
         }
     }
