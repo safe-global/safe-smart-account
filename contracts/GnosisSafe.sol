@@ -7,12 +7,12 @@ contract GnosisSafe {
 
     uint8 public constant MAX_OWNERS = 64;
 
-    event Confirmation(address owner, bytes32 transactionHash);
-    event Revocation(address owner, bytes32 transactionHash);
-    event CallExecution(address owner, address to, uint value, bytes data);
-    event DelegateCallExecution(address owner, address to, bytes data);
-    event CreateExecution(address owner, bytes data, address createdContract);
-    event Deposit(address sender, uint value);
+    event Confirmation(address indexed owner, bytes32 transactionHash);
+    event Revocation(address indexed owner, bytes32 transactionHash);
+    event CallExecution(address indexed owner, address to, uint value, bytes data);
+    event DelegateCallExecution(address indexed owner, address to, bytes data);
+    event CreateExecution(address indexed owner, bytes data, address createdContract);
+    event Deposit(address indexed sender, uint value);
     event OwnerAddition(address owner);
     event OwnerRemoval(address owner);
     event OwnerReplacement(address oldOwner, address newOwner);

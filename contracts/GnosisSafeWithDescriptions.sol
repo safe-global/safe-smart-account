@@ -4,7 +4,7 @@ import "./GnosisSafe.sol";
 
 contract GnosisSafeWithDescriptions is GnosisSafe {
 
-    event DescriptionAddition(address sender, bytes32 descriptionHash);
+    event DescriptionAddition(address indexed owner, bytes32 descriptionHash);
     
     bytes32[] descriptionHashes;
 
@@ -38,7 +38,6 @@ contract GnosisSafeWithDescriptions is GnosisSafe {
 
     function confirmAndExecuteTransactionWithSignatures(address to, uint value, bytes data, GnosisSafe.Operation operation, uint nonce, uint8[] v, bytes32[] r, bytes32[] s, bytes32 descriptionHash)
         public
-        onlyOwner
     {
         addDescription(descriptionHash);
         super.confirmAndExecuteTransactionWithSignatures(to, value, data, operation, nonce, v, r, s);
