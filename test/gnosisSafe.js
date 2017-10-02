@@ -1,6 +1,7 @@
 const util = require('util');
 const utils = require('./utils')
 const lightwallet = require('eth-lightwallet')
+const bs58 = require('bs58')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const GnosisSafeWithDescriptions = artifacts.require("./GnosisSafeWithDescriptions.sol")
@@ -53,7 +54,7 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
         // Withdraw 1 ETH
         transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, 0, 0)
-        let descriptionHash = 'YwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG'
+        let descriptionHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
         // Confirm transaction with account 0
         utils.logGasUsage(
             'confirmTransaction',
@@ -67,8 +68,18 @@ contract('GnosisSafe', function(accounts) {
             )
         )
         assert.equal(await gnosisSafe.getDescriptionCount(), 1)
+        assert.deepEqual(await gnosisSafe.getDescriptions(0, 1), [descriptionHash])
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
         assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
+        let transactionHash2 = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, 0, 1)
+        let descriptionHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash2, descriptionHash2, {from: accounts[0]})
+        )
+        assert.equal(await gnosisSafe.getDescriptionCount(), 2)
+        assert.deepEqual(await gnosisSafe.getDescriptions(0, 2), [descriptionHash, descriptionHash2])
     })
 
     it('should create a new safe and add a new owner', async () => {
