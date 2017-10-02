@@ -1,7 +1,7 @@
 const util = require('util');
 const utils = require('./utils')
+const { getParamFromTxEvent, assertRejects } = utils
 const lightwallet = require('eth-lightwallet')
-const bs58 = require('bs58')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const GnosisSafeWithDescriptions = artifacts.require("./GnosisSafeWithDescriptions.sol")
@@ -144,5 +144,39 @@ contract('GnosisSafe', function(accounts) {
         )
         owners = await gnosisSafe.getOwners()
         assert.equal(owners.length, 4)
+    })
+
+    it('should create a new safe and create a new contract with a safe transaction', async () => {
+        // Create Gnosis Safe
+        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
+        // Add owner transaction
+        const TestContract = web3.eth.contract([{
+            "constant": true,
+            "inputs": [],
+            "name": "x",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "stateMutability": "pure",
+            "type": "function"
+        }]);
+        data = "0x60606040523415600e57600080fd5b60978061001c6000396000f30060606040526000357c01" + 
+               "00000000000000000000000000000000000000000000000000000000900463ffffffff1680630c" +
+               "55699c14603c57600080fd5b3415604657600080fd5b604c6062565b6040518082815260200191" +
+               "505060405180910390f35b600060159050905600a165627a7a72305820f977aa5909c6d283de49" +
+               "6e5db51c83425475de52bab19fd0675e5b893587ec830029"
+        transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, 2, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        // Confirm and execute transaction with account 1
+        let testContract = getParamFromTxEvent(
+            await gnosisSafe.confirmAndExecuteTransaction(
+                0, 0, data, 2, 0, {from: accounts[1]}
+            ),
+            'createdContract', TestContract, 'CreateExecution'
+        )
+        assert.equal(await testContract.x(), 21)
     })
 })
