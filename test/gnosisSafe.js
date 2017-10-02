@@ -82,7 +82,7 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getDescriptions(0, 2), [descriptionHash, descriptionHash2])
     })
 
-    it('should create a new safe and add a new owner', async () => {
+    it.only('should create a new safe and add a new owner and remove another owner', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Add owner transaction
@@ -105,6 +105,24 @@ contract('GnosisSafe', function(accounts) {
         )
         owners = await gnosisSafe.getOwners()
         assert.equal(owners.length, 3)
+        // Remove owner transaction
+        data = await gnosisSafe.contract.removeOwner.getData(accounts[1], 2)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        // Confirm and execute transaction with account 1
+        utils.logGasUsage(
+            'confirmAndExecuteTransaction remove owner',
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+            )
+        )
+        owners = await gnosisSafe.getOwners()
+        assert.equal(owners.length, 2)
+        assert.equal(await gnosisSafe.isOwner(accounts[1]), false)
     })
 
     it('should create a new safe and add a new owner using signed messages', async () => {
@@ -137,7 +155,7 @@ contract('GnosisSafe', function(accounts) {
             sigS.push('0x' + sig.s.toString('hex'))
         }
         utils.logGasUsage(
-            'confirmAndExecuteTransaction add owner using signed messages',
+            'confirmAndExecuteTransactionWithSignatures add owner',
             await gnosisSafe.confirmAndExecuteTransactionWithSignatures(
                 gnosisSafe.address, 0, data, 0, 0, sigV, sigR, sigS, {from: accounts[0]}
             )
