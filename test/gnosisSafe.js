@@ -82,11 +82,11 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getDescriptions(0, 2), [descriptionHash, descriptionHash2])
     })
 
-    it.only('should create a new safe and add a new owner and remove another owner', async () => {
+    it.only('should create a new safe and add a new owner and remove another owner and replace two owners and update required owners', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
-        // Add owner transaction
-        data = await gnosisSafe.contract.addOwner.getData(accounts[3], 2)
+        // Add owner transaction and set required to 3
+        data = await gnosisSafe.contract.addOwner.getData(accounts[2], 3)
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
         // Confirm transaction with account 0
         utils.logGasUsage(
@@ -105,24 +105,51 @@ contract('GnosisSafe', function(accounts) {
         )
         owners = await gnosisSafe.getOwners()
         assert.equal(owners.length, 3)
-        // Remove owner transaction
-        data = await gnosisSafe.contract.removeOwner.getData(accounts[1], 2)
+        assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
+        assert.equal(await gnosisSafe.required(), 3)
+        // Remove owner transaction and set required to 2
+        data = await gnosisSafe.contract.removeOwner.getData(accounts[2], 2)
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
         // Confirm transaction with account 0
         utils.logGasUsage(
             'confirmTransaction',
             await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         )
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
+        )
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
             'confirmAndExecuteTransaction remove owner',
             await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[2]}
             )
         )
         owners = await gnosisSafe.getOwners()
         assert.equal(owners.length, 2)
-        assert.equal(await gnosisSafe.isOwner(accounts[1]), false)
+        assert.equal(await gnosisSafe.isOwner(accounts[2]), false)
+        assert.equal(await gnosisSafe.required(), 2)
+        // Replace owner transaction
+        data = await gnosisSafe.contract.replaceOwner.getData(accounts[0], accounts[2])
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        // Owner count is still 2
+        owners = await gnosisSafe.getOwners()
+        assert.equal(owners.length, 2)
+        // Confirm and execute transaction with account 1
+        utils.logGasUsage(
+            'confirmAndExecuteTransaction replace owner',
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+            )
+        )
+        assert.equal(await gnosisSafe.isOwner(accounts[0]), false)
+        assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
     })
 
     it('should create a new safe and add a new owner using signed messages', async () => {
