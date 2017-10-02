@@ -25,10 +25,12 @@ contract('GnosisSafe', function(accounts) {
         // Withdraw 1 ETH
         transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, 0, 0)
         // Confirm transaction with account 0
+        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 0)
         utils.logGasUsage(
             'confirmTransaction',
             await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         )
+        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
             'confirmAndExecuteTransaction send 1 eth',
@@ -36,6 +38,8 @@ contract('GnosisSafe', function(accounts) {
                 accounts[0], web3.toWei(1, 'ether'), 0, 0, 0, {from: accounts[1]}
             )
         )
+        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 2)
+        assert.deepEqual(await gnosisSafe.getConfirmingOwners(transactionHash), [accounts[0], accounts[1]])
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
         assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
     })

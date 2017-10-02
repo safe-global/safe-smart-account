@@ -276,6 +276,33 @@ contract GnosisSafe {
         return false;
     }
 
+    function getConfirmationCount(bytes32 transactionHash)
+        public
+        view
+        returns (uint confirmationCount)
+    {
+        for (uint i = 0; i < owners.length; i++) {
+            if (isConfirmed[transactionHash][owners[i]])
+                confirmationCount++;
+        }
+    }
+
+    function getConfirmingOwners(bytes32 transactionHash)
+        public
+        view
+        returns (address[] confirmingOwners)
+    {
+        uint confirmationCount = getConfirmationCount(transactionHash);
+        confirmingOwners = new address[](confirmationCount);
+        confirmationCount = 0;
+        for (uint i = 0; i < owners.length; i++) {
+            if (isConfirmed[transactionHash][owners[i]]) {
+                confirmingOwners[confirmationCount] = owners[i];
+                confirmationCount++;
+            }
+        }
+    }
+
     function getTransactionHash(address to, uint value, bytes data, Operation operation, uint nonce)
         public
         view
