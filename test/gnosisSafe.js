@@ -82,7 +82,7 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getDescriptions(0, 2), [descriptionHash, descriptionHash2])
     })
 
-    it.only('should create a new safe and add a new owner and remove another owner and replace two owners and update required owners', async () => {
+    it('should create a new safe and add, remove and replace an owner and update required confirmations', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Add owner transaction and set required to 3
@@ -150,6 +150,63 @@ contract('GnosisSafe', function(accounts) {
         )
         assert.equal(await gnosisSafe.isOwner(accounts[0]), false)
         assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
+    })
+
+    it('should create a new safe and add and remove an exception and update a condition', async () => {
+        // Create Gnosis Safe
+        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
+        // Add exception
+        let exception = "0xbc1e40869e04dbe797e707405fea119dd3382794"
+        data = await gnosisSafe.contract.addException.getData(exception)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        // Confirm and execute transaction with account 1
+        assert.equal(await gnosisSafe.isException(exception), false)
+        utils.logGasUsage(
+            'confirmAndExecuteTransaction add exception',
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+            )
+        )
+        assert.equal(await gnosisSafe.isException(exception), true)
+        // Remove exception
+        data = await gnosisSafe.contract.removeException.getData(exception)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        // Confirm and execute transaction with account 1
+        utils.logGasUsage(
+            'confirmAndExecuteTransaction remove exception',
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+            )
+        )
+        assert.equal(await gnosisSafe.isException(exception), false)
+        // Change condition
+        let condition = "0xcc1e40869e04dbe797e707405fea119dd3382794"
+        data = await gnosisSafe.contract.changeCondition.getData(condition)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        // Confirm transaction with account 0
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        )
+        assert.equal(await gnosisSafe.condition(), "0x0000000000000000000000000000000000000000")
+        // Confirm and execute transaction with account 1
+        utils.logGasUsage(
+            'confirmAndExecuteTransaction change condition',
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]}
+            )
+        )
+        assert.equal(await gnosisSafe.condition(), condition)
     })
 
     it('should create a new safe and add a new owner using signed messages', async () => {
