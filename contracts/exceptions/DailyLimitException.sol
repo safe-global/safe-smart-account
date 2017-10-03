@@ -3,6 +3,8 @@ import "../Exception.sol";
 import "../GnosisSafe.sol";
 
 
+/// @title Daily Limit Exception - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract DailyLimitException is Exception {
 
     event DailyLimitChange(address token, uint dailyLimit);

@@ -3,6 +3,8 @@ import "./Exception.sol";
 import "./Condition.sol";
 
 
+/// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafe {
 
     uint8 public constant MAX_OWNERS = 64;

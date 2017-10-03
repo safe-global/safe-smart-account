@@ -2,6 +2,8 @@ pragma solidity 0.4.17;
 import "./GnosisSafe.sol";
 
 
+/// @title Gnosis Safe with Descriptions - Extend the Gnosis Safe with the option to add a description hash to every transaction.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafeWithDescriptions is GnosisSafe {
 
     event DescriptionAddition(address indexed owner, bytes32 descriptionHash);

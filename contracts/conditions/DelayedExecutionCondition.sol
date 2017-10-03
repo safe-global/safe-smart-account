@@ -3,6 +3,8 @@ import "../Condition.sol";
 import "../GnosisSafe.sol";
 
 
+/// @title Delayed Execution Condition - Requires to wait a defined period before a transaciton can be executed.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract DelayedExecutionCondition is Condition {
 
     event DelayChange(uint delay);

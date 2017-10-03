@@ -3,6 +3,8 @@ import "../Exception.sol";
 import "../GnosisSafe.sol";
 
 
+/// @title Whitelist Exception - Allows to execute transactions to whitelisted addresses without confirmations.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract WhitelistException is Exception {
 
     event WhitelistAddition(address account);

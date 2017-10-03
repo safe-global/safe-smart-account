@@ -3,6 +3,8 @@ import "../Exception.sol";
 import "../GnosisSafe.sol";
 
 
+/// @title Last Resort Exception - Allows to execute a transaction without confirmations in case a deposit was paid and a challenge period passed.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract LastResortException is Exception {
 
     event TransactionSubmission(address sender, bytes32 submittedTransactionHash);
