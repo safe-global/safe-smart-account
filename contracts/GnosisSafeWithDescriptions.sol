@@ -8,7 +8,7 @@ contract GnosisSafeWithDescriptions is GnosisSafe {
 
     event DescriptionAddition(address indexed owner, bytes32 descriptionHash);
     
-    bytes32[] descriptionHashes;
+    bytes32[] public descriptionHashes;
 
     function GnosisSafeWithDescriptions(address[] _owners, uint8 _required)
         public

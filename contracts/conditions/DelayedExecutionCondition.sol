@@ -10,9 +10,9 @@ contract DelayedExecutionCondition is Condition {
     event DelayChange(uint delay);
     event TransactionSubmission(bytes32 transactionHash);
 
-    GnosisSafe gnosisSafe;
+    GnosisSafe public gnosisSafe;
     uint public delay;
-    mapping (bytes32 => uint) submissionTimes;
+    mapping (bytes32 => uint) public submissionTimes;
 
     modifier onlyGnosisSafe() {
         require(msg.sender == address(gnosisSafe));

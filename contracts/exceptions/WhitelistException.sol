@@ -11,7 +11,7 @@ contract WhitelistException is Exception {
     event WhitelistRemoval(address account);
 
     GnosisSafe public gnosisSafe;
-    mapping (address => bool) isWhitelisted;
+    mapping (address => bool) public isWhitelisted;
 
     modifier onlyGnosisSafe() {
         require(msg.sender == address(gnosisSafe));
