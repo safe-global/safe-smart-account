@@ -23,13 +23,15 @@ contract DailyLimitException is Exception {
         _;
     }
 
-    function DailyLimitException(GnosisSafe _gnosisSafe, uint dailyLimit)
+    function DailyLimitException(GnosisSafe _gnosisSafe, address[] tokens, uint[] _dailyLimits)
         public
     {
         require(address(_gnosisSafe) != 0);
         gnosisSafe = _gnosisSafe;
-        dailyLimits[0].dailyLimit = dailyLimit;
-        DailyLimitChange(0, dailyLimit);
+        for (uint i = 0; i < tokens.length; i++) {
+            dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
+            DailyLimitChange(tokens[i], _dailyLimits[i]);
+        }
     }
 
     function changeDailyLimit(address token, uint dailyLimit)
@@ -63,8 +65,10 @@ contract DailyLimitException is Exception {
         }
         require(   receiver != 0
                 && amount > 0);
-        if (isUnderLimit(token, amount))
+        if (isUnderLimit(token, amount)) {
+            dailyLimits[token].spentToday += amount;
             return true;
+        }
         return false;
     }
 
