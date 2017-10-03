@@ -17,10 +17,6 @@ contract('GnosisSafe', function(accounts) {
     const DELEGATECALL = 1
     const CREATE = 2
 
-    beforeEach(async () => {
-        
-    })
-
     it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)

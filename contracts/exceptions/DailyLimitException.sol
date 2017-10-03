@@ -58,10 +58,13 @@ contract DailyLimitException is Exception {
         }
         else if (value == 0) {
             token = to;
+            bytes4 functionIdentifier;
             assembly {
-                receiver := mload(add(data, 32))
-                amount := mload(add(data, 64))
+                functionIdentifier := mload(add(data, 32))
+                receiver := mload(add(data, 36))
+                amount := mload(add(data, 68))
             }
+            require(functionIdentifier == hex"a9059cbb");
         }
         require(   receiver != 0
                 && amount > 0);
