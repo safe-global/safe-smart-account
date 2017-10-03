@@ -115,7 +115,7 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await testToken.balances(accounts[0]), 20);
     })
 
-    it.only('should create a new Safe with daily limit exception and change the daily limit', async () => {
+    it('should create a new Safe with daily limit exception and change the daily limit', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Create daily limit exception

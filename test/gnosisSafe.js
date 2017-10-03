@@ -89,8 +89,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Owner count is still 2
-        let owners = await gnosisSafe.getOwners()
-        assert.equal(owners.length, 2)
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1]])
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
             'confirmAndExecuteTransaction add owner',
@@ -98,8 +97,7 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
             )
         )
-        owners = await gnosisSafe.getOwners()
-        assert.equal(owners.length, 3)
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1], accounts[2]])
         assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
         assert.equal(await gnosisSafe.required(), 3)
         // Remove owner and set required to 2
@@ -115,8 +113,7 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, 0, {from: accounts[2]}
             )
         )
-        owners = await gnosisSafe.getOwners()
-        assert.equal(owners.length, 2)
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1]])
         assert.equal(await gnosisSafe.isOwner(accounts[2]), false)
         assert.equal(await gnosisSafe.required(), 2)
         // Replace owner transaction
@@ -124,9 +121,6 @@ contract('GnosisSafe', function(accounts) {
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Owner count is still 2
-        owners = await gnosisSafe.getOwners()
-        assert.equal(owners.length, 2)
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
             'confirmAndExecuteTransaction replace owner',
@@ -134,8 +128,7 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
             )
         )
-        assert.equal(await gnosisSafe.isOwner(accounts[0]), false)
-        assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[2], accounts[1]])
     })
 
     it('should create a new Safe and add and remove an exception and update a condition', async () => {
@@ -156,6 +149,7 @@ contract('GnosisSafe', function(accounts) {
             )
         )
         assert.equal(await gnosisSafe.isException(exception), true)
+        assert.deepEqual(await gnosisSafe.getExceptions(), [exception])
         // Remove exception
         data = await gnosisSafe.contract.removeException.getData(exception)
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
@@ -169,6 +163,7 @@ contract('GnosisSafe', function(accounts) {
             )
         )
         assert.equal(await gnosisSafe.isException(exception), false)
+        assert.deepEqual(await gnosisSafe.getExceptions(), [])
         // Change condition
         let condition = "0xcc1e40869e04dbe797e707405fea119dd3382794"
         data = await gnosisSafe.contract.changeCondition.getData(condition)
@@ -221,8 +216,7 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, 0, sigV, sigR, sigS, {from: accounts[0]}
             )
         )
-        owners = await gnosisSafe.getOwners()
-        assert.equal(owners.length, 4)
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], lightwalletAccounts[0], lightwalletAccounts[1], lightwalletAccounts[2]])
     })
 
     it('should create a new Safe and do a CREATE transaction', async () => {
