@@ -4,7 +4,7 @@ const solc = require('solc')
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const DailyLimitException = artifacts.require("./DailyLimitException.sol");
 const DailyLimitExceptionFactory = artifacts.require("./DailyLimitExceptionFactory.sol");
-const CreateAndAddExceptions = artifacts.require("./CreateAndAddExceptions.sol");
+const DailyLimitHelper = artifacts.require("./DailyLimitHelper.sol");
 
 contract('DailyLimitException', function(accounts) {
 
@@ -21,14 +21,14 @@ contract('DailyLimitException', function(accounts) {
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Create daily limit exception
-        createAndAddExceptions = await CreateAndAddExceptions.new()
+        dailyLimitHelper = await DailyLimitHelper.new()
         // Add exception to wallet
-        data = await createAndAddExceptions.contract.createAndAddDailyLimitException.getData(dailyLimitExceptionFactory.address, [0], [200])
-        transactionHash = await gnosisSafe.getTransactionHash(createAndAddExceptions.address, 0, data, DELEGATECALL, 0)
+        data = await dailyLimitHelper.contract.createAndAddDailyLimitException.getData(dailyLimitExceptionFactory.address, [0], [200])
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitHelper.address, 0, data, DELEGATECALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(createAndAddExceptions.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitHelper.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
         exceptions = await gnosisSafe.getExceptions()
         assert.equal(exceptions.length, 1)
         dailyLimitException = DailyLimitException.at(exceptions[0])
