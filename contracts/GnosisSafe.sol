@@ -11,9 +11,9 @@ contract GnosisSafe {
 
     event Confirmation(address indexed owner, bytes32 transactionHash);
     event Revocation(address indexed owner, bytes32 transactionHash);
-    event CallExecution(address indexed owner, address to, uint value, bytes data);
-    event DelegateCallExecution(address indexed owner, address to, bytes data);
-    event CreateExecution(address indexed owner, bytes data, address createdContract);
+    event CallExecution(address indexed owner);
+    event DelegateCallExecution(address indexed owner);
+    event CreateExecution(address indexed owner, address createdContract);
     event Deposit(address indexed sender, uint value);
     event OwnerAddition(address owner);
     event OwnerRemoval(address owner);
@@ -247,11 +247,11 @@ contract GnosisSafe {
     {
         if (operation == Operation.Call) {
             require(to.call.value(value)(data));
-            CallExecution(msg.sender, to, value, data);
+            CallExecution(msg.sender);
         }
         else if (operation == Operation.DelegateCall) {
             require(to.delegatecall(data));
-            DelegateCallExecution(msg.sender, to, data);
+            DelegateCallExecution(msg.sender);
         }
         else {
             address createdContract;
@@ -259,7 +259,7 @@ contract GnosisSafe {
                 createdContract := create(0, add(data, 0x20), mload(data))
             }
             require(createdContract != 0);
-            CreateExecution(msg.sender, data, createdContract);
+            CreateExecution(msg.sender, createdContract);
         }
     }
 
