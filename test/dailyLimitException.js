@@ -3,6 +3,8 @@ const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const DailyLimitException = artifacts.require("./DailyLimitException.sol");
+const DailyLimitExceptionFactory = artifacts.require("./DailyLimitExceptionFactory.sol");
+const CreateAndAddExceptions = artifacts.require("./CreateAndAddExceptions.sol");
 
 contract('GnosisSafe', function(accounts) {
 
@@ -12,6 +14,36 @@ contract('GnosisSafe', function(accounts) {
     let dailyLimitException
 
     const CALL = 0
+    const DELEGATECALL = 1
+
+    it('should create a new Safe and add daily limit exception in one transaction', async () => {
+        // Create Gnosis Safe
+        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
+        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
+        // Create daily limit exception
+        createAndAddExceptions = await CreateAndAddExceptions.new()
+        // Add exception to wallet
+        data = await createAndAddExceptions.contract.createAndAddDailyLimitException.getData(dailyLimitExceptionFactory.address, [0], [200])
+        transactionHash = await gnosisSafe.getTransactionHash(createAndAddExceptions.address, 0, data, DELEGATECALL, 0)
+        // Confirm transaction with account 0
+        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        // Confirm and execute transaction with account 1
+        await gnosisSafe.confirmAndExecuteTransaction(createAndAddExceptions.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        exceptions = await gnosisSafe.getExceptions()
+        assert.equal(exceptions.length, 1)
+        dailyLimitException = DailyLimitException.at(exceptions[0])
+        // Deposit 1 eth
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
+        // Withdraw daily limit
+        utils.logGasUsage(
+            'executeException withdraw daily limit',
+            await gnosisSafe.executeException(
+                accounts[0], 100, 0, CALL, dailyLimitException.address, {from: accounts[1]}
+            )
+        )
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 100);
+    })
 
     it('should create a new Safe with daily limit exception and withdraw daily limit in Ether', async () => {
         // Create Gnosis Safe

@@ -4,6 +4,7 @@ var DailyLimitExceptionFactory = artifacts.require("./exceptions/DailyLimitExcep
 var WhitelistExceptionFactory = artifacts.require("./exceptions/WhitelistExceptionFactory.sol");
 var LastResortExceptionFactory = artifacts.require("./exceptions/LastResortExceptionFactory.sol");
 var DelayedExecutionConditionFactory = artifacts.require("./exceptions/DelayedExecutionConditionFactory.sol");
+var CreateAndAddExceptions = artifacts.require("./exceptions/CreateAndAddExceptions.sol");
 
 module.exports = function(deployer) {
     deployer.deploy(GnosisSafeFactory);
@@ -12,4 +13,5 @@ module.exports = function(deployer) {
     deployer.deploy(WhitelistExceptionFactory);
     deployer.deploy(LastResortExceptionFactory);
     deployer.deploy(DelayedExecutionConditionFactory);
+    deployer.deploy(CreateAndAddExceptions);
 };
