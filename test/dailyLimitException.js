@@ -4,7 +4,6 @@ const solc = require('solc')
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const DailyLimitException = artifacts.require("./DailyLimitException.sol");
 const DailyLimitExceptionFactory = artifacts.require("./DailyLimitExceptionFactory.sol");
-const DailyLimitHelper = artifacts.require("./DailyLimitHelper.sol");
 
 contract('DailyLimitException', function(accounts) {
 
@@ -19,16 +18,15 @@ contract('DailyLimitException', function(accounts) {
     it('should create a new Safe and add daily limit exception in one transaction', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
-        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Create daily limit exception
-        dailyLimitHelper = await DailyLimitHelper.new()
+        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Add exception to wallet
-        data = await dailyLimitHelper.contract.createAndAddDailyLimitException.getData(dailyLimitExceptionFactory.address, [0], [200])
-        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitHelper.address, 0, data, DELEGATECALL, 0)
+        data = await dailyLimitExceptionFactory.contract.create.getData([0], [200])
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitHelper.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
         exceptions = await gnosisSafe.getExceptions()
         assert.equal(exceptions.length, 1)
         dailyLimitException = DailyLimitException.at(exceptions[0])

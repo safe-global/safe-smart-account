@@ -4,13 +4,20 @@ import "./LastResortException.sol";
 
 contract LastResortExceptionFactory {
 
-    event LastResortExceptionCreation(GnosisSafe indexed gnosisSafe, LastResortException lastResortException);
+    event LastResortExceptionCreation(GnosisSafe gnosisSafe, LastResortException lastResortException);
+
+    function addException(Exception exception)
+        public
+    {
+
+    }
 
     function create(uint requiredDeposit, uint challengePeriod)
         public
         returns (LastResortException lastResortException)
     {
-        lastResortException = new LastResortException(GnosisSafe(msg.sender), requiredDeposit, challengePeriod);
-        LastResortExceptionCreation(GnosisSafe(msg.sender), lastResortException);
+        lastResortException = new LastResortException(GnosisSafe(this), requiredDeposit, challengePeriod);
+        LastResortExceptionCreation(GnosisSafe(this), lastResortException);
+        this.addException(lastResortException);
     }
 }

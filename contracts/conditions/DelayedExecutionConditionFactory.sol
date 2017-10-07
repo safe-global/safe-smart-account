@@ -4,13 +4,20 @@ import "./DelayedExecutionCondition.sol";
 
 contract DelayedExecutionConditionFactory {
 
-    event DelayedExecutionConditionCreation(GnosisSafe indexed gnosisSafe, DelayedExecutionCondition delayedExecutionCondition);
+    event DelayedExecutionConditionCreation(GnosisSafe gnosisSafe, DelayedExecutionCondition delayedExecutionCondition);
+
+    function changeCondition(Condition _condition)
+        public
+    {
+
+    }
 
     function create(uint delay)
         public
         returns (DelayedExecutionCondition delayedExecutionCondition)
     {
-        delayedExecutionCondition = new DelayedExecutionCondition(GnosisSafe(msg.sender), delay);
-        DelayedExecutionConditionCreation(GnosisSafe(msg.sender), delayedExecutionCondition);
+        delayedExecutionCondition = new DelayedExecutionCondition(GnosisSafe(this), delay);
+        DelayedExecutionConditionCreation(GnosisSafe(this), delayedExecutionCondition);
+        this.changeCondition(delayedExecutionCondition);
     }
 }
