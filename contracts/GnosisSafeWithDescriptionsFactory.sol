@@ -4,7 +4,7 @@ import "./GnosisSafeWithDescriptions.sol";
 
 contract GnosisSafeWithDescriptionsFactory {
 
-    event GnosisSafeWithDescriptionsCreation(address indexed creator, GnosisSafeWithDescriptions gnosisSafe);
+    event GnosisSafeWithDescriptionsCreation(address creator, GnosisSafeWithDescriptions gnosisSafe);
 
     function create(address[] owners, uint8 required)
         public
