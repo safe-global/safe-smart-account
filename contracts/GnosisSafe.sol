@@ -310,7 +310,7 @@ contract GnosisSafe {
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(1), this, to, value, data, operation, nonce);
+        return keccak256(byte(0x19), this, to, value, data, operation, nonce);
     }
 
     function getOwners()
