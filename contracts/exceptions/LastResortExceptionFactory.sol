@@ -6,7 +6,15 @@ contract LastResortExceptionFactory {
 
     event LastResortExceptionCreation(GnosisSafe gnosisSafe, LastResortException lastResortException);
 
+    uint8 required;
+
     function addException(Exception exception)
+        public
+    {
+
+    }
+
+    function addOwner(address owner, uint8 _required)
         public
     {
 
@@ -19,5 +27,6 @@ contract LastResortExceptionFactory {
         lastResortException = new LastResortException(GnosisSafe(this), requiredDeposit, challengePeriod);
         LastResortExceptionCreation(GnosisSafe(this), lastResortException);
         this.addException(lastResortException);
+        this.addOwner(lastResortException, required);
     }
 }

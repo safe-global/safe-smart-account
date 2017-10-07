@@ -37,21 +37,22 @@ contract LastResortException is Exception {
         public
         payable
     {
-        require(msg.value >= requiredDeposit);
+        require(   msg.value >= requiredDeposit
+                && submittedTransactionHash == 0);
         submittedTransactionHash = _submittedTransactionHash;
         submissionTimestamp = now;
         requestor = msg.sender;
         TransactionSubmission(msg.sender, _submittedTransactionHash);
     }
 
-    function cancelTransaction(bytes32 _submittedTransactionHash)
+    function cancelTransaction()
         public
     {
         require(   gnosisSafe.isOwner(msg.sender)
-                && msg.sender.send(this.balance));
+                && gnosisSafe.send(this.balance));
+        TransactionCancellation(msg.sender, submittedTransactionHash);
         submittedTransactionHash = bytes32(0);
         submissionTimestamp = 0;
-        TransactionCancellation(msg.sender, _submittedTransactionHash);
     }
 
     function executeException(address to, uint value, bytes data)
@@ -65,12 +66,20 @@ contract LastResortException is Exception {
         onlyGnosisSafe
         returns (bool)
     {
-        if (   keccak256(to, value, data, operation) == submittedTransactionHash
+        if (   getTransactionHash(to, value, data, operation) == submittedTransactionHash
             && now - submissionTimestamp > challengePeriod)
         {
             require(requestor.send(this.balance));
             return true;
         }
         return false;
+    }
+
+    function getTransactionHash(address to, uint value, bytes data, GnosisSafe.Operation operation)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(to, value, data, operation);
     }
 }

@@ -19,11 +19,11 @@ contract('WhitelistException', function(accounts) {
         whitelistException = await WhitelistException.new(gnosisSafe.address, [accounts[3]])
         // Add exception to wallet
         data = await gnosisSafe.contract.addException.getData(whitelistException.address)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]})
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
@@ -44,11 +44,11 @@ contract('WhitelistException', function(accounts) {
         whitelistException = await WhitelistException.new(gnosisSafe.address, [])
         // Add exception to wallet
         data = await gnosisSafe.contract.addException.getData(whitelistException.address)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, 0, 0)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, 0, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]})
         assert.equal(await whitelistException.isWhitelisted(accounts[3]), false);
         // Add account 3 to whitelist
         data = await whitelistException.contract.addToWhitelist.getData(accounts[3])

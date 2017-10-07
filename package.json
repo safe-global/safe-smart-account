@@ -24,6 +24,7 @@
     "url": "https://github.com/gnosis/gnosis-safe/issues"
   },
   "devDependencies": {
-    "eth-lightwallet": "*"
+    "eth-lightwallet": "*",
+    "@digix/tempo": "^0.2.0"
   }
 }
