@@ -49,7 +49,8 @@ contract DelayedExecutionCondition is Condition {
         returns (bool)
     {
         bytes32 transactionHash = gnosisSafe.getTransactionHash(to, value, data, operation, nonce);
-        if (now - submissionTimes[transactionHash] > delay)
+        if (   submissionTimes[transactionHash] > 0
+            && now - submissionTimes[transactionHash] > delay)
             return true;
         return false;
     }
