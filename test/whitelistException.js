@@ -3,7 +3,7 @@ const utils = require('./utils')
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const WhitelistException = artifacts.require("./WhitelistException.sol");
 
-contract('GnosisSafe', function(accounts) {
+contract('WhitelistException', function(accounts) {
 
     let gnosisSafe
     let data

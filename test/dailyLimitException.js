@@ -6,7 +6,7 @@ const DailyLimitException = artifacts.require("./DailyLimitException.sol");
 const DailyLimitExceptionFactory = artifacts.require("./DailyLimitExceptionFactory.sol");
 const CreateAndAddExceptions = artifacts.require("./CreateAndAddExceptions.sol");
 
-contract('GnosisSafe', function(accounts) {
+contract('DailyLimitException', function(accounts) {
 
     let gnosisSafe
     let data
