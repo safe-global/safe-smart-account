@@ -1,5 +1,8 @@
-function getParamFromTxEvent(transaction, paramName, contractFactory, eventName) {
+function getParamFromTxEvent(transaction, paramName, contractFactory, eventName, subject) {
     assert.isObject(transaction)
+    if (subject != null) {
+        logGasUsage(subject, transaction)
+    }
     let logs = transaction.logs
     if(eventName != null) {
         logs = logs.filter((l) => l.event === eventName)

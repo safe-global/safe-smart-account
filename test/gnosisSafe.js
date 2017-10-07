@@ -249,7 +249,7 @@ contract('GnosisSafe', function(accounts) {
             await gnosisSafe.confirmAndExecuteTransaction(
                 0, 0, data, CREATE, 0, {from: accounts[1]}
             ),
-            'createdContract', TestContract, 'CreateExecution'
+            'createdContract', TestContract, 'CreateExecution', 'confirmAndExecuteTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)
     })
@@ -295,7 +295,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm and execute transaction with account 1
         assert.equal(await testContract.balances(gnosisSafe.address), 0)
         utils.logGasUsage(
-            'confirmAndExecuteTransaction do DELEGATECALL',
+            'confirmAndExecuteTransaction DELEGATECALL',
             await gnosisSafe.confirmAndExecuteTransaction(
                 testLibrary.address, 0, data, DELEGATECALL, 0, {from: accounts[1]}
             )
