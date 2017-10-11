@@ -9,7 +9,7 @@ contract DelayedExecutionConditionFactory {
     function changeCondition(Condition _condition)
         public
     {
-
+        revert();
     }
 
     function create(uint delay)

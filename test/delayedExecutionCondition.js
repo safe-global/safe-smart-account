@@ -15,7 +15,7 @@ contract('DelayedExecutionCondition', function(accounts) {
     const CALL = 0
     const DELEGATECALL = 1
 
-    it.only('should create a new Safe with delayed execution condition and depoist and withdraw 1 ETH', async () => {
+    it('should create a new Safe with delayed execution condition and depoist and withdraw 1 ETH', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Create whitelist exception

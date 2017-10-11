@@ -9,7 +9,7 @@ contract WhitelistExceptionFactory {
     function addException(Exception exception)
         public
     {
-
+        revert();
     }
 
     function create(address[] whitelist)

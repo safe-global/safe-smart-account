@@ -9,7 +9,7 @@ contract DailyLimitExceptionFactory {
     function addException(Exception exception)
         public
     {
-
+        revert();
     }
 
     function create(address[] tokens, uint[] dailyLimits)

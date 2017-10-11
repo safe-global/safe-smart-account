@@ -11,13 +11,13 @@ contract LastResortExceptionFactory {
     function addException(Exception exception)
         public
     {
-
+        revert();
     }
 
     function addOwner(address owner, uint8 _required)
         public
     {
-
+        revert();
     }
 
     function create(uint requiredDeposit, uint challengePeriod)
