@@ -9,6 +9,8 @@ contract DailyLimitException is Exception {
 
     event DailyLimitChange(address token, uint dailyLimit);
 
+    bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
+
     GnosisSafe public gnosisSafe;
     mapping (address => DailyLimit) public dailyLimits;
 
@@ -63,7 +65,7 @@ contract DailyLimitException is Exception {
                 receiver := mload(add(data, 36))
                 amount := mload(add(data, 68))
             }
-            require(functionIdentifier == hex"a9059cbb");
+            require(functionIdentifier == TRANSFER_FUNCTION_IDENTIFIER);
         }
         require(   receiver != 0
                 && amount > 0);
