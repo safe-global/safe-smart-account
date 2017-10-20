@@ -18,11 +18,10 @@ contract WhitelistException is Exception {
         _;
     }
 
-    function WhitelistException(GnosisSafe _gnosisSafe, address[] accounts)
+    function WhitelistException(address[] accounts)
         public
     {
-        require(address(_gnosisSafe) != 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         for (uint i = 0; i < accounts.length; i++) {
             require(accounts[i] != 0);
             isWhitelisted[accounts[i]]= true;

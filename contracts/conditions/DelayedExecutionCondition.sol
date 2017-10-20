@@ -19,11 +19,10 @@ contract DelayedExecutionCondition is Condition {
         _;
     }
 
-    function DelayedExecutionCondition(GnosisSafe _gnosisSafe, uint _delay)
+    function DelayedExecutionCondition(uint _delay)
         public
     {
-        require(address(_gnosisSafe) != 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         delay = _delay;
         DelayChange(_delay);
     }

@@ -16,7 +16,7 @@ contract DelayedExecutionConditionFactory {
         public
         returns (DelayedExecutionCondition delayedExecutionCondition)
     {
-        delayedExecutionCondition = new DelayedExecutionCondition(GnosisSafe(this), delay);
+        delayedExecutionCondition = new DelayedExecutionCondition(delay);
         DelayedExecutionConditionCreation(GnosisSafe(this), delayedExecutionCondition);
         this.changeCondition(delayedExecutionCondition);
     }

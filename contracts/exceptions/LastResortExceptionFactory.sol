@@ -24,7 +24,7 @@ contract LastResortExceptionFactory {
         public
         returns (LastResortException lastResortException)
     {
-        lastResortException = new LastResortException(GnosisSafe(this), requiredDeposit, challengePeriod);
+        lastResortException = new LastResortException(requiredDeposit, challengePeriod);
         LastResortExceptionCreation(GnosisSafe(this), lastResortException);
         this.addException(lastResortException);
         this.addOwner(lastResortException, required);

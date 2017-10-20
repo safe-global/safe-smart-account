@@ -22,13 +22,12 @@ contract LastResortException is Exception {
         _;
     }
 
-    function LastResortException(GnosisSafe _gnosisSafe, uint _requiredDeposit, uint _challengePeriod)
+    function LastResortException(uint _requiredDeposit, uint _challengePeriod)
         public
     {
-        require(   address(_gnosisSafe) != 0
-                && _requiredDeposit > 0
+        require(   _requiredDeposit > 0
                 && _challengePeriod > 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         requiredDeposit = requiredDeposit;
         challengePeriod = _challengePeriod;
     }

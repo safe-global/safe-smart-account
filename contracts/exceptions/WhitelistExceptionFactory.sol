@@ -16,7 +16,7 @@ contract WhitelistExceptionFactory {
         public
         returns (WhitelistException whitelistException)
     {
-        whitelistException = new WhitelistException(GnosisSafe(this), whitelist);
+        whitelistException = new WhitelistException(whitelist);
         WhitelistExceptionCreation(GnosisSafe(this), whitelistException);
         this.addException(whitelistException);
     }

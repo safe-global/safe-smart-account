@@ -47,14 +47,17 @@ contract('DailyLimitException', function(accounts) {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Create daily limit exception
-        dailyLimitException = await DailyLimitException.new(gnosisSafe.address, [0], [200])
+        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Add exception to wallet
-        data = await gnosisSafe.contract.addException.getData(dailyLimitException.address)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
+        data = await dailyLimitExceptionFactory.contract.create.getData([0], [200])
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        exceptions = await gnosisSafe.getExceptions()
+        assert.equal(exceptions.length, 1)
+        dailyLimitException = DailyLimitException.at(exceptions[0])
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
@@ -109,14 +112,17 @@ contract('DailyLimitException', function(accounts) {
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})
         assert.equal(await testToken.balances(gnosisSafe.address), 100);
         // Create daily limit exception
-        dailyLimitException = await DailyLimitException.new(gnosisSafe.address, [testToken.address], [20])
+        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Add exception to wallet
-        data = await gnosisSafe.contract.addException.getData(dailyLimitException.address)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
+        data = await dailyLimitExceptionFactory.contract.create.getData([testToken.address], [20])
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        exceptions = await gnosisSafe.getExceptions()
+        assert.equal(exceptions.length, 1)
+        dailyLimitException = DailyLimitException.at(exceptions[0])
         // Withdraw daily limit
         data = await testToken.transfer.getData(accounts[0], 10)
         utils.logGasUsage(
@@ -149,14 +155,17 @@ contract('DailyLimitException', function(accounts) {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Create daily limit exception
-        dailyLimitException = await DailyLimitException.new(gnosisSafe.address, [0], [200])
+        dailyLimitExceptionFactory = await DailyLimitExceptionFactory.new()
         // Add exception to wallet
-        data = await gnosisSafe.contract.addException.getData(dailyLimitException.address)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
+        data = await dailyLimitExceptionFactory.contract.create.getData([0], [200])
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         // Confirm and execute transaction with account 1
-        await gnosisSafe.confirmAndExecuteTransaction(gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]})
+        await gnosisSafe.confirmAndExecuteTransaction(dailyLimitExceptionFactory.address, 0, data, DELEGATECALL, 0, {from: accounts[1]})
+        exceptions = await gnosisSafe.getExceptions()
+        assert.equal(exceptions.length, 1)
+        dailyLimitException = DailyLimitException.at(exceptions[0])
         let dailyLimit = await dailyLimitException.dailyLimits(0)
         assert.equal(dailyLimit[0], 200);
         // Change daily limit

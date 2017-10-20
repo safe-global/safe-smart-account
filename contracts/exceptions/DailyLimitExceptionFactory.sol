@@ -16,7 +16,7 @@ contract DailyLimitExceptionFactory {
         public
         returns (DailyLimitException dailyLimitException)
     {
-        dailyLimitException = new DailyLimitException(GnosisSafe(this), tokens, dailyLimits);
+        dailyLimitException = new DailyLimitException(tokens, dailyLimits);
         DailyLimitExceptionCreation(GnosisSafe(this), dailyLimitException);
         this.addException(dailyLimitException);
     }

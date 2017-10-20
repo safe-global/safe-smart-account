@@ -23,11 +23,10 @@ contract DailyLimitException is Exception {
         _;
     }
 
-    function DailyLimitException(GnosisSafe _gnosisSafe, address[] tokens, uint[] _dailyLimits)
+    function DailyLimitException(address[] tokens, uint[] _dailyLimits)
         public
     {
-        require(address(_gnosisSafe) != 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         for (uint i = 0; i < tokens.length; i++) {
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
             DailyLimitChange(tokens[i], _dailyLimits[i]);
