@@ -13,9 +13,9 @@ contract GnosisSafe {
 
     event Confirmation(address indexed owner, bytes32 transactionHash);
     event Revocation(address indexed owner, bytes32 transactionHash);
-    event CallExecution(address indexed owner);
-    event DelegateCallExecution(address indexed owner);
-    event CreateExecution(address indexed owner, address createdContract);
+    event CallExecution(address indexed sender);
+    event DelegateCallExecution(address indexed sender);
+    event CreateExecution(address indexed sender, address createdContract);
     event Deposit(address indexed sender, uint value);
     event OwnerAddition(address owner);
     event OwnerRemoval(address owner);
@@ -190,9 +190,18 @@ contract GnosisSafe {
         executeTransaction(to, value, data, operation, nonce);
     }
 
-    function confirmTransactionWithSignatures(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
+    function revokeConfirmation(bytes32 transactionHash)
         public
         onlyOwner
+    {
+        require(   !isExecuted[transactionHash]
+                && isConfirmed[transactionHash][msg.sender]);
+        isConfirmed[transactionHash][msg.sender] = false;
+        Revocation(msg.sender, transactionHash);
+    }
+
+    function confirmTransactionWithSignatures(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
+        public
     {
         for (uint i = 0; i < v.length; i++) {
             address signer = ecrecover(transactionHash, v[i], r[i], s[i]);
@@ -206,26 +215,14 @@ contract GnosisSafe {
 
     function confirmAndExecuteTransactionWithSignatures(address to, uint value, bytes data, Operation operation, uint nonce, uint8[] v, bytes32[] r, bytes32[] s)
         public
-        onlyOwner
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         confirmTransactionWithSignatures(transactionHash, v, r, s);
         executeTransaction(to, value, data, operation, nonce);
     }
 
-    function revokeConfirmation(bytes32 transactionHash)
-        public
-        onlyOwner
-    {
-        require(   !isExecuted[transactionHash]
-                && isConfirmed[transactionHash][msg.sender]);
-        isConfirmed[transactionHash][msg.sender] = false;
-        Revocation(msg.sender, transactionHash);
-    }
-
     function executeTransaction(address to, uint value, bytes data, Operation operation, uint nonce)
         public
-        onlyOwner
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         require(   !isExecuted[transactionHash]

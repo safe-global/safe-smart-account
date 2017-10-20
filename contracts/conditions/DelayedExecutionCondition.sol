@@ -46,7 +46,7 @@ contract DelayedExecutionCondition is Condition {
         TransactionSubmission(transactionHash);
     }
 
-    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation, uint nonce)
+    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation, uint nonce)
         public
         returns (bool)
     {

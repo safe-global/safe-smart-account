@@ -4,5 +4,5 @@ import "./GnosisSafe.sol";
 
 contract Condition {
 
-    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation, uint nonce) public returns (bool);
+    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation, uint nonce) public returns (bool);
 }
