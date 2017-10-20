@@ -10,6 +10,9 @@ contract DelayedExecutionCondition is Condition {
     event DelayChange(uint delay);
     event TransactionSubmission(bytes32 transactionHash);
 
+    string public constant NAME = "Delayed Execution Condition";
+    string public constant VERSION = "0.0.1";
+
     GnosisSafe public gnosisSafe;
     uint public delay;
     mapping (bytes32 => uint) public submissionTimes;

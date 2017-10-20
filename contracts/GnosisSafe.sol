@@ -7,6 +7,8 @@ import "./Condition.sol";
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafe {
 
+    string public constant NAME = "Gnosis Safe";
+    string public constant VERSION = "0.0.1";
     uint8 public constant MAX_OWNERS = 64;
 
     event Confirmation(address indexed owner, bytes32 transactionHash);

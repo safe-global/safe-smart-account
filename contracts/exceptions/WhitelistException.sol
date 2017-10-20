@@ -10,6 +10,9 @@ contract WhitelistException is Exception {
     event WhitelistAddition(address account);
     event WhitelistRemoval(address account);
 
+    string public constant NAME = "Whitelist Exception";
+    string public constant VERSION = "0.0.1";
+
     GnosisSafe public gnosisSafe;
     mapping (address => bool) public isWhitelisted;
 

@@ -7,6 +7,9 @@ import "./GnosisSafe.sol";
 contract GnosisSafeWithDescriptions is GnosisSafe {
 
     event DescriptionAddition(address indexed owner, bytes32 descriptionHash);
+
+    string public constant NAME = "Gnosis Safe with Descriptions";
+    string public constant VERSION = "0.0.1";
     
     bytes32[] public descriptionHashes;
 

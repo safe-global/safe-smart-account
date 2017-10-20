@@ -9,6 +9,8 @@ contract DailyLimitException is Exception {
 
     event DailyLimitChange(address token, uint dailyLimit);
 
+    string public constant NAME = "Daily Limit Exception";
+    string public constant VERSION = "0.0.1";
     bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
 
     GnosisSafe public gnosisSafe;

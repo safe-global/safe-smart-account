@@ -10,6 +10,9 @@ contract LastResortException is Exception {
     event TransactionSubmission(address sender, bytes32 submittedTransactionHash);
     event TransactionCancellation(address sender, bytes32 submittedTransactionHash);
 
+    string public constant NAME = "Last Resort Exception";
+    string public constant VERSION = "0.0.1";
+
     GnosisSafe public gnosisSafe;
     uint public requiredDeposit;
     uint public challengePeriod;
