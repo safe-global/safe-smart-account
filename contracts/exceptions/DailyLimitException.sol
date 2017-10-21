@@ -45,12 +45,13 @@ contract DailyLimitException is Exception {
         DailyLimitChange(token, dailyLimit);
     }
 
-    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation)
+    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)
     {
-        require(operation == GnosisSafe.Operation.Call);
+        require(   operation == GnosisSafe.Operation.Call
+                && gnosisSafe.isOwner(sender));
         address token;
         address receiver;
         uint amount;

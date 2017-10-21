@@ -31,7 +31,6 @@ contract('LastResortException', function(accounts) {
         exceptions = await gnosisSafe.getExceptions()
         assert.equal(exceptions.length, 1)
         lastResortException = LastResortException.at(exceptions[0])
-        assert.equal(await gnosisSafe.isOwner(lastResortException.address), true)
         // Deposit 0.1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0.1, 'ether'));
@@ -41,11 +40,11 @@ contract('LastResortException', function(accounts) {
         assert.equal(await lastResortException.submittedTransactionHash(), transactionHash)
         // Execution fails, because challenge period is not yet over
         await utils.assertRejects(
-            lastResortException.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, {from: accounts[3]}),
+            gnosisSafe.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, CALL, lastResortException.address, {from: accounts[3]}),
             "Challenge period is not over yet"
         )
         await wait(challengePeriod + 1)
-        await lastResortException.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, {from: accounts[3]})
+        await gnosisSafe.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, CALL, lastResortException.address, {from: accounts[3]})
         // Transaction was executed successfully and money was transferred
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
     })
@@ -66,7 +65,6 @@ contract('LastResortException', function(accounts) {
         exceptions = await gnosisSafe.getExceptions()
         assert.equal(exceptions.length, 1)
         lastResortException = LastResortException.at(exceptions[0])
-        assert.equal(await gnosisSafe.isOwner(lastResortException.address), true)
         // Deposit 0.1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0.1, 'ether'));
@@ -76,7 +74,7 @@ contract('LastResortException', function(accounts) {
         assert.equal(await lastResortException.submittedTransactionHash(), transactionHash)
         // Execution fails, because challenge period is not yet over
         await utils.assertRejects(
-            lastResortException.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, {from: accounts[3]}),
+            gnosisSafe.executeException(accounts[3], web3.toWei(0.1, 'ether'), 0, CALL, lastResortException.address, {from: accounts[3]}),
             "Challenge period is not over yet"
         )
         // Owner cancels transaction

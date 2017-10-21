@@ -53,17 +53,11 @@ contract LastResortException is Exception {
         require(   gnosisSafe.isOwner(msg.sender)
                 && gnosisSafe.send(this.balance));
         TransactionCancellation(msg.sender, submittedTransactionHash);
-        submittedTransactionHash = bytes32(0);
+        submittedTransactionHash = 0;
         submissionTimestamp = 0;
     }
 
-    function executeException(address to, uint value, bytes data)
-        public
-    {
-        gnosisSafe.executeException(to, value, data, GnosisSafe.Operation.Call, this);
-    }
-
-    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation)
+    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)

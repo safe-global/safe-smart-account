@@ -234,7 +234,6 @@ contract GnosisSafe {
 
     function executeException(address to, uint value, bytes data, Operation operation, Exception exception)
         public
-        onlyOwner
     {
         require(   isException[exception]
                 && exception.isExecutable(msg.sender, to, value, data, operation));

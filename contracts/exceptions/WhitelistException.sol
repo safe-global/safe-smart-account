@@ -51,11 +51,12 @@ contract WhitelistException is Exception {
         WhitelistRemoval(account);
     }
 
-    function isExecutable(address owner, address to, uint value, bytes data, GnosisSafe.Operation operation)
+    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)
     {
+        require(gnosisSafe.isOwner(sender));
         if (isWhitelisted[to])
             return true;
         return false;
