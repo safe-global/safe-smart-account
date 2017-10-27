@@ -8,7 +8,6 @@ import "./Condition.sol";
 contract GnosisSafe {
 
     event Confirmation(address indexed owner, bytes32 transactionHash);
-    event Revocation(address indexed owner, bytes32 transactionHash);
     event CallExecution(address indexed sender);
     event DelegateCallExecution(address indexed sender);
     event CreateExecution(address indexed sender, address createdContract);
@@ -188,16 +187,6 @@ contract GnosisSafe {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         confirmTransaction(transactionHash);
         executeTransaction(to, value, data, operation, nonce);
-    }
-
-    function revokeConfirmation(bytes32 transactionHash)
-        public
-        onlyOwner
-    {
-        require(   !isExecuted[transactionHash]
-                && isConfirmed[transactionHash][msg.sender]);
-        isConfirmed[transactionHash][msg.sender] = false;
-        Revocation(msg.sender, transactionHash);
     }
 
     function confirmTransactionWithSignatures(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)

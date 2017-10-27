@@ -33,13 +33,6 @@ contract('GnosisSafe', function(accounts) {
             await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
         )
         assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
-        utils.logGasUsage(
-            'revokeConfirmation',
-            await gnosisSafe.revokeConfirmation(transactionHash, {from: accounts[0]})
-        )
-        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 0)
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
             'confirmAndExecuteTransaction send 1 eth',
