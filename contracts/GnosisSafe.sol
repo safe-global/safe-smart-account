@@ -7,10 +7,6 @@ import "./Condition.sol";
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafe {
 
-    string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.0.1";
-    uint8 public constant MAX_OWNERS = 64;
-
     event Confirmation(address indexed owner, bytes32 transactionHash);
     event Revocation(address indexed owner, bytes32 transactionHash);
     event CallExecution(address indexed sender);
@@ -24,6 +20,10 @@ contract GnosisSafe {
     event ConditionChange(Condition condition);
     event ExceptionAddition(Exception exception);
     event ExceptionRemoval(Exception exception);
+
+    string public constant NAME = "Gnosis Safe";
+    string public constant VERSION = "0.0.1";
+    uint8 public constant MAX_OWNERS = 64;
 
     uint8 public required;
     Condition public condition;
