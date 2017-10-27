@@ -53,7 +53,6 @@ contract WhitelistException is Exception {
 
     function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
         public
-        onlyGnosisSafe
         returns (bool)
     {
         require(gnosisSafe.isOwner(sender));
