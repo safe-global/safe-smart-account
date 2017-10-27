@@ -15,7 +15,7 @@ contract('RevokeConfirmationException', function(accounts) {
     const CALL = 0
     const DELEGATECALL = 1
 
-    it.only('should create a new Safe and add revoke confirmation exception in one transaction', async () => {
+    it('should create a new Safe and add revoke confirmation exception in one transaction', async () => {
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
         // Create daily limit exception
