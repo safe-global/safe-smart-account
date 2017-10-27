@@ -53,7 +53,7 @@ contract LastResortException is Exception {
         require(   gnosisSafe.isOwner(msg.sender)
                 && gnosisSafe.send(this.balance));
         TransactionCancellation(msg.sender, submittedTransactionHash);
-        submittedTransactionHash = 0;
+        submittedTransactionHash = bytes32(0);
         submissionTimestamp = 0;
     }
 
