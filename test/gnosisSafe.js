@@ -5,7 +5,7 @@ const lightwallet = require('eth-lightwallet')
 const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const GnosisSafeWithDescriptions = artifacts.require("./GnosisSafeWithDescriptions.sol")
+const GnosisSafeWithHistory = artifacts.require("./GnosisSafeWithHistory.sol")
 
 contract('GnosisSafe', function(accounts) {
 
@@ -46,20 +46,26 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
     })
 
-    it('should create a new Safe with descriptions and deposit and withdraw 1 ETH', async () => {
+    it('should create a new Safe with history and deposit and withdraw 1 ETH', async () => {
         // Create Gnosis Safe
-        gnosisSafe = await GnosisSafeWithDescriptions.new([accounts[0], accounts[1]], 2)
+        let configHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
+        gnosisSafe = await GnosisSafeWithHistory.new([accounts[0], accounts[1]], 2, configHash)
+        assert.equal(await gnosisSafe.configHash(), configHash)
+        // Change config
+        let configHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
+        await gnosisSafe.changeConfig(configHash2, {from: accounts[1]})
+        assert.equal(await gnosisSafe.configHash(), configHash2)
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
         // Withdraw 1 ETH
         transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0)
-        let descriptionHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
+        let historyEntryHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
         // Confirm transaction with account 0
         utils.logGasUsage(
-            'confirmTransaction and add description',
-            await gnosisSafe.confirmTransaction(transactionHash, descriptionHash, {from: accounts[0]})
+            'confirmTransaction and add historyEntry',
+            await gnosisSafe.confirmTransaction(transactionHash, historyEntryHash, {from: accounts[0]})
         )
         // Confirm and execute transaction with account 1
         utils.logGasUsage(
@@ -68,16 +74,16 @@ contract('GnosisSafe', function(accounts) {
                 accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0, 0, {from: accounts[1]}
             )
         )
-        assert.equal(await gnosisSafe.getDescriptionCount(), 1)
-        assert.deepEqual(await gnosisSafe.getDescriptions(0, 1), [descriptionHash])
+        assert.equal(await gnosisSafe.getHistoryEntryCount(), 1)
+        assert.deepEqual(await gnosisSafe.getHistory(0, 1), [historyEntryHash])
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
         assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
         let transactionHash2 = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, 1)
-        let descriptionHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
+        let historyEntryHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
         // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash2, descriptionHash2, {from: accounts[0]})
-        assert.equal(await gnosisSafe.getDescriptionCount(), 2)
-        assert.deepEqual(await gnosisSafe.getDescriptions(0, 2), [descriptionHash, descriptionHash2])
+        await gnosisSafe.confirmTransaction(transactionHash2, historyEntryHash2, {from: accounts[0]})
+        assert.equal(await gnosisSafe.getHistoryEntryCount(), 2)
+        assert.deepEqual(await gnosisSafe.getHistory(0, 2), [historyEntryHash, historyEntryHash2])
     })
 
     it('should create a new Safe and add, remove and replace an owner and update required confirmations', async () => {
