@@ -3,6 +3,8 @@ import "../Exception.sol";
 import "../GnosisSafe.sol";
 
 
+/// @title Revoke Confirmation Exception - Allows an owner to revoke his confirmation for a multisig transaction.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract RevokeConfirmationException is Exception {
 
     event Revocation(address indexed owner, bytes32 transactionHash);
