@@ -45,13 +45,12 @@ contract RevokeConfirmationException is Exception {
                 && gnosisSafe.isOwner(sender)
                 && to == address(this)
                 && value == 0);
-        /*bytes4 functionIdentifier;
+        bytes4 functionIdentifier;
         assembly {
             functionIdentifier := mload(add(data, 32))
         }
-        if (functionIdentifier == revokeConfirmation.sign)
+        if (functionIdentifier == this.revokeConfirmation.selector)
             return true;
-        return false;*/
-        return true;
+        return false;
     }
 }
