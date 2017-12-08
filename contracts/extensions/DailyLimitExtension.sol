@@ -1,15 +1,13 @@
-pragma solidity 0.4.17;
-import "../Exception.sol";
+pragma solidity 0.4.19;
+import "../Extension.sol";
 import "../GnosisSafe.sol";
 
 
-/// @title Daily Limit Exception - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
+/// @title Daily Limit Extension - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract DailyLimitException is Exception {
+contract DailyLimitExtension is Extension {
 
-    event DailyLimitChange(address token, uint dailyLimit);
-
-    string public constant NAME = "Daily Limit Exception";
+    string public constant NAME = "Daily Limit Extension";
     string public constant VERSION = "0.0.1";
     bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
 
@@ -27,14 +25,20 @@ contract DailyLimitException is Exception {
         _;
     }
 
-    function DailyLimitException(address[] tokens, uint[] _dailyLimits)
+    function DailyLimitExtension(address[] tokens, uint[] _dailyLimits)
         public
     {
         gnosisSafe = GnosisSafe(msg.sender);
-        for (uint i = 0; i < tokens.length; i++) {
+        for (uint i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
-            DailyLimitChange(tokens[i], _dailyLimits[i]);
-        }
+    }
+
+    function changeGnosisSafe(GnosisSafe _gnosisSafe)
+        public
+        onlyGnosisSafe
+    {
+        require(address(_gnosisSafe) != 0);
+        gnosisSafe = _gnosisSafe;
     }
 
     function changeDailyLimit(address token, uint dailyLimit)
@@ -42,7 +46,6 @@ contract DailyLimitException is Exception {
         onlyGnosisSafe
     {
         dailyLimits[token].dailyLimit = dailyLimit;
-        DailyLimitChange(token, dailyLimit);
     }
 
     function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
@@ -50,8 +53,8 @@ contract DailyLimitException is Exception {
         onlyGnosisSafe
         returns (bool)
     {
-        require(   operation == GnosisSafe.Operation.Call
-                && gnosisSafe.isOwner(sender));
+        require(operation == GnosisSafe.Operation.Call);
+        require(gnosisSafe.isOwner(sender));
         address token;
         address receiver;
         uint amount;
@@ -70,8 +73,8 @@ contract DailyLimitException is Exception {
             }
             require(functionIdentifier == TRANSFER_FUNCTION_IDENTIFIER);
         }
-        require(   receiver != 0
-                && amount > 0);
+        require(receiver != 0);
+        require(amount > 0);
         if (isUnderLimit(token, amount)) {
             dailyLimits[token].spentToday += amount;
             return true;

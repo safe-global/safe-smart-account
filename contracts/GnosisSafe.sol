@@ -1,47 +1,27 @@
-pragma solidity 0.4.17;
-import "./Exception.sol";
-import "./Condition.sol";
+pragma solidity 0.4.19;
+import "./Extension.sol";
 
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafe {
 
-    event Confirmation(address indexed owner, bytes32 transactionHash);
-    event CallExecution(address indexed sender);
-    event DelegateCallExecution(address indexed sender);
-    event CreateExecution(address indexed sender, address createdContract);
-    event Deposit(address indexed sender, uint value);
-    event OwnerAddition(address owner);
-    event OwnerRemoval(address owner);
-    event OwnerReplacement(address oldOwner, address newOwner);
-    event RequirementChange(uint required);
-    event ConditionChange(Condition condition);
-    event ExceptionAddition(Exception exception);
-    event ExceptionRemoval(Exception exception);
+    event ContractCreation(address newContract);
 
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.1";
-    uint8 public constant MAX_OWNERS = 64;
 
-    uint8 public required;
-    Condition public condition;
+    uint8 public threshold;
+    uint256 public nonce;
     address[] public owners;
-    Exception[] public exceptions;
+    Extension[] public extensions;
     mapping (address => bool) public isOwner;
-    mapping (address => bool) public isException;
-    mapping (bytes32 => bool) public isExecuted;
-    mapping (bytes32 => mapping (address => bool)) public isConfirmed;
+    mapping (address => bool) public isExtension;
 
     enum Operation {
         Call,
         DelegateCall,
         Create
-    }
-
-    modifier onlyOwner() {
-        require(isOwner[msg.sender]);
-        _;
     }
 
     modifier onlyWallet() {
@@ -53,47 +33,46 @@ contract GnosisSafe {
         external
         payable
     {
-        Deposit(msg.sender, msg.value);
+
     }
 
-    function GnosisSafe(address[] _owners, uint8 _required)
+    function GnosisSafe(address[] _owners, uint8 _threshold, Extension extension)
         public
     {
-        require(   MAX_OWNERS >= _owners.length
-                && _required <= _owners.length
-                && _required >= 1);
-        for (uint i = 0; i < _owners.length; i++) {
-            require(   _owners[i] != 0
-                    && !isOwner[_owners[i]]);
+        require(_threshold <= _owners.length);
+        require(_threshold >= 1);
+        for (uint256 i = 0; i < _owners.length; i++) {
+            require(_owners[i] != 0);
+            require(!isOwner[_owners[i]]);
             isOwner[_owners[i]] = true;
-            OwnerAddition(_owners[i]);
         }
         owners = _owners;
-        required = _required;
-        RequirementChange(_required);
+        threshold = _threshold;
+        if (address(extension) != 0) {
+            extensions.push(extension);
+            isExtension[extension] = true;
+        }
     }
 
-    function addOwner(address owner, uint8 _required)
+    function addOwner(address owner, uint8 _threshold)
         public
         onlyWallet
     {
-        require(   owner != 0
-                && !isOwner[owner]
-                && MAX_OWNERS > owners.length);
+        require(owner != 0);
+        require(!isOwner[owner]);
         owners.push(owner);
         isOwner[owner] = true;
-        OwnerAddition(owner);
-        if (required != _required)
-            changeRequired(_required);
+        if (threshold != _threshold)
+            changeThreshold(_threshold);
     }
 
-    function removeOwner(address owner, uint8 _required)
+    function removeOwner(address owner, uint8 _threshold)
         public
         onlyWallet
     {
-        require(   isOwner[owner]
-                && (owners.length - 1) >= _required);
-        for (uint i = 0; i < owners.length; i++) {
+        require(isOwner[owner]);
+        require(owners.length - 1 >= _threshold);
+        for (uint256 i = 0; i < owners.length; i++) {
             if (owners[i] == owner) {
                 owners[i] = owners[owners.length - 1];
                 owners.length--;
@@ -101,19 +80,18 @@ contract GnosisSafe {
             }
         }
         isOwner[owner] = false;
-        OwnerRemoval(owner);
-        if (required != _required)
-            changeRequired(_required);
+        if (threshold != _threshold)
+            changeThreshold(_threshold);
     }
 
     function replaceOwner(address oldOwner, address newOwner)
         public
         onlyWallet
     {
-        require(   newOwner != 0
-                && isOwner[oldOwner]
-                && !isOwner[newOwner]);
-        for (uint i = 0; i < owners.length; i++) {
+        require(newOwner != 0);
+        require(isOwner[oldOwner]);
+        require(!isOwner[newOwner]);
+        for (uint256 i = 0; i < owners.length; i++) {
             if (owners[i] == oldOwner) {
                 owners[i] = newOwner;
                 break;
@@ -121,183 +99,133 @@ contract GnosisSafe {
         }
         isOwner[oldOwner] = false;
         isOwner[newOwner] =  true;
-        OwnerReplacement(oldOwner, newOwner);
     }
 
-    function changeRequired(uint8 _required)
+    function changeThreshold(uint8 _threshold)
         public
         onlyWallet
     {
-        require(   _required <= owners.length
-                && _required >= 1);
-        required = _required;
-        RequirementChange(_required);
+        require(_threshold <= owners.length);
+        require(_threshold >= 1);
+        threshold = _threshold;
     }
 
-    function changeCondition(Condition _condition)
+    function addExtension(Extension extension)
         public
         onlyWallet
     {
-        require(address(_condition) != 0);
-        condition = _condition;
-        ConditionChange(_condition);
+        require(address(extension) != 0);
+        require(!isExtension[extension]);
+        extensions.push(extension);
+        isExtension[extension] = true;
     }
 
-    function addException(Exception exception)
+    function removeExtension(Extension extension)
         public
         onlyWallet
     {
-        require(   address(exception) != 0
-                && !isException[exception]);
-        exceptions.push(exception);
-        isException[exception] = true;
-        ExceptionAddition(exception);
-    }
-
-    function removeException(Exception exception)
-        public
-        onlyWallet
-    {
-        require(isException[exception]);
-        for (uint i = 0; i < exceptions.length; i++) {
-            if (exceptions[i] == exception) {
-                exceptions[i] = exceptions[exceptions.length - 1];
-                exceptions.length--;
+        require(isExtension[extension]);
+        for (uint256 i = 0; i < extensions.length; i++) {
+            if (extensions[i] == extension) {
+                extensions[i] = extensions[extensions.length - 1];
+                extensions.length--;
                 break;
             }
         }
-        isException[exception] = false;
-        ExceptionRemoval(exception);
+        isExtension[extension] = false;
     }
 
-    function confirmTransaction(bytes32 transactionHash)
+    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)
         public
-        onlyOwner
-    {
-        require(   !isExecuted[transactionHash]
-                && !isConfirmed[transactionHash][msg.sender]);
-        isConfirmed[transactionHash][msg.sender] = true;
-        Confirmation(msg.sender, transactionHash);
-    }
-
-    function confirmAndExecuteTransaction(address to, uint value, bytes data, Operation operation, uint nonce)
-        public
-        onlyOwner
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        confirmTransaction(transactionHash);
-        executeTransaction(to, value, data, operation, nonce);
-    }
-
-    function confirmTransactionWithSignatures(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
-        public
-    {
-        for (uint i = 0; i < v.length; i++) {
-            address signer = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(   isOwner[signer]
-                    && !isExecuted[transactionHash]
-                    && !isConfirmed[transactionHash][signer]);
-            isConfirmed[transactionHash][signer] = true;
-            Confirmation(signer, transactionHash);
+        address lastRecoverd = address(0);
+        for (uint256 i = 0; i < threshold; i++) {
+            address recovered = ecrecover(transactionHash, v[i], r[i], s[i]);
+            require(recovered > lastRecoverd);
+            require(isOwner[recovered]);
+            lastRecoverd = recovered;
         }
-    }
-
-    function confirmAndExecuteTransactionWithSignatures(address to, uint value, bytes data, Operation operation, uint nonce, uint8[] v, bytes32[] r, bytes32[] s)
-        public
-    {
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        confirmTransactionWithSignatures(transactionHash, v, r, s);
-        executeTransaction(to, value, data, operation, nonce);
-    }
-
-    function executeTransaction(address to, uint value, bytes data, Operation operation, uint nonce)
-        public
-    {
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        require(   !isExecuted[transactionHash]
-                && isConfirmedByRequiredOwners(transactionHash)
-                && (address(condition) == 0 || condition.isExecutable(msg.sender, to, value, data, operation, nonce)));
-        isExecuted[transactionHash] = true;
+        nonce += 1;
         execute(to, value, data, operation);
     }
 
-    function executeException(address to, uint value, bytes data, Operation operation, Exception exception)
+    function executeExtension(address to, uint256 value, bytes data, Operation operation, Extension extension)
         public
     {
-        require(   isException[exception]
-                && exception.isExecutable(msg.sender, to, value, data, operation));
+        require(isExtension[extension]);
+        require(extension.isExecutable(msg.sender, to, value, data, operation));
         execute(to, value, data, operation);
     }
 
-    function execute(address to, uint value, bytes data, Operation operation)
-        private
+    function execute(address to, uint256 value, bytes data, Operation operation)
+        internal
     {
-        if (operation == Operation.Call) {
-            require(to.call.value(value)(data));
-            CallExecution(msg.sender);
-        }
-        else if (operation == Operation.DelegateCall) {
-            require(to.delegatecall(data));
-            DelegateCallExecution(msg.sender);
-        }
+        if (operation == Operation.Call)
+            require(executeCall(to, value, data));
+        else if (operation == Operation.DelegateCall)
+            require(executeDelegateCall(to, data));
         else {
-            address createdContract;
-            assembly {
-                createdContract := create(0, add(data, 0x20), mload(data))
-            }
-            require(createdContract != 0);
-            CreateExecution(msg.sender, createdContract);
+            address newContract = executeCreate(data);
+            require(newContract != 0);
+            ContractCreation(newContract);
         }
     }
 
-    function isConfirmedByRequiredOwners(bytes32 transactionHash)
-        public
-        view
-        returns (bool)
+    function executeCall(address to, uint256 value, bytes data)
+        internal
+        returns (bool success)
     {
-        uint confirmationCount;
-        for (uint i = 0; i < owners.length; i++) {
-            if (isConfirmed[transactionHash][owners[i]])
-                confirmationCount++;
-            if (confirmationCount == required)
-                return true;
+        uint256 dataLength = data.length;
+        assembly {
+            success := call(
+                sub(gas, 34710),   // 34710 is the value that solidity is currently emitting
+                to,
+                value,
+                add(data, 32),     // First 32 bytes are the padded length of data, so exclude that
+                dataLength,        // Size of the input (in bytes) - this is what fixes the padding problem
+                mload(0x40),       // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
+                0                  // Output is ignored, therefore the output size is zero
+            )
         }
-        return false;
     }
 
-    function getConfirmationCount(bytes32 transactionHash)
-        public
-        view
-        returns (uint confirmationCount)
+    function executeDelegateCall(address to, bytes data)
+        internal
+        returns (bool success)
     {
-        for (uint i = 0; i < owners.length; i++) {
-            if (isConfirmed[transactionHash][owners[i]])
-                confirmationCount++;
+        uint256 dataLength = data.length;
+        assembly {
+            success := delegatecall(
+                sub(gas, 34710),   // 34710 is the value that solidity is currently emitting
+                to,
+                add(data, 32),     // First 32 bytes are the padded length of data, so exclude that
+                dataLength,        // Size of the input (in bytes) - this is what fixes the padding problem
+                mload(0x40),       // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
+                0                  // Output is ignored, therefore the output size is zero
+            )
         }
     }
 
-    function getConfirmingOwners(bytes32 transactionHash)
-        public
-        view
-        returns (address[] confirmingOwners)
+    function executeCreate(bytes data)
+        internal
+        returns (address newContract)
     {
-        uint confirmationCount = getConfirmationCount(transactionHash);
-        confirmingOwners = new address[](confirmationCount);
-        confirmationCount = 0;
-        for (uint i = 0; i < owners.length; i++) {
-            if (isConfirmed[transactionHash][owners[i]]) {
-                confirmingOwners[confirmationCount] = owners[i];
-                confirmationCount++;
-            }
+        assembly {
+            newContract := create(
+                0,
+                add(data, 0x20),
+                mload(data)
+            )
         }
     }
 
-    function getTransactionHash(address to, uint value, bytes data, Operation operation, uint nonce)
+    function getTransactionHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
         public
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), this, to, value, data, operation, nonce);
+        return keccak256(byte(0x19), this, to, value, data, operation, _nonce);
     }
 
     function getOwners()
@@ -308,11 +236,11 @@ contract GnosisSafe {
         return owners;
     }
 
-    function getExceptions()
+    function getExtensions()
         public
         view
-        returns (Exception[])
+        returns (Extension[])
     {
-        return exceptions;
+        return extensions;
     }
 }

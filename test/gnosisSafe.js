@@ -1,11 +1,7 @@
-const util = require('util');
 const utils = require('./utils')
-const { getParamFromTxEvent, assertRejects } = utils
-const lightwallet = require('eth-lightwallet')
 const solc = require('solc')
-
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const GnosisSafeWithHistory = artifacts.require("./GnosisSafeWithHistory.sol")
+
 
 contract('GnosisSafe', function(accounts) {
 
@@ -18,216 +14,81 @@ contract('GnosisSafe', function(accounts) {
     const CREATE = 2
 
     it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
+        // Create lightwallet accounts
+        let lw = await utils.createLightwallet()
         // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
+        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
         // Withdraw 1 ETH
-        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0)
-        // Confirm transaction with account 0
-        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 0)
-        utils.logGasUsage(
-            'confirmTransaction',
-            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        )
-        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction send 1 eth',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 2)
-        assert.deepEqual(await gnosisSafe.getConfirmingOwners(transactionHash), [accounts[0], accounts[1]])
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
-        assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
-    })
-
-    it('should create a new Safe with history and deposit and withdraw 1 ETH', async () => {
-        // Create Gnosis Safe
-        let configHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
-        gnosisSafe = await GnosisSafeWithHistory.new([accounts[0], accounts[1]], 2, configHash)
-        assert.equal(await gnosisSafe.configHash(), configHash)
-        // Change config
-        let configHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
-        await gnosisSafe.changeConfig(configHash2, {from: accounts[1]})
-        assert.equal(await gnosisSafe.configHash(), configHash2)
-        // Deposit 1 ETH
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
-        // Withdraw 1 ETH
-        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0)
-        let historyEntryHash = '0xe886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
-        // Confirm transaction with account 0
-        utils.logGasUsage(
-            'confirmTransaction and add historyEntry',
-            await gnosisSafe.confirmTransaction(transactionHash, historyEntryHash, {from: accounts[0]})
-        )
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction send 1 eth',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                accounts[0], web3.toWei(1, 'ether'), 0, CALL, 0, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await gnosisSafe.getHistoryEntryCount(), 1)
-        assert.deepEqual(await gnosisSafe.getHistory(0, 1), [historyEntryHash])
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
-        assert.equal(await gnosisSafe.isExecuted(transactionHash), true)
-        let transactionHash2 = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, 1)
-        let historyEntryHash2 = '0xf886dc769ec7d83a00b8647920917cf4b932fbb8c6fd59bf6da7d18ee84d2447'
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash2, historyEntryHash2, {from: accounts[0]})
-        assert.equal(await gnosisSafe.getHistoryEntryCount(), 2)
-        assert.deepEqual(await gnosisSafe.getHistory(0, 2), [historyEntryHash, historyEntryHash2])
-    })
-
-    it('should create a new Safe and add, remove and replace an owner and update required confirmations', async () => {
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
-        // Add owner and set required to 3
-        data = await gnosisSafe.contract.addOwner.getData(accounts[2], 3)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Owner count is still 2
-        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1]])
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction add owner',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1], accounts[2]])
-        assert.equal(await gnosisSafe.isOwner(accounts[2]), true)
-        assert.equal(await gnosisSafe.required(), 3)
-        // Remove owner and set required to 2
-        data = await gnosisSafe.contract.removeOwner.getData(accounts[2], 2)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction remove owner',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[2]}
-            )
-        )
-        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], accounts[1]])
-        assert.equal(await gnosisSafe.isOwner(accounts[2]), false)
-        assert.equal(await gnosisSafe.required(), 2)
-        // Replace owner transaction
-        data = await gnosisSafe.contract.replaceOwner.getData(accounts[0], accounts[2])
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction replace owner',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[2], accounts[1]])
-    })
-
-    it('should create a new Safe and add and remove an exception and update a condition', async () => {
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
-        // Add exception
-        let exception = "0xbc1e40869e04dbe797e707405fea119dd3382794"
-        data = await gnosisSafe.contract.addException.getData(exception)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Confirm and execute transaction with account 1
-        assert.equal(await gnosisSafe.isException(exception), false)
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction add exception',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await gnosisSafe.isException(exception), true)
-        assert.deepEqual(await gnosisSafe.getExceptions(), [exception])
-        // Remove exception
-        data = await gnosisSafe.contract.removeException.getData(exception)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction remove exception',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await gnosisSafe.isException(exception), false)
-        assert.deepEqual(await gnosisSafe.getExceptions(), [])
-        // Change condition
-        let condition = "0xcc1e40869e04dbe797e707405fea119dd3382794"
-        data = await gnosisSafe.contract.changeCondition.getData(condition)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        assert.equal(await gnosisSafe.condition(), "0x0000000000000000000000000000000000000000")
-        // Confirm and execute transaction with account 1
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction change condition',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await gnosisSafe.condition(), condition)
-    })
-
-    it('should create a new Safe and add a new owner using signed messages', async () => {
-        // Create lightwallet accounts
-        const createVault = util.promisify(lightwallet.keystore.createVault).bind(lightwallet.keystore)
-        const keystore = await createVault({
-            hdPathString: "m/44'/60'/0'/0",
-            seedPhrase: "pull rent tower word science patrol economy legal yellow kit frequent fat",
-            password: "test",
-            salt: "testsalt"
-        })
-        const keyFromPassword = await util.promisify(keystore.keyFromPassword).bind(keystore)("test")
-        keystore.generateNewAddress(keyFromPassword, 20)
-        let accountsWithout0x = keystore.getAddresses()
-        let lightwalletAccounts = accountsWithout0x.map((a) => { return '0x' + a })
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], lightwalletAccounts[0], lightwalletAccounts[1]], 2)
-        // Add owner
-        data = await gnosisSafe.contract.addOwner.getData(lightwalletAccounts[2], 2)
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0)
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
-        let sigV = []
-        let sigR = []
-        let sigS = []
-        let signers = [lightwalletAccounts[0], lightwalletAccounts[1]]
-        for (var i=0; i<signers.length; i++) {
-            let sig = lightwallet.signing.signMsgHash(keystore, keyFromPassword, transactionHash, signers[i])
-            sigV.push(sig.v)
-            sigR.push('0x' + sig.r.toString('hex'))
-            sigS.push('0x' + sig.s.toString('hex'))
-        }
+        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
-            'confirmAndExecuteTransactionWithSignatures add owner',
-            await gnosisSafe.confirmAndExecuteTransactionWithSignatures(
-                gnosisSafe.address, 0, data, CALL, 0, sigV, sigR, sigS, {from: accounts[0]}
+            'executeTransaction withdraw 1 ETH',
+            await gnosisSafe.executeTransaction(
+                accounts[0], web3.toWei(1, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
-        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[0], lightwalletAccounts[0], lightwalletAccounts[1], lightwalletAccounts[2]])
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
     })
 
-    it('should create a new Safe and do a CREATE transaction', async () => {
+    it('should add, remove and replace an owner and update the threshold', async () => {
+        // Create lightwallet accounts
+        let lw = await utils.createLightwallet()
         // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
+        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
+        // Add owner and set threshold to 3
+        assert.equal(await gnosisSafe.threshold(), 2)
+        data = await gnosisSafe.contract.addOwner.getData(lw.accounts[2], 3)
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
+        // Confirm transaction with signed messages
+        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        utils.logGasUsage(
+            'executeTransaction add owner',
+            await gnosisSafe.executeTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+            )
+        )
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
+        assert.equal(await gnosisSafe.threshold(), 3)
+        // Replace owner and keep threshold
+        data = await gnosisSafe.contract.replaceOwner.getData(lw.accounts[2], lw.accounts[3])
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
+        // Confirm transaction with signed messages
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
+        utils.logGasUsage(
+            'executeTransaction replace owner',
+            await gnosisSafe.executeTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+            )
+        )
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3]])
+        // Remove owner and reduce threshold to 2
+        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[3], 2)
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
+        // Confirm transaction with signed messages
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[3]], transactionHash)
+        utils.logGasUsage(
+            'executeTransaction replace owner',
+            await gnosisSafe.executeTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+            )
+        )
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
+    })
+
+    it('should do a CREATE transaction', async () => {
+        // Create lightwallet accounts
+        let lw = await utils.createLightwallet()
+        // Create Gnosis Safe
+        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
         // Create test contract
         let source = `
         contract Test {
@@ -239,66 +100,17 @@ contract('GnosisSafe', function(accounts) {
         let interface = JSON.parse(output.contracts[':Test']['interface'])
         let bytecode = '0x' + output.contracts[':Test']['bytecode']
         data = bytecode
-        transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, CREATE, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, CREATE, nonce)
+        // Confirm transaction with signed messages
+        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         const TestContract = web3.eth.contract(interface);
-        // Confirm and execute transaction with account 1
-        let testContract = getParamFromTxEvent(
-            await gnosisSafe.confirmAndExecuteTransaction(
-                0, 0, data, CREATE, 0, {from: accounts[1]}
+        let testContract = utils.getParamFromTxEvent(
+            await gnosisSafe.executeTransaction(
+                0, 0, data, CREATE, sigs.sigV, sigs.sigR, sigs.sigS
             ),
-            'createdContract', TestContract, 'CreateExecution', 'confirmAndExecuteTransaction CREATE'
+            'newContract', TestContract, 'ContractCreation', 'executeTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)
-    })
-
-    it('should create a new Safe and do a DELEGATECALL transaction', async () => {
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 2)
-        // Create test contract and test library
-        let source = `
-        contract Test {
-            mapping (address => uint) public balances;
-            function addOne() {
-                balances[msg.sender] += 1;
-            }
-        }
-
-        library TestLibrary {
-            function addTwo(address x) {
-                Test(x).addOne();
-                Test(x).addOne();
-            }
-        }`
-        let output = await solc.compile(source, 0);
-        // Create test contract
-        let contractInterface = JSON.parse(output.contracts[':Test']['interface'])
-        let contractBytecode = '0x' + output.contracts[':Test']['bytecode']
-        transactionHash = await web3.eth.sendTransaction({from: accounts[0], data: contractBytecode, gas: 4000000})
-        let receipt = web3.eth.getTransactionReceipt(transactionHash);
-        const TestContract = web3.eth.contract(contractInterface)
-        let testContract = TestContract.at(receipt.contractAddress)
-        // Create library contract
-        let libraryInterface = JSON.parse(output.contracts[':TestLibrary']['interface'])
-        let libraryBytecode = '0x' + output.contracts[':TestLibrary']['bytecode']
-        transactionHash = await web3.eth.sendTransaction({from: accounts[0], data: libraryBytecode, gas: 4000000})
-        receipt = web3.eth.getTransactionReceipt(transactionHash);
-        const TestLibrary = web3.eth.contract(libraryInterface)
-        let testLibrary = await TestLibrary.at(receipt.contractAddress)
-        // Do DELEGATECALL
-        data = await testLibrary.addTwo.getData(testContract.address)
-        transactionHash = await gnosisSafe.getTransactionHash(testLibrary.address, 0, data, DELEGATECALL, 0)
-        // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[0]})
-        // Confirm and execute transaction with account 1
-        assert.equal(await testContract.balances(gnosisSafe.address), 0)
-        utils.logGasUsage(
-            'confirmAndExecuteTransaction DELEGATECALL',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                testLibrary.address, 0, data, DELEGATECALL, 0, {from: accounts[1]}
-            )
-        )
-        assert.equal(await testContract.balances(gnosisSafe.address), 2)
     })
 })
