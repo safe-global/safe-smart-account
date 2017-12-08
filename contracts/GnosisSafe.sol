@@ -179,13 +179,13 @@ contract GnosisSafe {
         uint256 dataLength = data.length;
         assembly {
             success := call(
-                sub(gas, 34710),   // 34710 is the value that solidity is currently emitting
+                sub(gas, 34710),
                 to,
                 value,
-                add(data, 32),     // First 32 bytes are the padded length of data, so exclude that
-                dataLength,        // Size of the input (in bytes) - this is what fixes the padding problem
-                mload(0x40),       // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
-                0                  // Output is ignored, therefore the output size is zero
+                add(data, 32),
+                dataLength,
+                mload(0x40),
+                0
             )
         }
     }
@@ -197,12 +197,12 @@ contract GnosisSafe {
         uint256 dataLength = data.length;
         assembly {
             success := delegatecall(
-                sub(gas, 34710),   // 34710 is the value that solidity is currently emitting
+                sub(gas, 34710),
                 to,
-                add(data, 32),     // First 32 bytes are the padded length of data, so exclude that
-                dataLength,        // Size of the input (in bytes) - this is what fixes the padding problem
-                mload(0x40),       // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
-                0                  // Output is ignored, therefore the output size is zero
+                add(data, 32),
+                dataLength,
+                mload(0x40),
+                0
             )
         }
     }

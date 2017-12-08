@@ -6,6 +6,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 contract('GnosisSafe', function(accounts) {
 
     let gnosisSafe
+    let lw
     let data
     let transactionHash
 
@@ -13,11 +14,14 @@ contract('GnosisSafe', function(accounts) {
     const DELEGATECALL = 1
     const CREATE = 2
 
-    it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
-        // Create lightwallet accounts
-        let lw = await utils.createLightwallet()
+    beforeEach(async function () {
+        // Create lightwallet
+        lw = await utils.createLightwallet()
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
+    })
+
+    it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
@@ -37,10 +41,6 @@ contract('GnosisSafe', function(accounts) {
     })
 
     it('should add, remove and replace an owner and update the threshold', async () => {
-        // Create lightwallet accounts
-        let lw = await utils.createLightwallet()
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
         data = await gnosisSafe.contract.addOwner.getData(lw.accounts[2], 3)
@@ -85,10 +85,6 @@ contract('GnosisSafe', function(accounts) {
     })
 
     it('should do a CREATE transaction', async () => {
-        // Create lightwallet accounts
-        let lw = await utils.createLightwallet()
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
         // Create test contract
         let source = `
         contract Test {
