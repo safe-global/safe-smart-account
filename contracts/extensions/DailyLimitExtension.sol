@@ -15,9 +15,9 @@ contract DailyLimitExtension is Extension {
     mapping (address => DailyLimit) public dailyLimits;
 
     struct DailyLimit {
-        uint dailyLimit;
-        uint spentToday;
-        uint lastDay;
+        uint256 dailyLimit;
+        uint256 spentToday;
+        uint256 lastDay;
     }
 
     modifier onlyGnosisSafe() {
@@ -25,11 +25,11 @@ contract DailyLimitExtension is Extension {
         _;
     }
 
-    function DailyLimitExtension(address[] tokens, uint[] _dailyLimits)
+    function DailyLimitExtension(GnosisSafe _gnosisSafe, address[] tokens, uint256[] _dailyLimits)
         public
     {
-        gnosisSafe = GnosisSafe(msg.sender);
-        for (uint i = 0; i < tokens.length; i++)
+        gnosisSafe = _gnosisSafe;
+        for (uint256 i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
     }
 
@@ -41,29 +41,30 @@ contract DailyLimitExtension is Extension {
         gnosisSafe = _gnosisSafe;
     }
 
-    function changeDailyLimit(address token, uint dailyLimit)
+    function changeDailyLimit(address token, uint256 dailyLimit)
         public
         onlyGnosisSafe
     {
         dailyLimits[token].dailyLimit = dailyLimit;
     }
 
-    function isExecutable(address sender, address to, uint value, bytes data, GnosisSafe.Operation operation)
+    function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)
     {
         require(operation == GnosisSafe.Operation.Call);
         require(gnosisSafe.isOwner(sender));
+        require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
         address receiver;
-        uint amount;
+        uint256 amount;
         if (data.length == 0) {
             token = 0;
             receiver = to;
             amount = value;
         }
-        else if (value == 0) {
+        else {
             token = to;
             bytes4 functionIdentifier;
             assembly {
@@ -82,7 +83,7 @@ contract DailyLimitExtension is Extension {
         return false;
     }
 
-    function isUnderLimit(address token, uint amount)
+    function isUnderLimit(address token, uint256 amount)
         internal
         returns (bool)
     {

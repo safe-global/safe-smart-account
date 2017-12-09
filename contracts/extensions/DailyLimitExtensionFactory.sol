@@ -13,19 +13,19 @@ contract DailyLimitExtensionFactory {
         revert();
     }
 
-    function createDailyLimitExtension(address[] tokens, uint[] dailyLimits)
+    function createDailyLimitExtension(GnosisSafe gnosisSafe, address[] tokens, uint256[] dailyLimits)
         public
         returns (DailyLimitExtension dailyLimitExtension)
     {
-        dailyLimitExtension = new DailyLimitExtension(tokens, dailyLimits);
+        dailyLimitExtension = new DailyLimitExtension(gnosisSafe, tokens, dailyLimits);
         DailyLimitExtensionCreation(dailyLimitExtension);
     }
 
-    function createAndAddDailyLimitExtension(address[] tokens, uint[] dailyLimits)
+    function createAndAddDailyLimitExtension(GnosisSafe gnosisSafe, address[] tokens, uint256[] dailyLimits)
         public
         returns (DailyLimitExtension dailyLimitExtension)
     {
-        dailyLimitExtension = createDailyLimitExtension(tokens, dailyLimits);
+        dailyLimitExtension = createDailyLimitExtension(gnosisSafe, tokens, dailyLimits);
         this.addExtension(dailyLimitExtension);
     }
 }

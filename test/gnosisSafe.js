@@ -11,7 +11,6 @@ contract('GnosisSafe', function(accounts) {
     let transactionHash
 
     const CALL = 0
-    const DELEGATECALL = 1
     const CREATE = 2
 
     beforeEach(async function () {
@@ -28,13 +27,23 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
         // Withdraw 1 ETH
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(1, 'ether'), 0, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction withdraw 1 ETH',
+            'executeTransaction withdraw 0.5 ETH',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(1, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+            )
+        )
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        // Confirm transaction with signed messages
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        utils.logGasUsage(
+            'executeTransaction withdraw 0.5 ETH 2nd time',
+            await gnosisSafe.executeTransaction(
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
@@ -76,7 +85,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[3]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction replace owner',
+            'executeTransaction remove owner',
             await gnosisSafe.executeTransaction(
                 gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
             )

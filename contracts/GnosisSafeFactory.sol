@@ -11,22 +11,22 @@ contract GnosisSafeFactory {
         returns (GnosisSafe gnosisSafe)
     {
         // Create extension
+        Extension extension;
         if (extensionFactory != 0) {
-            Extension extension;
             bool success;
             uint256 extensionDataLength = extensionData.length;
             assembly {
-                let o := mload(0x40)
+                let output := mload(0x40)
                 success := call(
                     sub(gas, 34710),
                     extensionFactory,
                     0,
                     add(extensionData, 32),
                     extensionDataLength,
-                    mload(0x40),
+                    output,
                     32
                 )
-                extension := and(mload(o), 0xffffffffffffffffffffffffffffffffffffffff)
+                extension := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)
             }
             require(success);
         }
@@ -34,6 +34,7 @@ contract GnosisSafeFactory {
         gnosisSafe = new GnosisSafe(owners, threshold, extension);
         GnosisSafeCreation(gnosisSafe);
         // Update extension owner
-        extension.changeGnosisSafe(gnosisSafe);
+        if (address(extension) > 0)
+            extension.changeGnosisSafe(gnosisSafe);
     }
 }
