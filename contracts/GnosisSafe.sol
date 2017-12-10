@@ -66,37 +66,27 @@ contract GnosisSafe {
             changeThreshold(_threshold);
     }
 
-    function removeOwner(address owner, uint8 _threshold)
+    function removeOwner(address owner, uint256 ownerIndex, uint8 _threshold)
         public
         onlyWallet
     {
-        require(isOwner[owner]);
+        require(owners[ownerIndex] == owner);
         require(owners.length - 1 >= _threshold);
-        for (uint256 i = 0; i < owners.length; i++) {
-            if (owners[i] == owner) {
-                owners[i] = owners[owners.length - 1];
-                owners.length--;
-                break;
-            }
-        }
+        owners[ownerIndex] = owners[owners.length - 1];
+        owners.length--;
         isOwner[owner] = false;
         if (threshold != _threshold)
             changeThreshold(_threshold);
     }
 
-    function replaceOwner(address oldOwner, address newOwner)
+    function replaceOwner(address oldOwner, uint256 oldOwnerIndex, address newOwner)
         public
         onlyWallet
     {
         require(newOwner != 0);
-        require(isOwner[oldOwner]);
+        require(owners[oldOwnerIndex] == oldOwner);
         require(!isOwner[newOwner]);
-        for (uint256 i = 0; i < owners.length; i++) {
-            if (owners[i] == oldOwner) {
-                owners[i] = newOwner;
-                break;
-            }
-        }
+        owners[oldOwnerIndex] = newOwner;
         isOwner[oldOwner] = false;
         isOwner[newOwner] =  true;
     }
@@ -120,18 +110,13 @@ contract GnosisSafe {
         isExtension[extension] = true;
     }
 
-    function removeExtension(Extension extension)
+    function removeExtension(Extension extension, uint256 extensionIndex)
         public
         onlyWallet
     {
-        require(isExtension[extension]);
-        for (uint256 i = 0; i < extensions.length; i++) {
-            if (extensions[i] == extension) {
-                extensions[i] = extensions[extensions.length - 1];
-                extensions.length--;
-                break;
-            }
-        }
+        require(extensions[extensionIndex] == extension);
+        extensions[extensionIndex] = extensions[extensions.length - 1];
+        extensions.length--;
         isExtension[extension] = false;
     }
 
