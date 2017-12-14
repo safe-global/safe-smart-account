@@ -1,10 +1,21 @@
 pragma solidity 0.4.19;
 import "./GnosisSafe.sol";
+import "./Proxy.sol";
 
 
 contract GnosisSafeFactory {
 
     event GnosisSafeCreation(GnosisSafe gnosisSafe);
+
+    GnosisSafe public gnosisSafeMasterCopy; 
+
+    function GnosisSafeFactory()
+        public
+    {
+        address[] memory owners = new address[](1);
+        owners[0] = this;
+        gnosisSafeMasterCopy = new GnosisSafe(owners, 1, Extension(0));
+    }
 
     function createGnosisSafe(address[] owners, uint8 threshold, address extensionFactory, bytes extensionData)
         public
@@ -31,7 +42,8 @@ contract GnosisSafeFactory {
             require(success);
         }
         // Create Gnosis Safe
-        gnosisSafe = new GnosisSafe(owners, threshold, extension);
+        gnosisSafe = GnosisSafe(new Proxy(gnosisSafeMasterCopy));
+        gnosisSafe.setup(owners, threshold, extension);
         GnosisSafeCreation(gnosisSafe);
         // Update extension owner
         if (address(extension) > 0)

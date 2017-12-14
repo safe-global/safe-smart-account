@@ -11,6 +11,7 @@ contract GnosisSafe {
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.1";
 
+    address proxy;
     uint8 public threshold;
     uint256 public nonce;
     address[] public owners;
@@ -39,6 +40,13 @@ contract GnosisSafe {
     function GnosisSafe(address[] _owners, uint8 _threshold, Extension extension)
         public
     {
+        setup(_owners, _threshold, extension);
+    }
+
+    function setup(address[] _owners, uint8 _threshold, Extension extension)
+        public
+    {
+        require(threshold == 0);
         require(_threshold <= _owners.length);
         require(_threshold >= 1);
         for (uint256 i = 0; i < _owners.length; i++) {
@@ -52,6 +60,14 @@ contract GnosisSafe {
             extensions.push(extension);
             isExtension[extension] = true;
         }
+    }
+
+    function changeProxy(address _proxy)
+        public
+        onlyWallet
+    {
+        require(_proxy != 0);
+        proxy = _proxy;
     }
 
     function addOwner(address owner, uint8 _threshold)

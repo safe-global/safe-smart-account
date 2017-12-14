@@ -26,5 +26,8 @@
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
     "eth-lightwallet": "*"
+  },
+  "dependencies": {
+    "ganache-cli": "^6.0.3"
   }
 }
