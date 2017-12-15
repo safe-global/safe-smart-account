@@ -1,5 +1,6 @@
 const utils = require('./utils')
 const solc = require('solc')
+
 const GnosisSafeFactory = artifacts.require("./GnosisSafeFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const DailyLimitExtension = artifacts.require("./DailyLimitExtension.sol");
