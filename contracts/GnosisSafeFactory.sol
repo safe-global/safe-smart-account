@@ -7,14 +7,14 @@ contract GnosisSafeFactory {
 
     event GnosisSafeCreation(GnosisSafe gnosisSafe);
 
-    GnosisSafe public gnosisSafeMasterCopy; 
+    GnosisSafe public masterCopy; 
 
     function GnosisSafeFactory()
         public
     {
         address[] memory owners = new address[](1);
         owners[0] = this;
-        gnosisSafeMasterCopy = new GnosisSafe(owners, 1, Extension(0));
+        masterCopy = new GnosisSafe(owners, 1, Extension(0));
     }
 
     function createGnosisSafe(address[] owners, uint8 threshold, address extensionFactory, bytes extensionData)
@@ -42,7 +42,7 @@ contract GnosisSafeFactory {
             require(success);
         }
         // Create Gnosis Safe
-        gnosisSafe = GnosisSafe(new Proxy(gnosisSafeMasterCopy));
+        gnosisSafe = GnosisSafe(new Proxy(masterCopy));
         gnosisSafe.setup(owners, threshold, extension);
         GnosisSafeCreation(gnosisSafe);
         // Update extension owner

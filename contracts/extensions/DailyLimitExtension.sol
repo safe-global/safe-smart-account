@@ -11,6 +11,7 @@ contract DailyLimitExtension is Extension {
     string public constant VERSION = "0.0.1";
     bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
 
+    DailyLimitExtension masterCopy;
     GnosisSafe public gnosisSafe;
     mapping (address => DailyLimit) public dailyLimits;
 
@@ -28,9 +29,24 @@ contract DailyLimitExtension is Extension {
     function DailyLimitExtension(GnosisSafe _gnosisSafe, address[] tokens, uint256[] _dailyLimits)
         public
     {
+        setup(_gnosisSafe, tokens, _dailyLimits);
+    }
+
+    function setup(GnosisSafe _gnosisSafe, address[] tokens, uint256[] _dailyLimits)
+        public
+    {
+        require(address(gnosisSafe) == 0);
         gnosisSafe = _gnosisSafe;
         for (uint256 i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
+    }
+
+    function changeMasterCopy(DailyLimitExtension _masterCopy)
+        public
+        onlyGnosisSafe
+    {
+        require(address(_masterCopy) != 0);
+        masterCopy = _masterCopy;
     }
 
     function changeGnosisSafe(GnosisSafe _gnosisSafe)

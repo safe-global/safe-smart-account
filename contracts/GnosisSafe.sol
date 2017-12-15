@@ -11,7 +11,7 @@ contract GnosisSafe {
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.1";
 
-    address proxy;
+    GnosisSafe masterCopy;
     uint8 public threshold;
     uint256 public nonce;
     address[] public owners;
@@ -62,12 +62,12 @@ contract GnosisSafe {
         }
     }
 
-    function changeProxy(address _proxy)
+    function changeMasterCopy(GnosisSafe _masterCopy)
         public
         onlyWallet
     {
-        require(_proxy != 0);
-        proxy = _proxy;
+        require(address(_masterCopy) != 0);
+        masterCopy = _masterCopy;
     }
 
     function addOwner(address owner, uint8 _threshold)

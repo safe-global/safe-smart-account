@@ -63,22 +63,16 @@ contract('DailyLimitExtension', function(accounts) {
         )
     })
 
-    it('should create a Daily Limit Extension and change Daily limit', async () => {
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0)
+    it('should change Daily limit', async () => {
+        // Gnosis Safe factory
+        gnosisSafeFactory = await GnosisSafeFactory.new()
         // Create daily limit exception
         dailyLimitExtensionFactory = await DailyLimitExtensionFactory.new()
-        // Add exception to wallet
-        data = await dailyLimitExtensionFactory.contract.createAndAddDailyLimitExtension.getData(gnosisSafe.address, [0], [200])
-        nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExtensionFactory.address, 0, data, DELEGATECALL, nonce)
-        //Confirm transaction with signed messages
-        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        utils.logGasUsage(
-            'executeTransaction create Daily Limit Extension',
-            await gnosisSafe.executeTransaction(
-                dailyLimitExtensionFactory.address, 0, data, DELEGATECALL, sigs.sigV, sigs.sigR, sigs.sigS
-            )
+        // Create Gnosis Safe with Daily Limit Extension
+        let extensionData = await dailyLimitExtensionFactory.contract.createDailyLimitExtension.getData(gnosisSafeFactory.address, [0], [200])
+        gnosisSafe = utils.getParamFromTxEvent(
+            await gnosisSafeFactory.createGnosisSafe([lw.accounts[0], lw.accounts[1]], 2, dailyLimitExtensionFactory.address, extensionData),
+            'gnosisSafe', GnosisSafe, 'GnosisSafeCreation', 'Create Gnosis Safe and Daily Limit Extension'
         )
         extensions = await gnosisSafe.getExtensions()
         assert.equal(extensions.length, 1)

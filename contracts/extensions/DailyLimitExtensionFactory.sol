@@ -1,31 +1,26 @@
 pragma solidity 0.4.19;
 import "./DailyLimitExtension.sol";
+import "../Proxy.sol";
 
 
 contract DailyLimitExtensionFactory {
 
     event DailyLimitExtensionCreation(DailyLimitExtension dailyLimitExtension);
 
-    function addExtension(Extension extension)
+    DailyLimitExtension masterCopy;
+
+    function DailyLimitExtensionFactory()
         public
-        pure
     {
-        revert();
+        masterCopy = new DailyLimitExtension(GnosisSafe(this), new address[](0), new uint256[](0));
     }
 
     function createDailyLimitExtension(GnosisSafe gnosisSafe, address[] tokens, uint256[] dailyLimits)
         public
         returns (DailyLimitExtension dailyLimitExtension)
     {
-        dailyLimitExtension = new DailyLimitExtension(gnosisSafe, tokens, dailyLimits);
+        dailyLimitExtension = DailyLimitExtension(new Proxy(masterCopy));
+        dailyLimitExtension.setup(gnosisSafe, tokens, dailyLimits);
         DailyLimitExtensionCreation(dailyLimitExtension);
-    }
-
-    function createAndAddDailyLimitExtension(GnosisSafe gnosisSafe, address[] tokens, uint256[] dailyLimits)
-        public
-        returns (DailyLimitExtension dailyLimitExtension)
-    {
-        dailyLimitExtension = createDailyLimitExtension(gnosisSafe, tokens, dailyLimits);
-        this.addExtension(dailyLimitExtension);
     }
 }
