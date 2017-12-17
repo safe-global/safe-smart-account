@@ -82,29 +82,27 @@ contract GnosisSafe {
             changeThreshold(_threshold);
     }
 
-    function removeOwner(address owner, uint256 ownerIndex, uint8 _threshold)
+    function removeOwner(uint256 ownerIndex, uint8 _threshold)
         public
         onlyWallet
     {
-        require(owners[ownerIndex] == owner);
         require(owners.length - 1 >= _threshold);
+        isOwner[owners[ownerIndex]] = false;
         owners[ownerIndex] = owners[owners.length - 1];
         owners.length--;
-        isOwner[owner] = false;
         if (threshold != _threshold)
             changeThreshold(_threshold);
     }
 
-    function replaceOwner(address oldOwner, uint256 oldOwnerIndex, address newOwner)
+    function replaceOwner(uint256 oldOwnerIndex, address newOwner)
         public
         onlyWallet
     {
         require(newOwner != 0);
-        require(owners[oldOwnerIndex] == oldOwner);
         require(!isOwner[newOwner]);
-        owners[oldOwnerIndex] = newOwner;
-        isOwner[oldOwner] = false;
+        isOwner[owners[oldOwnerIndex]] = false;
         isOwner[newOwner] =  true;
+        owners[oldOwnerIndex] = newOwner;
     }
 
     function changeThreshold(uint8 _threshold)
@@ -126,14 +124,13 @@ contract GnosisSafe {
         isExtension[extension] = true;
     }
 
-    function removeExtension(Extension extension, uint256 extensionIndex)
+    function removeExtension(uint256 extensionIndex)
         public
         onlyWallet
     {
-        require(extensions[extensionIndex] == extension);
+        isExtension[extensions[extensionIndex]] = false;
         extensions[extensionIndex] = extensions[extensions.length - 1];
         extensions.length--;
-        isExtension[extension] = false;
     }
 
     function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)

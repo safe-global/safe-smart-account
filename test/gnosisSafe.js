@@ -67,7 +67,7 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
         assert.equal(await gnosisSafe.threshold(), 3)
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(lw.accounts[2], 2, lw.accounts[3])
+        data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[3])
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
@@ -80,7 +80,7 @@ contract('GnosisSafe', function(accounts) {
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3]])
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[3], 2, 2)
+        data = await gnosisSafe.contract.removeOwner.getData(2, 2)
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
