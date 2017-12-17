@@ -146,7 +146,7 @@ contract('DailyLimitExtension', function(accounts) {
         assert.equal(await testToken.balances(gnosisSafe.address), 90);
         assert.equal(await testToken.balances(accounts[0]), 10);
         utils.logGasUsage(
-            'executeExtension withdraw daily limit for ERC20 token',
+            'executeExtension withdraw daily limit for ERC20 token 2nd time',
             await gnosisSafe.executeExtension(
                 testToken.address, 0, data, CALL, dailyLimitExtension.address, {from: accounts[0]}
             )

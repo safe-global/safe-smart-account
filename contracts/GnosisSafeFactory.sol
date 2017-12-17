@@ -43,7 +43,7 @@ contract GnosisSafeFactory {
         assembly {
             let output := mload(0x40)
             success := call(
-                sub(gas, 34710),
+                not(0),
                 extensionFactory,
                 0,
                 add(extensionData, 32),

@@ -180,12 +180,12 @@ contract GnosisSafe {
         uint256 dataLength = data.length;
         assembly {
             success := call(
-                sub(gas, 34710),
+                not(0),
                 to,
                 value,
                 add(data, 32),
                 dataLength,
-                mload(0x40),
+                0,
                 0
             )
         }
@@ -198,11 +198,11 @@ contract GnosisSafe {
         uint256 dataLength = data.length;
         assembly {
             success := delegatecall(
-                sub(gas, 34710),
+                not(0),
                 to,
                 add(data, 32),
                 dataLength,
-                mload(0x40),
+                0,
                 0
             )
         }
