@@ -3,13 +3,13 @@ pragma solidity 0.4.19;
 
 contract Proxy {
 
-    address destination;
+    address masterCopy;
 
-    function Proxy(address _destination)
+    function Proxy(address _masterCopy)
         public
     {
-        require(_destination != 0);
-        destination = _destination;
+        require(_masterCopy != 0);
+        masterCopy = _masterCopy;
     }
 
     function ()
@@ -17,9 +17,9 @@ contract Proxy {
         payable
     {
         assembly {
-            let destination := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
+            let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
             calldatacopy(0, 0, calldatasize())
-            let success := delegatecall(not(0), destination, 0, calldatasize(), 0, 0)
+            let success := delegatecall(not(0), masterCopy, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
             switch success
             case 0 { revert(0, returndatasize()) }
