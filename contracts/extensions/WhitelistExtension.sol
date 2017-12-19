@@ -19,17 +19,17 @@ contract WhitelistExtension is Extension {
         _;
     }
 
-    function WhitelistExtension(GnosisSafe _gnosisSafe, address[] accounts)
+    function WhitelistExtension(address[] accounts)
         public
     {
-        setup(_gnosisSafe, accounts);
+        setup(accounts);
     }
 
-    function setup(GnosisSafe _gnosisSafe, address[] accounts)
+    function setup(address[] accounts)
         public
     {
         require(address(gnosisSafe) == 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < accounts.length; i++) {
             require(accounts[i] != 0);
             isWhitelisted[accounts[i]]= true;
@@ -42,14 +42,6 @@ contract WhitelistExtension is Extension {
     {
         require(address(_masterCopy) != 0);
         masterCopy = _masterCopy;
-    }
-
-    function changeGnosisSafe(GnosisSafe _gnosisSafe)
-        public
-        onlyGnosisSafe
-    {
-        require(address(_gnosisSafe) != 0);
-        gnosisSafe = _gnosisSafe;
     }
 
     function addToWhitelist(address account)

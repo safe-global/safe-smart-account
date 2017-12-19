@@ -1,7 +1,5 @@
-var GnosisSafeFactory = artifacts.require("./GnosisSafeFactory.sol");
-var DailyLimitExtensionFactory = artifacts.require("./exceptions/DailyLimitExtensionFactory.sol");
+var ProxyFactory = artifacts.require("./ProxyFactory.sol");
 
 module.exports = function(deployer) {
-    deployer.deploy(GnosisSafeFactory);
-    deployer.deploy(DailyLimitExtensionFactory);
+    deployer.deploy(ProxyFactory);
 };

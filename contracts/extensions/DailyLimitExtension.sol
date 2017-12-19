@@ -26,17 +26,17 @@ contract DailyLimitExtension is Extension {
         _;
     }
 
-    function DailyLimitExtension(GnosisSafe _gnosisSafe, address[] tokens, uint256[] _dailyLimits)
+    function DailyLimitExtension(address[] tokens, uint256[] _dailyLimits)
         public
     {
-        setup(_gnosisSafe, tokens, _dailyLimits);
+        setup(tokens, _dailyLimits);
     }
 
-    function setup(GnosisSafe _gnosisSafe, address[] tokens, uint256[] _dailyLimits)
+    function setup(address[] tokens, uint256[] _dailyLimits)
         public
     {
         require(address(gnosisSafe) == 0);
-        gnosisSafe = _gnosisSafe;
+        gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
     }
@@ -47,14 +47,6 @@ contract DailyLimitExtension is Extension {
     {
         require(address(_masterCopy) != 0);
         masterCopy = _masterCopy;
-    }
-
-    function changeGnosisSafe(GnosisSafe _gnosisSafe)
-        public
-        onlyGnosisSafe
-    {
-        require(address(_gnosisSafe) != 0);
-        gnosisSafe = _gnosisSafe;
     }
 
     function changeDailyLimit(address token, uint256 dailyLimit)

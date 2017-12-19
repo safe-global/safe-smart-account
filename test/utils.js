@@ -1,14 +1,14 @@
 const util = require('util');
 const lightwallet = require('eth-lightwallet')
 
-function getParamFromTxEvent(transaction, paramName, contractFactory, eventName, subject) {
+function getParamFromTxEvent(transaction, paramName, contractFactory, eventName, subject, creator) {
     assert.isObject(transaction)
     if (subject != null) {
         logGasUsage(subject, transaction)
     }
     let logs = transaction.logs
     if(eventName != null) {
-        logs = logs.filter((l) => l.event === eventName)
+        logs = logs.filter((l) => l.event === eventName && l.address === creator)
     }
     assert.equal(logs.length, 1, 'too many logs found!')
     let param = logs[0].args[paramName]

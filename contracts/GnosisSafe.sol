@@ -37,13 +37,13 @@ contract GnosisSafe {
 
     }
 
-    function GnosisSafe(address[] _owners, uint8 _threshold, Extension extension)
+    function GnosisSafe(address[] _owners, uint8 _threshold, address to, bytes data)
         public
     {
-        setup(_owners, _threshold, extension);
+        setup(_owners, _threshold, to, data);
     }
 
-    function setup(address[] _owners, uint8 _threshold, Extension extension)
+    function setup(address[] _owners, uint8 _threshold, address to, bytes data)
         public
     {
         require(threshold == 0);
@@ -56,10 +56,8 @@ contract GnosisSafe {
         }
         owners = _owners;
         threshold = _threshold;
-        if (address(extension) != 0) {
-            extensions.push(extension);
-            isExtension[extension] = true;
-        }
+        if (to != 0)
+            executeDelegateCall(to, data);
     }
 
     function changeMasterCopy(GnosisSafe _masterCopy)
