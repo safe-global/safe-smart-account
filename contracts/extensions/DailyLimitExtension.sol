@@ -61,8 +61,8 @@ contract DailyLimitExtension is Extension {
         onlyGnosisSafe
         returns (bool)
     {
-        require(operation == GnosisSafe.Operation.Call);
         require(gnosisSafe.isOwner(sender));
+        require(operation == GnosisSafe.Operation.Call);
         require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
         address receiver;

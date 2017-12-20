@@ -57,7 +57,7 @@ contract GnosisSafe {
         owners = _owners;
         threshold = _threshold;
         if (to != 0)
-            executeDelegateCall(to, data);
+            require(executeDelegateCall(to, data));
     }
 
     function changeMasterCopy(GnosisSafe _masterCopy)

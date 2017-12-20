@@ -66,6 +66,7 @@ contract WhitelistExtension is Extension {
         returns (bool)
     {
         require(gnosisSafe.isOwner(sender));
+        require(operation == GnosisSafe.Operation.Call);
         if (isWhitelisted[to])
             return true;
         return false;
