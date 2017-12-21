@@ -76,9 +76,9 @@ contract DailyLimitExtension is Extension {
             token = to;
             bytes4 functionIdentifier;
             assembly {
-                functionIdentifier := mload(add(data, 32))
-                receiver := mload(add(data, 36))
-                amount := mload(add(data, 68))
+                functionIdentifier := mload(add(data, 0x20))
+                receiver := mload(add(data, 0x24))
+                amount := mload(add(data, 0x44))
             }
             require(functionIdentifier == TRANSFER_FUNCTION_IDENTIFIER);
         }

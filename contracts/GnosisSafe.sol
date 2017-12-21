@@ -172,17 +172,8 @@ contract GnosisSafe {
         internal
         returns (bool success)
     {
-        uint256 dataLength = data.length;
         assembly {
-            success := call(
-                not(0),
-                to,
-                value,
-                add(data, 32),
-                dataLength,
-                0,
-                0
-            )
+            success := call(not(0), to, value, add(data, 0x20), mload(data), 0, 0)
         }
     }
 
@@ -190,16 +181,8 @@ contract GnosisSafe {
         internal
         returns (bool success)
     {
-        uint256 dataLength = data.length;
         assembly {
-            success := delegatecall(
-                not(0),
-                to,
-                add(data, 32),
-                dataLength,
-                0,
-                0
-            )
+            success := delegatecall(not(0), to, add(data, 0x20), mload(data), 0, 0)
         }
     }
 
@@ -208,11 +191,7 @@ contract GnosisSafe {
         returns (address newContract)
     {
         assembly {
-            newContract := create(
-                0,
-                add(data, 0x20),
-                mload(data)
-            )
+            newContract := create(0, add(data, 0x20), mload(data))
         }
     }
 

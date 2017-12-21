@@ -10,32 +10,23 @@ contract CreateAndAddExtension {
         revert();
     }
 
-    function createAndAddExtension(address proxyFactory, bytes extensionData)
+    function createAndAddExtension(address proxyFactory, bytes data)
         public
     {
-        Extension extension = createExtension(proxyFactory, extensionData);
+        Extension extension = createExtension(proxyFactory, data);
         this.addExtension(extension);
     }
 
-    function createExtension(address proxyFactory, bytes extensionData)
+    function createExtension(address proxyFactory, bytes data)
         internal
         returns (Extension extension)
     {
         // Create extension
-        bool success;
-        uint256 extensionDataLength = extensionData.length;
         assembly {
             let output := mload(0x40)
-            success := delegatecall(
-                not(0),
-                proxyFactory,
-                add(extensionData, 32),
-                extensionDataLength,
-                output,
-                32
-            )
+            switch delegatecall(not(0), proxyFactory, add(data, 0x20), mload(data), output, 0x20)
+            case 0 { revert(0, 0) }
             extension := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)
         }
-        require(success);
     }
 }

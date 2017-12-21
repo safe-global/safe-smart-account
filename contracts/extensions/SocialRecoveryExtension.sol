@@ -43,8 +43,8 @@ contract SocialRecoveryExtension is Extension {
         require(_threshold <= _friends.length);
         require(_threshold >= 2);
         for (uint256 i = 0; i < _friends.length; i++) {
-            require(   _friends[i] != 0
-                    && !isFriend[_friends[i]]);
+            require(_friends[i] != 0);
+            require(!isFriend[_friends[i]]);
             isFriend[_friends[i]] = true;
         }
         friends = _friends;
@@ -78,7 +78,7 @@ contract SocialRecoveryExtension is Extension {
         require(operation == GnosisSafe.Operation.Call);
         bytes4 functionIdentifier;
         assembly {
-            functionIdentifier := mload(add(data, 32))
+            functionIdentifier := mload(add(data, 0x20))
         }
         require(functionIdentifier == REPLACE_OWNER_FUNCTION_IDENTIFIER);
         bytes32 transactionHash = getTransactionHash(to, value, data, operation);

@@ -11,22 +11,11 @@ contract ProxyFactory {
         returns (Proxy proxy)
     {
         proxy = new Proxy(masterCopy);
-        if (data.length > 0) {
-            bool success;
-            uint256 dataLength = data.length;
+        if (data.length > 0)
             assembly {
-                success := call(
-                    not(0),
-                    proxy,
-                    0,
-                    add(data, 32),
-                    dataLength,
-                    0,
-                    0
-                )
+                switch call(not(0), proxy, 0, add(data, 0x20), mload(data), 0, 0)
+                case 0 { revert(0, 0) }
             }
-            require(success);
-        }
         ProxyCreation(proxy);
     }
 }
