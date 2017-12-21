@@ -39,9 +39,9 @@ contract SocialRecoveryExtension is Extension {
         public
     {
         require(address(gnosisSafe) == 0);
-        gnosisSafe = GnosisSafe(msg.sender);
         require(_threshold <= _friends.length);
         require(_threshold >= 2);
+        gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < _friends.length; i++) {
             require(_friends[i] != 0);
             require(!isFriend[_friends[i]]);
@@ -64,7 +64,6 @@ contract SocialRecoveryExtension is Extension {
         onlyFriend
     {
         require(!isExecuted[transactionHash]);
-        require(!isConfirmed[transactionHash][msg.sender]);
         isConfirmed[transactionHash][msg.sender] = true;
     }
 
