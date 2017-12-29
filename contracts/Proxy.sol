@@ -1,9 +1,11 @@
 pragma solidity 0.4.19;
 
-
-contract Proxy {
+contract ProxyStorage {
 
     address masterCopy;
+}
+
+contract Proxy is ProxyStorage {
 
     function Proxy(address _masterCopy)
         public
