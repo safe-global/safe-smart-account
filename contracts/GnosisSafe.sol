@@ -145,32 +145,33 @@ contract GnosisSafe {
         isConfirmed[msg.sender][transactionHash] = true;
     }
 
-    function confirmAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners)
+    function confirmAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
         public
         onlyOwner
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         confirmTransaction(transactionHash);
-        executeTransaction(to, value, data, operation, v, r, s, _owners);
+        executeTransaction(to, value, data, operation, v, r, s, _owners, indices);
     }
 
-    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners)
+    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
         public
     {
-        require(v.length + _owners.length == threshold);
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        address lastRecoverd = address(0);
+        address lastOwner = address(0);
+        address validatedOwner;
         uint256 i = 0;
-        for (i = 0; i < v.length; i++) {
-            address recovered = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(recovered > lastRecoverd);
-            require(isOwner[recovered]);
-            lastRecoverd = recovered;
-        }
-        for (i = 0; i < _owners.length; i++) {
-            require(_owners[i] > lastRecoverd);
-            require(isOwner[_owners[i]]);
-            lastRecoverd = _owners[i];
+        for (uint256 j = 0; j < threshold; j++) {
+            if (indices.length > i && j == indices[i]) {
+                require(isConfirmed[_owners[i]][transactionHash]);
+                validatedOwner = _owners[i];
+                i += 1;
+            }
+            else
+                validatedOwner = ecrecover(transactionHash, v[j-i], r[j-i], s[j-i]);  
+            require(isOwner[validatedOwner]);
+            require(validatedOwner > lastOwner);
+            lastOwner = validatedOwner;
         }
         nonce += 1;
         execute(to, value, data, operation);

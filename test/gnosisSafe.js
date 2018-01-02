@@ -34,7 +34,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         nonce = await gnosisSafe.nonce()
@@ -44,7 +44,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH 2nd time',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
@@ -53,7 +53,7 @@ contract('GnosisSafe', function(accounts) {
     it('should add, remove and replace an owner and update the threshold', async () => {
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
-        data = await gnosisSafe.contract.addOwner.getData(lw.accounts[2], 3)
+        data = await gnosisSafe.contract.addOwner.getData(accounts[2], 3)
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
@@ -61,21 +61,22 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction add owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[2]])
         assert.equal(await gnosisSafe.threshold(), 3)
         // Replace owner and keep threshold
         data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[3])
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        index = [lw.accounts[0], lw.accounts[1], accounts[2]].sort().indexOf(accounts[2])
         utils.logGasUsage(
             'executeTransaction replace owner',
-            await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+            await gnosisSafe.confirmAndExecuteTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[2]], [index], {from: accounts[2]}
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3]])
@@ -88,7 +89,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction remove owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
@@ -113,7 +114,7 @@ contract('GnosisSafe', function(accounts) {
         const TestContract = web3.eth.contract(interface);
         let testContract = utils.getParamFromTxEvent(
             await gnosisSafe.executeTransaction(
-                0, 0, data, CREATE, sigs.sigV, sigs.sigR, sigs.sigS, []
+                0, 0, data, CREATE, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             ),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )

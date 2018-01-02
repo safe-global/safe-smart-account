@@ -97,7 +97,7 @@ contract('DailyLimitExtension', function(accounts) {
         utils.logGasUsage(
             'executeTransaction change daily limit',
             await gnosisSafe.executeTransaction(
-                dailyLimitExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                dailyLimitExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         dailyLimit = await dailyLimitExtension.dailyLimits(0)

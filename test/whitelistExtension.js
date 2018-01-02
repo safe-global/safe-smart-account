@@ -81,7 +81,7 @@ contract('WhitelistExtension', function(accounts) {
         utils.logGasUsage(
             'executeTransaction add account to whitelist',
             await gnosisSafe.executeTransaction(
-                whitelistExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                whitelistExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         assert.equal(await whitelistExtension.isWhitelisted(accounts[3]), true)
@@ -94,7 +94,7 @@ contract('WhitelistExtension', function(accounts) {
         utils.logGasUsage(
             'executeTransaction add account to whitelist',
             await gnosisSafe.executeTransaction(
-                whitelistExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
+                whitelistExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
         assert.equal(await whitelistExtension.isWhitelisted(accounts[3]), false)
