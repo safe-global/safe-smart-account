@@ -18,6 +18,7 @@ contract GnosisSafe {
     Extension[] public extensions;
     mapping (address => bool) public isOwner;
     mapping (address => bool) public isExtension;
+    mapping (address => mapping (bytes32 => bool)) public isConfirmed;
 
     enum Operation {
         Call,
@@ -27,6 +28,11 @@ contract GnosisSafe {
 
     modifier onlyWallet() {
         require(msg.sender == address(this));
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(isOwner[msg.sender]);
         _;
     }
 
@@ -131,16 +137,40 @@ contract GnosisSafe {
         extensions.length--;
     }
 
-    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)
+    function confirmTransaction(bytes32 transactionHash)
         public
+        onlyOwner
+    {
+        require(!isConfirmed[msg.sender][transactionHash]);
+        isConfirmed[msg.sender][transactionHash] = true;
+    }
+
+    function confirmAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners)
+        public
+        onlyOwner
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
+        confirmTransaction(transactionHash);
+        executeTransaction(to, value, data, operation, v, r, s, _owners);
+    }
+
+    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners)
+        public
+    {
+        require(v.length + _owners.length == threshold);
+        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         address lastRecoverd = address(0);
-        for (uint256 i = 0; i < threshold; i++) {
+        uint256 i = 0;
+        for (i = 0; i < v.length; i++) {
             address recovered = ecrecover(transactionHash, v[i], r[i], s[i]);
             require(recovered > lastRecoverd);
             require(isOwner[recovered]);
             lastRecoverd = recovered;
+        }
+        for (i = 0; i < _owners.length; i++) {
+            require(_owners[i] > lastRecoverd);
+            require(isOwner[_owners[i]]);
+            lastRecoverd = _owners[i];
         }
         nonce += 1;
         execute(to, value, data, operation);

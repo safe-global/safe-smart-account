@@ -34,7 +34,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
             )
         )
         nonce = await gnosisSafe.nonce()
@@ -44,7 +44,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH 2nd time',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
@@ -61,7 +61,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction add owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
@@ -75,7 +75,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction replace owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3]])
@@ -88,7 +88,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction remove owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, []
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
@@ -113,7 +113,7 @@ contract('GnosisSafe', function(accounts) {
         const TestContract = web3.eth.contract(interface);
         let testContract = utils.getParamFromTxEvent(
             await gnosisSafe.executeTransaction(
-                0, 0, data, CREATE, sigs.sigV, sigs.sigR, sigs.sigS
+                0, 0, data, CREATE, sigs.sigV, sigs.sigR, sigs.sigS, []
             ),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )

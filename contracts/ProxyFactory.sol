@@ -3,7 +3,7 @@ import "./Proxy.sol";
 
 
 contract ProxyFactory {
-    
+
     event ProxyCreation(Proxy proxy);
 
     function createProxy(address masterCopy, bytes data)
