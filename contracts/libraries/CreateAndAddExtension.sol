@@ -2,14 +2,21 @@ pragma solidity 0.4.19;
 import "../Extension.sol";
 
 
+/// @title Create and Add Extension - Allows to create and add a new extension in one transaction.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract CreateAndAddExtension {
 
+    /// @dev Function required to compile contract. Gnosis Safe function is called instead.
+    /// @param extension Not used.
     function addExtension(Extension extension)
         public
     {
         revert();
     }
 
+    /// @dev Allows to create and add a new extension in one transaction.
+    /// @param proxyFactory Extension factory contract.
+    /// @param data Extension constructor payload.
     function createAndAddExtension(address proxyFactory, bytes data)
         public
     {
