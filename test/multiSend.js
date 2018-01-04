@@ -1,5 +1,4 @@
 const utils = require('./utils')
-const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")
