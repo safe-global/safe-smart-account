@@ -72,6 +72,7 @@ contract('GnosisSafe', function(accounts) {
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with account 0
         await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
+        assert.deepEqual(await gnosisSafe.getConfirmations(transactionHash, [accounts[1]]), [true])
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         index1 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[0])

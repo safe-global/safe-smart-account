@@ -34,6 +34,7 @@ contract GnosisSafe {
         _;
     }
 
+    /// @dev Fallback function accepts Ether transactions
     function ()
         external
         payable
@@ -337,5 +338,19 @@ contract GnosisSafe {
         returns (Extension[])
     {
         return extensions;
+    }
+
+    /// @dev Returns confirmation status for given transaction and owners.
+    /// @param transactionHash Safe transaction hash
+    /// @param _owners List of Safe owners to check
+    function getConfirmations(bytes32 transactionHash, address[] _owners)
+        public
+        view
+        returns (bool[] confirmations)
+    {
+        confirmations = new bool[](_owners.length);   
+        for (uint256 i = 0; i < _owners.length; i++) {
+            confirmations[i] = isConfirmed[_owners[i]][transactionHash];
+        }
     }
 }
