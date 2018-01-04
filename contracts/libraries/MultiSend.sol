@@ -1,8 +1,14 @@
 pragma solidity 0.4.19;
 
 
+/// @title Multi Send - Allows to batch multiple transactions into one.
+/// @author Nick Dodson - <nick.dodson@consensys.net>
+/// @author Gonçalo Sá - <goncalo.sa@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract MultiSend {
 
+    /// @dev Sends multiple transactions and reverts all if one fails.
+    /// @param transactions Encoded transactions.
     function multiSend(bytes transactions)
         public
     {
