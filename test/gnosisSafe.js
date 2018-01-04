@@ -1,4 +1,5 @@
 const utils = require('./utils')
+const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 
@@ -17,7 +18,7 @@ contract('GnosisSafe', function(accounts) {
         // Create lightwallet
         lw = await utils.createLightwallet()
         // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0, 0)
+        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1], accounts[0]], 2, 0, 0)
     })
 
     it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
@@ -52,7 +53,7 @@ contract('GnosisSafe', function(accounts) {
     it('should add, remove and replace an owner and update the threshold', async () => {
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
-        data = await gnosisSafe.contract.addOwner.getData(accounts[2], 3)
+        data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
@@ -63,22 +64,25 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[2]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[0], accounts[1]])
         assert.equal(await gnosisSafe.threshold(), 3)
         // Replace owner and keep threshold
         data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[3])
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
-        // Confirm transaction with signed messages
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        index = [lw.accounts[0], lw.accounts[1], accounts[2]].sort().indexOf(accounts[2])
+        // Confirm transaction with account 0
+        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
+        // Confirm transaction with signed message from lw account 0
+        sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
+        index1 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[0])
+        index2 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[1])
         utils.logGasUsage(
             'executeTransaction replace owner',
-            await gnosisSafe.confirmAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[2]], [index], {from: accounts[2]}
+            await gnosisSafe.executeTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[0], accounts[1]], [index1, index2], {from: accounts[0]}
             )
         )
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3], accounts[1]])
         // Remove owner and reduce threshold to 2
         data = await gnosisSafe.contract.removeOwner.getData(2, 2)
         nonce = await gnosisSafe.nonce()
@@ -91,7 +95,7 @@ contract('GnosisSafe', function(accounts) {
                 gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
         )
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[1]])
     })
 
     it('should do a CREATE transaction', async () => {

@@ -16,8 +16,11 @@ contract GnosisSafe {
     uint256 public nonce;
     address[] public owners;
     Extension[] public extensions;
+    // isOwner mapping allows to check if an address is a Safe owner
     mapping (address => bool) public isOwner;
+    // isExtension mapping allows to check if an extension was whitelisted
     mapping (address => bool) public isExtension;
+    // isConfirmed mapping allows to check if a transaction was confirmed by an owner via a confirm transaction
     mapping (address => mapping (bytes32 => bool)) public isConfirmed;
 
     enum Operation {
@@ -31,11 +34,6 @@ contract GnosisSafe {
         _;
     }
 
-    modifier onlyOwner() {
-        require(isOwner[msg.sender]);
-        _;
-    }
-
     function ()
         external
         payable
@@ -43,18 +41,31 @@ contract GnosisSafe {
 
     }
 
+    /// @dev Constructor function
+    /// @param _owners List of Safe owners.
+    /// @param _threshold Number of required confirmations for a Safe transaction.
+    /// @param to Contract address for optional delegate call.
+    /// @param data Data payload for optional delegate call.
     function GnosisSafe(address[] _owners, uint8 _threshold, address to, bytes data)
         public
     {
         setup(_owners, _threshold, to, data);
     }
 
+    /// @dev Setup function sets initial storage of contract.
+    /// @param _owners List of Safe owners.
+    /// @param _threshold Number of required confirmations for a Safe transaction.
+    /// @param to Contract address for optional delegate call.
+    /// @param data Data payload for optional delegate call.
     function setup(address[] _owners, uint8 _threshold, address to, bytes data)
         public
     {
+        // threshold can only be 0 at initialization.
+        // Check ensures that setup function can only be called once.
         require(threshold == 0);
         require(_threshold <= _owners.length);
         require(_threshold >= 1);
+        // Initializing Safe owners
         for (uint256 i = 0; i < _owners.length; i++) {
             require(_owners[i] != 0);
             require(!isOwner[_owners[i]]);
@@ -62,10 +73,14 @@ contract GnosisSafe {
         }
         owners = _owners;
         threshold = _threshold;
+        // If a to address is set, an additional delegate call is executed.
+        // This call allows further contract setup steps, like adding an extension.
         if (to != 0)
             require(executeDelegateCall(to, data));
     }
 
+    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
+    /// @param _masterCopy New contract
     function changeMasterCopy(GnosisSafe _masterCopy)
         public
         onlyWallet
@@ -74,6 +89,10 @@ contract GnosisSafe {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Allows to add a new owner to the Safe and update the threshold at the same time.
+    ///      This can only be done via a Safe transaction.
+    /// @param owner New owner address
+    /// @param _threshold New threshold
     function addOwner(address owner, uint8 _threshold)
         public
         onlyWallet
@@ -86,6 +105,10 @@ contract GnosisSafe {
             changeThreshold(_threshold);
     }
 
+    /// @dev Allows to remove an owner from the Safe and update the threshold at the same time.
+    ///      This can only be done via a Safe transaction.
+    /// @param ownerIndex Array index position of owner address to be removed.
+    /// @param _threshold New threshold
     function removeOwner(uint256 ownerIndex, uint8 _threshold)
         public
         onlyWallet
@@ -98,6 +121,10 @@ contract GnosisSafe {
             changeThreshold(_threshold);
     }
 
+    /// @dev Allows to replace an owner from the Safe with another address.
+    ///      This can only be done via a Safe transaction.
+    /// @param oldOwnerIndex Array index position of owner address to be replaced.
+    /// @param newOwner New owner address
     function replaceOwner(uint256 oldOwnerIndex, address newOwner)
         public
         onlyWallet
@@ -109,6 +136,9 @@ contract GnosisSafe {
         owners[oldOwnerIndex] = newOwner;
     }
 
+    /// @dev Allows to update the number of required confirmations by Safe owners.
+    ///      This can only be done via a Safe transaction.
+    /// @param _threshold New threshold
     function changeThreshold(uint8 _threshold)
         public
         onlyWallet
@@ -118,6 +148,9 @@ contract GnosisSafe {
         threshold = _threshold;
     }
 
+    /// @dev Allows to add an extension to the whitelist.
+    ///      This can only be done via a Safe transaction.
+    /// @param extension Extension to be whitelisted
     function addExtension(Extension extension)
         public
         onlyWallet
@@ -128,6 +161,9 @@ contract GnosisSafe {
         isExtension[extension] = true;
     }
 
+    /// @dev Allows to remove an extension from the whitelist.
+    ///      This can only be done via a Safe transaction.
+    /// @param extensionIndex Array index position of extension to be removed from whitelist
     function removeExtension(uint256 extensionIndex)
         public
         onlyWallet
@@ -137,23 +173,27 @@ contract GnosisSafe {
         extensions.length--;
     }
 
+    /// @dev Allows to confirm a Safe transaction with a regular transaction.
+    ///      This can only be done from an owner address.
+    /// @param transactionHash Hash of Safe transaction
     function confirmTransaction(bytes32 transactionHash)
         public
-        onlyOwner
     {
+        require(isOwner[msg.sender]);
         require(!isConfirmed[msg.sender][transactionHash]);
         isConfirmed[msg.sender][transactionHash] = true;
     }
 
-    function confirmAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
-        public
-        onlyOwner
-    {
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        confirmTransaction(transactionHash);
-        executeTransaction(to, value, data, operation, v, r, s, _owners, indices);
-    }
-
+    /// @dev Allows to execute a Safe transaction confrimed by required number of owners.
+    /// @param to Destination address
+    /// @param value Ether value
+    /// @param data Data payload
+    /// @param operation Operation type
+    /// @param v Array of signature V values
+    /// @param r Array of signature R values
+    /// @param s Array of signature S values
+    /// @param _owners List of Safe owners confirming via regular transactions
+    /// @param indices List of indeces of Safe owners confirming via regular transactions
     function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
         public
     {
@@ -161,9 +201,10 @@ contract GnosisSafe {
         address lastOwner = address(0);
         address validatedOwner;
         uint256 i = 0;
-        for (uint256 j = 0; j < threshold; j++) {
+        uint256 j;
+        for (j = 0; j < threshold; j++) {
             if (indices.length > i && j == indices[i]) {
-                require(isConfirmed[_owners[i]][transactionHash]);
+                require(msg.sender == _owners[i] || isConfirmed[_owners[i]][transactionHash]);
                 validatedOwner = _owners[i];
                 i += 1;
             }
@@ -173,10 +214,21 @@ contract GnosisSafe {
             require(validatedOwner > lastOwner);
             lastOwner = validatedOwner;
         }
+        // Delete storage to receive refunds
+        if (_owners.length > 0) {
+            for (j = 0; j < _owners.length; j++)
+                isConfirmed[_owners[j]][transactionHash] = false;
+        }
         nonce += 1;
         execute(to, value, data, operation);
     }
 
+    /// @dev Allows to execute a Safe transaction via an extension without any further confirmations.
+    /// @param to Destination address
+    /// @param value Ether value
+    /// @param data Data payload
+    /// @param operation Operation type
+    /// @param extension Extension address
     function executeExtension(address to, uint256 value, bytes data, Operation operation, Extension extension)
         public
     {
@@ -226,6 +278,12 @@ contract GnosisSafe {
         }
     }
 
+    /// @dev Returns transactions hash to be signed by owners.
+    /// @param to Destination address
+    /// @param value Ether value
+    /// @param data Data payload
+    /// @param operation Operation type
+    /// @param _nonce Transaction nonce
     function getTransactionHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
         public
         view
@@ -234,6 +292,7 @@ contract GnosisSafe {
         return keccak256(byte(0x19), this, to, value, data, operation, _nonce);
     }
 
+    /// @dev Returns array of owners.
     function getOwners()
         public
         view
@@ -242,6 +301,7 @@ contract GnosisSafe {
         return owners;
     }
 
+    /// @dev Returns array of extensions.
     function getExtensions()
         public
         view
