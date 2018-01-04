@@ -1,10 +1,14 @@
 pragma solidity 0.4.19;
 
 
+/// @title Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract Proxy {
 
     address masterCopy;
 
+    /// @dev Constructor function sets address of master copy contract.
+    /// @param _masterCopy Master copy address.
     function Proxy(address _masterCopy)
         public
     {
@@ -12,6 +16,7 @@ contract Proxy {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Fallback function forwards all transactions and returns all received return data.
     function ()
         external
         payable
