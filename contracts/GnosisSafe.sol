@@ -63,11 +63,15 @@ contract GnosisSafe {
         // threshold can only be 0 at initialization.
         // Check ensures that setup function can only be called once.
         require(threshold == 0);
+        // Validate that threshold is smaller than numbr of added owners.
         require(_threshold <= _owners.length);
+        // There has to be at least one Safe owner.
         require(_threshold >= 1);
         // Initializing Safe owners
         for (uint256 i = 0; i < _owners.length; i++) {
+            // Owner address cannot be null.
             require(_owners[i] != 0);
+            // No duplicate owners allowed.
             require(!isOwner[_owners[i]]);
             isOwner[_owners[i]] = true;
         }
@@ -76,6 +80,7 @@ contract GnosisSafe {
         // If a to address is set, an additional delegate call is executed.
         // This call allows further contract setup steps, like adding an extension.
         if (to != 0)
+            // Setup has to complete successfully or transaction fails.
             require(executeDelegateCall(to, data));
     }
 
@@ -85,6 +90,7 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Master copy address cannot be null.
         require(address(_masterCopy) != 0);
         masterCopy = _masterCopy;
     }
@@ -97,10 +103,13 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Owner address cannot be null.
         require(owner != 0);
+        // No duplicate owners allowed.
         require(!isOwner[owner]);
         owners.push(owner);
         isOwner[owner] = true;
+        // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
     }
@@ -113,10 +122,12 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Only allow to remove an owner, if threshold can still be reached.
         require(owners.length - 1 >= _threshold);
         isOwner[owners[ownerIndex]] = false;
         owners[ownerIndex] = owners[owners.length - 1];
         owners.length--;
+        // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
     }
@@ -129,7 +140,9 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Owner address cannot be null.
         require(newOwner != 0);
+        // No duplicate owners allowed.
         require(!isOwner[newOwner]);
         isOwner[owners[oldOwnerIndex]] = false;
         isOwner[newOwner] =  true;
@@ -143,7 +156,9 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Validate that threshold is smaller than numbr of owners.
         require(_threshold <= owners.length);
+        // There has to be at least one Safe owner.
         require(_threshold >= 1);
         threshold = _threshold;
     }
@@ -155,7 +170,9 @@ contract GnosisSafe {
         public
         onlyWallet
     {
+        // Extension address cannot be null.
         require(address(extension) != 0);
+        // Extension cannot be added twice.
         require(!isExtension[extension]);
         extensions.push(extension);
         isExtension[extension] = true;
@@ -179,7 +196,9 @@ contract GnosisSafe {
     function confirmTransaction(bytes32 transactionHash)
         public
     {
+        // Only Safe owners are allowed to confirm Safe transactions.
         require(isOwner[msg.sender]);
+        // It is only possible to confirm a transaction once.
         require(!isConfirmed[msg.sender][transactionHash]);
         isConfirmed[msg.sender][transactionHash] = true;
     }
@@ -189,38 +208,43 @@ contract GnosisSafe {
     /// @param value Ether value
     /// @param data Data payload
     /// @param operation Operation type
-    /// @param v Array of signature V values
-    /// @param r Array of signature R values
-    /// @param s Array of signature S values
-    /// @param _owners List of Safe owners confirming via regular transactions
+    /// @param v Array of signature V values sorted by owner addresses
+    /// @param r Array of signature R values sorted by owner addresses
+    /// @param s Array of signature S values sorted by owner addresses
+    /// @param _owners List of Safe owners confirming via regular transactions sorted by owner addresses
     /// @param indices List of indeces of Safe owners confirming via regular transactions
     function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
+        // There cannot be an owner with address 0.
         address lastOwner = address(0);
-        address validatedOwner;
-        uint256 i = 0;
-        uint256 j;
-        for (j = 0; j < threshold; j++) {
-            if (indices.length > i && j == indices[i]) {
-                require(msg.sender == _owners[i] || isConfirmed[_owners[i]][transactionHash]);
-                validatedOwner = _owners[i];
-                i += 1;
+        address currentOwner;
+        uint256 i;
+        uint256 j = 0;
+        // Validate threshold is reached.
+        for (i = 0; i < threshold; i++) {
+            // Check confirmation done with regular transactions or by msg.sender.
+            if (indices.length > j && i == indices[j]) {
+                require(msg.sender == _owners[j] || isConfirmed[_owners[j]][transactionHash]);
+                currentOwner = _owners[j];
+                j += 1;
             }
+            // Check confirmations done with signed messages
             else
-                validatedOwner = ecrecover(transactionHash, v[j-i], r[j-i], s[j-i]);  
-            require(isOwner[validatedOwner]);
-            require(validatedOwner > lastOwner);
-            lastOwner = validatedOwner;
+                currentOwner = ecrecover(transactionHash, v[i-j], r[i-j], s[i-j]);  
+            require(isOwner[currentOwner]);
+            require(currentOwner > lastOwner);
+            lastOwner = currentOwner;
         }
         // Delete storage to receive refunds
         if (_owners.length > 0) {
-            for (j = 0; j < _owners.length; j++) {
-                if (msg.sender != _owners[j])
-                    isConfirmed[_owners[j]][transactionHash] = false;
+            for (i = 0; i < _owners.length; i++) {
+                if (msg.sender != _owners[i])
+                    isConfirmed[_owners[i]][transactionHash] = false;
             }
         }
+        // Increase nonce and execute transaction
         nonce += 1;
         execute(to, value, data, operation);
     }
@@ -234,8 +258,11 @@ contract GnosisSafe {
     function executeExtension(address to, uint256 value, bytes data, Operation operation, Extension extension)
         public
     {
+        // Only whitelisted extensions are allowed.
         require(isExtension[extension]);
+        // Extension has to confirm transaction.
         require(extension.isExecutable(msg.sender, to, value, data, operation));
+        // Exectute transaction without further confirmations.
         execute(to, value, data, operation);
     }
 
