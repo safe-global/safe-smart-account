@@ -216,8 +216,10 @@ contract GnosisSafe {
         }
         // Delete storage to receive refunds
         if (_owners.length > 0) {
-            for (j = 0; j < _owners.length; j++)
-                isConfirmed[_owners[j]][transactionHash] = false;
+            for (j = 0; j < _owners.length; j++) {
+                if (msg.sender != _owners[j])
+                    isConfirmed[_owners[j]][transactionHash] = false;
+            }
         }
         nonce += 1;
         execute(to, value, data, operation);
