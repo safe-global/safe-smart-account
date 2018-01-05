@@ -225,7 +225,7 @@ contract GnosisSafe {
         uint256 j = 0;
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
-            // Check confirmation done with regular transactions or by msg.sender.
+            // Check confirmations done with regular transactions or by msg.sender.
             if (indices.length > j && i == indices[j]) {
                 require(msg.sender == _owners[j] || isConfirmed[_owners[j]][transactionHash]);
                 currentOwner = _owners[j];
@@ -314,6 +314,7 @@ contract GnosisSafe {
     /// @param data Data payload.
     /// @param operation Operation type.
     /// @param _nonce Transaction nonce.
+    /// @return Transaction hash.
     function getTransactionHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
         public
         view
@@ -323,6 +324,7 @@ contract GnosisSafe {
     }
 
     /// @dev Returns array of owners.
+    /// @return Array of Safe owners.
     function getOwners()
         public
         view
@@ -332,6 +334,7 @@ contract GnosisSafe {
     }
 
     /// @dev Returns array of extensions.
+    /// @return Array of extensions.
     function getExtensions()
         public
         view
@@ -343,6 +346,8 @@ contract GnosisSafe {
     /// @dev Returns confirmation status for given transaction and owners.
     /// @param transactionHash Safe transaction hash.
     /// @param _owners List of Safe owners to check.
+    /// @return Array of boolean values in order of given owner array.
+    ///         Values for confirming owners are set to true.
     function getConfirmations(bytes32 transactionHash, address[] _owners)
         public
         view
