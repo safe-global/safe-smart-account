@@ -12,6 +12,7 @@ contract WhitelistExtension is Extension {
 
     WhitelistExtension masterCopy;
     GnosisSafe public gnosisSafe;
+    // isWhitelisted mapping maps destination address to boolean.
     mapping (address => bool) public isWhitelisted;
 
     modifier onlyGnosisSafe() {
@@ -19,16 +20,23 @@ contract WhitelistExtension is Extension {
         _;
     }
 
+    /// @dev Constructor function triggers setup function.
+    /// @param accounts List of whitelisted accounts.
     function WhitelistExtension(address[] accounts)
         public
     {
         setup(accounts);
     }
 
+    /// @dev Setup function sets initial storage of contract.
+    /// @param accounts List of whitelisted accounts.
     function setup(address[] accounts)
         public
     {
+        // gnosisSafe can only be 0 at initalization of contract.
+        // Check ensures that setup function can only be called once.
         require(address(gnosisSafe) == 0);
+        // Set whitelisted destinations.
         gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < accounts.length; i++) {
             require(accounts[i] != 0);
@@ -36,6 +44,8 @@ contract WhitelistExtension is Extension {
         }
     }
 
+    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
+    /// @param _masterCopy New contract address.
     function changeMasterCopy(WhitelistExtension _masterCopy)
         public
         onlyGnosisSafe
@@ -44,6 +54,8 @@ contract WhitelistExtension is Extension {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Allows to add destination to whitelist. This can only be done via a Safe transaction.
+    /// @param account Destination address.
     function addToWhitelist(address account)
         public
         onlyGnosisSafe
@@ -53,6 +65,8 @@ contract WhitelistExtension is Extension {
         isWhitelisted[account] = true;
     }
 
+    /// @dev Allows to remove destination from whitelist. This can only be done via a Safe transaction.
+    /// @param account Destination address.
     function removeFromWhitelist(address account)
         public
         onlyGnosisSafe
@@ -61,10 +75,18 @@ contract WhitelistExtension is Extension {
         isWhitelisted[account] = false;
     }
 
+    /// @dev Returns if Safe transaction is to a whitelisted destination.
+    /// @param sender Safe owner sending Safe transaction.
+    /// @param to Whitelisted destination address.
+    /// @param value Not checked.
+    /// @param data Not checked.
+    /// @param operation Only Call operations are allowed.
+    /// @return Returns if transaction can be executed.
     function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
         public
         returns (bool)
     {
+        // Only Safe owners are allowed to execute transactions to whitelisted accounts.
         require(gnosisSafe.isOwner(sender));
         require(operation == GnosisSafe.Operation.Call);
         if (isWhitelisted[to])
