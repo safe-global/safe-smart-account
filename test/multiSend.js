@@ -20,14 +20,14 @@ contract('MultiSend', function(accounts) {
         gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0, 0)
     })
 
-    it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
+    it('should create a new Safe and deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
         assert.equal(await gnosisSafe.threshold(), 2)
         multiSend = await MultiSend.new()
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(2, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
-        // Withdraw 1 ETH
+        // Withdraw 2 ETH and change threshold
         nonce = await gnosisSafe.nonce()
         const TransactionWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"},{"name":"data","type":"bytes"}],"name":"send","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
         tw = TransactionWrapper.at(1)

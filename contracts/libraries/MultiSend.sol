@@ -8,7 +8,9 @@ pragma solidity 0.4.19;
 contract MultiSend {
 
     /// @dev Sends multiple transactions and reverts all if one fails.
-    /// @param transactions Encoded transactions.
+    /// @param transactions Encoded transactions. Each transaction is encoded as
+    ///                     a tuple(address,uint256,bytes). The bytes of all
+    ///                     encoded transactions are concatenated to form the input.
     function multiSend(bytes transactions)
         public
     {
