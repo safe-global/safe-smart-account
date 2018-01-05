@@ -13,6 +13,7 @@ contract DailyLimitExtension is Extension {
 
     DailyLimitExtension masterCopy;
     GnosisSafe public gnosisSafe;
+    // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;
 
     struct DailyLimit {
@@ -26,21 +27,32 @@ contract DailyLimitExtension is Extension {
         _;
     }
 
+    /// @dev Constructor function triggers setup function.
+    /// @param tokens List of token addresses. Ether is represented with address 0x0.
+    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether). 
+    ///        First entry of array corresponds to first entry in token address array.
     function DailyLimitExtension(address[] tokens, uint256[] _dailyLimits)
         public
     {
         setup(tokens, _dailyLimits);
     }
 
+    /// @dev Setup function sets initial storage of contract.
+    /// @param tokens List of token addresses. Ether is represented with address 0x0.
+    /// @param _dailyLimits List of daily limits in smalles units (e.g. Wei for Ether).
     function setup(address[] tokens, uint256[] _dailyLimits)
         public
     {
+        // gnosisSafe can only be 0 at initalization of contract.
+        // Check ensures that setup function can only be called once.
         require(address(gnosisSafe) == 0);
         gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
     }
 
+    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
+    /// @param _masterCopy New contract address.
     function changeMasterCopy(DailyLimitExtension _masterCopy)
         public
         onlyGnosisSafe
@@ -49,6 +61,9 @@ contract DailyLimitExtension is Extension {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Allows to update the daily limit for a specified token. This can only be done via a Safe transaction.
+    /// @param token Token contract address.
+    /// @param dailyLimit Daily limit in smallest token unit.
     function changeDailyLimit(address token, uint256 dailyLimit)
         public
         onlyGnosisSafe
@@ -56,13 +71,22 @@ contract DailyLimitExtension is Extension {
         dailyLimits[token].dailyLimit = dailyLimit;
     }
 
+    /// @dev Returns if Safe transaction is a valid daily limit transaction.
+    /// @param sender Safe owner sending Safe transaction.
+    /// @param to Receiver address in case of Ether transfer, token address in case of a token transfer.
+    /// @param value Ether value in case of an Ether transfer.
+    /// @param data Encoded token transfer. Empty in case of Ether transfer.
+    /// @param operation Only Call operations are allowed.
+    /// @return Returns if transaction can be executed.
     function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
         public
         onlyGnosisSafe
         returns (bool)
     {
+        // Only Safe owners are allowed to execute daily limit transactions.
         require(gnosisSafe.isOwner(sender));
         require(operation == GnosisSafe.Operation.Call);
+        // Data has to encode a token transfer or has to be empty.
         require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
         address receiver;
@@ -84,6 +108,7 @@ contract DailyLimitExtension is Extension {
         }
         require(receiver != 0);
         require(amount > 0);
+        // Validate that transfer is not exceeding daily limit.
         if (isUnderLimit(token, amount)) {
             dailyLimits[token].spentToday += amount;
             return true;
@@ -106,6 +131,8 @@ contract DailyLimitExtension is Extension {
         return false;
     }
 
+    /// @dev Returns last midnight as Unix timestamp.
+    /// @return Unix timestamp.
     function today()
         public
         view
