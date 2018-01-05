@@ -36,15 +36,15 @@ contract('SocialRecoveryException', function(accounts) {
         // Replace owner
         data = await gnosisSafe.contract.replaceOwner.getData(1, accounts[9])
         // Confirm transaction to be executed without confirmations
-        transactionHash = await socialRecoveryExtension.getTransactionHash(gnosisSafe.address, 0, data, CALL)
-        await socialRecoveryExtension.confirmTransaction(transactionHash, {from: accounts[3]})
+        dataHash = await socialRecoveryExtension.getDataHash(data)
+        await socialRecoveryExtension.confirmTransaction(dataHash, {from: accounts[3]})
         // Execution fails, because challenge period is not yet over
         await utils.assertRejects(
             gnosisSafe.executeExtension(gnosisSafe.address, 0, data, CALL, socialRecoveryExtension.address, {from: accounts[0]}),
             "It was not confirmed by the required number of friends"
         )
         // Confirm with 2nd friend
-        await socialRecoveryExtension.confirmTransaction(transactionHash, {from: accounts[2]})
+        await socialRecoveryExtension.confirmTransaction(dataHash, {from: accounts[2]})
         await gnosisSafe.executeExtension(gnosisSafe.address, 0, data, CALL, socialRecoveryExtension.address, {from: accounts[3]})
         assert.equal(await gnosisSafe.isOwner(accounts[9]), true);
     })
