@@ -59,8 +59,6 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000de0b6b3a7640000"+
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000000"
-
-        console.log(data)
         transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
