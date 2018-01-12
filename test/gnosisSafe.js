@@ -71,8 +71,12 @@ contract('GnosisSafe', function(accounts) {
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with account 0
-        await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
-        assert.deepEqual(await gnosisSafe.getConfirmations(transactionHash, [accounts[1]]), [true])
+        utils.logGasUsage(
+            'confirmTransaction',
+            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
+        )
+        assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
+        assert.deepEqual(await gnosisSafe.getConfirmingOwners(transactionHash), [accounts[1]])
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         index1 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[0])
@@ -80,7 +84,7 @@ contract('GnosisSafe', function(accounts) {
         utils.logGasUsage(
             'executeTransaction replace owner',
             await gnosisSafe.executeTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[0], accounts[1]], [index1, index2], {from: accounts[0]}
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[0], accounts[1]].sort(), [index1, index2].sort(), {from: accounts[0]}
             )
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3], accounts[1]])

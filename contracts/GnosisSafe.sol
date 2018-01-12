@@ -233,7 +233,7 @@ contract GnosisSafe {
             }
             // Check confirmations done with signed messages.
             else
-                currentOwner = ecrecover(transactionHash, v[i-j], r[i-j], s[i-j]);  
+                currentOwner = ecrecover(transactionHash, v[i-j], r[i-j], s[i-j]);
             require(isOwner[currentOwner]);
             require(currentOwner > lastOwner);
             lastOwner = currentOwner;
@@ -343,19 +343,34 @@ contract GnosisSafe {
         return extensions;
     }
 
-    /// @dev Returns confirmation status for given transaction and owners.
+    /// @dev Returns a the count of owners that have confirmed the given transaction.
     /// @param transactionHash Safe transaction hash.
-    /// @param _owners List of Safe owners to check.
-    /// @return Array of boolean values in order of given owner array.
-    ///         Values for confirming owners are set to true.
-    function getConfirmations(bytes32 transactionHash, address[] _owners)
+    function getConfirmationCount(bytes32 transactionHash)
         public
         view
-        returns (bool[] confirmations)
+        returns (uint confirmationCount)
     {
-        confirmations = new bool[](_owners.length);   
-        for (uint256 i = 0; i < _owners.length; i++) {
-            confirmations[i] = isConfirmed[_owners[i]][transactionHash];
+        for (uint i = 0; i < owners.length; i++) {
+            if (isConfirmed[owners[i]][transactionHash])
+                confirmationCount++;
+        }
+    }
+
+    /// @dev Returns a list of owners that have confirmed the given transaction.
+    /// @param transactionHash Safe transaction hash.
+    function getConfirmingOwners(bytes32 transactionHash)
+        public
+        view
+        returns (address[] confirmingOwners)
+    {
+        uint confirmationCount = getConfirmationCount(transactionHash);
+        confirmingOwners = new address[](confirmationCount);
+        confirmationCount = 0;
+        for (uint i = 0; i < owners.length; i++) {
+            if (isConfirmed[owners[i]][transactionHash]) {
+                confirmingOwners[confirmationCount] = owners[i];
+                confirmationCount++;
+            }
         }
     }
 }
