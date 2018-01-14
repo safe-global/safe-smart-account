@@ -193,12 +193,17 @@ contract GnosisSafe {
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.
-    /// @param transactionHash Hash of Safe transaction.
-    function confirmTransaction(bytes32 transactionHash)
+    /// @param to Destination address.
+    /// @param value Ether value.
+    /// @param data Data payload.
+    /// @param operation Operation type.
+    /// @param _nonce Transaction nonce.
+    function confirmTransaction(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
         public
     {
         // Only Safe owners are allowed to confirm Safe transactions.
         require(isOwner[msg.sender]);
+        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         // It is only possible to confirm a transaction once.
         require(!isConfirmed[msg.sender][transactionHash]);
         isConfirmed[msg.sender][transactionHash] = true;

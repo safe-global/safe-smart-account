@@ -73,7 +73,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm transaction with account 0
         utils.logGasUsage(
             'confirmTransaction',
-            await gnosisSafe.confirmTransaction(transactionHash, {from: accounts[1]})
+            await gnosisSafe.confirmTransaction(gnosisSafe.address, 0, data, CALL, nonce, {from: accounts[1]})
         )
         assert.equal(await gnosisSafe.getConfirmationCount(transactionHash), 1)
         assert.deepEqual(await gnosisSafe.getConfirmingOwners(transactionHash), [accounts[1]])
