@@ -209,7 +209,7 @@ contract GnosisSafe {
         isConfirmed[msg.sender][transactionHash] = true;
     }
 
-    /// @dev Allows to execute a Safe transaction confrimed by required number of owners.
+    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
