@@ -58,7 +58,7 @@ The Safe transaction parameters used for `executeTransaction` have to be set lik
 
 `allConfirmingOwners = [0x1, 0x2, 0x3, 0x4]`
 
-Position of `0x3` is `2` and position of `0x4` is `3` in `indeces` array.
+Position of `0x3` is `2` and position of `0x4` is `3` in `indices` array.
 
 ### Extensions
 Extensions allow to execute transactions from the Safe without the requirement of multiple signatures. Extensions define their own requirements for execution. Every extension has to implement the interface for extensions. This interface requires only one function `isExecutable` receiving all transaction parameters and evaluating if a transaction is allowed to be executed. Extension transactions don't require a nonce as they don't require replay protection.
