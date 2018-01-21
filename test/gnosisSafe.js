@@ -19,7 +19,7 @@ contract('GnosisSafe', function(accounts) {
         gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1], accounts[0]], 2, 0, 0)
     })
 
-    it('should create a new Safe and deposit and withdraw 1 ETH', async () => {
+    it('should deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
@@ -57,7 +57,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction add owner',
+            'executeTransaction add owner and update threshold',
             await gnosisSafe.executeTransaction(
                 gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )
@@ -93,7 +93,7 @@ contract('GnosisSafe', function(accounts) {
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[3]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction remove owner',
+            'executeTransaction remove owner and update threshold',
             await gnosisSafe.executeTransaction(
                 gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
             )

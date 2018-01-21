@@ -19,27 +19,27 @@ contract('WhitelistExtension', function(accounts) {
         let createAndAddExtension = await CreateAndAddExtension.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new([accounts[0]], 1, 0, 0)
         let whitelistExtensionMasterCopy = await WhitelistExtension.new([])
-        // Create Gnosis Safe and Daily Limit Extension in one transactions
+        // Create Gnosis Safe and Whitelist Extension in one transactions
         let extensionData = await whitelistExtensionMasterCopy.contract.setup.getData([accounts[3]])
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(whitelistExtensionMasterCopy.address, extensionData)
         let createAndAddExtensionData = createAndAddExtension.contract.createAndAddExtension.getData(proxyFactory.address, proxyFactoryData)
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1]], 1, createAndAddExtension.address, createAndAddExtensionData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Extension', 
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Whitelist Extension', 
         )
         let extensions = await gnosisSafe.getExtensions()
         whitelistExtension = WhitelistExtension.at(extensions[0])
         assert.equal(await whitelistExtension.gnosisSafe(), gnosisSafe.address)
     })
 
-    it('should create a new Safe with whitelist extension and execute a withdraw transaction to a whitelisted account', async () => {
+    it('should execute a withdraw transaction to a whitelisted account', async () => {
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
         // Withdraw to whitelisted account
         utils.logGasUsage(
-            'executeException withdraw to whitelisted account',
+            'executeExtension withdraw to whitelisted account',
             await gnosisSafe.executeExtension(
                 accounts[3], 300, 0, 0, whitelistExtension.address, {from: accounts[1]}
             )
@@ -47,7 +47,7 @@ contract('WhitelistExtension', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 300);
     })
 
-    it('should create a new Safe with whitelist extension and add and remove an account from the whitelist', async () => {
+    it('should add and remove an account from the whitelist', async () => {
         assert.equal(await whitelistExtension.isWhitelisted(accounts[1]), false)
         // Add account 3 to whitelist
         let data = await whitelistExtension.contract.addToWhitelist.getData(accounts[1])

@@ -7,30 +7,27 @@ const MultiSendStruct = artifacts.require("./libraries/MultiSendStruct.sol")
 contract('MultiSendStruct', function(accounts) {
 
     let gnosisSafe
-    let lw
-    let data
-    let transactionHash
+    let multiSend
 
     const DELEGATECALL = 1
 
     beforeEach(async function () {
-        // Create lightwallet
-        lw = await utils.createLightwallet()
-        // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1]], 2, 0, 0)
+        // Create Gnosis Safe and MultiSend library
+        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 1, 0, 0)
+        multiSend = await MultiSendStruct.new()
     })
 
-    it('should create a new Safe and deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
-        assert.equal(await gnosisSafe.threshold(), 2)
-        multiSend = await MultiSendStruct.new()
+    it('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
+        // Threshold is 1 after deployment
+        assert.equal(await gnosisSafe.threshold(), 1)
         // Deposit 2 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(2, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
         // Withdraw 2 ETH and change threshold
         // TODO: use web3js parsing when they support tuples
-        nonce = await gnosisSafe.nonce()
-        data = '0x2f6fda4a' +
+        let nonce = await gnosisSafe.nonce()
+        let data = '0x2f6fda4a' +
           "0000000000000000000000000000000000000000000000000000000000000020"+
           "0000000000000000000000000000000000000000000000000000000000000004"+
           "0000000000000000000000000000000000000000000000000000000000000080"+
@@ -43,7 +40,7 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000024"+
           "b7f3358d00000000000000000000000000000000000000000000000000000000"+
-          "0000000100000000000000000000000000000000000000000000000000000000"+
+          "0000000200000000000000000000000000000000000000000000000000000000"+
 
           "000000000000000000000000" + accounts[0].substr(2) +
           "00000000000000000000000000000000000000000000000006f05b59d3b20000"+
@@ -59,16 +56,14 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000de0b6b3a7640000"+
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000000"
-        transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
-        // Confirm transaction with signed messages
-        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
         utils.logGasUsage(
             'executeTransaction send multiple transactions',
             await gnosisSafe.executeTransaction(
-                multiSend.address, 0, data, DELEGATECALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
+                multiSend.address, 0, data, DELEGATECALL, [], [], [], [accounts[0]], [0]
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
-        assert.equal(await gnosisSafe.threshold(), 1)
+        assert.equal(await gnosisSafe.threshold(), 2)
     })
 })

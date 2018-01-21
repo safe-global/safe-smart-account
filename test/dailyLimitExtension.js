@@ -34,7 +34,7 @@ contract('DailyLimitExtension', function(accounts) {
         assert.equal(await dailyLimitExtension.gnosisSafe(), gnosisSafe.address)
     })
 
-    it('should create Gnosis Safe and Daily Limit Extension in one transaction', async () => {
+    it('should withdraw daily limit', async () => {
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
@@ -61,7 +61,7 @@ contract('DailyLimitExtension', function(accounts) {
         )
     })
 
-    it('should change Daily limit', async () => {
+    it('should change daily limit', async () => {
         // Change daily limit
         let dailyLimit = await dailyLimitExtension.dailyLimits(0)
         assert.equal(dailyLimit[0], 100);
@@ -78,7 +78,7 @@ contract('DailyLimitExtension', function(accounts) {
         assert.equal(dailyLimit[0], 200);
     })
 
-    it.only('should withdraw daily limit for an ERC20 token', async () => {
+    it('should withdraw daily limit for an ERC20 token', async () => {
         // Create fake token
         let source = `
         contract TestToken {
