@@ -54,9 +54,9 @@ The Safe transaction parameters used for `executeTransaction` have to be filled 
 * `owners = [0x3, 0x4]`
 * `indices = [2, 3]`
 
-`v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1` signature part and corresponds to position `0` in `r` and `s`. The `owners` array contains owner addresses of owners confirming the transaction by sending a `confirmTransaction` or calling the `executeTransaction`. Their address position in the array of ordered confirming owner addresses is passed on in the `indices` array starting from position 0:
+`v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1` signature part and corresponds to position `0` in `r` and `s`. The `owners` array contains addresses of owners confirming transaction by sending a `confirmTransaction` or calling `executeTransaction`. Their address position in the sorted array of all confirming owner addresses is passed on in the `indices` array starting from position 0:
 
-`confirmingOwners = [0x1, 0x2, 0x3, 0x4]`
+`allConfirmingOwners = [0x1, 0x2, 0x3, 0x4]`
 
 Position of `0x3` is `2` and position of `0x4` is `3`.
 
