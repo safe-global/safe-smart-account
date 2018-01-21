@@ -21,9 +21,8 @@ The proxy contract implements only two functions: The constructor, which is sett
 #### ProxyFactory.sol
 The proxy factory allows to create new proxy contracts pointing to a master copy and executing a function from the newly deployed proxy in one transaction. This additional transaction can for example execute the setup function to initialize the state of the contract.
 
-Gnosis Safe
------------
-### GnosisSafe.sol
+### Gnosis Safe
+#### GnosisSafe.sol
 The Gnosis Safe contract implements all basic multisignature functionality. It allows to execute Safe transactions and Safe extensions.
 
 Safe transactions can be used to configure the wallet like managing owners, updating the master copy address or whitelisting of extensions. All configuration functions can only be called via transactions sent from the Safe itself. This assures that configuration changes require owner confirmations.
@@ -37,7 +36,7 @@ Once the required number of confirmations is available `executeTransaction` can 
 
 All Confirmations have to be ordered by the owner address. This is required to easily validate there are no confirmation duplicates.
 
-#### Example execution
+##### Example execution
 
 Assuming we have 4 owners in a 4 out of 4 multisig configuration:
 
@@ -61,27 +60,25 @@ The Safe transaction parameters used for `executeTransaction` have to be filled 
 
 Position of `0x3` is `2` and position of `0x4` is `3`.
 
-Extensions
-----------
+### Extensions
 Extensions allow to execute transactions from the Safe without the requirement of multiple signatures. Extensions define their own requirements for execution. Every extension has to implement the interface for extensions. This interface requires only one function `isExecutable`, which receives all transaction parameters and evaluates if a transaction is allowed to be executed. Extension transactions don't require a nonce as they don't require signed confirmation messages.
 
-### DailyLimitExtension.sol
+#### DailyLimitExtension.sol
 The Daily Limit Extensions allows an owner to withdraw specified amounts of specified ERC20 tokens on a daily basis without confirmation by other owners. The daily limit is reset at midnight UTC. Ether is represented with the token address 0. Daily limits can be set via Safe transactions.
 
-### SocialRecoveryExtension.sol
+#### SocialRecoveryExtension.sol
 The Social Recovery Extensions allows to recover a Safe in case access to owner accounts was lost. This is done by defining a minimum of 3 friends’ addresses as trusted parties. If all required friends confirm that a Safe owner should be replaced with another address, the Safe owner is replaced and access to the Safe can be restored. Every owner address can be replaced only once.
 
-### WhitelistExtension.sol
+#### WhitelistExtension.sol
 The Whitelist Extensions allows an owner to execute arbitrary transactions to specific addresses without confirmation by other owners. The whitelist can be maintained via Safe transactions.
 
-Libraries
----------
+### Libraries
 Libraries can be called from the Safe via a `DELEGATECALL`. They should not implement their own storage as this storage won’t be accessible via a `DELEGATECALL`.
 
-### MultiSend.sol
+#### MultiSend.sol
 This library allows to batch transactions and execute them at once. This is helpful if more complex operations have to be done like approving an amount of ERC20 tokens and calling a contract consuming those tokens. If one transaction fails all are reverted.
 
-### CreateAndAddExtension.sol
+#### CreateAndAddExtension.sol
 This library allows to create a new Safe extension and whitelist this extension for the Safe in one single transaction.
 
 Install
