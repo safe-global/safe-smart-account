@@ -19,7 +19,7 @@ contract('GnosisSafe', function(accounts) {
         gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1], accounts[0]], 2, 0, 0)
     })
 
-    it('should deposit and withdraw 1 ETH', async () => {
+    it.only('should deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
@@ -28,21 +28,22 @@ contract('GnosisSafe', function(accounts) {
         let nonce = await gnosisSafe.nonce()
         let transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
-        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
+        let index = [lw.accounts[0], accounts[0]].sort().indexOf(accounts[0])
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[0]], [index]
             )
         )
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'executeTransaction withdraw 0.5 ETH 2nd time',
             await gnosisSafe.executeTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [], []
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, [accounts[0]], [index]
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
