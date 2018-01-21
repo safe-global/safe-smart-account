@@ -8,8 +8,6 @@ contract('GnosisSafe', function(accounts) {
 
     let gnosisSafe
     let lw
-    let data
-    let transactionHash
 
     const CALL = 0
     const CREATE = 2
@@ -27,8 +25,8 @@ contract('GnosisSafe', function(accounts) {
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
         // Withdraw 1 ETH
-        nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        let nonce = await gnosisSafe.nonce()
+        let transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
@@ -53,9 +51,9 @@ contract('GnosisSafe', function(accounts) {
     it('should add, remove and replace an owner and update the threshold', async () => {
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
-        data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
-        nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
+        let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
+        let nonce = await gnosisSafe.nonce()
+        let transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
@@ -79,8 +77,8 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getConfirmingOwners(transactionHash), [accounts[1]])
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
-        index1 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[0])
-        index2 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[1])
+        let index1 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[0])
+        let index2 = [lw.accounts[0], accounts[0], accounts[1]].sort().indexOf(accounts[1])
         utils.logGasUsage(
             'executeTransaction replace owner',
             await gnosisSafe.executeTransaction(
@@ -114,9 +112,9 @@ contract('GnosisSafe', function(accounts) {
         let output = await solc.compile(source, 0);
         let interface = JSON.parse(output.contracts[':Test']['interface'])
         let bytecode = '0x' + output.contracts[':Test']['bytecode']
-        data = bytecode
-        nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, CREATE, nonce)
+        let data = bytecode
+        let nonce = await gnosisSafe.nonce()
+        let transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, CREATE, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         const TestContract = web3.eth.contract(interface);
