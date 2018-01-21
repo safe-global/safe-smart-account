@@ -16,6 +16,7 @@ contract GnosisSafe {
     uint256 public nonce;
     address[] public owners;
     Extension[] public extensions;
+
     // isOwner mapping allows to check if an address is a Safe owner.
     mapping (address => bool) public isOwner;
     // isExtension mapping allows to check if an extension was whitelisted.

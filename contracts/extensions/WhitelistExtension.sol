@@ -12,6 +12,7 @@ contract WhitelistExtension is Extension {
 
     WhitelistExtension masterCopy;
     GnosisSafe public gnosisSafe;
+
     // isWhitelisted mapping maps destination address to boolean.
     mapping (address => bool) public isWhitelisted;
 

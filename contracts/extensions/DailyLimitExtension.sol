@@ -13,6 +13,7 @@ contract DailyLimitExtension is Extension {
 
     DailyLimitExtension masterCopy;
     GnosisSafe public gnosisSafe;
+
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;
 

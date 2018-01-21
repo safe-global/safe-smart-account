@@ -15,6 +15,7 @@ contract SocialRecoveryExtension is Extension {
     GnosisSafe public gnosisSafe;
     uint8 public threshold;
     address[] public friends;
+
     // isFriend mapping maps friend's address to friend status.
     mapping (address => bool) public isFriend;
     // isExecuted mapping maps data hash to execution status.
