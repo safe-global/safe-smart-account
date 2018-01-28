@@ -35,7 +35,7 @@ contract('SocialRecoveryExtension', function(accounts) {
 
     it('should allow to replace an owner apporved by friends', async () => {
         // Replace owner
-        let data = await gnosisSafe.contract.replaceOwner.getData(1, accounts[9])
+        let data = await gnosisSafe.contract.replaceOwner.getData(1, accounts[1], accounts[9])
         // Confirm transaction to be executed without confirmations
         let dataHash = await socialRecoveryExtension.getDataHash(data)
         await socialRecoveryExtension.confirmTransaction(dataHash, {from: accounts[3]})

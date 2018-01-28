@@ -119,14 +119,17 @@ contract GnosisSafe {
     /// @dev Allows to remove an owner from the Safe and update the threshold at the same time.
     ///      This can only be done via a Safe transaction.
     /// @param ownerIndex Array index position of owner address to be removed.
+    /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
-    function removeOwner(uint256 ownerIndex, uint8 _threshold)
+    function removeOwner(uint256 ownerIndex, address owner, uint8 _threshold)
         public
         onlyWallet
     {
         // Only allow to remove an owner, if threshold can still be reached.
         require(owners.length - 1 >= _threshold);
-        isOwner[owners[ownerIndex]] = false;
+        // Validate owner address corresponds to owner index.
+        require(owners[ownerIndex] == owner);
+        isOwner[owner] = false;
         owners[ownerIndex] = owners[owners.length - 1];
         owners.length--;
         // Change threshold if threshold was changed.
@@ -137,8 +140,9 @@ contract GnosisSafe {
     /// @dev Allows to replace an owner from the Safe with another address.
     ///      This can only be done via a Safe transaction.
     /// @param oldOwnerIndex Array index position of owner address to be replaced.
+    /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
-    function replaceOwner(uint256 oldOwnerIndex, address newOwner)
+    function replaceOwner(uint256 oldOwnerIndex, address oldOwner, address newOwner)
         public
         onlyWallet
     {
@@ -146,7 +150,9 @@ contract GnosisSafe {
         require(newOwner != 0);
         // No duplicate owners allowed.
         require(!isOwner[newOwner]);
-        isOwner[owners[oldOwnerIndex]] = false;
+        // Validate owner address corresponds to owner index.
+        require(owners[oldOwnerIndex] == oldOwner);
+        isOwner[oldOwner] = false;
         isOwner[newOwner] =  true;
         owners[oldOwnerIndex] = newOwner;
     }
@@ -183,11 +189,14 @@ contract GnosisSafe {
     /// @dev Allows to remove an extension from the whitelist.
     ///      This can only be done via a Safe transaction.
     /// @param extensionIndex Array index position of extension to be removed from whitelist.
-    function removeExtension(uint256 extensionIndex)
+    /// @param extension Extension to be removed.
+    function removeExtension(uint256 extensionIndex, Extension extension)
         public
         onlyWallet
     {
-        isExtension[extensions[extensionIndex]] = false;
+        // Validate extension address corresponds to extension index.
+        require(extensions[extensionIndex] == extension);
+        isExtension[extension] = false;
         extensions[extensionIndex] = extensions[extensions.length - 1];
         extensions.length--;
     }
