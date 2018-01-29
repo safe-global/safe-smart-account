@@ -19,7 +19,7 @@ contract('GnosisSafe', function(accounts) {
         gnosisSafe = await GnosisSafe.new([lw.accounts[0], lw.accounts[1], accounts[0]], 2, 0, 0)
     })
 
-    it.only('should deposit and withdraw 1 ETH', async () => {
+    it('should deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
@@ -66,7 +66,7 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[0], accounts[1]])
         assert.equal(await gnosisSafe.threshold(), 3)
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[3])
+        data = await gnosisSafe.contract.replaceOwner.getData(2, accounts[0], lw.accounts[3])
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with account 0
@@ -88,7 +88,7 @@ contract('GnosisSafe', function(accounts) {
         )
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3], accounts[1]])
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(2, 2)
+        data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[3], 2)
         nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed messages
