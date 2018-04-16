@@ -11,27 +11,34 @@ contract('DailyLimitExtension', function(accounts) {
 
     let gnosisSafe
     let dailyLimitExtension
+    let lw
 
     const CALL = 0
 
     beforeEach(async function () {
+        // Create lightwallet
+        lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let createAndAddExtension = await CreateAndAddExtension.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new([accounts[0]], 1, 0, 0)
-        let dailyLimitExtensionMasterCopy = await DailyLimitExtension.new([], [])
+        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        // Initialize safe master copy
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
+        let dailyLimitExtensionMasterCopy = await DailyLimitExtension.new()
+        // Initialize extension master copy
+        dailyLimitExtensionMasterCopy.setup([], [])
         // Create Gnosis Safe and Daily Limit Extension in one transactions
         let extensionData = await dailyLimitExtensionMasterCopy.contract.setup.getData([0], [100])
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitExtensionMasterCopy.address, extensionData)
         let createAndAddExtensionData = createAndAddExtension.contract.createAndAddExtension.getData(proxyFactory.address, proxyFactoryData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0]], 1, createAndAddExtension.address, createAndAddExtensionData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddExtension.address, createAndAddExtensionData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Extension', 
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Extension',
         )
         let extensions = await gnosisSafe.getExtensions()
         dailyLimitExtension = DailyLimitExtension.at(extensions[0])
-        assert.equal(await dailyLimitExtension.gnosisSafe(), gnosisSafe.address)
+        assert.equal(await dailyLimitExtension.getGnosisSafe.call(), gnosisSafe.address)
     })
 
     it('should withdraw daily limit', async () => {
@@ -41,21 +48,21 @@ contract('DailyLimitExtension', function(accounts) {
         // Withdraw daily limit
         utils.logGasUsage(
             'executeExtension withdraw daily limit',
-            await gnosisSafe.executeExtension(
-                accounts[0], 50, 0, CALL, dailyLimitExtension.address, {from: accounts[0]}
+            await dailyLimitExtension.executeDailyLimit(
+                accounts[0], 50, 0, {from: accounts[0]}
             )
         )
         utils.logGasUsage(
             'executeExtension withdraw daily limit 2nd time',
-            await gnosisSafe.executeExtension(
-                accounts[0], 50, 0, CALL, dailyLimitExtension.address, {from: accounts[0]}
+            await dailyLimitExtension.executeDailyLimit(
+                accounts[0], 50, 0, {from: accounts[0]}
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 100);
         // Third withdrawal will fail
         await utils.assertRejects(
-            gnosisSafe.executeExtension(
-                accounts[0], 50, 0, CALL, dailyLimitExtension.address, {from: accounts[0]}
+            dailyLimitExtension.executeDailyLimit(
+                accounts[0], 50, 0, {from: accounts[0]}
             ),
             "Daily limit exceeded"
         )
@@ -68,10 +75,11 @@ contract('DailyLimitExtension', function(accounts) {
         let data = await dailyLimitExtension.contract.changeDailyLimit.getData(0, 200)
         let nonce = await gnosisSafe.nonce()
         let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExtension.address, 0, data, CALL, nonce)
+        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'executeTransaction change daily limit',
             await gnosisSafe.executeTransaction(
-                dailyLimitExtension.address, 0, data, CALL, [], [], [], [accounts[0]], [0]
+                dailyLimitExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         dailyLimit = await dailyLimitExtension.dailyLimits(0)
@@ -103,7 +111,8 @@ contract('DailyLimitExtension', function(accounts) {
         let data = await dailyLimitExtension.contract.changeDailyLimit.getData(testToken.address, 20)
         let nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(dailyLimitExtension.address, 0, data, CALL, nonce)
-        await gnosisSafe.executeTransaction(dailyLimitExtension.address, 0, data, CALL, [], [], [], [accounts[0]], [0])
+        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        await gnosisSafe.executeTransaction(dailyLimitExtension.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS)
         // Transfer 100 tokens to Safe
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})
@@ -112,23 +121,23 @@ contract('DailyLimitExtension', function(accounts) {
         data = await testToken.transfer.getData(accounts[0], 10)
         utils.logGasUsage(
             'executeExtension withdraw daily limit for ERC20 token',
-            await gnosisSafe.executeExtension(
-                testToken.address, 0, data, CALL, dailyLimitExtension.address, {from: accounts[0]}
+            await dailyLimitExtension.executeDailyLimit(
+                testToken.address, 0, data, {from: accounts[0]}
             )
         )
         assert.equal(await testToken.balances(gnosisSafe.address), 90);
         assert.equal(await testToken.balances(accounts[0]), 10);
         utils.logGasUsage(
             'executeExtension withdraw daily limit for ERC20 token 2nd time',
-            await gnosisSafe.executeExtension(
-                testToken.address, 0, data, CALL, dailyLimitExtension.address, {from: accounts[0]}
+            await dailyLimitExtension.executeDailyLimit(
+                testToken.address, 0, data, {from: accounts[0]}
             )
         )
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
         // Third withdrawal will fail
         await utils.assertRejects(
-            gnosisSafe.executeExtension(testToken.address, 0, data, CALL, dailyLimitExtension.address, {from: accounts[0]}),
+            dailyLimitExtension.executeDailyLimit(testToken.address, 0, data, {from: accounts[0]}),
             "Daily limit exceeded for ERC20 token"
         )
         // Balances didn't change

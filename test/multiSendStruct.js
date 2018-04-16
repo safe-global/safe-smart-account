@@ -8,12 +8,15 @@ contract('MultiSendStruct', function(accounts) {
 
     let gnosisSafe
     let multiSend
+    let lw
 
     const DELEGATECALL = 1
 
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
-        gnosisSafe = await GnosisSafe.new([accounts[0], accounts[1]], 1, 0, 0)
+        lw = await utils.createLightwallet()
+        gnosisSafe = await GnosisSafe.new()
+        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0)
         multiSend = await MultiSendStruct.new()
     })
 
@@ -57,10 +60,11 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000000"
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
+        let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'executeTransaction send multiple transactions',
             await gnosisSafe.executeTransaction(
-                multiSend.address, 0, data, DELEGATECALL, [], [], [], [accounts[0]], [0]
+                multiSend.address, 0, data, DELEGATECALL, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)

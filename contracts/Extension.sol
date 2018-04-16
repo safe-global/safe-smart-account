@@ -8,5 +8,5 @@ contract Extension {
 
     /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
     /// @return Returns the safe the Extension is attached to.
-    function getGnosisSafe() public returns (address);
+    function getGnosisSafe() public returns (GnosisSafe);
 }

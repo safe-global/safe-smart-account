@@ -17,8 +17,12 @@ contract('SocialRecoveryExtension', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let createAndAddExtension = await CreateAndAddExtension.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new([accounts[0], accounts[1]], 2, 0, 0)
-        let socialRecoveryExtensionMasterCopy = await SocialRecoveryExtension.new([accounts[0], accounts[1]], 2)
+        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        // Initialize safe master copy
+        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, 0)
+        let socialRecoveryExtensionMasterCopy = await SocialRecoveryExtension.new()
+        // Initialize extension master copy
+        socialRecoveryExtensionMasterCopy.setup([accounts[0], accounts[1]], 2)
         // Create Gnosis Safe and Social Recovery Extension in one transactions
         let extensionData = await socialRecoveryExtensionMasterCopy.contract.setup.getData([accounts[2], accounts[3]], 2)
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(socialRecoveryExtensionMasterCopy.address, extensionData)
@@ -26,11 +30,11 @@ contract('SocialRecoveryExtension', function(accounts) {
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1]], 2, createAndAddExtension.address, createAndAddExtensionData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Social Recovery Extension', 
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Social Recovery Extension',
         )
         let extensions = await gnosisSafe.getExtensions()
         socialRecoveryExtension = SocialRecoveryExtension.at(extensions[0])
-        assert.equal(await socialRecoveryExtension.gnosisSafe(), gnosisSafe.address)
+        assert.equal(await socialRecoveryExtension.getGnosisSafe.call(), gnosisSafe.address)
     })
 
     it('should allow to replace an owner apporved by friends', async () => {
@@ -41,12 +45,12 @@ contract('SocialRecoveryExtension', function(accounts) {
         await socialRecoveryExtension.confirmTransaction(dataHash, {from: accounts[3]})
         // Execution fails, because challenge period is not yet over
         await utils.assertRejects(
-            gnosisSafe.executeExtension(gnosisSafe.address, 0, data, CALL, socialRecoveryExtension.address, {from: accounts[0]}),
+            socialRecoveryExtension.recoverAccess(data, {from: accounts[0]}),
             "It was not confirmed by the required number of friends"
         )
         // Confirm with 2nd friend
         await socialRecoveryExtension.confirmTransaction(dataHash, {from: accounts[2]})
-        await gnosisSafe.executeExtension(gnosisSafe.address, 0, data, CALL, socialRecoveryExtension.address, {from: accounts[3]})
+        await socialRecoveryExtension.recoverAccess(data, {from: accounts[3]})
         assert.equal(await gnosisSafe.isOwner(accounts[9]), true);
     })
 });

@@ -56,7 +56,7 @@ contract DailyLimitExtension is Extension {
     /// @return Returns the safe the Extension is attached to.
     function getGnosisSafe()
         public
-        returns (address)
+        returns (GnosisSafe)
     {
         return gnosisSafe;
     }
