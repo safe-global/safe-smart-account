@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity 0.4.21;
 
 
 /// @title Multi Send - Allows to batch multiple transactions into one.

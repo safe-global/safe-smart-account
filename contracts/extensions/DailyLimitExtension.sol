@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity 0.4.21;
 import "../Extension.sol";
 import "../GnosisSafe.sol";
 
@@ -30,7 +30,7 @@ contract DailyLimitExtension is Extension {
 
     /// @dev Constructor function triggers setup function.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
-    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether). 
+    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether).
     ///        First entry of array corresponds to first entry in token address array.
     function DailyLimitExtension(address[] tokens, uint256[] _dailyLimits)
         public

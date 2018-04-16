@@ -27,41 +27,30 @@ The Gnosis Safe contract implements all basic multisignature functionality. It a
 
 Safe transactions can be used to configure the wallet like managing owners, updating the master copy address or whitelisting of extensions. All configuration functions can only be called via transactions sent from the Safe itself. This assures that configuration changes require owner confirmations.
 
-Before a Safe transaction can be executed, the transaction has to be confirmed by the required number of owners. There are two ways to confirm transactions:
+Before a Safe transaction can be executed, the transaction has to be confirmed by the required number of owners. Owners represented by private key controlled accounts can sign the transaction hash.
 
-1. Owners represented by private key controlled accounts can sign the transaction hash.
-2. Owners represented by contract accounts (e.g. other Safe contracts) or private key controlled accounts can confirm a transaction by calling the `confirmTransaction` function.
-
-Once the required number of confirmations is available `executeTransaction` can be called by sending confirmation signatures and references to confirmations sent using `confirmTransaction`. In case the account calling `executeTransaction` is a wallet owner its call can be used as confirmation and the owner doesn't have to confirm with a signed message or `confirmTransaction`.
+Once the required number of confirmations is available `executeTransaction` can be called with the sending confirmation signatures.
 
 `executeTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
 
 ##### Example execution
 
-Assuming we have 4 owners in a 4 out of 4 multisig configuration:
+Assuming we have 2 owners in a 2 out of 2 multisig configuration:
 
 1. `0x1` (Private key)
 2. `0x2` (Private key)
-3. `0x3` (Safe contract)
-4. `0x4` (Private key)
 
-`0x1` and `0x2` are confirming by signing a message. `0x3` is confirming by sending a `confirmTransaction` transaction. `0x4` is calling the `executeTransaction` function and therefore also confirming the transaction.
+`0x1` and `0x2` are confirming by signing a message.
 
 The Safe transaction parameters used for `executeTransaction` have to be set like the following:
 * `v = [v_0x1, v_0x2]`
 * `r = [r_0x1, r_0x2]`
 * `s = [s_0x1, s_0x2]`
-* `owners = [0x3, 0x4]`
-* `indices = [2, 3]`
 
-`v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1`'s signature part and corresponds to position `0` in `r` and `s`. The `owners` array contains owner addresses confirming transaction by sending a `confirmTransaction` or calling `executeTransaction`. Their address position in the sorted array of all confirming owner addresses is set in the `indices` array starting from position 0:
-
-`allConfirmingOwners = [0x1, 0x2, 0x3, 0x4]`
-
-Position of `0x3` is `2` and position of `0x4` is `3` in `indices` array.
+`v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1`'s signature part and corresponds to position `0` in `r` and `s`.
 
 ### Extensions
-Extensions allow to execute transactions from the Safe without the requirement of multiple signatures. Extensions define their own requirements for execution. Every extension has to implement the interface for extensions. This interface requires only one function `isExecutable` receiving all transaction parameters and evaluating if a transaction is allowed to be executed. Extension transactions don't require a nonce as they don't require replay protection.
+Extensions allow to execute transactions from the Safe without the requirement of multiple signatures. For this Extensions that have been added to a Safe can use the `executeExtension` function. Extensions define their own requirements for execution. Extensions need to implement their own replay protection.
 
 #### DailyLimitExtension.sol
 The Daily Limit Extensions allows an owner to withdraw specified amounts of specified ERC20 tokens on a daily basis without confirmation by other owners. The daily limit is reset at midnight UTC. Ether is represented with the token address 0. Daily limits can be set via Safe transactions.

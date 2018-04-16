@@ -28,6 +28,7 @@
     "eth-lightwallet": "*"
   },
   "dependencies": {
-    "ganache-cli": "^6.0.3"
+    "ganache-cli": "^6.0.3",
+    "solc": "^0.4.21"
   }
 }

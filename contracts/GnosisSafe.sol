@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity 0.4.21;
 import "./Extension.sol";
 
 
@@ -11,9 +11,12 @@ contract GnosisSafe {
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.1";
 
-    GnosisSafe masterCopy;
-    uint8 public threshold;
+    // masterCopy always needs to be first declared variable, to ensure that it is at the same location as in the Proxy contract.
+    // It should also always be ensured that the address is stored alone (uses a full word)
+    GnosisSafe public masterCopy;
+
     uint256 public nonce;
+    uint8 public threshold;
     address[] public owners;
     Extension[] public extensions;
 
@@ -21,8 +24,6 @@ contract GnosisSafe {
     mapping (address => bool) public isOwner;
     // isExtension mapping allows to check if an extension was whitelisted.
     mapping (address => bool) public isExtension;
-    // isConfirmed mapping allows to check if a transaction was confirmed by an owner via a confirm transaction.
-    mapping (address => mapping (bytes32 => bool)) public isConfirmed;
 
     enum Operation {
         Call,
@@ -41,17 +42,6 @@ contract GnosisSafe {
         payable
     {
 
-    }
-
-    /// @dev Constructor function triggers setup function.
-    /// @param _owners List of Safe owners.
-    /// @param _threshold Number of required confirmations for a Safe transaction.
-    /// @param to Contract address for optional delegate call.
-    /// @param data Data payload for optional delegate call.
-    function GnosisSafe(address[] _owners, uint8 _threshold, address to, bytes data)
-        public
-    {
-        setup(_owners, _threshold, to, data);
     }
 
     /// @dev Setup function sets initial storage of contract.
@@ -201,24 +191,6 @@ contract GnosisSafe {
         extensions.length--;
     }
 
-    /// @dev Allows to confirm a Safe transaction with a regular transaction.
-    ///      This can only be done from an owner address.
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @param _nonce Transaction nonce.
-    function confirmTransaction(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
-        public
-    {
-        // Only Safe owners are allowed to confirm Safe transactions.
-        require(isOwner[msg.sender]);
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        // It is only possible to confirm a transaction once.
-        require(!isConfirmed[msg.sender][transactionHash]);
-        isConfirmed[msg.sender][transactionHash] = true;
-    }
-
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
@@ -227,9 +199,7 @@ contract GnosisSafe {
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
-    /// @param _owners List of Safe owners confirming via regular transactions sorted by owner addresses.
-    /// @param indices List of indeces of Safe owners confirming via regular transactions.
-    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, address[] _owners, uint256[] indices)
+    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
@@ -237,48 +207,29 @@ contract GnosisSafe {
         address lastOwner = address(0);
         address currentOwner;
         uint256 i;
-        uint256 j = 0;
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
-            // Check confirmations done with regular transactions or by msg.sender.
-            if (indices.length > j && i == indices[j]) {
-                require(msg.sender == _owners[j] || isConfirmed[_owners[j]][transactionHash]);
-                currentOwner = _owners[j];
-                j += 1;
-            }
-            // Check confirmations done with signed messages.
-            else
-                currentOwner = ecrecover(transactionHash, v[i-j], r[i-j], s[i-j]);
+            currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
             require(isOwner[currentOwner]);
             require(currentOwner > lastOwner);
             lastOwner = currentOwner;
-        }
-        // Delete storage to receive refunds.
-        if (_owners.length > 0) {
-            for (i = 0; i < _owners.length; i++) {
-                if (msg.sender != _owners[i])
-                    isConfirmed[_owners[i]][transactionHash] = false;
-            }
         }
         // Increase nonce and execute transaction.
         nonce += 1;
         execute(to, value, data, operation);
     }
 
-    /// @dev Allows to execute a Safe transaction via an extension without any further confirmations.
+    /// @dev Allows an Extension to execute a Safe transaction without any further confirmations.
     /// @param to Destination address of extension transaction.
     /// @param value Ether value of extension transaction.
     /// @param data Data payload of extension transaction.
     /// @param operation Operation type of extension transaction.
-    /// @param extension Extension address of extension transaction.
-    function executeExtension(address to, uint256 value, bytes data, Operation operation, Extension extension)
+    function executeExtension(address to, uint256 value, bytes data, Operation operation)
         public
     {
         // Only whitelisted extensions are allowed.
-        require(isExtension[extension]);
-        // Extension has to confirm transaction.
-        require(extension.isExecutable(msg.sender, to, value, data, operation));
-        // Exectute transaction without further confirmations.
+        require(isExtension[msg.sender]);
+        // Execute transaction without further confirmations.
         execute(to, value, data, operation);
     }
 
@@ -356,36 +307,5 @@ contract GnosisSafe {
         returns (Extension[])
     {
         return extensions;
-    }
-
-    /// @dev Returns a the count of owners that have confirmed the given transaction.
-    /// @param transactionHash Safe transaction hash.
-    function getConfirmationCount(bytes32 transactionHash)
-        public
-        view
-        returns (uint confirmationCount)
-    {
-        for (uint i = 0; i < owners.length; i++) {
-            if (isConfirmed[owners[i]][transactionHash])
-                confirmationCount++;
-        }
-    }
-
-    /// @dev Returns a list of owners that have confirmed the given transaction.
-    /// @param transactionHash Safe transaction hash.
-    function getConfirmingOwners(bytes32 transactionHash)
-        public
-        view
-        returns (address[] confirmingOwners)
-    {
-        uint confirmationCount = getConfirmationCount(transactionHash);
-        confirmingOwners = new address[](confirmationCount);
-        confirmationCount = 0;
-        for (uint i = 0; i < owners.length; i++) {
-            if (isConfirmed[owners[i]][transactionHash]) {
-                confirmingOwners[confirmationCount] = owners[i];
-                confirmationCount++;
-            }
-        }
     }
 }
