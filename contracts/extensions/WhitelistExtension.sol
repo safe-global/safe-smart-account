@@ -21,14 +21,6 @@ contract WhitelistExtension is Extension {
         _;
     }
 
-    /// @dev Constructor function triggers setup function.
-    /// @param accounts List of whitelisted accounts.
-    function WhitelistExtension(address[] accounts)
-        public
-    {
-        setup(accounts);
-    }
-
     /// @dev Setup function sets initial storage of contract.
     /// @param accounts List of whitelisted accounts.
     function setup(address[] accounts)

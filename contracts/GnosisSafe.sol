@@ -13,7 +13,7 @@ contract GnosisSafe {
 
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location as in the Proxy contract.
     // It should also always be ensured that the address is stored alone (uses a full word)
-    GnosisSafe public masterCopy;
+    GnosisSafe masterCopy;
 
     uint256 public nonce;
     uint8 public threshold;

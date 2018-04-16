@@ -33,15 +33,6 @@ contract SocialRecoveryExtension is Extension {
         _;
     }
 
-    /// @dev Constructor function triggers setup function.
-    /// @param _friends List of friends' addresses.
-    /// @param _threshold Required number of friends to confirm replacement.
-    function SocialRecoveryExtension(address[] _friends, uint8 _threshold)
-        public
-    {
-        setup(_friends, _threshold);
-    }
-
     /// @dev Setup function sets initial storage of contract.
     /// @param _friends List of friends' addresses.
     /// @param _threshold Required number of friends to confirm replacement.

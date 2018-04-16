@@ -6,7 +6,7 @@ pragma solidity 0.4.21;
 contract Proxy {
 
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
-    address public masterCopy;
+    address masterCopy;
 
     /// @dev Constructor function sets address of master copy contract.
     /// @param _masterCopy Master copy address.
@@ -31,5 +31,21 @@ contract Proxy {
             case 0 { revert(0, returndatasize()) }
             default { return(0, returndatasize()) }
         }
+    }
+
+    function implementation()
+        public
+        view
+        returns (address)
+    {
+        return masterCopy;
+    }
+
+    function proxyType()
+        public
+        pure
+        returns (uint256)
+    {
+        return 2;
     }
 }

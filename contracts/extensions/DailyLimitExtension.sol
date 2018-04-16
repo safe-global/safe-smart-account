@@ -28,16 +28,6 @@ contract DailyLimitExtension is Extension {
         _;
     }
 
-    /// @dev Constructor function triggers setup function.
-    /// @param tokens List of token addresses. Ether is represented with address 0x0.
-    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether).
-    ///        First entry of array corresponds to first entry in token address array.
-    function DailyLimitExtension(address[] tokens, uint256[] _dailyLimits)
-        public
-    {
-        setup(tokens, _dailyLimits);
-    }
-
     /// @dev Setup function sets initial storage of contract.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _dailyLimits List of daily limits in smalles units (e.g. Wei for Ether).
