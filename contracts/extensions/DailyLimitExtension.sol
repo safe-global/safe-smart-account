@@ -12,7 +12,7 @@ contract DailyLimitExtension is Extension {
     bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
 
     DailyLimitExtension masterCopy;
-    GnosisSafe public gnosisSafe;
+    GnosisSafe gnosisSafe;
 
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;
@@ -52,6 +52,15 @@ contract DailyLimitExtension is Extension {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
+    /// @return Returns the safe the Extension is attached to.
+    function getGnosisSafe()
+        public
+        returns (address)
+    {
+        return gnosisSafe;
+    }
+
     /// @dev Allows to update the daily limit for a specified token. This can only be done via a Safe transaction.
     /// @param token Token contract address.
     /// @param dailyLimit Daily limit in smallest token unit.
@@ -63,20 +72,15 @@ contract DailyLimitExtension is Extension {
     }
 
     /// @dev Returns if Safe transaction is a valid daily limit transaction.
-    /// @param sender Safe owner sending Safe transaction.
     /// @param to Receiver address in case of Ether transfer, token address in case of a token transfer.
     /// @param value Ether value in case of an Ether transfer.
     /// @param data Encoded token transfer. Empty in case of Ether transfer.
-    /// @param operation Only Call operations are allowed.
     /// @return Returns if transaction can be executed.
-    function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
+    function executeDailyLimit(address to, uint256 value, bytes data)
         public
-        onlyGnosisSafe
-        returns (bool)
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(gnosisSafe.isOwner(sender));
-        require(operation == GnosisSafe.Operation.Call);
+        require(gnosisSafe.isOwner(msg.sender));
         // Data has to encode a token transfer or has to be empty.
         require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
@@ -100,11 +104,9 @@ contract DailyLimitExtension is Extension {
         require(receiver != 0);
         require(amount > 0);
         // Validate that transfer is not exceeding daily limit.
-        if (isUnderLimit(token, amount)) {
-            dailyLimits[token].spentToday += amount;
-            return true;
-        }
-        return false;
+        require(isUnderLimit(token, amount));
+        dailyLimits[token].spentToday += amount;
+        gnosisSafe.executeExtension(to, value, data, GnosisSafe.Operation.Call);
     }
 
     function isUnderLimit(address token, uint256 amount)

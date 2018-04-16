@@ -12,7 +12,8 @@ contract SocialRecoveryExtension is Extension {
     bytes4 public constant REPLACE_OWNER_FUNCTION_IDENTIFIER = hex"54e99c6e";
 
     SocialRecoveryExtension masterCopy;
-    GnosisSafe public gnosisSafe;
+    GnosisSafe gnosisSafe;
+
     uint8 public threshold;
     address[] public friends;
 
@@ -65,6 +66,15 @@ contract SocialRecoveryExtension is Extension {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
+    /// @return Returns the safe the Extension is attached to.
+    function getGnosisSafe()
+        public
+        returns (address)
+    {
+        return gnosisSafe;
+    }
+
     /// @dev Allows a friend to confirm a Safe transaction.
     /// @param dataHash Safe transaction hash.
     function confirmTransaction(bytes32 dataHash)
@@ -76,22 +86,13 @@ contract SocialRecoveryExtension is Extension {
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.
-    /// @param sender Friend's address.
-    /// @param to Gnosis Safe address.
-    /// @param value No Ether should be send.
     /// @param data Encoded owner replacement transaction.
-    /// @param operation Only Call operations are allowed.
     /// @return Returns if transaction can be executed.
-    function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
+    function recoverAccess(bytes data)
         public
-        onlyGnosisSafe
-        returns (bool)
     {
         // Only friends are allowed to execute the replacement.
-        require(isFriend[sender]);
-        require(to == address(gnosisSafe));
-        require(value == 0);
-        require(operation == GnosisSafe.Operation.Call);
+        require(isFriend[msg.sender]);
         // Validate that transaction is a owner replacement transaction.
         bytes4 functionIdentifier;
         assembly {
@@ -99,12 +100,10 @@ contract SocialRecoveryExtension is Extension {
         }
         require(functionIdentifier == REPLACE_OWNER_FUNCTION_IDENTIFIER);
         bytes32 dataHash = getDataHash(data);
-        if (   !isExecuted[dataHash]
-            && isConfirmedByRequiredFriends(dataHash)) {
-            isExecuted[dataHash] = true;
-            return true;
-        }
-        return false;
+        require(!isExecuted[dataHash]);
+        require(isConfirmedByRequiredFriends(dataHash));
+        isExecuted[dataHash] = true;
+        gnosisSafe.executeExtension(address(gnosisSafe), 0, data, GnosisSafe.Operation.Call);
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.

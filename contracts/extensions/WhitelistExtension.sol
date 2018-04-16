@@ -47,6 +47,15 @@ contract WhitelistExtension is Extension {
         masterCopy = _masterCopy;
     }
 
+    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
+    /// @return Returns the safe the Extension is attached to.
+    function getGnosisSafe()
+        public
+        returns (address)
+    {
+        return gnosisSafe;
+    }
+
     /// @dev Allows to add destination to whitelist. This can only be done via a Safe transaction.
     /// @param account Destination address.
     function addToWhitelist(address account)
@@ -69,21 +78,17 @@ contract WhitelistExtension is Extension {
     }
 
     /// @dev Returns if Safe transaction is to a whitelisted destination.
-    /// @param sender Safe owner sending Safe transaction.
     /// @param to Whitelisted destination address.
     /// @param value Not checked.
     /// @param data Not checked.
-    /// @param operation Only Call operations are allowed.
     /// @return Returns if transaction can be executed.
-    function isExecutable(address sender, address to, uint256 value, bytes data, GnosisSafe.Operation operation)
+    function executeWhitelisted(address to, uint256 value, bytes data)
         public
         returns (bool)
     {
         // Only Safe owners are allowed to execute transactions to whitelisted accounts.
-        require(gnosisSafe.isOwner(sender));
-        require(operation == GnosisSafe.Operation.Call);
-        if (isWhitelisted[to])
-            return true;
-        return false;
+        require(gnosisSafe.isOwner(msg.sender));
+        require(isWhitelisted[to]);
+        gnosisSafe.executeExtension(to, value, data, GnosisSafe.Operation.Call);
     }
 }

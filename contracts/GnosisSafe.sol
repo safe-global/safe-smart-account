@@ -172,6 +172,7 @@ contract GnosisSafe {
         require(address(extension) != 0);
         // Extension cannot be added twice.
         require(!isExtension[extension]);
+        require(this == extension.getGnosisSafe());
         extensions.push(extension);
         isExtension[extension] = true;
     }
@@ -229,6 +230,7 @@ contract GnosisSafe {
     {
         // Only whitelisted extensions are allowed.
         require(isExtension[msg.sender]);
+        require(this == Extension(msg.sender).getGnosisSafe());
         // Execute transaction without further confirmations.
         execute(to, value, data, operation);
     }
