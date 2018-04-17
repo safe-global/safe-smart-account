@@ -55,17 +55,18 @@ contract GnosisSafe {
         // Threshold can only be 0 at initialization.
         // Check ensures that setup function can only be called once.
         require(threshold == 0);
-        // Validate that threshold is smaller than numbr of added owners.
+        // Validate that threshold is smaller than number of added owners.
         require(_threshold <= _owners.length);
         // There has to be at least one Safe owner.
         require(_threshold >= 1);
         // Initializing Safe owners.
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
-            require(_owners[i] != 0);
+            address owner = _owners[i];
+            require(owner != 0);
             // No duplicate owners allowed.
-            require(!isOwner[_owners[i]]);
-            isOwner[_owners[i]] = true;
+            require(!isOwner[owner]);
+            isOwner[owner] = true;
         }
         owners = _owners;
         threshold = _threshold;

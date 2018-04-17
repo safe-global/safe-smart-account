@@ -48,9 +48,10 @@ contract SocialRecoveryExtension is Extension {
         gnosisSafe = GnosisSafe(msg.sender);
         // Set allowed friends.
         for (uint256 i = 0; i < _friends.length; i++) {
-            require(_friends[i] != 0);
-            require(!isFriend[_friends[i]]);
-            isFriend[_friends[i]] = true;
+            address friend = _friends[i];
+            require(friend != 0);
+            require(!isFriend[friend]);
+            isFriend[friend] = true;
         }
         friends = _friends;
         threshold = _threshold;

@@ -26,14 +26,15 @@ contract WhitelistExtension is Extension {
     function setup(address[] accounts)
         public
     {
-        // gnosisSafe can only be 0 at initalization of contract.
+        // gnosisSafe can only be 0 at initialization of contract.
         // Check ensures that setup function can only be called once.
         require(address(gnosisSafe) == 0);
         // Set whitelisted destinations.
         gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < accounts.length; i++) {
-            require(accounts[i] != 0);
-            isWhitelisted[accounts[i]]= true;
+            address account = accounts[i];
+            require(account != 0);
+            isWhitelisted[account]= true;
         }
     }
 
