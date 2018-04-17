@@ -17,7 +17,7 @@ contract('GnosisSafe', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Gnosis Safe
         gnosisSafe = await GnosisSafe.new()
-        gnosisSafe.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
     })
 
     it('should deposit and withdraw 1 ETH', async () => {

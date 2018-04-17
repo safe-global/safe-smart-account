@@ -71,16 +71,11 @@ contract DailyLimitExtension is Extension {
         dailyLimits[token].dailyLimit = dailyLimit;
     }
 
-    /// @dev Returns if Safe transaction is a valid daily limit transaction.
-    /// @param to Receiver address in case of Ether transfer, token address in case of a token transfer.
-    /// @param value Ether value in case of an Ether transfer.
-    /// @param data Encoded token transfer. Empty in case of Ether transfer.
-    /// @return Returns if transaction can be executed.
-    function executeDailyLimit(address to, uint256 value, bytes data)
-        public
+    function executeInternal(address sender, address to, uint256 value, bytes data)
+        internal
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(gnosisSafe.isOwner(msg.sender));
+        require(gnosisSafe.isOwner(sender));
         // Data has to encode a token transfer or has to be empty.
         require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
@@ -107,6 +102,17 @@ contract DailyLimitExtension is Extension {
         require(isUnderLimit(token, amount));
         dailyLimits[token].spentToday += amount;
         gnosisSafe.executeExtension(to, value, data, GnosisSafe.Operation.Call);
+    }
+
+    /// @dev Returns if Safe transaction is a valid daily limit transaction.
+    /// @param to Receiver address in case of Ether transfer, token address in case of a token transfer.
+    /// @param value Ether value in case of an Ether transfer.
+    /// @param data Encoded token transfer. Empty in case of Ether transfer.
+    /// @return Returns if transaction can be executed.
+    function executeDailyLimit(address to, uint256 value, bytes data)
+        public
+    {
+        executeInternal(msg.sender, to, value, data);
     }
 
     function isUnderLimit(address token, uint256 amount)
