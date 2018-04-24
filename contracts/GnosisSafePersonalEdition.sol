@@ -6,7 +6,27 @@ import "./GnosisSafe.sol";
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafePersonalEdition is GnosisSafe {
 
+    event ExecutedTransaction(address to, uint256 value, bytes data, Operation operation, bool success);
+
     uint256 public nonce;
+
+    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
+    /// @param to Destination address of Safe transaction.
+    /// @param value Ether value of Safe transaction.
+    /// @param data Data payload of Safe transaction.
+    /// @param operation Operation type of Safe transaction.
+    /// @param v Array of signature V values sorted by owner addresses.
+    /// @param r Array of signature R values sorted by owner addresses.
+    /// @param s Array of signature S values sorted by owner addresses.
+    function payAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, address executor, uint256 price, uint8[] v, bytes32[] r, bytes32[] s)
+        public
+    {
+        checkHash(getPayAndExecuteHash(to, value, data, operation, executor, price, nonce), v, r, s);
+        // Increase nonce and execute transaction.
+        nonce += 1;
+        executor.transfer(price);
+        emit ExecutedTransaction(to, value, data, operation, execute(to, value, data, operation));
+    }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
     /// @param to Destination address of Safe transaction.
@@ -19,35 +39,57 @@ contract GnosisSafePersonalEdition is GnosisSafe {
     function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)
         public
     {
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        // There cannot be an owner with address 0.
-        address lastOwner = address(0);
-        address currentOwner;
-        uint256 i;
-        // Validate threshold is reached.
-        for (i = 0; i < threshold; i++) {
-            currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(isOwner[currentOwner]);
-            require(currentOwner > lastOwner);
-            lastOwner = currentOwner;
-        }
+        checkHash(getExecuteHash(to, value, data, operation, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce += 1;
-        execute(to, value, data, operation);
+        require(execute(to, value, data, operation));
     }
 
-    /// @dev Returns transactions hash to be signed by owners.
+    function checkHash(bytes32 hash, uint8[] v, bytes32[] r, bytes32[] s)
+      internal
+    {
+      // There cannot be an owner with address 0.
+      address lastOwner = address(0);
+      address currentOwner;
+      uint256 i;
+      // Validate threshold is reached.
+      for (i = 0; i < threshold; i++) {
+          currentOwner = ecrecover(hash, v[i], r[i], s[i]);
+          require(isOwner[currentOwner]);
+          require(currentOwner > lastOwner);
+          lastOwner = currentOwner;
+      }
+    }
+
+    /// @dev Returns hash to be signed by owners for executeTransaction.
     /// @param to Destination address.
     /// @param value Ether value.
     /// @param data Data payload.
     /// @param operation Operation type.
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
-    function getTransactionHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
+    function getExecuteHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
         public
         view
         returns (bytes32)
     {
         return keccak256(byte(0x19), byte(0), this, to, value, data, operation, _nonce);
+    }
+
+    /// @dev Returns hash to be signed by owners for payAndExecuteTransaction.
+    /// @param to Destination address.
+    /// @param value Ether value.
+    /// @param data Data payload.
+    /// @param operation Operation type.
+    /// @param executor Address that should be paid for the transaction.
+    /// @param price Price paid to the executor.
+    /// @param _nonce Transaction nonce.
+    /// @return Transaction hash.
+    function getPayAndExecuteHash(address to, uint256 value, bytes data, Operation operation, address executor, uint256 price, uint256 _nonce)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, executor, price, _nonce);
     }
 }

@@ -199,23 +199,25 @@ contract GnosisSafe {
     /// @param operation Operation type of extension transaction.
     function executeExtension(address to, uint256 value, bytes data, Operation operation)
         public
+        returns (bool success)
     {
         // Only whitelisted extensions are allowed.
         require(isExtension[msg.sender]);
         // Execute transaction without further confirmations.
-        execute(to, value, data, operation);
+        success = execute(to, value, data, operation);
     }
 
     function execute(address to, uint256 value, bytes data, Operation operation)
         internal
+        returns (bool success)
     {
         if (operation == Operation.Call)
-            require(executeCall(to, value, data));
+            success = executeCall(to, value, data);
         else if (operation == Operation.DelegateCall)
-            require(executeDelegateCall(to, data));
+            success = executeDelegateCall(to, data);
         else {
             address newContract = executeCreate(data);
-            require(newContract != 0);
+            success = newContract != 0;
             ContractCreation(newContract);
         }
     }

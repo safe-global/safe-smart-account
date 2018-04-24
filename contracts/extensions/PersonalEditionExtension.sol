@@ -57,6 +57,36 @@ contract PersonalEditionExtension is Extension {
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
+    function payAndExecuteTransactionCombined(address to, uint256 value, bytes data, GnosisSafe.Operation operation, uint256 price, uint8[] v, bytes32[] r, bytes32[] s)
+        public
+    {
+        bytes32 transactionHash = getCombinedHash(to, value, data, operation, nonce, price);
+        // There cannot be an owner with address 0.
+        address lastOwner = address(0);
+        address currentOwner;
+        uint8 threshold = gnosisSafe.threshold();
+        uint256 i;
+        // Validate threshold is reached.
+        for (i = 0; i < threshold; i++) {
+            currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
+            require(gnosisSafe.isOwner(currentOwner));
+            require(currentOwner > lastOwner);
+            lastOwner = currentOwner;
+        }
+        // Increase nonce and execute transaction.
+        nonce += 1;
+        gnosisSafe.executeExtension(msg.sender, price, "", GnosisSafe.Operation.Call);
+        gnosisSafe.executeExtension(to, value, data, operation);
+    }
+
+    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
+    /// @param to Destination address of Safe transaction.
+    /// @param value Ether value of Safe transaction.
+    /// @param data Data payload of Safe transaction.
+    /// @param operation GnosisSafe.Operation type of Safe transaction.
+    /// @param v Array of signature V values sorted by owner addresses.
+    /// @param r Array of signature R values sorted by owner addresses.
+    /// @param s Array of signature S values sorted by owner addresses.
     function payAndExecuteTransaction(address to, uint256 value, bytes data, GnosisSafe.Operation operation, uint8[] v, bytes32[] r, bytes32[] s, uint256 price, uint8 pv, bytes32 pr, bytes32 ps)
         public
     {
@@ -121,5 +151,21 @@ contract PersonalEditionExtension is Extension {
         returns (bytes32)
     {
         return keccak256(byte(0x19), byte(0), this, gnosisSafe, to, value, data, operation, _nonce);
+    }
+
+    /// @dev Returns transactions hash to be signed by owners.
+    /// @param to Destination address.
+    /// @param value Ether value.
+    /// @param data Data payload.
+    /// @param operation GnosisSafe.Operation type.
+    /// @param _nonce Transaction nonce.
+    /// @param price Price that is paid for the transaction.
+    /// @return Transaction hash.
+    function getCombinedHash(address to, uint256 value, bytes data, GnosisSafe.Operation operation, uint256 _nonce, uint256 price)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(byte(0x19), byte(0), this, gnosisSafe, to, value, data, operation, _nonce, price);
     }
 }
