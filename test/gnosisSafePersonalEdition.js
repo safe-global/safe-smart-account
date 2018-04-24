@@ -1,23 +1,64 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafe.sol")
+const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const Battery = artifacts.require("./libraries/Battery.sol")
+const MultiSend = artifacts.require("./libraries/MultiSend.sol")
+const TransactionWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"},{"name":"data","type":"bytes"}],"name":"send","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}])
 
 
 contract('GnosisSafe', function(accounts) {
 
     let gnosisSafe
+    let multiSend
+    let battery
     let lw
+    let tw = TransactionWrapper.at(1)
 
     const CALL = 0
     const CREATE = 2
 
+    let buildMultiSend = async function(target, value) {
+      let nonce = await gnosisSafe.nonce()
+      let transactionHash = await gnosisSafe.getTransactionHash.call(target, value, 0, CALL, nonce)
+      // Confirm transaction with signed messages
+      let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
+      let executeData = gnosisSafe.contract.executeTransaction.getData(target, value, 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS)
+
+      let estimate = await gnosisSafe.executeTransaction.estimateGas(target, value, 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS)
+      let batteryData = battery.contract.discharge.getData(estimate / 15000)
+
+      let payAndExecuteTransactionData = '0x' +
+        tw.send.getData(battery.address, 0, batteryData).substr(10) +
+        tw.send.getData(gnosisSafe.address, 0, executeData).substr(10)
+
+      utils.logGasUsage(
+          'executeTransaction withdraw ' + value + ' ETH to ' + target,
+          await multiSend.multiSend(payAndExecuteTransactionData)
+      )
+    }
+
     beforeEach(async function () {
         // Create lightwallet
         lw = await utils.createLightwallet()
+        // Create Master Copies
+        let proxyFactory = await ProxyFactory.new()
+        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
         // Create Gnosis Safe
-        gnosisSafe = await GnosisSafe.new()
-        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0]], 1, 0, 0)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe (Single Owner)',
+        )
+        gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+        )
+        multiSend = await MultiSend.new()
+        battery = await Battery.new()
     })
 
     it('should deposit and withdraw 1 ETH', async () => {
@@ -25,6 +66,7 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+
         // Withdraw 1 ETH
         let nonce = await gnosisSafe.nonce()
         let transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
@@ -47,6 +89,21 @@ contract('GnosisSafe', function(accounts) {
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
+    })
+
+    it('should deposit and withdraw 1 ETH with Battery', async () => {
+        utils.logGasUsage(
+          'charge battery',
+          await battery.charge(100)
+        )
+        // Deposit 1 ETH
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+
+        // Withdraw 1 ETH
+        await buildMultiSend(accounts[0], web3.toWei(0.5, 'ether'))
+        await buildMultiSend(accounts[0], web3.toWei(0.5, 'ether'))
     })
 
     it('should add, remove and replace an owner and update the threshold', async () => {

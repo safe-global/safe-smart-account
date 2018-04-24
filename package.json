@@ -29,6 +29,6 @@
   },
   "dependencies": {
     "ganache-cli": "^6.0.3",
-    "solc": "^0.4.21"
+    "solc": "^0.4.22"
   }
 }

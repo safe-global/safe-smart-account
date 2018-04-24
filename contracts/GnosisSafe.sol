@@ -15,10 +15,9 @@ contract GnosisSafe {
     // It should also always be ensured that the address is stored alone (uses a full word)
     GnosisSafe masterCopy;
 
-    uint256 public nonce;
-    uint8 public threshold;
     address[] public owners;
     Extension[] public extensions;
+    uint8 public threshold;
 
     // isOwner mapping allows to check if an address is a Safe owner.
     mapping (address => bool) public isOwner;
@@ -193,34 +192,6 @@ contract GnosisSafe {
         extensions.length--;
     }
 
-    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
-    /// @param to Destination address of Safe transaction.
-    /// @param value Ether value of Safe transaction.
-    /// @param data Data payload of Safe transaction.
-    /// @param operation Operation type of Safe transaction.
-    /// @param v Array of signature V values sorted by owner addresses.
-    /// @param r Array of signature R values sorted by owner addresses.
-    /// @param s Array of signature S values sorted by owner addresses.
-    function executeTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s)
-        public
-    {
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        // There cannot be an owner with address 0.
-        address lastOwner = address(0);
-        address currentOwner;
-        uint256 i;
-        // Validate threshold is reached.
-        for (i = 0; i < threshold; i++) {
-            currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(isOwner[currentOwner]);
-            require(currentOwner > lastOwner);
-            lastOwner = currentOwner;
-        }
-        // Increase nonce and execute transaction.
-        nonce += 1;
-        execute(to, value, data, operation);
-    }
-
     /// @dev Allows an Extension to execute a Safe transaction without any further confirmations.
     /// @param to Destination address of extension transaction.
     /// @param value Ether value of extension transaction.
@@ -231,7 +202,6 @@ contract GnosisSafe {
     {
         // Only whitelisted extensions are allowed.
         require(isExtension[msg.sender]);
-        require(this == Extension(msg.sender).getGnosisSafe());
         // Execute transaction without further confirmations.
         execute(to, value, data, operation);
     }
@@ -275,21 +245,6 @@ contract GnosisSafe {
         assembly {
             newContract := create(0, add(data, 0x20), mload(data))
         }
-    }
-
-    /// @dev Returns transactions hash to be signed by owners.
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @param _nonce Transaction nonce.
-    /// @return Transaction hash.
-    function getTransactionHash(address to, uint256 value, bytes data, Operation operation, uint256 _nonce)
-        public
-        view
-        returns (bytes32)
-    {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, _nonce);
     }
 
     /// @dev Returns array of owners.
