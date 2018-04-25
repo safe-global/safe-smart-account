@@ -106,61 +106,103 @@ contract('GnosisSafe', function(accounts) {
         await buildMultiSend(accounts[0], web3.toWei(0.5, 'ether'))
     })
 
-    it('should deposit and withdraw 1 ETH paying the executor', async () => {
+    it('should deposit and withdraw 1 ETH and remove an owner, paying the executor', async () => {
+        let executor = accounts[8]
+        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        console.log("    Executor Balance: " + executorBalance)
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1.1, 'ether'))
 
-        let price = 7515400000000000 // Hardcoded for now
-
         // Withdraw 0.5 ETH
-        let executorBalance = await web3.eth.getBalance(accounts[9]).toNumber()
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getPayAndExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, nonce)
+        let transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
-        let success = utils.getParamFromTxEvent(
-            await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, sigs.sigV, sigs.sigR, sigs.sigS
-            ),
-            'ExecutedTransaction', 'success', gnosisSafe.address, null, 'executed transaction',
+
+        // Estimating twice will allow us to get the correct gas price (we could probably also just increase the passed estimate)
+        // With the double stimate the balance of the executor after all transactions will be the same as before all transactions
+        let estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
-        assert.ok(success)
-        assert.equal(await web3.eth.getBalance(accounts[9]).toNumber(), executorBalance + price)
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+        )
+
+        utils.checkTxEvent(
+            await gnosisSafe.payAndExecuteTransaction(
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            ),
+            'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
+        )
+        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
+        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
 
         // Withdraw 0.5 ETH
-        executorBalance = await web3.eth.getBalance(accounts[9]).toNumber()
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getPayAndExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, nonce)
+        transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
-        success = utils.getParamFromTxEvent(
-            await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, sigs.sigV, sigs.sigR, sigs.sigS
-            ),
-            'ExecutedTransaction', 'success', gnosisSafe.address, null, 'executed transaction',
+
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
-        assert.ok(success)
-        //assert.equal(await web3.eth.getBalance(accounts[9]).toNumber(), executorBalance + price)
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+        )
+        utils.checkTxEvent(
+            await gnosisSafe.payAndExecuteTransaction(
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            ),
+            'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
+        )
+        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
+        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
 
         // Withdraw 0.5 ETH -> transaction should fail, but fees should be paid
-        executorBalance = await web3.eth.getBalance(accounts[9]).toNumber()
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getPayAndExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, nonce)
+        transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
-        success = utils.getParamFromTxEvent(
-            await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[9], price, sigs.sigV, sigs.sigR, sigs.sigS
-            ),
-            'ExecutedTransaction', 'success', gnosisSafe.address, null, 'executed transaction',
+
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
-        assert.ok(!success)
-        //assert.equal(await web3.eth.getBalance(accounts[9]).toNumber(), executorBalance + price)
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+        )
+        utils.checkTxEvent(
+            await gnosisSafe.payAndExecuteTransaction(
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            ),
+            'ExecutionFailed', gnosisSafe.address, true, 'executed transaction'
+        )
+        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
+        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
+
+        let data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[2], 2)
+        nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
+        )
+        estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+        )
+        utils.checkTxEvent(
+            await gnosisSafe.payAndExecuteTransaction(
+                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            ),
+            'ExecutionFailed', gnosisSafe.address, false, 'remove owner transaction'
+        )
+        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
+        assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
     })
 
     it('should add, remove and replace an owner and update the threshold', async () => {
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
         let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
@@ -182,6 +224,9 @@ contract('GnosisSafe', function(accounts) {
         transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
+        let estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
+            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1
+        )
         utils.logGasUsage(
             'executeTransaction replace owner',
             await gnosisSafe.executeTransaction(

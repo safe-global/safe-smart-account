@@ -6,7 +6,7 @@ import "./GnosisSafe.sol";
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafePersonalEdition is GnosisSafe {
 
-    event ExecutedTransaction(address to, uint256 value, bytes data, Operation operation, bool success);
+    event ExecutionFailed();
 
     uint256 public nonce;
 
@@ -18,14 +18,25 @@ contract GnosisSafePersonalEdition is GnosisSafe {
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
-    function payAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, address executor, uint256 price, uint8[] v, bytes32[] r, bytes32[] s)
+    /// @param overrideGasCosts Allows the sender to override the costs that are paid by the safe for the tx (can only be lowered and not 0).
+    function payAndExecuteTransaction(address to, uint256 value, bytes data, Operation operation, uint8[] v, bytes32[] r, bytes32[] s, uint256 overrideGasCosts)
         public
     {
-        checkHash(getPayAndExecuteHash(to, value, data, operation, executor, price, nonce), v, r, s);
+        uint256 startGas = gasleft();
+        checkHash(getExecuteHash(to, value, data, operation, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce += 1;
-        executor.transfer(price);
-        emit ExecutedTransaction(to, value, data, operation, execute(to, value, data, operation));
+        if (!execute(to, value, data, operation)) {
+          emit ExecutionFailed();
+        }
+        // 8000 = execution costs for transfer to origin
+        // 21000 = base transaction costs
+        // msg.data.length * 27 = price for data payload
+        uint256 gasCosts = startGas - gasleft() + 8000 + 21000 + msg.data.length * 27;
+        if (overrideGasCosts > 0 && overrideGasCosts < gasCosts) {
+          gasCosts = overrideGasCosts;
+        }
+        tx.origin.transfer(gasCosts * tx.gasprice);
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners.

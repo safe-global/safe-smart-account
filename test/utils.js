@@ -21,6 +21,18 @@ function getParamFromTxEvent(transaction, eventName, paramName, contract, contra
     }
 }
 
+function checkTxEvent(transaction, eventName, contract, exists, subject) {
+  assert.isObject(transaction)
+  if (subject != null) {
+      logGasUsage(subject, transaction)
+  }
+  let logs = transaction.logs
+  if(eventName != null) {
+      logs = logs.filter((l) => l.event === eventName && l.address === contract)
+  }
+  assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
+}
+
 function logGasUsage(subject, transaction) {
     console.log("    Gas costs for " + subject + ": " + transaction.receipt.gasUsed)
 }
@@ -77,6 +89,7 @@ async function assertRejects(q, msg) {
 
 Object.assign(exports, {
     getParamFromTxEvent,
+    checkTxEvent,
     logGasUsage,
     createLightwallet,
     signTransaction,
