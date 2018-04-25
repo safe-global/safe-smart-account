@@ -109,7 +109,6 @@ contract('GnosisSafe', function(accounts) {
     it('should deposit and withdraw 1 ETH and remove an owner, paying the executor', async () => {
         let executor = accounts[8]
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
-        console.log("    Executor Balance: " + executorBalance)
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
@@ -136,8 +135,7 @@ contract('GnosisSafe', function(accounts) {
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
         )
-        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
-        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
+        assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
 
         // Withdraw 0.5 ETH
         nonce = await gnosisSafe.nonce()
@@ -157,8 +155,7 @@ contract('GnosisSafe', function(accounts) {
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
         )
-        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
-        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
+        assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
 
         // Withdraw 0.5 ETH -> transaction should fail, but fees should be paid
         nonce = await gnosisSafe.nonce()
@@ -178,8 +175,7 @@ contract('GnosisSafe', function(accounts) {
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'executed transaction'
         )
-        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
-        //assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
+        assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
 
         let data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[2], 2)
         nonce = await gnosisSafe.nonce()
@@ -197,7 +193,8 @@ contract('GnosisSafe', function(accounts) {
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'remove owner transaction'
         )
-        console.log("    Executor Balance: " + await web3.eth.getBalance(executor).toNumber())
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
+        assert.equal(await gnosisSafe.threshold(), 2)
         assert.equal(await web3.eth.getBalance(executor).toNumber(), executorBalance)
     })
 
@@ -224,9 +221,6 @@ contract('GnosisSafe', function(accounts) {
         transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
-        let estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1
-        )
         utils.logGasUsage(
             'executeTransaction replace owner',
             await gnosisSafe.executeTransaction(
