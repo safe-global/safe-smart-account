@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
-    "eth-lightwallet": "*"
+    "eth-lightwallet": "*",
+    "random-buffer": "*"
   },
   "dependencies": {
     "ganache-cli": "^6.0.3",
