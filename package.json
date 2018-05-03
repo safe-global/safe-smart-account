@@ -25,11 +25,11 @@
   },
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
-    "eth-lightwallet": "*",
+    "eth-lightwallet": "^3.0.1",
     "random-buffer": "*"
   },
   "dependencies": {
-    "ganache-cli": "^6.0.3",
-    "solc": "^0.4.22"
+    "ganache-cli": "^6.1.0",
+    "solc": "^0.4.23"
   }
 }
