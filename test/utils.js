@@ -1,6 +1,25 @@
 const util = require('util');
 const lightwallet = require('eth-lightwallet')
 
+function dataGasValue(hexValue) {
+   switch(hexValue) {
+    case "0x": return 0
+    case "00": return 4
+    default: return 68
+  };
+}
+
+function estimateDataGasCosts(dataString) {
+  const reducer = (accumulator, currentValue) => accumulator += dataGasValue(currentValue)
+
+  return dataString.match(/.{2}/g).reduce(reducer, 0)
+}
+
+function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
+    transaction.logs = transaction.logs.concat(transaction.receipt.logs.map(event => definitions.formatter(event)))
+    return getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject)
+}
+
 function getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject) {
     assert.isObject(transaction)
     if (subject != null) {
@@ -30,6 +49,7 @@ function checkTxEvent(transaction, eventName, contract, exists, subject) {
   if(eventName != null) {
       logs = logs.filter((l) => l.event === eventName && l.address === contract)
   }
+  console.log("    Tx gas limit " + transaction.receipt.transactionHash)
   assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
 }
 
@@ -89,9 +109,11 @@ async function assertRejects(q, msg) {
 
 Object.assign(exports, {
     getParamFromTxEvent,
+    getParamFromTxEventWithAdditionalDefinitions,
     checkTxEvent,
     logGasUsage,
     createLightwallet,
     signTransaction,
-    assertRejects
+    assertRejects,
+    estimateDataGasCosts
 })

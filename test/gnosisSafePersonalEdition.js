@@ -21,7 +21,7 @@ contract('GnosisSafe', function(accounts) {
 
     let buildMultiSend = async function(target, value) {
       let nonce = await gnosisSafe.nonce()
-      let transactionHash = await gnosisSafe.getExecuteHash.call(target, value, 0, CALL, nonce)
+      let transactionHash = await gnosisSafe.getTransactionHash.call(target, value, 0, CALL, 0, nonce)
       // Confirm transaction with signed messages
       let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
       let executeData = gnosisSafe.contract.executeTransaction.getData(target, value, 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS)
@@ -69,7 +69,7 @@ contract('GnosisSafe', function(accounts) {
 
         // Withdraw 1 ETH
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
         utils.logGasUsage(
@@ -79,7 +79,7 @@ contract('GnosisSafe', function(accounts) {
             )
         )
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[1], lw.accounts[0]], transactionHash)
         utils.logGasUsage(
@@ -116,22 +116,22 @@ contract('GnosisSafe', function(accounts) {
 
         // Withdraw 0.5 ETH
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
 
         // Estimating twice will allow us to get the correct gas price (we could probably also just increase the passed estimate)
         // With the double stimate the balance of the executor after all transactions will be the same as before all transactions
         let estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
         )
 
         utils.checkTxEvent(
             await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
         )
@@ -139,19 +139,19 @@ contract('GnosisSafe', function(accounts) {
 
         // Withdraw 0.5 ETH
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
 
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
         )
         utils.checkTxEvent(
             await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'executed transaction'
         )
@@ -159,19 +159,19 @@ contract('GnosisSafe', function(accounts) {
 
         // Withdraw 0.5 ETH -> transaction should fail, but fees should be paid
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[2]], transactionHash)
 
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
         )
         utils.checkTxEvent(
             await gnosisSafe.payAndExecuteTransaction(
-                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+                accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'executed transaction'
         )
@@ -179,17 +179,17 @@ contract('GnosisSafe', function(accounts) {
 
         let data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[2], 2)
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0, nonce)
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
+            gnosisSafe.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
         estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+            gnosisSafe.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
         )
         utils.checkTxEvent(
             await gnosisSafe.payAndExecuteTransaction(
-                gnosisSafe.address, 0, data, CALL, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
+                gnosisSafe.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
             ),
             'ExecutionFailed', gnosisSafe.address, false, 'remove owner transaction'
         )
@@ -204,7 +204,7 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await gnosisSafe.threshold(), 2)
         let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
@@ -218,7 +218,7 @@ contract('GnosisSafe', function(accounts) {
         // Replace owner and keep threshold
         data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[2], lw.accounts[3])
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0, nonce)
         // Confirm transaction with signed message from lw account 0
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
         utils.logGasUsage(
@@ -231,7 +231,7 @@ contract('GnosisSafe', function(accounts) {
         // Remove owner and reduce threshold to 2
         data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[3], 2)
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getExecuteHash(gnosisSafe.address, 0, data, CALL, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(gnosisSafe.address, 0, data, CALL, 0, nonce)
         // Confirm transaction with signed messages
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[3]], transactionHash)
         utils.logGasUsage(
@@ -256,7 +256,7 @@ contract('GnosisSafe', function(accounts) {
         let bytecode = '0x' + output.contracts[':Test']['bytecode']
         let data = bytecode
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getExecuteHash(0, 0, data, CREATE, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(0, 0, data, CREATE, 0, nonce)
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         const TestContract = web3.eth.contract(interface);

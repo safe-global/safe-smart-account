@@ -1,6 +1,6 @@
 const utils = require('./utils')
 
-const GnosisSafe = artifacts.require("./GnosisSafe.sol")
+const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const MultiSendStruct = artifacts.require("./libraries/MultiSendStruct.sol")
 
 
@@ -59,7 +59,7 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000de0b6b3a7640000"+
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000000"
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'executeTransaction send multiple transactions',
