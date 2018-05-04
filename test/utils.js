@@ -49,12 +49,12 @@ function checkTxEvent(transaction, eventName, contract, exists, subject) {
   if(eventName != null) {
       logs = logs.filter((l) => l.event === eventName && l.address === contract)
   }
-  console.log("    Tx gas limit " + transaction.receipt.transactionHash)
   assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
 }
 
-function logGasUsage(subject, transaction) {
-    console.log("    Gas costs for " + subject + ": " + transaction.receipt.gasUsed)
+function logGasUsage(subject, transactionOrReceipt) {
+    let receipt = transactionOrReceipt.receipt || transactionOrReceipt
+    console.log("    Gas costs for " + subject + ": " + receipt.gasUsed)
 }
 
 async function createLightwallet() {
@@ -68,11 +68,9 @@ async function createLightwallet() {
     })
     const keyFromPassword = await util.promisify(keystore.keyFromPassword).bind(keystore)("test")
     keystore.generateNewAddress(keyFromPassword, 20)
-    let accountsWithout0x = keystore.getAddresses()
-    let lightwalletAccounts = accountsWithout0x.map((a) => { return '0x' + a })
     return {
         keystore: keystore,
-        accounts: lightwalletAccounts,
+        accounts: keystore.getAddresses(),
         passwords: keyFromPassword
     }
 }

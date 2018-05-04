@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 import "./GnosisSafe.sol";
 import "./MasterCopy.sol";
 import "./PersonalEditionBase.sol";

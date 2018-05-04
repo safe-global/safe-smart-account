@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 
 
 /// @title Delegate Constructor Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract. It is possible to send along initialization data with the constructor.
@@ -12,7 +12,7 @@ contract DelegateConstructorProxy {
     /// @dev Constructor function sets address of master copy contract.
     /// @param _masterCopy Master copy address.
     /// @param initializer Data used for a delegate call to initialize the contract.
-    function DelegateConstructorProxy(address _masterCopy, bytes initializer)
+    constructor(address _masterCopy, bytes initializer)
         public
     {
         require(_masterCopy != 0);

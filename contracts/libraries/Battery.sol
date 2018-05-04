@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 
 
 /// @title Battery - Very simple contract that allows to "mine" gas.

@@ -146,14 +146,12 @@ contract('PersonalEditionModule', function(accounts) {
         nonce = await testModule.nonce()
         transactionHash = await testModule.getTransactionHash(testModule.address, 0, data, CALL, 0, nonce)
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        console.log(transactionHash)
         estimate = await testModule.payAndExecuteTransaction.estimateGas(
             testModule.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, 1, {from: executor}
         )
         estimate = await testModule.payAndExecuteTransaction.estimateGas(
             testModule.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}
         )
-        console.log(estimate)
         utils.checkTxEvent(
             await testModule.payAndExecuteTransaction(
                 testModule.address, 0, data, CALL, 0, sigs.sigV, sigs.sigR, sigs.sigS, estimate, {from: executor}

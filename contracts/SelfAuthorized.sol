@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 
 
 /// @title SelfAuthorized - authorizes current contract to perform actions
