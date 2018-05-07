@@ -28,9 +28,8 @@ contract Proxy {
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas, masterCopy, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
-            switch success
-            case 0 { revert(0, returndatasize()) }
-            default { return(0, returndatasize()) }
+            if eq(success, 0) { revert(0, returndatasize()) }
+            return(0, returndatasize())
         }
     }
 
