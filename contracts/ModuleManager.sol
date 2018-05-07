@@ -36,7 +36,7 @@ contract ModuleManager is MasterCopy {
         initialized = true;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.
-            require(executeDelegateCall(to, data, 0));
+            require(executeDelegateCall(to, data, gasleft()));
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -81,17 +81,17 @@ contract ModuleManager is MasterCopy {
         // Only whitelisted modules are allowed.
         require(isModule[msg.sender]);
         // Execute transaction without further confirmations.
-        success = execute(to, value, data, operation, 0);
+        success = execute(to, value, data, operation, gasleft());
     }
 
-    function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 gasAdjustment)
+    function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 txGas)
         internal
         returns (bool success)
     {
         if (operation == Enum.Operation.Call)
-            success = executeCall(to, value, data, gasAdjustment);
+            success = executeCall(to, value, data, txGas);
         else if (operation == Enum.Operation.DelegateCall)
-            success = executeDelegateCall(to, data, gasAdjustment);
+            success = executeDelegateCall(to, data, txGas);
         else {
             address newContract = executeCreate(data);
             success = newContract != 0;
@@ -99,23 +99,23 @@ contract ModuleManager is MasterCopy {
         }
     }
 
-    function executeCall(address to, uint256 value, bytes data, uint256 gasAdjustment)
+    function executeCall(address to, uint256 value, bytes data, uint256 txGas)
         internal
         returns (bool success)
     {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
-            success := call(sub(gas, gasAdjustment), to, value, add(data, 0x20), mload(data), 0, 0)
+            success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
         }
     }
 
-    function executeDelegateCall(address to, bytes data, uint256 gasAdjustment)
+    function executeDelegateCall(address to, bytes data, uint256 txGas)
         internal
         returns (bool success)
     {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
-            success := delegatecall(sub(gas, gasAdjustment), to, add(data, 0x20), mload(data), 0, 0)
+            success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
         }
     }
 

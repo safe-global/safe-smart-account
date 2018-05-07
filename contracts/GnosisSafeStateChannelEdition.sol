@@ -40,7 +40,7 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
         checkHash(transactionHash, v, r, s);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        require(execute(to, value, data, operation, 0));
+        require(execute(to, value, data, operation, gasleft()));
     }
 
     function checkHash(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)

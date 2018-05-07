@@ -16,7 +16,6 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     uint256 internal constant DATA_BYTE_GAS_COSTS = 68;
 
     event ExecutionFailed();
-    event PaymentFailed();
 
     uint256 public nonce;
 
@@ -25,7 +24,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
-    /// @param minTxGas Minimum gas that should be available for the Safe transaction.
+    /// @param safeTxGas Gas that should be used for the Safe transaction.
     /// @param maxGasPrice Maximum gas price that should be used for this transaction.
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
@@ -35,7 +34,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 value, 
         bytes data, 
         Enum.Operation operation, 
-        uint256 minTxGas,
+        uint256 safeTxGas,
         uint256 maxGasPrice,
         uint8[] v, 
         bytes32[] r, 
@@ -45,26 +44,24 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     {
         uint256 startGas = gasleft();
         require(tx.gasprice <= maxGasPrice);
-        require(address(this).balance > totalGasCosts(minTxGas) * tx.gasprice);
-        checkHash(getTransactionHash(to, value, data, operation, minTxGas, maxGasPrice, nonce), v, r, s);
+        require(address(this).balance - value > totalGasCosts(safeTxGas) * tx.gasprice);
+        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, maxGasPrice, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
-        require(gasleft() - PAYMENT_GAS_COSTS >= minTxGas);
-        if (!execute(to, value, data, operation, PAYMENT_GAS_COSTS)) {
+        require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas);
+        if (!execute(to, value, data, operation, safeTxGas)) {
             emit ExecutionFailed();
         }
         uint256 gasCosts = totalGasCosts(startGas - gasleft());
 
-        // We send the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
-        // solium-disable-next-line security/no-tx-origin, security/no-send 
-        if (!tx.origin.send(gasCosts * tx.gasprice)) {
-            emit PaymentFailed();
-        }
+        // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
+        // solium-disable-next-line security/no-tx-origin
+        tx.origin.transfer(gasCosts * tx.gasprice);
     }
 
     /// @dev Calculates the total gas costs for a safe transaction with the gas costs for the execution of the transaction.
     /// @param executionGas Gas costs for the execution of the safe transaction.
-    /// @return Total gas costs for the execution (this includes gas costs for the payment to tx.origin, base transaction and payload data ).
+    /// @return Total gas costs for the execution (this includes gas costs for the payment to tx.origin, base transaction and payload data).
     function totalGasCosts(uint256 executionGas) 
         public 
         pure
@@ -90,7 +87,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         returns (uint256)
     {
         uint256 startGas = gasleft();
-        require(execute(to, value, data, operation, 0));
+        require(execute(to, value, data, operation, gasleft()));
         return startGas - gasleft();
     }
 
@@ -116,7 +113,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param value Ether value.
     /// @param data Data payload.
     /// @param operation Operation type.
-    /// @param minTxGas Minimum gas that should be available for the safe transaction.
+    /// @param safeTxGas Fas that should be used for the safe transaction.
     /// @param maxGasPrice Maximum gas price that should be used for this transaction.
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
@@ -125,7 +122,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 value, 
         bytes data, 
         Enum.Operation operation, 
-        uint256 minTxGas, 
+        uint256 safeTxGas, 
         uint256 maxGasPrice, 
         uint256 _nonce
     )
@@ -133,6 +130,6 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, minTxGas, maxGasPrice, _nonce);
+        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, maxGasPrice, _nonce);
     }
 }

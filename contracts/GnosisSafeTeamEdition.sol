@@ -55,7 +55,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         checkAndClearConfirmations(transactionHash);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        require(execute(to, value, data, operation, 0));
+        require(execute(to, value, data, operation, gasleft()));
     }
 
     function checkAndClearConfirmations(bytes32 transactionHash)
