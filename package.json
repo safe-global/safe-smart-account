@@ -30,7 +30,7 @@
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",
-    "truffle": "^3.4.11"
+    "truffle": "^4.1.8"
   },
   "dependencies": {
     "ganache-cli": "^6.1.0",
