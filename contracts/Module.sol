@@ -8,19 +8,19 @@ import "./ModuleManager.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract Module is MasterCopy {
 
-  ModuleManager public manager;
+    ModuleManager public manager;
 
-  modifier authorized() {
-      require(msg.sender == address(manager));
-      _;
-  }
+    modifier authorized() {
+        require(msg.sender == address(manager));
+        _;
+    }
 
-  function setManager()
-      internal
-  {
-      // manager can only be 0 at initalization of contract.
-      // Check ensures that setup function can only be called once.
-      require(address(manager) == 0);
-      manager = ModuleManager(msg.sender);
-  }
+    function setManager()
+        internal
+    {
+        // manager can only be 0 at initalization of contract.
+        // Check ensures that setup function can only be called once.
+        require(address(manager) == 0);
+        manager = ModuleManager(msg.sender);
+    }
 }

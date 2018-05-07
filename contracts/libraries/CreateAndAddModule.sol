@@ -28,6 +28,7 @@ contract CreateAndAddModule {
         internal
         returns (Module module)
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             let output := mload(0x40)
             switch delegatecall(not(0), proxyFactory, add(data, 0x20), mload(data), output, 0x20)

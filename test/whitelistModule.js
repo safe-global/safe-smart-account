@@ -2,7 +2,7 @@ const utils = require('./utils')
 
 const CreateAndAddModule = artifacts.require("./libraries/CreateAndAddModule.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol");
 const WhitelistModule = artifacts.require("./WhitelistModule.sol");
 
 
@@ -56,25 +56,25 @@ contract('WhitelistModule', function(accounts) {
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), false)
         // Add account 3 to whitelist
         let data = await whitelistModule.contract.addToWhitelist.getData(accounts[1])
-        let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, nonce)
+        let nonce = utils.currentTimeNs()
+        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'executeTransaction add account to whitelist',
             await gnosisSafe.executeTransaction(
-                whitelistModule.address, 0, data, CALL,  sigs.sigV, sigs.sigR, sigs.sigS
+                whitelistModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), true)
         // Remove account 3 from whitelist
         data = await whitelistModule.contract.removeFromWhitelist.getData(accounts[1])
-        nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, nonce)
+        nonce = await utils.currentTimeNs()
+        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, nonce)
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'executeTransaction remove account from whitelist',
             await gnosisSafe.executeTransaction(
-                whitelistModule.address, 0, data, CALL,  sigs.sigV, sigs.sigR, sigs.sigS
+                whitelistModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), false)

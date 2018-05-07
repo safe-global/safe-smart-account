@@ -14,6 +14,7 @@ contract MultiSend {
     function multiSend(bytes transactions)
         public
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20

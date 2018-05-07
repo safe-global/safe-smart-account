@@ -24,7 +24,7 @@ contract WhitelistModule is Module {
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             require(account != 0);
-            isWhitelisted[account]= true;
+            isWhitelisted[account] = true;
         }
     }
 

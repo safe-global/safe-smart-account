@@ -32,11 +32,11 @@ contract ModuleManager is MasterCopy {
     function setupModules(address to, bytes data)
         public
     {
-      require(!initialized);
-      initialized = true;
-      if (to != 0)
-          // Setup has to complete successfully or transaction fails.
-          require(executeDelegateCall(to, data, 0));
+        require(!initialized);
+        initialized = true;
+        if (to != 0)
+            // Setup has to complete successfully or transaction fails.
+            require(executeDelegateCall(to, data, 0));
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -93,7 +93,7 @@ contract ModuleManager is MasterCopy {
         else if (operation == Enum.Operation.DelegateCall)
             success = executeDelegateCall(to, data, gasAdjustment);
         else {
-            address newContract = executeCreate(data, gasAdjustment);
+            address newContract = executeCreate(data);
             success = newContract != 0;
             emit ContractCreation(newContract);
         }
@@ -103,6 +103,7 @@ contract ModuleManager is MasterCopy {
         internal
         returns (bool success)
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             success := call(sub(gas, gasAdjustment), to, value, add(data, 0x20), mload(data), 0, 0)
         }
@@ -112,15 +113,17 @@ contract ModuleManager is MasterCopy {
         internal
         returns (bool success)
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             success := delegatecall(sub(gas, gasAdjustment), to, add(data, 0x20), mload(data), 0, 0)
         }
     }
 
-    function executeCreate(bytes data, uint256 gasAdjustment)
+    function executeCreate(bytes data)
         internal
         returns (address newContract)
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             newContract := create(0, add(data, 0x20), mload(data))
         }

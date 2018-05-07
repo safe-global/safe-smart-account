@@ -94,7 +94,7 @@ contract OwnerManager is SelfAuthorized {
         // Validate owner address corresponds to owner index.
         require(owners[oldOwnerIndex] == oldOwner);
         isOwner[oldOwner] = false;
-        isOwner[newOwner] =  true;
+        isOwner[newOwner] = true;
         owners[oldOwnerIndex] = newOwner;
     }
 

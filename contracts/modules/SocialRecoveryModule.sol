@@ -68,6 +68,7 @@ contract SocialRecoveryModule is Module {
         require(isFriend[msg.sender]);
         // Validate that transaction is a owner replacement transaction.
         bytes4 functionIdentifier;
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             functionIdentifier := mload(add(data, 0x20))
         }

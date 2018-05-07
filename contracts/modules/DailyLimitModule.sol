@@ -61,6 +61,7 @@ contract DailyLimitModule is Module {
         else {
             token = to;
             bytes4 functionIdentifier;
+            // solium-disable-next-line security/no-inline-assembly
             assembly {
                 functionIdentifier := mload(add(data, 0x20))
                 receiver := mload(add(data, 0x24))

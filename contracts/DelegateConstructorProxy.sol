@@ -33,6 +33,7 @@ contract DelegateConstructorProxy {
     function delegate(bytes _calldata, bool returnData)
         internal
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
             let success := delegatecall(sub(gas, 10000), masterCopy, add(_calldata, 0x20), mload(_calldata), 0, 0)

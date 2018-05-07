@@ -4,12 +4,9 @@ import "./ModuleManager.sol";
 import "./OwnerManager.sol";
 
 
-/// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
+/// @title Gnosis Safe - A multisignature wallet with support for modules and owners.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafe is ModuleManager, OwnerManager {
-
-    string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.0.1";
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.

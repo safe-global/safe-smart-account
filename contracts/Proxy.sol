@@ -22,6 +22,7 @@ contract Proxy {
         external
         payable
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
             calldatacopy(0, 0, calldatasize())

@@ -1,6 +1,11 @@
 const util = require('util');
 const lightwallet = require('eth-lightwallet')
 
+function currentTimeNs() {
+    const hrTime=process.hrtime();
+    return hrTime[0] * 1000000000 + hrTime[1]
+}
+
 function dataGasValue(hexValue) {
    switch(hexValue) {
     case "0x": return 0
@@ -106,6 +111,7 @@ async function assertRejects(q, msg) {
 }
 
 Object.assign(exports, {
+    currentTimeNs,
     getParamFromTxEvent,
     getParamFromTxEventWithAdditionalDefinitions,
     checkTxEvent,
