@@ -19,7 +19,7 @@ contract ProxyFactory {
         if (data.length > 0)
             // solium-disable-next-line security/no-inline-assembly
             assembly {
-                switch call(not(0), proxy, 0, add(data, 0x20), mload(data), 0, 0)
+                switch call(gas, proxy, 0, add(data, 0x20), mload(data), 0, 0)
                 case 0 { revert(0, 0) }
             }
         emit ProxyCreation(proxy);

@@ -32,7 +32,7 @@ contract MultiSendStruct {
     {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
-            success := call(not(0), to, value, add(data, 0x20), mload(data), 0, 0)
+            success := call(gas, to, value, add(data, 0x20), mload(data), 0, 0)
         }
     }
 }
