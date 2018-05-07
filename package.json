@@ -8,7 +8,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test"
+    "test-norpc": "truffle test",
+    "test": "run-with-testrpc -l 20000000 'truffle test'"
   },
   "repository": {
     "type": "git",
