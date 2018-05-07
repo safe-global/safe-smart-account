@@ -1,20 +1,25 @@
 pragma solidity 0.4.23;
 
 
-/// @title Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
+/// @title Delegate Constructor Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract. It is possible to send along initialization data with the constructor.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract Proxy {
+/// @author Richard Meissner - <richard@gnosis.pm>
+contract DelegateConstructorProxy {
 
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     address masterCopy;
 
     /// @dev Constructor function sets address of master copy contract.
     /// @param _masterCopy Master copy address.
-    constructor(address _masterCopy)
+    /// @param initializer Data used for a delegate call to initialize the contract.
+    constructor(address _masterCopy, bytes initializer)
         public
     {
         require(_masterCopy != 0);
         masterCopy = _masterCopy;
+        if (initializer.length > 0) {
+            delegate(initializer, false);
+        }
     }
 
     /// @dev Fallback function forwards all transactions and returns all received return data.
@@ -22,15 +27,20 @@ contract Proxy {
         external
         payable
     {
+        delegate(msg.data, true);
+    }
+
+    function delegate(bytes _calldata, bool returnData)
+        internal
+    {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
-            calldatacopy(0, 0, calldatasize())
-            let success := delegatecall(not(0), masterCopy, 0, calldatasize(), 0, 0)
-            returndatacopy(0, 0, returndatasize())
-            switch success
-            case 0 { revert(0, returndatasize()) }
-            default { return(0, returndatasize()) }
+            let success := delegatecall(sub(gas, 10000), masterCopy, add(_calldata, 0x20), mload(_calldata), 0, 0)
+            let ptr := mload(0x40)
+            returndatacopy(ptr, 0, returndatasize)
+            if eq(success, 0) { revert(ptr, returndatasize) }
+            if returnData { return(ptr, returndatasize) }
         }
     }
 

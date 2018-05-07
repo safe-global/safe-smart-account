@@ -1,18 +1,17 @@
-pragma solidity 0.4.21;
-import "../Extension.sol";
-import "../GnosisSafe.sol";
+pragma solidity 0.4.23;
+import "../Module.sol";
+import "../ModuleManager.sol";
+import "../OwnerManager.sol";
+import "../Enum.sol";
 
 
-/// @title Daily Limit Extension - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
+/// @title Daily Limit Module - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract DailyLimitExtension is Extension {
+contract DailyLimitModule is Module {
 
-    string public constant NAME = "Daily Limit Extension";
+    string public constant NAME = "Daily Limit Module";
     string public constant VERSION = "0.0.1";
     bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
-
-    DailyLimitExtension masterCopy;
-    GnosisSafe gnosisSafe;
 
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;
@@ -23,42 +22,15 @@ contract DailyLimitExtension is Extension {
         uint256 lastDay;
     }
 
-    modifier onlyGnosisSafe() {
-        require(msg.sender == address(gnosisSafe));
-        _;
-    }
-
     /// @dev Setup function sets initial storage of contract.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _dailyLimits List of daily limits in smalles units (e.g. Wei for Ether).
     function setup(address[] tokens, uint256[] _dailyLimits)
         public
     {
-        // gnosisSafe can only be 0 at initalization of contract.
-        // Check ensures that setup function can only be called once.
-        require(address(gnosisSafe) == 0);
-        gnosisSafe = GnosisSafe(msg.sender);
+        setManager();
         for (uint256 i = 0; i < tokens.length; i++)
             dailyLimits[tokens[i]].dailyLimit = _dailyLimits[i];
-    }
-
-    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
-    /// @param _masterCopy New contract address.
-    function changeMasterCopy(DailyLimitExtension _masterCopy)
-        public
-        onlyGnosisSafe
-    {
-        require(address(_masterCopy) != 0);
-        masterCopy = _masterCopy;
-    }
-
-    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
-    /// @return Returns the safe the Extension is attached to.
-    function getGnosisSafe()
-        public
-        returns (GnosisSafe)
-    {
-        return gnosisSafe;
     }
 
     /// @dev Allows to update the daily limit for a specified token. This can only be done via a Safe transaction.
@@ -66,7 +38,7 @@ contract DailyLimitExtension is Extension {
     /// @param dailyLimit Daily limit in smallest token unit.
     function changeDailyLimit(address token, uint256 dailyLimit)
         public
-        onlyGnosisSafe
+        authorized
     {
         dailyLimits[token].dailyLimit = dailyLimit;
     }
@@ -75,7 +47,7 @@ contract DailyLimitExtension is Extension {
         internal
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(gnosisSafe.isOwner(sender));
+        require(OwnerManager(manager).isOwner(sender));
         // Data has to encode a token transfer or has to be empty.
         require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
         address token;
@@ -89,6 +61,7 @@ contract DailyLimitExtension is Extension {
         else {
             token = to;
             bytes4 functionIdentifier;
+            // solium-disable-next-line security/no-inline-assembly
             assembly {
                 functionIdentifier := mload(add(data, 0x20))
                 receiver := mload(add(data, 0x24))
@@ -101,7 +74,7 @@ contract DailyLimitExtension is Extension {
         // Validate that transfer is not exceeding daily limit.
         require(isUnderLimit(token, amount));
         dailyLimits[token].spentToday += amount;
-        gnosisSafe.executeExtension(to, value, data, GnosisSafe.Operation.Call);
+        manager.executeModule(to, value, data, Enum.Operation.Call);
     }
 
     /// @dev Returns if Safe transaction is a valid daily limit transaction.

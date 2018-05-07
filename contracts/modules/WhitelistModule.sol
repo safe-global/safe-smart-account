@@ -1,67 +1,38 @@
-pragma solidity 0.4.21;
-import "../Extension.sol";
-import "../GnosisSafe.sol";
+pragma solidity 0.4.23;
+import "../Enum.sol";
+import "../Module.sol";
+import "../ModuleManager.sol";
+import "../OwnerManager.sol";
 
 
-/// @title Whitelist Extension - Allows to execute transactions to whitelisted addresses without confirmations.
+/// @title Whitelist Module - Allows to execute transactions to whitelisted addresses without confirmations.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract WhitelistExtension is Extension {
+contract WhitelistModule is Module {
 
-    string public constant NAME = "Whitelist Extension";
+    string public constant NAME = "Whitelist Module";
     string public constant VERSION = "0.0.1";
-
-    WhitelistExtension masterCopy;
-    GnosisSafe public gnosisSafe;
 
     // isWhitelisted mapping maps destination address to boolean.
     mapping (address => bool) public isWhitelisted;
-
-    modifier onlyGnosisSafe() {
-        require(msg.sender == address(gnosisSafe));
-        _;
-    }
 
     /// @dev Setup function sets initial storage of contract.
     /// @param accounts List of whitelisted accounts.
     function setup(address[] accounts)
         public
     {
-        // gnosisSafe can only be 0 at initialization of contract.
-        // Check ensures that setup function can only be called once.
-        require(address(gnosisSafe) == 0);
-        // Set whitelisted destinations.
-        gnosisSafe = GnosisSafe(msg.sender);
+        setManager();
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             require(account != 0);
-            isWhitelisted[account]= true;
+            isWhitelisted[account] = true;
         }
-    }
-
-    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
-    /// @param _masterCopy New contract address.
-    function changeMasterCopy(WhitelistExtension _masterCopy)
-        public
-        onlyGnosisSafe
-    {
-        require(address(_masterCopy) != 0);
-        masterCopy = _masterCopy;
-    }
-
-    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
-    /// @return Returns the safe the Extension is attached to.
-    function getGnosisSafe()
-        public
-        returns (GnosisSafe)
-    {
-        return gnosisSafe;
     }
 
     /// @dev Allows to add destination to whitelist. This can only be done via a Safe transaction.
     /// @param account Destination address.
     function addToWhitelist(address account)
         public
-        onlyGnosisSafe
+        authorized
     {
         require(account != 0);
         require(!isWhitelisted[account]);
@@ -72,7 +43,7 @@ contract WhitelistExtension is Extension {
     /// @param account Destination address.
     function removeFromWhitelist(address account)
         public
-        onlyGnosisSafe
+        authorized
     {
         require(isWhitelisted[account]);
         isWhitelisted[account] = false;
@@ -88,8 +59,8 @@ contract WhitelistExtension is Extension {
         returns (bool)
     {
         // Only Safe owners are allowed to execute transactions to whitelisted accounts.
-        require(gnosisSafe.isOwner(msg.sender));
+        require(OwnerManager(manager).isOwner(msg.sender));
         require(isWhitelisted[to]);
-        gnosisSafe.executeExtension(to, value, data, GnosisSafe.Operation.Call);
+        manager.executeModule(to, value, data, Enum.Operation.Call);
     }
 }

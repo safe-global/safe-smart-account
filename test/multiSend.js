@@ -1,6 +1,6 @@
 const utils = require('./utils')
 
-const GnosisSafe = artifacts.require("./GnosisSafe.sol")
+const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")
 
 
@@ -28,7 +28,7 @@ contract('MultiSend', function(accounts) {
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(2, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
         // Withdraw 2 ETH and change threshold
-        let nonce = await gnosisSafe.nonce()
+        let nonce = utils.currentTimeNs()
         const TransactionWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"},{"name":"data","type":"bytes"}],"name":"send","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
         let tw = TransactionWrapper.at(1)
         let changeData = await gnosisSafe.contract.changeThreshold.getData(2)
@@ -43,7 +43,7 @@ contract('MultiSend', function(accounts) {
         utils.logGasUsage(
             'executeTransaction send multiple transactions',
             await gnosisSafe.executeTransaction(
-                multiSend.address, 0, data, DELEGATECALL, sigs.sigV, sigs.sigR, sigs.sigS
+                multiSend.address, 0, data, DELEGATECALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)

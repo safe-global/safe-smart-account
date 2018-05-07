@@ -1,6 +1,30 @@
 const util = require('util');
 const lightwallet = require('eth-lightwallet')
 
+function currentTimeNs() {
+    const hrTime=process.hrtime();
+    return hrTime[0] * 1000000000 + hrTime[1]
+}
+
+function dataGasValue(hexValue) {
+   switch(hexValue) {
+    case "0x": return 0
+    case "00": return 4
+    default: return 68
+  };
+}
+
+function estimateDataGasCosts(dataString) {
+  const reducer = (accumulator, currentValue) => accumulator += dataGasValue(currentValue)
+
+  return dataString.match(/.{2}/g).reduce(reducer, 0)
+}
+
+function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
+    transaction.logs = transaction.logs.concat(transaction.receipt.logs.map(event => definitions.formatter(event)))
+    return getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject)
+}
+
 function getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject) {
     assert.isObject(transaction)
     if (subject != null) {
@@ -21,8 +45,21 @@ function getParamFromTxEvent(transaction, eventName, paramName, contract, contra
     }
 }
 
-function logGasUsage(subject, transaction) {
-    console.log("    Gas costs for " + subject + ": " + transaction.receipt.gasUsed)
+function checkTxEvent(transaction, eventName, contract, exists, subject) {
+  assert.isObject(transaction)
+  if (subject != null) {
+      logGasUsage(subject, transaction)
+  }
+  let logs = transaction.logs
+  if(eventName != null) {
+      logs = logs.filter((l) => l.event === eventName && l.address === contract)
+  }
+  assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
+}
+
+function logGasUsage(subject, transactionOrReceipt) {
+    let receipt = transactionOrReceipt.receipt || transactionOrReceipt
+    console.log("    Gas costs for " + subject + ": " + receipt.gasUsed)
 }
 
 async function createLightwallet() {
@@ -36,11 +73,9 @@ async function createLightwallet() {
     })
     const keyFromPassword = await util.promisify(keystore.keyFromPassword).bind(keystore)("test")
     keystore.generateNewAddress(keyFromPassword, 20)
-    let accountsWithout0x = keystore.getAddresses()
-    let lightwalletAccounts = accountsWithout0x.map((a) => { return '0x' + a })
     return {
         keystore: keystore,
-        accounts: lightwalletAccounts,
+        accounts: keystore.getAddresses(),
         passwords: keyFromPassword
     }
 }
@@ -76,9 +111,13 @@ async function assertRejects(q, msg) {
 }
 
 Object.assign(exports, {
+    currentTimeNs,
     getParamFromTxEvent,
+    getParamFromTxEventWithAdditionalDefinitions,
+    checkTxEvent,
     logGasUsage,
     createLightwallet,
     signTransaction,
-    assertRejects
+    assertRejects,
+    estimateDataGasCosts
 })

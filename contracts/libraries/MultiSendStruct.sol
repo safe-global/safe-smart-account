@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.23;
 pragma experimental ABIEncoderV2;
 
 
@@ -10,9 +10,9 @@ pragma experimental ABIEncoderV2;
 contract MultiSendStruct {
 
     struct Transaction {
-      address to;
-      uint256 value;
-      bytes data;
+        address to;
+        uint256 value;
+        bytes data;
     }
 
     /// @dev Sends multiple transactions and reverts all if one fails.
@@ -30,6 +30,7 @@ contract MultiSendStruct {
         internal
         returns (bool success)
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             success := call(not(0), to, value, add(data, 0x20), mload(data), 0, 0)
         }

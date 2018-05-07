@@ -1,10 +1,10 @@
-pragma solidity 0.4.21;
-import "./DailyLimitExtension.sol";
+pragma solidity 0.4.23;
+import "./DailyLimitModule.sol";
 
 
-/// @title Daily Limit Extension With Signature - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
+/// @title Daily Limit Module With Signature - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract DailyLimitExtensionWithSignature is DailyLimitExtension {
+contract DailyLimitModuleWithSignature is DailyLimitModule {
 
     uint256 public nonce;
 

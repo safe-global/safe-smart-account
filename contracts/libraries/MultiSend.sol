@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 
 
 /// @title Multi Send - Allows to batch multiple transactions into one.
@@ -14,6 +14,7 @@ contract MultiSend {
     function multiSend(bytes transactions)
         public
     {
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20

@@ -1,18 +1,17 @@
-pragma solidity 0.4.21;
-import "../Extension.sol";
-import "../GnosisSafe.sol";
+pragma solidity 0.4.23;
+import "../Enum.sol";
+import "../Module.sol";
+import "../ModuleManager.sol";
+import "../OwnerManager.sol";
 
 
-/// @title Social Recovery Extension - Allows to replace an owner without Safe confirmations if friends approve the replacement.
+/// @title Social Recovery Module - Allows to replace an owner without Safe confirmations if friends approve the replacement.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract SocialRecoveryExtension is Extension {
+contract SocialRecoveryModule is Module {
 
-    string public constant NAME = "Social Recovery Extension";
+    string public constant NAME = "Social Recovery Module";
     string public constant VERSION = "0.0.1";
     bytes4 public constant REPLACE_OWNER_FUNCTION_IDENTIFIER = hex"54e99c6e";
-
-    SocialRecoveryExtension masterCopy;
-    GnosisSafe gnosisSafe;
 
     uint8 public threshold;
     address[] public friends;
@@ -23,11 +22,6 @@ contract SocialRecoveryExtension is Extension {
     mapping (bytes32 => bool) public isExecuted;
     // isConfirmed mapping maps data hash to friend's address to confirmation status.
     mapping (bytes32 => mapping (address => bool)) public isConfirmed;
-
-    modifier onlyGnosisSafe() {
-        require(msg.sender == address(gnosisSafe));
-        _;
-    }
 
     modifier onlyFriend() {
         require(isFriend[msg.sender]);
@@ -40,12 +34,9 @@ contract SocialRecoveryExtension is Extension {
     function setup(address[] _friends, uint8 _threshold)
         public
     {
-        // gnosisSafe can only be 0 at initalization of contract.
-        // Check ensures that setup function can only be called once.
-        require(address(gnosisSafe) == 0);
         require(_threshold <= _friends.length);
         require(_threshold >= 2);
-        gnosisSafe = GnosisSafe(msg.sender);
+        setManager();
         // Set allowed friends.
         for (uint256 i = 0; i < _friends.length; i++) {
             address friend = _friends[i];
@@ -55,25 +46,6 @@ contract SocialRecoveryExtension is Extension {
         }
         friends = _friends;
         threshold = _threshold;
-    }
-
-    /// @dev Allows to upgrade the contract. This can only be done via a Safe transaction.
-    /// @param _masterCopy New contract address.
-    function changeMasterCopy(SocialRecoveryExtension _masterCopy)
-        public
-        onlyGnosisSafe
-    {
-        require(address(_masterCopy) != 0);
-        masterCopy = _masterCopy;
-    }
-
-    /// @dev Function to be implemented by extension. This is used to check to what Safe the Extension is attached.
-    /// @return Returns the safe the Extension is attached to.
-    function getGnosisSafe()
-        public
-        returns (GnosisSafe)
-    {
-        return gnosisSafe;
     }
 
     /// @dev Allows a friend to confirm a Safe transaction.
@@ -96,6 +68,7 @@ contract SocialRecoveryExtension is Extension {
         require(isFriend[msg.sender]);
         // Validate that transaction is a owner replacement transaction.
         bytes4 functionIdentifier;
+        // solium-disable-next-line security/no-inline-assembly
         assembly {
             functionIdentifier := mload(add(data, 0x20))
         }
@@ -104,7 +77,7 @@ contract SocialRecoveryExtension is Extension {
         require(!isExecuted[dataHash]);
         require(isConfirmedByRequiredFriends(dataHash));
         isExecuted[dataHash] = true;
-        gnosisSafe.executeExtension(address(gnosisSafe), 0, data, GnosisSafe.Operation.Call);
+        manager.executeModule(address(manager), 0, data, Enum.Operation.Call);
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.
