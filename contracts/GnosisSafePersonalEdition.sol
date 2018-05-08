@@ -56,7 +56,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
 
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         // solium-disable-next-line security/no-tx-origin
-        tx.origin.transfer(gasCosts * tx.gasprice);
+        tx.origin.send(gasCosts * tx.gasprice);
     }
 
     /// @dev Calculates the total gas costs for a safe transaction with the gas costs for the execution of the transaction.

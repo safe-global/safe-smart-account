@@ -23,7 +23,8 @@ contract('GnosisSafe', function(accounts) {
         let minGasEstimate = 0
         try {
             minGasEstimate = await gnosisSafe.estimate.call(to, value, data, operation, {from: gnosisSafe.address, gasPrice: 0})
-            minGasEstimate = minGasEstimate.toNumber()
+            // Add 10k else we will fail in case of delegate calls
+            minGasEstimate = minGasEstimate.toNumber() + 10000
             console.log("    Min gas estimate: " + minGasEstimate)
         } catch(e) {
             console.log("    Could not estimate " + subject)
