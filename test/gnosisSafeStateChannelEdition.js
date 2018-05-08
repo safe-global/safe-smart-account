@@ -1,7 +1,7 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
@@ -16,36 +16,19 @@ contract('GnosisSafe', function(accounts) {
     const CALL = 0
     const CREATE = 2
 
-    let executeTransaction = async function(subject, accounts, to, value, data, operation, fails) {
-        let txFailed = fails || false
-
-        // Estimate safe transaction (need to be called with from set to the safe address)
-        let minGasEstimate = 0
-        try {
-            minGasEstimate = await gnosisSafe.estimate.call(to, value, data, operation, {from: gnosisSafe.address, gasPrice: 0})
-            minGasEstimate = minGasEstimate.toNumber()
-            console.log("    Min gas estimate: " + minGasEstimate)
-        } catch(e) {
-            console.log("    Could not estimate " + subject)
-        }
-
-        let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(to, value, data, operation, minGasEstimate, MAX_GAS_PRICE, nonce)
+    let executeTransaction = async function(subject, accounts, to, value, data, operation) {
+        let nonce = utils.currentTimeNs()
+        let transactionHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
 
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, accounts, transactionHash)
-
-        // Estimate gas of paying transaction
-        let estimate = await gnosisSafe.payAndExecuteTransaction.estimateGas(
-            to, value, data, operation, minGasEstimate, MAX_GAS_PRICE, sigs.sigV, sigs.sigR, sigs.sigS
-        )
         
         // Execute paying transaction
         // We add the minGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-        let tx = await gnosisSafe.payAndExecuteTransaction(
-            to, value, data, operation, minGasEstimate, MAX_GAS_PRICE, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + minGasEstimate + 10000}
+        let tx = await gnosisSafe.executeTransaction(
+            to, value, data, operation, nonce, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor}
         )
-        utils.checkTxEvent(tx, 'ExecutionFailed', gnosisSafe.address, txFailed, subject)
+        utils.logGasUsage(subject, tx)
         return tx
     }
 
@@ -67,29 +50,18 @@ contract('GnosisSafe', function(accounts) {
     it('should deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH + some spare money for execution 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1.1, 'ether'))
-
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
 
         // Withdraw 1 ETH
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL)
 
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL)
 
-        // Should fail as it is over the balance (payment should still happen)
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, true)
-
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
     })
 
     it('should add, remove and replace an owner and update the threshold', async () => {
-        // Fund account for execution 
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
-
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
         // Add owner and set threshold to 3
         assert.equal(await gnosisSafe.threshold(), 2)
         let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
@@ -106,17 +78,9 @@ contract('GnosisSafe', function(accounts) {
         data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[3], 2)
         await executeTransaction('remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[1]])
-
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
     })
 
     it('should do a CREATE transaction', async () => {
-        // Fund account for execution 
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
-
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
         // Create test contract
         let source = `
         contract Test {
@@ -133,9 +97,5 @@ contract('GnosisSafe', function(accounts) {
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)
-
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
     })
 })
