@@ -13,7 +13,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     
     uint256 internal constant BASE_TX_GAS_COSTS = 21000;
     uint256 internal constant PAYMENT_GAS_COSTS = 10000;
-    uint256 internal constant DATA_BYTE_GAS_COSTS = 68;
+    // The maximum price for data payload is 68 (non-zero byte), but the avera is way lower, therefore we use 40
+    uint256 internal constant DATA_BYTE_GAS_COSTS = 40;
 
     event ExecutionFailed();
 
@@ -25,7 +26,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param maxGasPrice Maximum gas price that should be used for this transaction.
+    /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
@@ -35,7 +36,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         bytes data, 
         Enum.Operation operation, 
         uint256 safeTxGas,
-        uint256 maxGasPrice,
+        uint256 gasPrice,
         uint8[] v, 
         bytes32[] r, 
         bytes32[] s
@@ -43,9 +44,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         public
     {
         uint256 startGas = gasleft();
-        require(tx.gasprice <= maxGasPrice);
-        require(address(this).balance - value > totalGasCosts(safeTxGas) * tx.gasprice);
-        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, maxGasPrice, nonce), v, r, s);
+        require(address(this).balance - value >= totalGasCosts(safeTxGas) * gasPrice);
+        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, gasPrice, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
         require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas);
@@ -56,7 +56,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
 
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         // solium-disable-next-line security/no-tx-origin
-        tx.origin.send(gasCosts * tx.gasprice);
+        tx.origin.transfer(gasCosts * gasPrice);
     }
 
     /// @dev Calculates the total gas costs for a safe transaction with the gas costs for the execution of the transaction.
@@ -67,9 +67,6 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         pure
         returns (uint256) 
     {
-        // 10000 = gas used to pay the tx.origin
-        // 21000 = base transaction costs
-        // msg.data.length * 68 = maximun price for data payload
         return executionGas + PAYMENT_GAS_COSTS + BASE_TX_GAS_COSTS + msg.data.length * DATA_BYTE_GAS_COSTS;
     }
 
@@ -114,7 +111,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param data Data payload.
     /// @param operation Operation type.
     /// @param safeTxGas Fas that should be used for the safe transaction.
-    /// @param maxGasPrice Maximum gas price that should be used for this transaction.
+    /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
@@ -123,13 +120,13 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         bytes data, 
         Enum.Operation operation, 
         uint256 safeTxGas, 
-        uint256 maxGasPrice, 
+        uint256 gasPrice, 
         uint256 _nonce
     )
         public
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, maxGasPrice, _nonce);
+        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, gasPrice, _nonce);
     }
 }
