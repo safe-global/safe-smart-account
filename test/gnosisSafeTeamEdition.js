@@ -5,7 +5,7 @@ const GnosisSafe = artifacts.require("./GnosisSafeTeamEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafe', function(accounts) {
+contract('GnosisSafeTeamEdition', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]

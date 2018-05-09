@@ -9,7 +9,7 @@ const EthereumTx = require('ethereumjs-tx')
 const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
-contract('GnosisSafe', function(accounts) {
+contract('GnosisSafePersonalEdition', function(accounts) {
 
     const CALL = 0
 
