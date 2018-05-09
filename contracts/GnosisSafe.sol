@@ -17,6 +17,7 @@ contract GnosisSafe is ModuleManager, OwnerManager {
         public
     {
         setupOwners(_owners, _threshold);
+        // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
         setupModules(to, data);
     }
 }

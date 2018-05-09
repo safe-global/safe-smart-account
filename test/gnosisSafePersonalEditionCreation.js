@@ -1,4 +1,5 @@
 const utils = require('./utils')
+const safeUtils = require('./utilsPersonalSafe')
 const solc = require('solc')
 const fs = require('fs')
 const randomBuffer = require("random-buffer")
@@ -9,6 +10,8 @@ const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 contract('GnosisSafe', function(accounts) {
+
+    const CALL = 0
 
     let gnosisSafeMasterCopy
     let lw
@@ -74,9 +77,11 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await web3.eth.getCode(target), "0x0")
 
         let funderBalance = await web3.eth.getBalance(funder).toNumber()
+
         // User funds safe
         await web3.eth.sendTransaction({from: accounts[1], to: target, value: userCosts})
         assert.equal(await web3.eth.getBalance(target).toNumber(), userCosts)
+
         // Gnosis funds sender
         let fundSenderTx = await web3.eth.sendTransaction({from: funder, to: sender, value: tx.getUpfrontCost(), gasPrice: gasPrice})
 
@@ -86,5 +91,9 @@ contract('GnosisSafe', function(accounts) {
         let gnosisSafe = GnosisSafe.at(target)
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
         assert.equal(await web3.eth.getBalance(funder).toNumber(), funderBalance)
+
+        await web3.eth.sendTransaction({from: accounts[1], to: target, value: web3.toWei(1.1, 'ether')})
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[8])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[8])
     })
 })

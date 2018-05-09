@@ -44,7 +44,7 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
     }
 
     function checkHash(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
-        public
+        internal
         view
     {
         // There cannot be an owner with address 0.

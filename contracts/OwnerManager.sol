@@ -16,7 +16,7 @@ contract OwnerManager is SelfAuthorized {
     /// @param _owners List of Safe owners.
     /// @param _threshold Number of required confirmations for a Safe transaction.
     function setupOwners(address[] _owners, uint8 _threshold)
-        public
+        internal
     {
         // Threshold can only be 0 at initialization.
         // Check ensures that setup function can only be called once.

@@ -7,7 +7,7 @@ import "./Enum.sol";
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract ModuleManager is MasterCopy {
+contract ModuleManager is SelfAuthorized {
 
     event ContractCreation(address newContract);
 
@@ -19,8 +19,6 @@ contract ModuleManager is MasterCopy {
     // isModule mapping allows to check if a module was whitelisted.
     mapping (address => bool) public isModule;
 
-    bool initialized;
-
     /// @dev Fallback function accepts Ether transactions.
     function ()
         external
@@ -30,10 +28,8 @@ contract ModuleManager is MasterCopy {
     }
 
     function setupModules(address to, bytes data)
-        public
+        internal
     {
-        require(!initialized);
-        initialized = true;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.
             require(executeDelegateCall(to, data, gasleft()));
