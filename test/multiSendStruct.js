@@ -62,8 +62,8 @@ contract('MultiSendStruct', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction send multiple transactions',
-            await gnosisSafe.executeTransaction(
+            'execTransaction send multiple transactions',
+            await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )

@@ -54,17 +54,17 @@ There are multiple implementations of the Gnosis Safe contract with different me
 #### GnosisSafePersonalEdition.sol
 This version is targeted at users that control all keys owning a safe. The transaction hash can be signed with the private keys that manage the safe. 
 
-Once the required number of confirmations is available `payAndExecuteTransaction` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
+Once the required number of confirmations is available `execPayTransaction` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
 
-`payAndExecuteTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
+`execPayTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
 
 #### GnosisSafeTeamEdition.sol
-This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `executeTransaction`. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
+This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `confirmExecTransaction`. If the sender of `confirmExecTransaction` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
 
 #### GnosisSafeStateChannelEdition.sol
-This version is meant to be used with state channels. It is similar to the personal edition, but without the payment option (therefore the method is named `executeTransaction`). Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
+This version is meant to be used with state channels. It is similar to the personal edition, but without the payment option (therefore the method is named `execTransaction`). Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
 
-##### Example execution for Personal Edition
+##### Example execution for State Channel Edition
 
 Assuming we have 2 owners in a 2 out of 2 multisig configuration:
 
@@ -73,7 +73,7 @@ Assuming we have 2 owners in a 2 out of 2 multisig configuration:
 
 `0x1` and `0x2` are confirming by signing a message.
 
-The Safe transaction parameters used for `executeTransaction` have to be set like the following:
+The Safe transaction parameters used for `execTransaction` have to be set like the following:
 * `v = [v_0x1, v_0x2]`
 * `r = [r_0x1, r_0x2]`
 * `s = [s_0x1, s_0x2]`

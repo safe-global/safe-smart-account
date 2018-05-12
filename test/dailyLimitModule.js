@@ -77,8 +77,8 @@ contract('DailyLimitModule', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
-            'executeTransaction change daily limit',
-            await gnosisSafe.executeTransaction(
+            'execTransaction change daily limit',
+            await gnosisSafe.execTransaction(
                 dailyLimitModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
@@ -114,7 +114,7 @@ contract('DailyLimitModule', function(accounts) {
         let nonce = utils.currentTimeNs()
         transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        await gnosisSafe.executeTransaction(dailyLimitModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS)
+        await gnosisSafe.execTransaction(dailyLimitModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS)
         // Transfer 100 tokens to Safe
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})

@@ -100,8 +100,8 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
 
         utils.logGasUsage(
-            'executeTransaction change daily limit',
-            await gnosisSafe.payAndExecuteTransaction(
+            'execPayTransaction change daily limit',
+            await gnosisSafe.execPayTransaction(
                 dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
@@ -137,7 +137,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         let nonce = await gnosisSafe.nonce()
         transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        await gnosisSafe.payAndExecuteTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), sigs.sigV, sigs.sigR, sigs.sigS)
+        await gnosisSafe.execPayTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), sigs.sigV, sigs.sigR, sigs.sigS)
         // Transfer 100 tokens to Safe
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})

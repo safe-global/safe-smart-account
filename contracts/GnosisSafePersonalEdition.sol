@@ -29,7 +29,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
-    function payAndExecuteTransaction(
+    function execPayTransaction(
         address to, 
         uint256 value, 
         bytes data, 
@@ -72,7 +72,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
 
     /// @dev Allows to estimate a Safe transaction. 
     ///      This method can only be used by the safe itself in a transaction. When estimating set `from` to the address of the safe.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `payAndExecuteTransaction`
+    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execPayTransaction`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.

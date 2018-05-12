@@ -35,13 +35,13 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         isConfirmed[transactionHash][msg.sender] = true;
     }
 
-    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
+    /// @dev Allows to execute a Safe transaction confirmed by required number of owners. If the sender is an owner this is automatically confirmed.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param nonce Nonce used for this Safe transaction.
-    function executeTransaction(
+    function confirmExecTransaction(
         address to, 
         uint256 value, 
         bytes data, 
@@ -61,6 +61,20 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     function checkAndClearConfirmations(bytes32 transactionHash)
         internal
     {
+        uint256 confirmations = 0;
+        // Validate threshold is reached.
+        address currentOwner = owners[OWNERS_SENTINEL];
+        while (currentOwner != OWNERS_SENTINEL) {
+            bool ownerConfirmed = isConfirmed[transactionHash][currentOwner];
+            if(currentOwner == msg.sender || ownerConfirmed) {
+                if (ownerConfirmed) {
+                    isConfirmed[transactionHash][currentOwner] = false;
+                }
+                confirmations ++;
+            }
+            currentOwner = owners[currentOwner];
+        }
+        require(confirmations >= threshold);
     }
 
     /// @dev Returns hash to be signed by owners.

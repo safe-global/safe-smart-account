@@ -22,7 +22,7 @@ contract('GnosisSafeTeamEdition', function(accounts) {
             utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.confirmTransaction(to, value, data, operation, nonce, {from: account}))
         }
 
-        let tx = await gnosisSafe.executeTransaction(to, value, data, operation, nonce, {from: executor})
+        let tx = await gnosisSafe.confirmExecTransaction(to, value, data, operation, nonce, {from: executor})
         utils.logGasUsage(subject, tx)
         return tx
     }
@@ -63,7 +63,7 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         assert.equal(await gnosisSafe.threshold(), 3)
 
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(accounts[1], accounts[2], accounts[3])
+        data = await gnosisSafe.contract.swapOwner.getData(accounts[1], accounts[2], accounts[3])
         await executeTransaction('replace owner', [accounts[0], accounts[1], accounts[2]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[5], accounts[0], accounts[1], accounts[3]])
 

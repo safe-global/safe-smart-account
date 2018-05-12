@@ -25,7 +25,7 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
         
         // Execute paying transaction
         // We add the minGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-        let tx = await gnosisSafe.executeTransaction(
+        let tx = await gnosisSafe.execTransaction(
             to, value, data, operation, nonce, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor}
         )
         utils.logGasUsage(subject, tx)
@@ -70,7 +70,7 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
         assert.equal(await gnosisSafe.threshold(), 3)
 
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
+        data = await gnosisSafe.contract.swapOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
         await executeTransaction('replace owner', [lw.accounts[0], lw.accounts[1], lw.accounts[2]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[3]])
 

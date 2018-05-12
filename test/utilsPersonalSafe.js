@@ -7,7 +7,7 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and dataGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
     let signatureCost = 3 * (64 + 64) + signatureCount * (192 + 2176 + 2176) // array count (3 -> r, s, v) * (array pointer + array length) + signature count * (v, r, s)
-    let payload = safe.contract.payAndExecuteTransaction.getData(
+    let payload = safe.contract.execPayTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, [], [], []
     )
     let dataGasEstimate = utils.estimateDataGasCosts(payload) + signatureCost
@@ -45,18 +45,18 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     let sigs = utils.signTransaction(lw, accounts, transactionHash)
 
     // Estimate gas of paying transaction
-    let estimate = await safe.payAndExecuteTransaction.estimateGas(
+    let estimate = await safe.execPayTransaction.estimateGas(
         to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, sigs.sigV, sigs.sigR, sigs.sigS
     )
     
-    let payload = safe.contract.payAndExecuteTransaction.getData(
+    let payload = safe.contract.execPayTransaction.getData(
         to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
     console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-    let tx = await safe.payAndExecuteTransaction(
+    let tx = await safe.execPayTransaction(
         to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
     utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)

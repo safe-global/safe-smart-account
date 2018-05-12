@@ -64,7 +64,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         assert.equal(await gnosisSafe.threshold(), 3)
 
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
+        data = await gnosisSafe.contract.swapOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
         await safeUtils.executeTransaction(lw, gnosisSafe, 'replace owner', [lw.accounts[0], lw.accounts[1], lw.accounts[2]], gnosisSafe.address, 0, data, CALL, executor)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[3]])
 

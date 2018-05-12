@@ -82,12 +82,12 @@ contract OwnerManager is SelfAuthorized {
             changeThreshold(_threshold);
     }
 
-    /// @dev Allows to replace an owner from the Safe with another address.
+    /// @dev Allows to swap/replace an owner from the Safe with another address.
     ///      This can only be done via a Safe transaction.
     /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
     /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
-    function replaceOwner(address prevOwner, address oldOwner, address newOwner)
+    function swapOwner(address prevOwner, address oldOwner, address newOwner)
         public
         authorized
     {
@@ -139,22 +139,15 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (address[])
     {
-        // Calculate owner count
-        uint256 ownerCount = 0;
-        address currentOwner = owners[OWNERS_SENTINEL];
-        while(currentOwner != OWNERS_SENTINEL) {
-            currentOwner = owners[currentOwner];
-            ownerCount ++;
-        }
         address[] memory array = new address[](ownerCount);
 
         // populate return array
-        ownerCount = 0;
-        currentOwner = owners[OWNERS_SENTINEL];
+        uint256 index = 0;
+        address currentOwner = owners[OWNERS_SENTINEL];
         while(currentOwner != OWNERS_SENTINEL) {
-            array[ownerCount] = currentOwner;
+            array[index] = currentOwner;
             currentOwner = owners[currentOwner];
-            ownerCount ++;
+            index ++;
         }
         return array;
     }

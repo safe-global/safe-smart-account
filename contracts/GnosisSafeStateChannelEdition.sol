@@ -23,7 +23,7 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
-    function executeTransaction(
+    function execTransaction(
         address to, 
         uint256 value, 
         bytes data, 
