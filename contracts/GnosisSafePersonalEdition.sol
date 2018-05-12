@@ -12,7 +12,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     string public constant VERSION = "0.0.1";
     
     uint256 internal constant BASE_TX_GAS_COSTS = 21000;
-    uint256 internal constant PAYMENT_GAS_COSTS = 10000;
+    uint256 internal constant PAYMENT_GAS_COSTS = 11000;
 
     event ExecutionFailed();
 
@@ -99,7 +99,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = ecrecover(hash, v[i], r[i], s[i]);
-            require(isOwner[currentOwner]);
+            require(owners[currentOwner] != 0);
             require(currentOwner > lastOwner);
             lastOwner = currentOwner;
         }

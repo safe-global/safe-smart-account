@@ -54,7 +54,7 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(isOwner[currentOwner]);
+            require(isOwner(currentOwner));
             require(currentOwner > lastOwner);
             lastOwner = currentOwner;
         }

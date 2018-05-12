@@ -10,8 +10,8 @@ var CreateAndAddModule = artifacts.require("./CreateAndAddModule.sol");
 var MultiSend = artifacts.require("./MultiSend.sol");
 
 
-const notOwnedAddress = "0x0000000000000000000000000000000000000001"
-const notOwnedAddress2 = "0x0000000000000000000000000000000000000002"
+const notOwnedAddress = "0x0000000000000000000000000000000000000002"
+const notOwnedAddress2 = "0x0000000000000000000000000000000000000003"
 
 let initSafe = function (safe) {
     safe.setup([notOwnedAddress], 1, 0, 0)

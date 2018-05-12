@@ -13,11 +13,9 @@ contract ModuleManager is SelfAuthorized {
 
     string public constant NAME = "Module Manager";
     string public constant VERSION = "0.0.1";
+    address public constant MODULES_SENTINEL = address(0x1);
 
-    Module[] public modules;
-
-    // isModule mapping allows to check if a module was whitelisted.
-    mapping (address => bool) public isModule;
+    mapping (address => address) public modules;
 
     /// @dev Fallback function accepts Ether transactions.
     function ()
@@ -30,6 +28,7 @@ contract ModuleManager is SelfAuthorized {
     function setupModules(address to, bytes data)
         internal
     {
+        modules[MODULES_SENTINEL] = MODULES_SENTINEL;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.
             require(executeDelegateCall(to, data, gasleft()));
@@ -42,27 +41,26 @@ contract ModuleManager is SelfAuthorized {
         public
         authorized
     {
-        // Module address cannot be null.
-        require(address(module) != 0);
+        // Module address cannot be null or sentinel.
+        require(address(module) != 0 && address(module) != MODULES_SENTINEL);
         // Module cannot be added twice.
-        require(!isModule[module]);
-        modules.push(module);
-        isModule[module] = true;
+        require(modules[module] == 0);
+        modules[module] = modules[MODULES_SENTINEL];
+        modules[MODULES_SENTINEL] = module;
     }
 
     /// @dev Allows to remove a module from the whitelist.
     ///      This can only be done via a Safe transaction.
-    /// @param moduleIndex Array index position of module to be removed from whitelist.
+    /// @param prevModule Module that pointed to the module to be removed in the linked list
     /// @param module Module to be removed.
-    function removeModule(uint256 moduleIndex, Module module)
+    function removeModule(Module prevModule, Module module)
         public
         authorized
     {
         // Validate module address corresponds to module index.
-        require(modules[moduleIndex] == module);
-        isModule[module] = false;
-        modules[moduleIndex] = modules[modules.length - 1];
-        modules.length--;
+        require(modules[prevModule] == address(module));
+        modules[prevModule] = modules[module];
+        modules[module] = 0;
     }
 
     /// @dev Allows a Module to execute a Safe transaction without any further confirmations.
@@ -75,7 +73,7 @@ contract ModuleManager is SelfAuthorized {
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
-        require(isModule[msg.sender]);
+        require(modules[msg.sender] != 0);
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
     }
@@ -130,8 +128,25 @@ contract ModuleManager is SelfAuthorized {
     function getModules()
         public
         view
-        returns (Module[])
+        returns (address[])
     {
-        return modules;
+        // Calculate module count
+        uint256 moduleCount = 0;
+        address currentModule = modules[MODULES_SENTINEL];
+        while(currentModule != MODULES_SENTINEL) {
+            currentModule = modules[currentModule];
+            moduleCount ++;
+        }
+        address[] memory array = new address[](moduleCount);
+
+        // populate return array
+        moduleCount = 0;
+        currentModule = modules[MODULES_SENTINEL];
+        while(currentModule != MODULES_SENTINEL) {
+            array[moduleCount] = currentModule;
+            currentModule = modules[currentModule];
+            moduleCount ++;
+        }
+        return array;
     }
 }

@@ -60,18 +60,19 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         assert.equal(await gnosisSafe.threshold(), 2)
         let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'add owner and set threshold to 3', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor)
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[1]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[2]])
         assert.equal(await gnosisSafe.threshold(), 3)
 
         // Replace owner and keep threshold
-        data = await gnosisSafe.contract.replaceOwner.getData(2, lw.accounts[2], lw.accounts[3])
+        data = await gnosisSafe.contract.replaceOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
         await safeUtils.executeTransaction(lw, gnosisSafe, 'replace owner', [lw.accounts[0], lw.accounts[1], lw.accounts[2]], gnosisSafe.address, 0, data, CALL, executor)
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[3], accounts[1]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[3]])
 
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(2, lw.accounts[3], 2)
+        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[1], lw.accounts[3], 2)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL, executor)
-        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], accounts[1]])
+        assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1]])
+        assert.equal(await gnosisSafe.threshold(), 2)
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")

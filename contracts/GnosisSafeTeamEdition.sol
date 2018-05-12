@@ -28,7 +28,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         public
     {
         // Only Safe owners are allowed to confirm Safe transactions.
-        require(isOwner[msg.sender]);
+        require(isOwner(msg.sender));
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         // It is only possible to confirm a transaction once.
         require(!isConfirmed[transactionHash][msg.sender]);
@@ -61,19 +61,6 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     function checkAndClearConfirmations(bytes32 transactionHash)
         internal
     {
-        uint256 confirmations = 0;
-        // Validate threshold is reached.
-        for (uint256 i = 0; i < owners.length; i++) {
-            address owner = owners[i];
-            bool ownerConfirmed = isConfirmed[transactionHash][owner];
-            if(owner == msg.sender || ownerConfirmed) {
-                if (ownerConfirmed) {
-                    isConfirmed[transactionHash][owner] = false;
-                }
-                confirmations ++;
-            }
-        }
-        require(confirmations >= threshold);
     }
 
     /// @dev Returns hash to be signed by owners.

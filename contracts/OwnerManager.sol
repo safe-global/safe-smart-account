@@ -6,11 +6,11 @@ import "./SelfAuthorized.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract OwnerManager is SelfAuthorized {
 
-    address[] public owners;
-    uint8 public threshold;
+    address public constant OWNERS_SENTINEL = address(0x1);
 
-    // isOwner mapping allows to check if an address is a Safe owner.
-    mapping (address => bool) public isOwner;
+    mapping(address => address) public owners;
+    uint256 ownerCount;
+    uint8 public threshold;
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
@@ -26,15 +26,18 @@ contract OwnerManager is SelfAuthorized {
         // There has to be at least one Safe owner.
         require(_threshold >= 1);
         // Initializing Safe owners.
+        address currentOwner = OWNERS_SENTINEL;
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            require(owner != 0);
+            require(owner != 0 && owner != OWNERS_SENTINEL);
             // No duplicate owners allowed.
-            require(!isOwner[owner]);
-            isOwner[owner] = true;
+            require(owners[owner] == 0);
+            owners[currentOwner] = owner;
+            currentOwner = owner;
         }
-        owners = _owners;
+        owners[currentOwner] = OWNERS_SENTINEL;
+        ownerCount = _owners.length;
         threshold = _threshold;
     }
 
@@ -47,11 +50,12 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Owner address cannot be null.
-        require(owner != 0);
+        require(owner != 0 && owner != OWNERS_SENTINEL);
         // No duplicate owners allowed.
-        require(!isOwner[owner]);
-        owners.push(owner);
-        isOwner[owner] = true;
+        require(owners[owner] == 0);
+        owners[owner] = owners[OWNERS_SENTINEL];
+        owners[OWNERS_SENTINEL] = owner;
+        ownerCount++;
         // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
@@ -59,20 +63,20 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to remove an owner from the Safe and update the threshold at the same time.
     ///      This can only be done via a Safe transaction.
-    /// @param ownerIndex Array index position of owner address to be removed.
+    /// @param prevOwner Owner that pointed to the owner to be removed in the linked list
     /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
-    function removeOwner(uint256 ownerIndex, address owner, uint8 _threshold)
+    function removeOwner(address prevOwner, address owner, uint8 _threshold)
         public
         authorized
     {
         // Only allow to remove an owner, if threshold can still be reached.
-        require(owners.length - 1 >= _threshold);
+        require(ownerCount - 1 >= _threshold);
         // Validate owner address corresponds to owner index.
-        require(owners[ownerIndex] == owner);
-        isOwner[owner] = false;
-        owners[ownerIndex] = owners[owners.length - 1];
-        owners.length--;
+        require(owners[prevOwner] == owner);
+        owners[prevOwner] = owners[owner];
+        owners[owner] = 0;
+        ownerCount--;
         // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
@@ -80,22 +84,22 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to replace an owner from the Safe with another address.
     ///      This can only be done via a Safe transaction.
-    /// @param oldOwnerIndex Array index position of owner address to be replaced.
+    /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
     /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
-    function replaceOwner(uint256 oldOwnerIndex, address oldOwner, address newOwner)
+    function replaceOwner(address prevOwner, address oldOwner, address newOwner)
         public
         authorized
     {
         // Owner address cannot be null.
-        require(newOwner != 0);
+        require(newOwner != 0 && newOwner != OWNERS_SENTINEL);
         // No duplicate owners allowed.
-        require(!isOwner[newOwner]);
+        require(owners[newOwner] == 0);
         // Validate owner address corresponds to owner index.
-        require(owners[oldOwnerIndex] == oldOwner);
-        isOwner[oldOwner] = false;
-        isOwner[newOwner] = true;
-        owners[oldOwnerIndex] = newOwner;
+        require(owners[prevOwner] == oldOwner);
+        owners[newOwner] = owners[oldOwner];
+        owners[prevOwner] = newOwner;
+        owners[oldOwner] = 0;
     }
 
     /// @dev Allows to update the number of required confirmations by Safe owners.
@@ -106,7 +110,7 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Validate that threshold is smaller than number of owners.
-        require(_threshold <= owners.length);
+        require(_threshold <= ownerCount);
         // There has to be at least one Safe owner.
         require(_threshold >= 1);
         threshold = _threshold;
@@ -125,7 +129,7 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (bool)
     {
-        return isOwner[owner];
+        return owners[owner] != 0;
     }
 
     /// @dev Returns array of owners.
@@ -135,6 +139,23 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (address[])
     {
-        return owners;
+        // Calculate owner count
+        uint256 ownerCount = 0;
+        address currentOwner = owners[OWNERS_SENTINEL];
+        while(currentOwner != OWNERS_SENTINEL) {
+            currentOwner = owners[currentOwner];
+            ownerCount ++;
+        }
+        address[] memory array = new address[](ownerCount);
+
+        // populate return array
+        ownerCount = 0;
+        currentOwner = owners[OWNERS_SENTINEL];
+        while(currentOwner != OWNERS_SENTINEL) {
+            array[ownerCount] = currentOwner;
+            currentOwner = owners[currentOwner];
+            ownerCount ++;
+        }
+        return array;
     }
 }
