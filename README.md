@@ -107,6 +107,9 @@ Experimental implementation of the multi send library that uses structs instead 
 #### CreateAndAddModule.sol
 This library allows to create a new Safe module and whitelist this module for the Safe in one single transaction.
 
+#### Note on naming of execute function of the safes
+To optimize gas usage the naming of the execute functions of the safe contracts was choosen in a matter that result in a low method id. Please consider this when renaming.
+
 Install
 -------
 ### Install requirements with npm:
