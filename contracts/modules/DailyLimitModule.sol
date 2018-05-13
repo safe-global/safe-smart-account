@@ -74,7 +74,7 @@ contract DailyLimitModule is Module {
         // Validate that transfer is not exceeding daily limit.
         require(isUnderLimit(token, amount));
         dailyLimits[token].spentToday += amount;
-        manager.executeModule(to, value, data, Enum.Operation.Call);
+        manager.execTransactionFromModule(to, value, data, Enum.Operation.Call);
     }
 
     /// @dev Returns if Safe transaction is a valid daily limit transaction.

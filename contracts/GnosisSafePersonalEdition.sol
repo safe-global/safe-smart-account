@@ -78,7 +78,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
-    function estimate(address to, uint256 value, bytes data, Enum.Operation operation)
+    function requiredTxGas(address to, uint256 value, bytes data, Enum.Operation operation)
         public
         authorized
         returns (uint256)

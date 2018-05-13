@@ -63,11 +63,11 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
 
     it('should add, remove and replace an owner and update the threshold', async () => {
         // Add owner and set threshold to 3
-        assert.equal(await gnosisSafe.threshold(), 2)
-        let data = await gnosisSafe.contract.addOwner.getData(accounts[1], 3)
+        assert.equal(await gnosisSafe.getThreshold(), 2)
+        let data = await gnosisSafe.contract.addOwnerWithThreshold.getData(accounts[1], 3)
         await executeTransaction('add owner and set threshold to 3', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[2]])
-        assert.equal(await gnosisSafe.threshold(), 3)
+        assert.equal(await gnosisSafe.getThreshold(), 3)
 
         // Replace owner and keep threshold
         data = await gnosisSafe.contract.swapOwner.getData(lw.accounts[1], lw.accounts[2], lw.accounts[3])
@@ -78,7 +78,7 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
         data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[1], lw.accounts[3], 2)
         await executeTransaction('remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1]])
-        assert.equal(await gnosisSafe.threshold(), 2)
+        assert.equal(await gnosisSafe.getThreshold(), 2)
     })
 
     it('should do a CREATE transaction', async () => {

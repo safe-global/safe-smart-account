@@ -25,7 +25,7 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
     try {
-        txGasEstimate = await safe.estimate.call(to, value, data, operation, {from: safe.address, gasPrice: 0})
+        txGasEstimate = await safe.requiredTxGas.call(to, value, data, operation, {from: safe.address, gasPrice: 0})
         // Add 10k else we will fail in case of nested calls
         txGasEstimate = txGasEstimate.toNumber() + 10000
         console.log("    Tx Gas estimate: " + txGasEstimate)

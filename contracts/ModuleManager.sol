@@ -13,9 +13,9 @@ contract ModuleManager is SelfAuthorized {
 
     string public constant NAME = "Module Manager";
     string public constant VERSION = "0.0.1";
-    address public constant MODULES_SENTINEL = address(0x1);
+    address public constant SENTINEL_MODULES = address(0x1);
 
-    mapping (address => address) public modules;
+    mapping (address => address) internal modules;
 
     /// @dev Fallback function accepts Ether transactions.
     function ()
@@ -28,7 +28,7 @@ contract ModuleManager is SelfAuthorized {
     function setupModules(address to, bytes data)
         internal
     {
-        modules[MODULES_SENTINEL] = MODULES_SENTINEL;
+        modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.
             require(executeDelegateCall(to, data, gasleft()));
@@ -37,23 +37,23 @@ contract ModuleManager is SelfAuthorized {
     /// @dev Allows to add a module to the whitelist.
     ///      This can only be done via a Safe transaction.
     /// @param module Module to be whitelisted.
-    function addModule(Module module)
+    function enableModule(Module module)
         public
         authorized
     {
         // Module address cannot be null or sentinel.
-        require(address(module) != 0 && address(module) != MODULES_SENTINEL);
+        require(address(module) != 0 && address(module) != SENTINEL_MODULES);
         // Module cannot be added twice.
         require(modules[module] == 0);
-        modules[module] = modules[MODULES_SENTINEL];
-        modules[MODULES_SENTINEL] = module;
+        modules[module] = modules[SENTINEL_MODULES];
+        modules[SENTINEL_MODULES] = module;
     }
 
     /// @dev Allows to remove a module from the whitelist.
     ///      This can only be done via a Safe transaction.
     /// @param prevModule Module that pointed to the module to be removed in the linked list
     /// @param module Module to be removed.
-    function removeModule(Module prevModule, Module module)
+    function disableModule(Module prevModule, Module module)
         public
         authorized
     {
@@ -68,7 +68,7 @@ contract ModuleManager is SelfAuthorized {
     /// @param value Ether value of module transaction.
     /// @param data Data payload of module transaction.
     /// @param operation Operation type of module transaction.
-    function executeModule(address to, uint256 value, bytes data, Enum.Operation operation)
+    function execTransactionFromModule(address to, uint256 value, bytes data, Enum.Operation operation)
         public
         returns (bool success)
     {
@@ -132,8 +132,8 @@ contract ModuleManager is SelfAuthorized {
     {
         // Calculate module count
         uint256 moduleCount = 0;
-        address currentModule = modules[MODULES_SENTINEL];
-        while(currentModule != MODULES_SENTINEL) {
+        address currentModule = modules[SENTINEL_MODULES];
+        while(currentModule != SENTINEL_MODULES) {
             currentModule = modules[currentModule];
             moduleCount ++;
         }
@@ -141,8 +141,8 @@ contract ModuleManager is SelfAuthorized {
 
         // populate return array
         moduleCount = 0;
-        currentModule = modules[MODULES_SENTINEL];
-        while(currentModule != MODULES_SENTINEL) {
+        currentModule = modules[SENTINEL_MODULES];
+        while(currentModule != SENTINEL_MODULES) {
             array[moduleCount] = currentModule;
             currentModule = modules[currentModule];
             moduleCount ++;

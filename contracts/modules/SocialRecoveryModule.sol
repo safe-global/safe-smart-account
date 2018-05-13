@@ -77,7 +77,7 @@ contract SocialRecoveryModule is Module {
         require(!isExecuted[dataHash]);
         require(isConfirmedByRequiredFriends(dataHash));
         isExecuted[dataHash] = true;
-        manager.executeModule(address(manager), 0, data, Enum.Operation.Call);
+        manager.execTransactionFromModule(address(manager), 0, data, Enum.Operation.Call);
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.

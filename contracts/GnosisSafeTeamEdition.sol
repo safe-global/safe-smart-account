@@ -14,25 +14,22 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => bool) public isExecuted;
 
-    // isConfirmed mapping allows to check if a transaction (by hash) was confirmed by an owner.
-    mapping (bytes32 => mapping(address => bool)) public isConfirmed;
+    // isApproved mapping allows to check if a transaction (by hash) was confirmed by an owner.
+    mapping (bytes32 => mapping(address => bool)) public isApproved;
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @param nonce Transaction nonce.
-    function confirmTransaction(address to, uint256 value, bytes data, Enum.Operation operation, uint256 nonce)
+    /// @param transactionHash Hash of the transaction that should be approved.
+    function approveTransactionByHash(bytes32 transactionHash)
         public
     {
         // Only Safe owners are allowed to confirm Safe transactions.
-        require(isOwner(msg.sender));
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
+        require(owners[msg.sender] != 0);
+        // It should not be possible to confirm an executed transaction
+        require(!isExecuted[transactionHash]);
         // It is only possible to confirm a transaction once.
-        require(!isConfirmed[transactionHash][msg.sender]);
-        isConfirmed[transactionHash][msg.sender] = true;
+        require(!isApproved[transactionHash][msg.sender]);
+        isApproved[transactionHash][msg.sender] = true;
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners. If the sender is an owner this is automatically confirmed.
@@ -41,7 +38,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param nonce Nonce used for this Safe transaction.
-    function confirmExecTransaction(
+    function execTransactionIfApproved(
         address to, 
         uint256 value, 
         bytes data, 
@@ -63,12 +60,12 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     {
         uint256 confirmations = 0;
         // Validate threshold is reached.
-        address currentOwner = owners[OWNERS_SENTINEL];
-        while (currentOwner != OWNERS_SENTINEL) {
-            bool ownerConfirmed = isConfirmed[transactionHash][currentOwner];
+        address currentOwner = owners[SENTINEL_OWNERS];
+        while (currentOwner != SENTINEL_OWNERS) {
+            bool ownerConfirmed = isApproved[transactionHash][currentOwner];
             if(currentOwner == msg.sender || ownerConfirmed) {
                 if (ownerConfirmed) {
-                    isConfirmed[transactionHash][currentOwner] = false;
+                    isApproved[transactionHash][currentOwner] = false;
                 }
                 confirmations ++;
             }

@@ -47,13 +47,13 @@ contract('DailyLimitModule', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
         // Withdraw daily limit
         utils.logGasUsage(
-            'executeModule withdraw daily limit',
+            'execTransactionFromModule withdraw daily limit',
             await dailyLimitModule.executeDailyLimit(
                 accounts[0], 50, 0, {from: accounts[0]}
             )
         )
         utils.logGasUsage(
-            'executeModule withdraw daily limit 2nd time',
+            'execTransactionFromModule withdraw daily limit 2nd time',
             await dailyLimitModule.executeDailyLimit(
                 accounts[0], 50, 0, {from: accounts[0]}
             )
@@ -122,7 +122,7 @@ contract('DailyLimitModule', function(accounts) {
         // Withdraw daily limit
         data = await testToken.transfer.getData(accounts[0], 10)
         utils.logGasUsage(
-            'executeModule withdraw daily limit for ERC20 token',
+            'execTransactionFromModule withdraw daily limit for ERC20 token',
             await dailyLimitModule.executeDailyLimit(
                 testToken.address, 0, data, {from: accounts[0]}
             )
@@ -130,7 +130,7 @@ contract('DailyLimitModule', function(accounts) {
         assert.equal(await testToken.balances(gnosisSafe.address), 90);
         assert.equal(await testToken.balances(accounts[0]), 10);
         utils.logGasUsage(
-            'executeModule withdraw daily limit for ERC20 token 2nd time',
+            'execTransactionFromModule withdraw daily limit for ERC20 token 2nd time',
             await dailyLimitModule.executeDailyLimit(
                 testToken.address, 0, data, {from: accounts[0]}
             )

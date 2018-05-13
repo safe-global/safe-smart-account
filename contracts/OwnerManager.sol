@@ -6,11 +6,11 @@ import "./SelfAuthorized.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract OwnerManager is SelfAuthorized {
 
-    address public constant OWNERS_SENTINEL = address(0x1);
+    address public constant SENTINEL_OWNERS = address(0x1);
 
-    mapping(address => address) public owners;
+    mapping(address => address) internal owners;
     uint256 ownerCount;
-    uint8 public threshold;
+    uint8 internal threshold;
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
@@ -26,17 +26,17 @@ contract OwnerManager is SelfAuthorized {
         // There has to be at least one Safe owner.
         require(_threshold >= 1);
         // Initializing Safe owners.
-        address currentOwner = OWNERS_SENTINEL;
+        address currentOwner = SENTINEL_OWNERS;
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            require(owner != 0 && owner != OWNERS_SENTINEL);
+            require(owner != 0 && owner != SENTINEL_OWNERS);
             // No duplicate owners allowed.
             require(owners[owner] == 0);
             owners[currentOwner] = owner;
             currentOwner = owner;
         }
-        owners[currentOwner] = OWNERS_SENTINEL;
+        owners[currentOwner] = SENTINEL_OWNERS;
         ownerCount = _owners.length;
         threshold = _threshold;
     }
@@ -45,16 +45,16 @@ contract OwnerManager is SelfAuthorized {
     ///      This can only be done via a Safe transaction.
     /// @param owner New owner address.
     /// @param _threshold New threshold.
-    function addOwner(address owner, uint8 _threshold)
+    function addOwnerWithThreshold(address owner, uint8 _threshold)
         public
         authorized
     {
         // Owner address cannot be null.
-        require(owner != 0 && owner != OWNERS_SENTINEL);
+        require(owner != 0 && owner != SENTINEL_OWNERS);
         // No duplicate owners allowed.
         require(owners[owner] == 0);
-        owners[owner] = owners[OWNERS_SENTINEL];
-        owners[OWNERS_SENTINEL] = owner;
+        owners[owner] = owners[SENTINEL_OWNERS];
+        owners[SENTINEL_OWNERS] = owner;
         ownerCount++;
         // Change threshold if threshold was changed.
         if (threshold != _threshold)
@@ -92,7 +92,7 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Owner address cannot be null.
-        require(newOwner != 0 && newOwner != OWNERS_SENTINEL);
+        require(newOwner != 0 && newOwner != SENTINEL_OWNERS);
         // No duplicate owners allowed.
         require(owners[newOwner] == 0);
         // Validate owner address corresponds to owner index.
@@ -116,7 +116,7 @@ contract OwnerManager is SelfAuthorized {
         threshold = _threshold;
     }
 
-    function threshold()
+    function getThreshold()
         public
         view
         returns (uint8)
@@ -143,8 +143,8 @@ contract OwnerManager is SelfAuthorized {
 
         // populate return array
         uint256 index = 0;
-        address currentOwner = owners[OWNERS_SENTINEL];
-        while(currentOwner != OWNERS_SENTINEL) {
+        address currentOwner = owners[SENTINEL_OWNERS];
+        while(currentOwner != SENTINEL_OWNERS) {
             array[index] = currentOwner;
             currentOwner = owners[currentOwner];
             index ++;

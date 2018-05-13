@@ -59,7 +59,7 @@ Once the required number of confirmations is available `execPayTransaction` can 
 `execPayTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
 
 #### GnosisSafeTeamEdition.sol
-This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `confirmExecTransaction`. If the sender of `confirmExecTransaction` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
+This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `execTransactionIfApproved`. If the sender of `execTransactionIfApproved` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
 
 #### GnosisSafeStateChannelEdition.sol
 This version is meant to be used with state channels. It is similar to the personal edition, but without the payment option (therefore the method is named `execTransaction`). Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
@@ -81,7 +81,7 @@ The Safe transaction parameters used for `execTransaction` have to be set like t
 `v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1`'s signature part and corresponds to position `0` in `r` and `s`.
 
 ### Modules
-Modules allow to execute transactions from the Safe without the requirement of multiple signatures. For this Modules that have been added to a Safe can use the `executeModule` function. Modules define their own requirements for execution. Modules need to implement their own replay protection.
+Modules allow to execute transactions from the Safe without the requirement of multiple signatures. For this Modules that have been added to a Safe can use the `execTransactionFromModule` function. Modules define their own requirements for execution. Modules need to implement their own replay protection.
 
 #### DailyLimitModule.sol
 The Daily Limit Modules allows an owner to withdraw specified amounts of specified ERC20 tokens on a daily basis without confirmation by other owners. The daily limit is reset at midnight UTC. Ether is represented with the token address 0. Daily limits can be set via Safe transactions.
@@ -108,7 +108,7 @@ Experimental implementation of the multi send library that uses structs instead 
 This library allows to create a new Safe module and whitelist this module for the Safe in one single transaction.
 
 #### Note on naming of execute function of the safes
-To optimize gas usage the naming of the execute functions of the safe contracts was choosen in a matter that result in a low method id. Please consider this when renaming.
+To optimize gas usage the naming of the methods was choosen in a matter that result in a low method id for methods that are often used. Please consider this when renaming.
 
 Install
 -------

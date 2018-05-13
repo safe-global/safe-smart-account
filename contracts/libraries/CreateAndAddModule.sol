@@ -8,7 +8,7 @@ contract CreateAndAddModule {
 
     /// @dev Function required to compile contract. Gnosis Safe function is called instead.
     /// @param module Not used.
-    function addModule(Module module)
+    function enableModule(Module module)
         public
     {
         revert();
@@ -21,7 +21,7 @@ contract CreateAndAddModule {
         public
     {
         Module module = createModule(proxyFactory, data);
-        this.addModule(module);
+        this.enableModule(module);
     }
 
     function createModule(address proxyFactory, bytes data)

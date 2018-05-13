@@ -22,7 +22,7 @@ contract('MultiSend', function(accounts) {
 
     it('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
         // Threshold is 1 after deployment
-        assert.equal(await gnosisSafe.threshold(), 1)
+        assert.equal(await gnosisSafe.getThreshold(), 1)
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(2, 'ether')})
@@ -47,6 +47,6 @@ contract('MultiSend', function(accounts) {
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
-        assert.equal(await gnosisSafe.threshold(), 2)
+        assert.equal(await gnosisSafe.getThreshold(), 2)
     })
 })

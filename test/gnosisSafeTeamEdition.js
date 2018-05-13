@@ -18,11 +18,12 @@ contract('GnosisSafeTeamEdition', function(accounts) {
     let executeTransaction = async function(subject, accounts, to, value, data, operation) {
         let nonce = utils.currentTimeNs()
         
+        let transactionHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
         for (let account of accounts) {
-            utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.confirmTransaction(to, value, data, operation, nonce, {from: account}))
+            utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionByHash(transactionHash, {from: account}))
         }
 
-        let tx = await gnosisSafe.confirmExecTransaction(to, value, data, operation, nonce, {from: executor})
+        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: executor})
         utils.logGasUsage(subject, tx)
         return tx
     }
@@ -56,11 +57,11 @@ contract('GnosisSafeTeamEdition', function(accounts) {
 
     it('should add, remove and replace an owner and update the threshold', async () => {
         // Add owner and set threshold to 3
-        assert.equal(await gnosisSafe.threshold(), 2)
-        let data = await gnosisSafe.contract.addOwner.getData(accounts[5], 3)
+        assert.equal(await gnosisSafe.getThreshold(), 2)
+        let data = await gnosisSafe.contract.addOwnerWithThreshold.getData(accounts[5], 3)
         await executeTransaction('add owner and set threshold to 3', [accounts[0], accounts[1]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[5], accounts[0], accounts[1], accounts[2]])
-        assert.equal(await gnosisSafe.threshold(), 3)
+        assert.equal(await gnosisSafe.getThreshold(), 3)
 
         // Replace owner and keep threshold
         data = await gnosisSafe.contract.swapOwner.getData(accounts[1], accounts[2], accounts[3])

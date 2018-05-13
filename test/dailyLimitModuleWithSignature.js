@@ -54,7 +54,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         // Withdraw daily limit
         let sigs = await generateSignature(accounts[0], 50, 0)
         utils.logGasUsage(
-            'executeModule withdraw daily limit',
+            'execTransactionFromModule withdraw daily limit',
             await dailyLimitModule.executeDailyLimitWithSignature(
                 accounts[0], 50, 0, sigs.sigV[0], sigs.sigR[0], sigs.sigS[0], {from: accounts[9]}
             )
@@ -70,7 +70,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
 
         sigs = await generateSignature(accounts[0], 50, 0)
         utils.logGasUsage(
-            'executeModule withdraw daily limit 2nd time',
+            'execTransactionFromModule withdraw daily limit 2nd time',
             await dailyLimitModule.executeDailyLimitWithSignature(
                 accounts[0], 50, 0, sigs.sigV[0], sigs.sigR[0], sigs.sigS[0], {from: accounts[9]}
             )
@@ -148,7 +148,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         // First withdrawal
         sigs = await generateSignature(testToken.address, 0, data)
         utils.logGasUsage(
-            'executeModule withdraw daily limit for ERC20 token',
+            'execTransactionFromModule withdraw daily limit for ERC20 token',
             await dailyLimitModule.executeDailyLimitWithSignature(
                 testToken.address, 0, data, sigs.sigV[0], sigs.sigR[0], sigs.sigS[0], {from: accounts[9]}
             )
@@ -167,7 +167,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         // Second withdrawal
         sigs = await generateSignature(testToken.address, 0, data)
         utils.logGasUsage(
-            'executeModule withdraw daily limit for ERC20 token 2nd time',
+            'execTransactionFromModule withdraw daily limit for ERC20 token 2nd time',
             await dailyLimitModule.executeDailyLimitWithSignature(
                 testToken.address, 0, data, sigs.sigV[0], sigs.sigR[0], sigs.sigS[0], {from: accounts[9]}
             )

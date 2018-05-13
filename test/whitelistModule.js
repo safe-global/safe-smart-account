@@ -44,7 +44,7 @@ contract('WhitelistModule', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
         // Withdraw to whitelisted account
         utils.logGasUsage(
-            'executeModule withdraw to whitelisted account',
+            'execTransactionFromModule withdraw to whitelisted account',
             await whitelistModule.executeWhitelisted(
                 accounts[3], 300, 0, {from: accounts[1]}
             )

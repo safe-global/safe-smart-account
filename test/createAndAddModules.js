@@ -10,7 +10,7 @@ const DailyLimitModuleWithSignature = artifacts.require("./modules/DailyLimitMod
 const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
     
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('CreateAndAddModules', function(accounts) {
 
     let gnosisSafe
     let lw
@@ -53,6 +53,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
         )
 
-        console.log(await gnosisSafe.getModules())
+        let modules = await gnosisSafe.getModules()
+        assert.equal(2, modules.length)
     })
 })
