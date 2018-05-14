@@ -1,31 +1,33 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol")
+const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
+const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
+    
 
-
-contract('GnosisSafeStateChannelEdition', function(accounts) {
+contract('StateChannelModule', function(accounts) {
 
     let gnosisSafe
+    let stateChannelModule
     let lw
     let executor = accounts[8]
-
-    const MAX_GAS_PRICE = web3.toWei(100, 'gwei')
 
     const CALL = 0
     const CREATE = 2
 
     let executeTransaction = async function(subject, accounts, to, value, data, operation) {
         let nonce = utils.currentTimeNs()
-        let transactionHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
+        let transactionHash = await stateChannelModule.getTransactionHash(to, value, data, operation, nonce)
 
         // Confirm transaction with signed messages
         let sigs = utils.signTransaction(lw, accounts, transactionHash)
         
         // Execute paying transaction
         // We add the minGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-        let tx = await gnosisSafe.execTransaction(
+        let tx = await stateChannelModule.execTransaction(
             to, value, data, operation, nonce, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor}
         )
         utils.logGasUsage(subject, tx)
@@ -35,16 +37,32 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
     beforeEach(async function () {
         // Create lightwallet
         lw = await utils.createLightwallet()
+        // Create libraries
+        let createAndAddModules = await CreateAndAddModules.new()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        let stateChannelModuleMasterCopy = await StateChannelModule.new()
+
+        // State channel module setup
+        let stateChannelSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
+        let stateChannelCreationData = await proxyFactory.contract.createProxy.getData(stateChannelModuleMasterCopy.address, stateChannelSetupData)
+
+        let mw = ModuleDataWrapper.at(1)
+        let modulesCreationData = '0x' +
+            mw.setup.getData(stateChannelCreationData).substr(74) // Remove method id (10) and position of data in payload (64)
+        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
+
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, createAndAddModules.address, createAndAddModulesData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
         )
+        let modules = await gnosisSafe.getModules()
+        stateChannelModule = StateChannelModule.at(modules[0])
+        assert.equal(await stateChannelModule.manager.call(), gnosisSafe.address)
     })
 
     it('should deposit and withdraw 1 ETH', async () => {
@@ -93,7 +111,9 @@ contract('GnosisSafeStateChannelEdition', function(accounts) {
         let interface = JSON.parse(output.contracts[':Test']['interface'])
         let data = '0x' + output.contracts[':Test']['bytecode']
         const TestContract = web3.eth.contract(interface);
-        let testContract = utils.getParamFromTxEvent(
+        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
+            // We need to tell web3 how to parse the ContractCreation event from the module manager
+            gnosisSafe.contract.allEvents(),
             await executeTransaction('create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, data, CREATE),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )

@@ -1,18 +1,25 @@
 pragma solidity 0.4.23;
-import "./GnosisSafe.sol";
-import "./MasterCopy.sol";
+import "../Module.sol";
+import "../OwnerManager.sol";
 
 
-/// @title Gnosis Safe State Channel Edition - A multisignature wallet with support for confirmations.
+/// @title Gnosis Safe State Module - A module that allows interaction with statechannels.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
+contract StateChannelModule is Module {
 
-    string public constant NAME = "Gnosis Safe State Channel Edition";
+    string public constant NAME = "State Channel Module";
     string public constant VERSION = "0.0.1";
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => bool) public isExecuted;
+
+    /// @dev Setup function sets manager
+    function setup()
+        public
+    {
+        setManager();
+    }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
     /// @param to Destination address of Safe transaction.
@@ -40,7 +47,7 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
         checkHash(transactionHash, v, r, s);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        require(execute(to, value, data, operation, gasleft()));
+        manager.execTransactionFromModule(to, value, data, operation);
     }
 
     function checkHash(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
@@ -51,10 +58,11 @@ contract GnosisSafeStateChannelEdition is MasterCopy, GnosisSafe {
         address lastOwner = address(0);
         address currentOwner;
         uint256 i;
+        uint8 threshold = OwnerManager(manager).getThreshold();
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(owners[currentOwner] != 0);
+            require(OwnerManager(manager).isOwner(currentOwner));
             require(currentOwner > lastOwner);
             lastOwner = currentOwner;
         }
