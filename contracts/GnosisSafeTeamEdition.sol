@@ -19,13 +19,24 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.
-    /// @param transactionHash Hash of the transaction that should be approved.
-    function approveTransactionByHash(bytes32 transactionHash)
+    /// @param to Destination address of Safe transaction.
+    /// @param value Ether value of Safe transaction.
+    /// @param data Data payload of Safe transaction.
+    /// @param operation Operation type of Safe transaction.
+    /// @param nonce Nonce used for this Safe transaction.
+    function approveTransactionWithParameters(
+        address to, 
+        uint256 value, 
+        bytes data, 
+        Enum.Operation operation, 
+        uint256 nonce
+    )
         public
     {
         // Only Safe owners are allowed to confirm Safe transactions.
         require(owners[msg.sender] != 0);
         // It should not be possible to confirm an executed transaction
+        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         require(!isExecuted[transactionHash]);
         // It is only possible to confirm a transaction once.
         require(!isApproved[transactionHash][msg.sender]);

@@ -34,7 +34,7 @@ contract('GnosisSafeEditions', function(accounts) {
     it('check method naming of team safe', async () => {
         let functions = getSortedFunctions(GnosisSafeTeam.abi)
         console.log(functions)
-        assert.equal('approveTransactionByHash', functions[0].name)
+        assert.equal('approveTransactionWithParameters', functions[0].name)
         assert.equal('execTransactionIfApproved', functions[1].name)
     })
     it('check method naming of sate channel module', async () => {

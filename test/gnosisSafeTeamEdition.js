@@ -18,9 +18,8 @@ contract('GnosisSafeTeamEdition', function(accounts) {
     let executeTransaction = async function(subject, accounts, to, value, data, operation) {
         let nonce = utils.currentTimeNs()
         
-        let transactionHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
         for (let account of accounts) {
-            utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionByHash(transactionHash, {from: account}))
+            utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, nonce, {from: account}))
         }
 
         let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: executor})
