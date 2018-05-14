@@ -1,6 +1,6 @@
 const utils = require('./utils')
 
-const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const MultiSendStruct = artifacts.require("./libraries/MultiSendStruct.sol")
 
 
@@ -29,7 +29,7 @@ contract('MultiSendStruct', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
         // Withdraw 2 ETH and change threshold
         // TODO: use web3js parsing when they support tuples
-        let nonce = utils.currentTimeNs()
+        let nonce = await gnosisSafe.nonce()
         let data = '0x2f6fda4a' +
           "0000000000000000000000000000000000000000000000000000000000000020"+
           "0000000000000000000000000000000000000000000000000000000000000004"+
@@ -59,12 +59,12 @@ contract('MultiSendStruct', function(accounts) {
           "0000000000000000000000000000000000000000000000000de0b6b3a7640000"+
           "0000000000000000000000000000000000000000000000000000000000000060"+
           "0000000000000000000000000000000000000000000000000000000000000000"
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
-            await gnosisSafe.execTransaction(
-                multiSend.address, 0, data, DELEGATECALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
+            await gnosisSafe.execPayTransaction(
+                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)

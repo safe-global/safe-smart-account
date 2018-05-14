@@ -1,6 +1,6 @@
 const utils = require('./utils')
 
-const CreateAndAddModule = artifacts.require("./libraries/CreateAndAddModule.sol");
+const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
@@ -16,7 +16,7 @@ contract('SocialRecoveryModule', function(accounts) {
     beforeEach(async function () {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let createAndAddModule = await CreateAndAddModule.new()
+        let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
         gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, 0)
@@ -26,8 +26,9 @@ contract('SocialRecoveryModule', function(accounts) {
         // Create Gnosis Safe and Social Recovery Module in one transactions
         let moduleData = await socialRecoveryModuleMasterCopy.contract.setup.getData([accounts[2], accounts[3]], 2)
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(socialRecoveryModuleMasterCopy.address, moduleData)
-        let createAndAddModuleData = createAndAddModule.contract.createAndAddModule.getData(proxyFactory.address, proxyFactoryData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1]], 2, createAndAddModule.address, createAndAddModuleData)
+        let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
+        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1]], 2, createAndAddModules.address, createAndAddModulesData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Social Recovery Module',

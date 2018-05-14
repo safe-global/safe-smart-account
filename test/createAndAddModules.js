@@ -7,8 +7,7 @@ const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 const DailyLimitModuleWithSignature = artifacts.require("./modules/DailyLimitModuleWithSignature.sol");
-const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
-    
+
 
 contract('CreateAndAddModules', function(accounts) {
 
@@ -40,10 +39,7 @@ contract('CreateAndAddModules', function(accounts) {
         let dailyLimitCreationData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, dailyLimitSetupData)
 
         // Create library data
-        let mw = ModuleDataWrapper.at(1)
-        let modulesCreationData = '0x' +
-            mw.setup.getData(recoveryCreationData).substr(74) + // Remove method id (10) and position of data in payload (64)
-            mw.setup.getData(dailyLimitCreationData).substr(74)
+        let modulesCreationData = utils.createAndAddModulesData([recoveryCreationData,dailyLimitCreationData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe

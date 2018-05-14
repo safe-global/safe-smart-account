@@ -2,7 +2,7 @@ const utils = require('./utils')
 const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
-const CreateAndAddModule = artifacts.require("./libraries/CreateAndAddModule.sol");
+const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModuleWithSignature = artifacts.require("./modules/DailyLimitModuleWithSignature.sol");
 
@@ -26,7 +26,7 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let createAndAddModule = await CreateAndAddModule.new()
+        let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
         gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
@@ -36,8 +36,10 @@ contract('DailyLimitModuleWithSignature', function(accounts) {
         // Create Gnosis Safe and Daily Limit Module in one transactions
         let moduleData = await dailyLimitModuleMasterCopy.contract.setup.getData([0], [100])
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, moduleData)
-        let createAndAddModuleData = createAndAddModule.contract.createAndAddModule.getData(proxyFactory.address, proxyFactoryData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModule.address, createAndAddModuleData)
+        let moduleCreationData = utils.createAndAddModulesData([proxyFactoryData])
+        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, moduleCreationData)
+        
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',

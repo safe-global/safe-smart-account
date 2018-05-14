@@ -1,8 +1,8 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafeStateChannelEdition.sol");
-const CreateAndAddModule = artifacts.require("./libraries/CreateAndAddModule.sol");
+const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
 
@@ -20,7 +20,7 @@ contract('DailyLimitModule', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let createAndAddModule = await CreateAndAddModule.new()
+        let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
         gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
@@ -30,13 +30,15 @@ contract('DailyLimitModule', function(accounts) {
         // Create Gnosis Safe and Daily Limit Module in one transactions
         let moduleData = await dailyLimitModuleMasterCopy.contract.setup.getData([0], [100])
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, moduleData)
-        let createAndAddModuleData = createAndAddModule.contract.createAndAddModule.getData(proxyFactory.address, proxyFactoryData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModule.address, createAndAddModuleData)
+        let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
+        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
         )
         let modules = await gnosisSafe.getModules()
+        console.log(modules)
         dailyLimitModule = DailyLimitModule.at(modules[0])
         assert.equal(await dailyLimitModule.manager.call(), gnosisSafe.address)
     })
@@ -69,17 +71,21 @@ contract('DailyLimitModule', function(accounts) {
     })
 
     it('should change daily limit', async () => {
+        // Funds for paying execution
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
         // Change daily limit
         let dailyLimit = await dailyLimitModule.dailyLimits(0)
         assert.equal(dailyLimit[0], 100);
         let data = await dailyLimitModule.contract.changeDailyLimit.getData(0, 200)
-        let nonce = utils.currentTimeNs()
-        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, nonce)
+
+        let nonce = await gnosisSafe.nonce()
+        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
+
         utils.logGasUsage(
-            'execTransaction change daily limit',
-            await gnosisSafe.execTransaction(
-                dailyLimitModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS
+            'execPayTransaction change daily limit',
+            await gnosisSafe.execPayTransaction(
+                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         dailyLimit = await dailyLimitModule.dailyLimits(0)
@@ -111,10 +117,10 @@ contract('DailyLimitModule', function(accounts) {
         let testToken = TestToken.at(receipt.contractAddress)
         // Add test token to daily limit module
         let data = await dailyLimitModule.contract.changeDailyLimit.getData(testToken.address, 20)
-        let nonce = utils.currentTimeNs()
-        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, nonce)
+        let nonce = await gnosisSafe.nonce()
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        await gnosisSafe.execTransaction(dailyLimitModule.address, 0, data, CALL, nonce, sigs.sigV, sigs.sigR, sigs.sigS)
+        await gnosisSafe.execPayTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS)
         // Transfer 100 tokens to Safe
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})

@@ -1,12 +1,12 @@
 var ProxyFactory = artifacts.require("./ProxyFactory.sol");
 var GnosisSafePersonalEdition = artifacts.require("./GnosisSafePersonalEdition.sol");
 var GnosisSafeTeamEdition = artifacts.require("./GnosisSafeTeamEdition.sol");
-var GnosisSafeStateChannelEdition = artifacts.require("./GnosisSafeStateChannelEdition.sol");
+var StateChannelModule = artifacts.require("./StateChannelModule.sol");
 var DailyLimitModule = artifacts.require("./DailyLimitModule.sol");
 var DailyLimitModuleWithSignature = artifacts.require("./DailyLimitModuleWithSignature.sol");
 var SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 var WhitelistModule = artifacts.require("./WhitelistModule.sol");
-var CreateAndAddModule = artifacts.require("./CreateAndAddModule.sol");
+var CreateAndAddModules = artifacts.require("./CreateAndAddModules.sol");
 var MultiSend = artifacts.require("./MultiSend.sol");
 
 
@@ -22,7 +22,10 @@ module.exports = function(deployer) {
     deployer.deploy(ProxyFactory);
     deployer.deploy(GnosisSafePersonalEdition).then(initSafe);
     deployer.deploy(GnosisSafeTeamEdition).then(initSafe);
-    deployer.deploy(GnosisSafeStateChannelEdition).then(initSafe);
+    deployer.deploy(StateChannelModule).then(function (module) {
+        module.setup()
+        return module
+    });
     deployer.deploy(DailyLimitModule).then(function (module) {
         module.setup([],[])
         return module
@@ -39,6 +42,6 @@ module.exports = function(deployer) {
         module.setup([])
         return module
     });
-    deployer.deploy(CreateAndAddModule);
+    deployer.deploy(CreateAndAddModules);
     deployer.deploy(MultiSend);
 };

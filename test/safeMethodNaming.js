@@ -1,7 +1,7 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafeStateChannel = artifacts.require("./GnosisSafeStateChannelEdition.sol");
+const StateChannelModule = artifacts.require("./StateChannelModule.sol");
 const GnosisSafeTeam = artifacts.require("./GnosisSafeTeamEdition.sol");
 const GnosisSafePersonal = artifacts.require("./GnosisSafePersonalEdition.sol");
 
@@ -37,8 +37,8 @@ contract('GnosisSafeEditions', function(accounts) {
         assert.equal('approveTransactionByHash', functions[0].name)
         assert.equal('execTransactionIfApproved', functions[1].name)
     })
-    it('check method naming of sate channel safe', async () => {
-        let functions = getSortedFunctions(GnosisSafeStateChannel.abi)
+    it('check method naming of sate channel module', async () => {
+        let functions = getSortedFunctions(StateChannelModule.abi)
         console.log(functions)
         assert.equal('execTransaction', functions[0].name)
     })

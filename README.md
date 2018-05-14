@@ -104,8 +104,8 @@ This library allows to batch transactions and execute them at once. This is usef
 #### MultiSendStruct.sol
 Experimental implementation of the multi send library that uses structs instead of a byte array to pass the combined transactions to the contract.
 
-#### CreateAndAddModule.sol
-This library allows to create a new Safe module and whitelist this module for the Safe in one single transaction.
+#### CreateAndAddModules.sol
+This library allows to create new Safe modules and whitelist these modules for the Safe in one single transaction.
 
 #### Note on naming of execute function of the safes
 To optimize gas usage the naming of the methods was choosen in a matter that result in a low method id for methods that are often used. Please consider this when renaming.

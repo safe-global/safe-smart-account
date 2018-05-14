@@ -4,9 +4,7 @@ const solc = require('solc')
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
-    
+const ProxyFactory = artifacts.require("./ProxyFactory.sol") 
 
 contract('StateChannelModule', function(accounts) {
 
@@ -49,9 +47,7 @@ contract('StateChannelModule', function(accounts) {
         let stateChannelSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
         let stateChannelCreationData = await proxyFactory.contract.createProxy.getData(stateChannelModuleMasterCopy.address, stateChannelSetupData)
 
-        let mw = ModuleDataWrapper.at(1)
-        let modulesCreationData = '0x' +
-            mw.setup.getData(stateChannelCreationData).substr(74) // Remove method id (10) and position of data in payload (64)
+        let modulesCreationData = utils.createAndAddModulesData([stateChannelCreationData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe
