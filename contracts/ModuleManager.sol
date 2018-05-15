@@ -28,6 +28,7 @@ contract ModuleManager is SelfAuthorized {
     function setupModules(address to, bytes data)
         internal
     {
+        require(modules[SENTINEL_MODULES] == 0);
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.

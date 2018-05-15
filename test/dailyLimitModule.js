@@ -38,7 +38,6 @@ contract('DailyLimitModule', function(accounts) {
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
         )
         let modules = await gnosisSafe.getModules()
-        console.log(modules)
         dailyLimitModule = DailyLimitModule.at(modules[0])
         assert.equal(await dailyLimitModule.manager.call(), gnosisSafe.address)
     })
