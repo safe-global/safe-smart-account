@@ -16,7 +16,8 @@ contract('StateChannelModule', function(accounts) {
     const CALL = 0
     const CREATE = 2
 
-    let executeTransaction = async function(subject, accounts, to, value, data, operation) {
+    let executeTransaction = async function(subject, accounts, to, value, data, operation, failing) {
+        failing = failing || false
         let nonce = utils.currentTimeNs()
         let transactionHash = await stateChannelModule.getTransactionHash(to, value, data, operation, nonce)
 
@@ -25,11 +26,22 @@ contract('StateChannelModule', function(accounts) {
         
         // Execute paying transaction
         // We add the minGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-        let tx = await stateChannelModule.execTransaction(
+        let tx = stateChannelModule.execTransaction(
             to, value, data, operation, nonce, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor}
         )
-        utils.logGasUsage(subject, tx)
-        return tx
+
+        let res
+        if (failing) {
+            res = await utils.assertRejects(
+                tx,
+                subject
+            )
+        } else {
+            res = await tx
+            utils.logGasUsage(subject, res)
+        }
+        
+        return res
     }
 
     beforeEach(async function () {
@@ -66,6 +78,8 @@ contract('StateChannelModule', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        // Should fail because there are not enough funds
+        await executeTransaction('executeTransaction withdraw 2 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(2, 'ether'), 0, CALL, true)
 
         // Withdraw 1 ETH
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL)

@@ -40,6 +40,13 @@ contract('WhitelistModule', function(accounts) {
     })
 
     it('should execute a withdraw transaction to a whitelisted account', async () => {
+        // Withdraw to whitelisted account should fail as we don't have funds
+        await utils.assertRejects(
+            whitelistModule.executeWhitelisted(
+                accounts[3], 300, 0, {from: accounts[1]}
+            ),
+            "Not enough funds"
+        )
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));

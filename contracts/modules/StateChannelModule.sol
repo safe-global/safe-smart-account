@@ -47,7 +47,7 @@ contract StateChannelModule is Module {
         checkHash(transactionHash, v, r, s);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        manager.execTransactionFromModule(to, value, data, operation);
+        require(manager.execTransactionFromModule(to, value, data, operation));
     }
 
     function checkHash(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)

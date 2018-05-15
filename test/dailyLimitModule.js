@@ -44,6 +44,13 @@ contract('DailyLimitModule', function(accounts) {
     })
 
     it('should withdraw daily limit', async () => {
+        // Withdrawal should fail as there is no ETH in the Safe
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(
+                accounts[0], 50, 0, {from: accounts[0]}
+            ),
+            "Not enough funds"
+        )
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
@@ -103,6 +110,7 @@ contract('DailyLimitModule', function(accounts) {
                 balances[msg.sender] = 100;
             }
             function transfer(address to, uint value) public returns (bool) {
+                require(balances[msg.sender] >= value);
                 balances[msg.sender] -= value;
                 balances[to] += value;
             }
@@ -121,12 +129,17 @@ contract('DailyLimitModule', function(accounts) {
         transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         await gnosisSafe.execPayTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS)
-        // Transfer 100 tokens to Safe
+        // Withdrawal should fail as there are no tokens
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
+        data = await testToken.transfer.getData(accounts[0], 10)
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(testToken.address, 0, data, {from: accounts[0]}),
+            "Not enough funds"
+        )
+        // Transfer 100 tokens to Safe
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})
         assert.equal(await testToken.balances(gnosisSafe.address), 100);
         // Withdraw daily limit
-        data = await testToken.transfer.getData(accounts[0], 10)
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit for ERC20 token',
             await dailyLimitModule.executeDailyLimit(

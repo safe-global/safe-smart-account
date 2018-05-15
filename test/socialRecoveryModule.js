@@ -38,15 +38,25 @@ contract('SocialRecoveryModule', function(accounts) {
         assert.equal(await socialRecoveryModule.manager.call(), gnosisSafe.address)
     })
 
-    it('should allow to replace an owner apporved by friends', async () => {
-        // Replace owner
-        let data = await gnosisSafe.contract.swapOwner.getData("0x1", accounts[0], accounts[9])
+    it('should allow to replace an owner approved by friends', async () => {
+        // Replace non existing owner
+        let data = await gnosisSafe.contract.swapOwner.getData("0x1", accounts[8], accounts[9])
         // Confirm transaction to be executed without confirmations
         let dataHash = await socialRecoveryModule.getDataHash(data)
         await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[3]})
-        // Execution fails, because challenge period is not yet over
+        await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[2]})
         await utils.assertRejects(
-            socialRecoveryModule.recoverAccess(data, {from: accounts[0]}),
+            socialRecoveryModule.recoverAccess(data, {from: accounts[3]}),
+            "Owner does not exist"
+        )
+        
+        // Replace owner
+        data = await gnosisSafe.contract.swapOwner.getData("0x1", accounts[0], accounts[9])
+        // Confirm transaction to be executed without confirmations
+        dataHash = await socialRecoveryModule.getDataHash(data)
+        await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[3]})
+        await utils.assertRejects(
+            socialRecoveryModule.recoverAccess(data, {from: accounts[3]}),
             "It was not confirmed by the required number of friends"
         )
         // Confirm with 2nd friend

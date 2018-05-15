@@ -61,6 +61,6 @@ contract WhitelistModule is Module {
         // Only Safe owners are allowed to execute transactions to whitelisted accounts.
         require(OwnerManager(manager).isOwner(msg.sender));
         require(isWhitelisted[to]);
-        manager.execTransactionFromModule(to, value, data, Enum.Operation.Call);
+        require(manager.execTransactionFromModule(to, value, data, Enum.Operation.Call));
     }
 }

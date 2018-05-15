@@ -115,6 +115,7 @@ async function assertRejects(q, msg) {
         if(!catchFlag)
             assert.fail(res, null, msg)
     }
+    return res
 }
 
 Object.assign(exports, {
