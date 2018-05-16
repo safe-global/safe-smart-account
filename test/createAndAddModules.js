@@ -6,7 +6,7 @@ const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.s
 const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
-const DailyLimitModuleWithSignature = artifacts.require("./modules/DailyLimitModuleWithSignature.sol");
+const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol");
 
 
 contract('CreateAndAddModules', function(accounts) {
@@ -27,16 +27,16 @@ contract('CreateAndAddModules', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
-        let dailyLimitModuleMasterCopy = await DailyLimitModuleWithSignature.new()
-        dailyLimitModuleMasterCopy.setup([], [])
+        let stateChannelModuleMasterCopy = await StateChannelModule.new()
+        stateChannelModuleMasterCopy.setup()
         let socialRecoveryModuleMasterCopy = await SocialRecoveryModule.new()
         socialRecoveryModuleMasterCopy.setup([accounts[0], accounts[1]], 2)
 
         // Create module data
         let recoverySetupData = await socialRecoveryModuleMasterCopy.contract.setup.getData([accounts[2], accounts[3]], 2)
         let recoveryCreationData = await proxyFactory.contract.createProxy.getData(socialRecoveryModuleMasterCopy.address, recoverySetupData)
-        let dailyLimitSetupData = await dailyLimitModuleMasterCopy.contract.setup.getData([0], [100])
-        let dailyLimitCreationData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, dailyLimitSetupData)
+        let dailyLimitSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
+        let dailyLimitCreationData = await proxyFactory.contract.createProxy.getData(stateChannelModuleMasterCopy.address, dailyLimitSetupData)
 
         // Create library data
         let modulesCreationData = utils.createAndAddModulesData([recoveryCreationData,dailyLimitCreationData])

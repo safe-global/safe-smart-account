@@ -2,8 +2,7 @@ var ProxyFactory = artifacts.require("./ProxyFactory.sol");
 var GnosisSafePersonalEdition = artifacts.require("./GnosisSafePersonalEdition.sol");
 var GnosisSafeTeamEdition = artifacts.require("./GnosisSafeTeamEdition.sol");
 var StateChannelModule = artifacts.require("./StateChannelModule.sol");
-var DailyLimitModule = artifacts.require("./DailyLimitModule.sol");
-var DailyLimitModuleWithSignature = artifacts.require("./DailyLimitModuleWithSignature.sol");
+var DailyLimitModule = artifacts.require("./DailyLimitModule.sol")
 var SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 var WhitelistModule = artifacts.require("./WhitelistModule.sol");
 var CreateAndAddModules = artifacts.require("./CreateAndAddModules.sol");
@@ -27,10 +26,6 @@ module.exports = function(deployer) {
         return module
     });
     deployer.deploy(DailyLimitModule).then(function (module) {
-        module.setup([],[])
-        return module
-    });
-    deployer.deploy(DailyLimitModuleWithSignature).then(function (module) {
         module.setup([],[])
         return module
     });
