@@ -1,4 +1,4 @@
-pragma solidity 0.4.23;
+pragma solidity 0.4.24;
 import "./Module.sol";
 import "./MasterCopy.sol";
 import "./Enum.sol";
