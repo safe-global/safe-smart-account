@@ -40,7 +40,7 @@ contract('MultiSend', function(accounts) {
             tw.send.getData(accounts[1], web3.toWei(0.5, 'ether'), '0x').substr(10) +
             tw.send.getData(accounts[2], web3.toWei(1, 'ether'), '0x').substr(10)
         let data = await multiSend.contract.multiSend.getData(nestedTransactionData)
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
