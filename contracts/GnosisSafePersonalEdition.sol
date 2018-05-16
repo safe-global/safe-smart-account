@@ -7,6 +7,7 @@ import "./MasterCopy.sol";
 /// @title Gnosis Safe Personal Edition - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
+/// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
 contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
 
     string public constant NAME = "Gnosis Safe Personal Edition";
