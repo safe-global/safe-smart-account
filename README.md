@@ -61,9 +61,6 @@ Once the required number of confirmations is available `execPayTransaction` can 
 #### GnosisSafeTeamEdition.sol
 This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `execTransactionIfApproved`. If the sender of `execTransactionIfApproved` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
 
-#### GnosisSafeStateChannelEdition.sol
-This version is meant to be used with state channels. It is similar to the personal edition, but without the payment option (therefore the method is named `execTransaction`). Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
-
 ##### Example execution for State Channel Edition
 
 Assuming we have 2 owners in a 2 out of 2 multisig configuration:
@@ -83,11 +80,11 @@ The Safe transaction parameters used for `execTransaction` have to be set like t
 ### Modules
 Modules allow to execute transactions from the Safe without the requirement of multiple signatures. For this Modules that have been added to a Safe can use the `execTransactionFromModule` function. Modules define their own requirements for execution. Modules need to implement their own replay protection.
 
+#### StateChannelModule.sol
+This module is meant to be used with state channels. It is a module similar to the personal edition, but without the payment option (therefore the method is named `execTransaction`). Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
+
 #### DailyLimitModule.sol
 The Daily Limit Modules allows an owner to withdraw specified amounts of specified ERC20 tokens on a daily basis without confirmation by other owners. The daily limit is reset at midnight UTC. Ether is represented with the token address 0. Daily limits can be set via Safe transactions.
-
-#### DailyLimitModuleWithSignature.sol
-This is an extension to the daily limit module that checks if the transaction was issued by an owner via a signatures that is sent to the contract. For this the contract also keeps track of a nounce against replay attacks. This is used if the transaction is submitted by another account then an owner.
 
 #### SocialRecoveryModule.sol
 The Social Recovery Modules allows to recover a Safe in case access to owner accounts was lost. This is done by defining a minimum of 3 friends’ addresses as trusted parties. If all required friends confirm that a Safe owner should be replaced with another address, the Safe owner is replaced and access to the Safe can be restored. Every owner address can be replaced only once.
@@ -100,9 +97,6 @@ Libraries can be called from the Safe via a `DELEGATECALL`. They should not impl
 
 #### MultiSend.sol
 This library allows to batch transactions and execute them at once. This is useful if user interactions require more than one transaction for one UI interaction like approving an amount of ERC20 tokens and calling a contract consuming those tokens. If one transaction fails all are reverted.
-
-#### MultiSendStruct.sol
-Experimental implementation of the multi send library that uses structs instead of a byte array to pass the combined transactions to the contract.
 
 #### CreateAndAddModules.sol
 This library allows to create new Safe modules and whitelist these modules for the Safe in one single transaction.

@@ -73,7 +73,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @dev Allows to estimate a Safe transaction. 
     ///      This method is only meant for estimation purpose, therfore two different protection mechanism against execution in a transaction have been made:
     ///      1.) The method can only be called from the safe itself
-    ///      2.) The response is returned with a revert
+    ///      2.) The response is returned with a revert (not in place yet)
     ///      When estimating set `from` to the address of the safe.
     ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execPayTransaction`
     /// @param to Destination address of Safe transaction.
@@ -90,7 +90,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         require(execute(to, value, data, operation, gasleft()));
         uint256 requiredGas = startGas - gasleft();
         // Convert response to string
-        revert(string(abi.encodePacked(requiredGas)));
+        return requiredGas;
+        // TODO: use this if we can test it: revert(string(abi.encodePacked(requiredGas)));
     }
 
     function checkHash(bytes32 hash, uint8[] v, bytes32[] r, bytes32[] s)
