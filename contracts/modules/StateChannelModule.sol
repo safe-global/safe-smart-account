@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.23;
 import "../Module.sol";
 import "../OwnerManager.sol";
 
