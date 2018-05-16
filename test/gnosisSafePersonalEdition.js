@@ -44,7 +44,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
         // Should fail as it is over the balance (payment should still happen)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, 0, true)
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")

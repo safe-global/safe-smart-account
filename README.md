@@ -54,9 +54,9 @@ There are multiple implementations of the Gnosis Safe contract with different me
 #### GnosisSafePersonalEdition.sol
 This version is targeted at users that control all keys owning a safe. The transaction hash can be signed with the private keys that manage the safe. 
 
-Once the required number of confirmations is available `execPayTransaction` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
+Once the required number of confirmations is available `execAndPayTransaction` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
 
-`execPayTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
+`execAndPayTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
 
 #### GnosisSafeTeamEdition.sol
 This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `execTransactionIfApproved`. If the sender of `execTransactionIfApproved` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.

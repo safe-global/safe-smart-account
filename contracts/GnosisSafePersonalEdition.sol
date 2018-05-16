@@ -1,4 +1,5 @@
 pragma solidity 0.4.24;
+import "./interfaces/ERC20Token.sol";
 import "./GnosisSafe.sol";
 import "./MasterCopy.sol";
 
@@ -26,10 +27,11 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param safeTxGas Gas that should be used for the Safe transaction.
     /// @param dataGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Gas price that should be used for the payment calculation.
+    /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param v Array of signature V values sorted by owner addresses.
     /// @param r Array of signature R values sorted by owner addresses.
     /// @param s Array of signature S values sorted by owner addresses.
-    function execPayTransaction(
+    function execAndPayTransaction(
         address to, 
         uint256 value, 
         bytes data, 
@@ -37,6 +39,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
+        address gasToken,
         uint8[] v, 
         bytes32[] r, 
         bytes32[] s
@@ -44,18 +47,26 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         public
     {
         uint256 startGas = gasleft();
-        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, nonce), v, r, s);
+        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
         require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas);
         if (!execute(to, value, data, operation, safeTxGas)) {
             emit ExecutionFailed();
         }
-        uint256 gasCosts = totalGasCosts(startGas - gasleft(), dataGas);
-
+        
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
-        // solium-disable-next-line security/no-tx-origin
-        tx.origin.transfer(gasCosts * gasPrice);
+        if (gasPrice > 0) {
+            uint256 gasCosts = totalGasCosts(startGas - gasleft(), dataGas);
+            uint256 amount = gasCosts * gasPrice;
+            if (gasToken == address(0)) {
+                 // solium-disable-next-line security/no-tx-origin
+                tx.origin.transfer(amount);
+            } else {
+                 // solium-disable-next-line security/no-tx-origin
+                ERC20Token(gasToken).transfer(tx.origin, amount);
+            }
+        }  
     }
 
     /// @dev Calculates the total gas costs for a safe transaction with the gas costs for the execution of the transaction.
@@ -75,7 +86,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert (not in place yet)
     ///      When estimating set `from` to the address of the safe.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execPayTransaction`
+    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execAndPayTransaction`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -119,6 +130,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param safeTxGas Fas that should be used for the safe transaction.
     /// @param dataGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Maximum gas price that should be used for this transaction.
+    /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
@@ -129,12 +141,13 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 safeTxGas, 
         uint256 dataGas, 
         uint256 gasPrice, 
+        address gasToken,
         uint256 _nonce
     )
         public
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, dataGas, gasPrice, _nonce);
+        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce);
     }
 }

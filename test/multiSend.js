@@ -44,7 +44,7 @@ contract('MultiSend', function(accounts) {
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
-            await gnosisSafe.execPayTransaction(
+            await gnosisSafe.execAndPayTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
