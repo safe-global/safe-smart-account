@@ -45,7 +45,7 @@ contract('MultiSend', function(accounts) {
         utils.logGasUsage(
             'execTransaction send multiple transactions',
             await gnosisSafe.execAndPayTransaction(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
+                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
