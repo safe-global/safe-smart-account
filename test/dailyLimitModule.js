@@ -23,7 +23,7 @@ contract('DailyLimitModule', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
         let dailyLimitModuleMasterCopy = await DailyLimitModule.new()
         // Initialize module master copy
         dailyLimitModuleMasterCopy.setup([], [])
@@ -57,20 +57,20 @@ contract('DailyLimitModule', function(accounts) {
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit',
             await dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, 0, {from: accounts[0]}
+                accounts[0], 50, "0x", {from: accounts[0]}
             )
         )
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit 2nd time',
             await dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, 0, {from: accounts[0]}
+                accounts[0], 50, "0x", {from: accounts[0]}
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 100);
         // Third withdrawal will fail
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, 0, {from: accounts[0]}
+                accounts[0], 50, "0x", {from: accounts[0]}
             ),
             "Daily limit exceeded"
         )

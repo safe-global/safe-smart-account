@@ -26,7 +26,7 @@ contract('CreateAndAddModules', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
         let dailyLimitModuleMasterCopy = await DailyLimitModuleWithSignature.new()
         dailyLimitModuleMasterCopy.setup([], [])
         let socialRecoveryModuleMasterCopy = await SocialRecoveryModule.new()

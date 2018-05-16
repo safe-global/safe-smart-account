@@ -45,7 +45,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         // Create lightwallet
         lw = await utils.createLightwallet()
         gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
     })
 
     it('should create safe from random account', async () => {
@@ -53,7 +53,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         let gasPrice = web3.toWei('20', 'gwei')
         var payingProxyJson = JSON.parse(fs.readFileSync("./build/contracts/PayingProxy.json"));
         const PayingProxy = web3.eth.contract(payingProxyJson.abi);
-        gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, 0)
+        gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
 
         let rawTx = {
             value: 0,
@@ -93,7 +93,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         assert.equal(await web3.eth.getBalance(funder).toNumber(), funderBalance)
 
         await web3.eth.sendTransaction({from: accounts[1], to: target, value: web3.toWei(1.1, 'ether')})
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[8])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), 0, CALL, accounts[8])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[8])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[8])
     })
 })

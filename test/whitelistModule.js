@@ -22,7 +22,7 @@ contract('WhitelistModule', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x")
         let whitelistModuleMasterCopy = await WhitelistModule.new([])
         // Create Gnosis Safe and Whitelist Module in one transactions
         let moduleData = await whitelistModuleMasterCopy.contract.setup.getData([accounts[3]])
@@ -43,7 +43,7 @@ contract('WhitelistModule', function(accounts) {
         // Withdraw to whitelisted account should fail as we don't have funds
         await utils.assertRejects(
             whitelistModule.executeWhitelisted(
-                accounts[3], 300, 0, {from: accounts[1]}
+                accounts[3], 300, "0x", {from: accounts[1]}
             ),
             "Not enough funds"
         )
@@ -54,7 +54,7 @@ contract('WhitelistModule', function(accounts) {
         utils.logGasUsage(
             'execTransactionFromModule withdraw to whitelisted account',
             await whitelistModule.executeWhitelisted(
-                accounts[3], 300, 0, {from: accounts[1]}
+                accounts[3], 300, "0x", {from: accounts[1]}
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 300);

@@ -19,7 +19,7 @@ contract('SocialRecoveryModule', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await GnosisSafe.new()
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x")
         let socialRecoveryModuleMasterCopy = await SocialRecoveryModule.new()
         // Initialize module master copy
         socialRecoveryModuleMasterCopy.setup([accounts[0], accounts[1]], 2)

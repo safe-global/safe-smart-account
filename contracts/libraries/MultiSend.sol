@@ -25,7 +25,7 @@ contract MultiSend {
                 let data := add(transactions, add(i, 0x80))
                 switch call(gas, to, value, data, dataLength, 0, 0)
                 case 0 { revert(0, 0) }
-                i := add(i, add(0x80, mul(div(add(dataLength, 0x20), 0x20), 0x20)))
+                i := add(i, add(0x80, mul(div(add(dataLength, 0x1f), 0x20), 0x20)))
             }
         }
     }

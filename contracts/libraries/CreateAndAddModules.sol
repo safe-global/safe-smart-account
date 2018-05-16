@@ -35,7 +35,7 @@ contract CreateAndAddModules {
                 module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)
 
                 // Data is always padded to 32 bytes
-                i := add(i, add(0x20, mul(div(add(createBytesLength, 0x20), 0x20), 0x20)))
+                i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))
             }
             this.enableModule(module);
         }
