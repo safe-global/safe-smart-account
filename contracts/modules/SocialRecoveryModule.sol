@@ -103,7 +103,7 @@ contract SocialRecoveryModule is Module {
     /// @return Data hash.
     function getDataHash(bytes data)
         public
-        view
+        pure
         returns (bytes32)
     {
         return keccak256(data);

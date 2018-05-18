@@ -148,6 +148,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce);
+        return keccak256(
+            abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce)
+        );
     }
 }

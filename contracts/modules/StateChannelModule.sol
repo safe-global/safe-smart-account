@@ -86,6 +86,6 @@ contract StateChannelModule is Module {
         view
         returns (bytes32)
     {
-        return keccak256(byte(0x19), byte(0), this, to, value, data, operation, nonce);
+        return keccak256(abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, nonce));
     }
 }
