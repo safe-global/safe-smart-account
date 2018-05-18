@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test-norpc": "truffle test",
-    "test": "run-with-testrpc -l 20000000 'truffle test'"
+    "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'"
   },
   "repository": {
     "type": "git",
@@ -29,12 +29,13 @@
     "eth-lightwallet": "^3.0.1",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
+    "ganache-cli": "git://github.com/rmeissner/ganache-cli.git#9ff6b5e3034e062689f3fda598415a665fc007f2",
     "solidity-coverage": "^0.4.2",
-    "truffle": "^4.1.8",
+    "truffle": "git://github.com/trufflesuite/truffle.git#develop",
     "web3": "0.20.6"
   },
   "dependencies": {
-    "ganache-cli": "^6.1.0",
+    "truffle": "git://github.com/trufflesuite/truffle.git#develop",
     "solc": "^0.4.24"
   }
 }

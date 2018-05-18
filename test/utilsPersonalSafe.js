@@ -1,4 +1,5 @@
 const utils = require('./utils')
+const BigNumber = require('bignumber.js');
 
 const GAS_PRICE = web3.toWei(100, 'gwei')
 
@@ -26,7 +27,9 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
     try {
-        txGasEstimate = await safe.requiredTxGas.call(to, value, data, operation, {from: safe.address, gasPrice: 0})
+        let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
+        let estimateResponse = await web3.eth.call({to: safe.address, from: safe.address, data: estimateData})
+        txGasEstimate = new BigNumber(estimateResponse.substring(138), 16)
         // Add 10k else we will fail in case of nested calls
         txGasEstimate = txGasEstimate.toNumber() + 10000
         console.log("    Tx Gas estimate: " + txGasEstimate)
