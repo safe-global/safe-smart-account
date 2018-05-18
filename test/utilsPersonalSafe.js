@@ -1,4 +1,5 @@
 const utils = require('./utils')
+const solc = require('solc')
 const BigNumber = require('bignumber.js');
 
 const GAS_PRICE = web3.toWei(100, 'gwei')
@@ -41,33 +42,58 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     let dataGasEstimate = estimateDataGas(safe, to, value, data, operation, txGasEstimate, txGasToken, nonce, accounts.length)
     console.log("    Data Gas estimate: " + dataGasEstimate)
 
-    let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, txGasToken, nonce)
-    console.log("    Tx Hash: " + transactionHash)
-
+    let gasPrice = GAS_PRICE
+    if (txGasToken != 0) {
+        gasPrice = 1
+    }
+    let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce)
 
     // Confirm transaction with signed messages
     let sigs = utils.signTransaction(lw, accounts, transactionHash)
+    
+    let payload = safe.contract.execAndPayTransaction.getData(
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS
+    )
+    console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Estimate gas of paying transaction
     let estimate = await safe.execAndPayTransaction.estimateGas(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS
     )
-    
-    let payload = safe.contract.execAndPayTransaction.getData(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
-    )
-    console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
     let tx = await safe.execAndPayTransaction(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, GAS_PRICE, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
     utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
     return tx
 }
 
+let deployToken = async function(deployer) {
+    let tokenSource = `
+    contract TestToken {
+        mapping (address => uint) public balances;
+        function TestToken() {
+            balances[msg.sender] = 10000000;
+        }
+        function transfer(address to, uint value) public returns (bool) {
+            require(balances[msg.sender] >= value);
+            balances[msg.sender] -= value;
+            balances[to] += value;
+        }
+    }`
+    let solcOutput = await solc.compile(tokenSource, 0);
+    let tokenInterface = JSON.parse(solcOutput.contracts[':TestToken']['interface'])
+    let tokenBytecode = '0x' + solcOutput.contracts[':TestToken']['bytecode']
+    let transactionHash = await web3.eth.sendTransaction({from: deployer, data: tokenBytecode, gas: 4000000})
+    let receipt = web3.eth.getTransactionReceipt(transactionHash);
+    const TestToken = web3.eth.contract(tokenInterface)
+    return TestToken.at(receipt.contractAddress)
+}
+
 Object.assign(exports, {
     estimateDataGas,
-    executeTransaction
+    executeTransaction,
+    deployToken
 })
