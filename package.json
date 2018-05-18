@@ -32,10 +32,10 @@
     "ganache-cli": "git://github.com/rmeissner/ganache-cli.git#9ff6b5e3034e062689f3fda598415a665fc007f2",
     "solidity-coverage": "^0.4.2",
     "truffle": "git://github.com/trufflesuite/truffle.git#develop",
-    "web3": "0.20.6"
+    "web3": "0.20.6",
+    "bignumber.js": "^7.1.0"
   },
   "dependencies": {
-    "truffle": "git://github.com/trufflesuite/truffle.git#develop",
     "solc": "^0.4.24"
   }
 }
