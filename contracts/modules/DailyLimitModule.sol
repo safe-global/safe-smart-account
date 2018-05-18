@@ -11,7 +11,7 @@ contract DailyLimitModule is Module {
 
     string public constant NAME = "Daily Limit Module";
     string public constant VERSION = "0.0.1";
-    bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = hex"a9059cbb";
+    bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = bytes4(keccak256("transfer(address,uint256)"));
 
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;

@@ -11,7 +11,7 @@ contract SocialRecoveryModule is Module {
 
     string public constant NAME = "Social Recovery Module";
     string public constant VERSION = "0.0.1";
-    bytes4 public constant REPLACE_OWNER_FUNCTION_IDENTIFIER = hex"e318b52b";
+    bytes4 public constant REPLACE_OWNER_FUNCTION_IDENTIFIER = bytes4(keccak256("swapOwner(address,address,address)"));
 
     uint8 public threshold;
     address[] public friends;
