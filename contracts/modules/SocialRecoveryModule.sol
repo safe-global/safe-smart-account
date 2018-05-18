@@ -11,7 +11,6 @@ contract SocialRecoveryModule is Module {
 
     string public constant NAME = "Social Recovery Module";
     string public constant VERSION = "0.0.1";
-    bytes4 public constant REPLACE_OWNER_FUNCTION_IDENTIFIER = bytes4(keccak256("swapOwner(address,address,address)"));
 
     uint8 public threshold;
     address[] public friends;
@@ -59,20 +58,16 @@ contract SocialRecoveryModule is Module {
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.
-    /// @param data Encoded owner replacement transaction.
+    /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
+    /// @param oldOwner Owner address to be replaced.
+    /// @param newOwner New owner address.
     /// @return Returns if transaction can be executed.
-    function recoverAccess(bytes data)
+    function recoverAccess(address prevOwner, address oldOwner, address newOwner)
         public
     {
         // Only friends are allowed to execute the replacement.
         require(isFriend[msg.sender]);
-        // Validate that transaction is a owner replacement transaction.
-        bytes4 functionIdentifier;
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            functionIdentifier := mload(add(data, 0x20))
-        }
-        require(functionIdentifier == REPLACE_OWNER_FUNCTION_IDENTIFIER);
+        bytes memory data = abi.encodeWithSignature("swapOwner(address,address,address)", prevOwner, oldOwner, newOwner);
         bytes32 dataHash = getDataHash(data);
         require(!isExecuted[dataHash]);
         require(isConfirmedByRequiredFriends(dataHash));

@@ -11,7 +11,6 @@ contract DailyLimitModule is Module {
 
     string public constant NAME = "Daily Limit Module";
     string public constant VERSION = "0.0.1";
-    bytes4 public constant TRANSFER_FUNCTION_IDENTIFIER = bytes4(keccak256("transfer(address,uint256)"));
 
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;
@@ -43,49 +42,27 @@ contract DailyLimitModule is Module {
         dailyLimits[token].dailyLimit = dailyLimit;
     }
 
-    function executeInternal(address sender, address to, uint256 value, bytes data)
-        internal
+    /// @dev Returns if Safe transaction is a valid daily limit transaction.
+    /// @param token Address of the token that should be transfered (0 for Ether)
+    /// @param to Address to which the tokens should be transfered
+    /// @param amount Amount of tokens (or Ether) that should be transfered
+    /// @return Returns if transaction can be executed.
+    function executeDailyLimit(address token, address to, uint256 amount)
+        public
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(OwnerManager(manager).isOwner(sender));
-        // Data has to encode a token transfer or has to be empty.
-        require(data.length == 0 && value > 0 || data.length > 0 && value == 0);
-        address token;
-        address receiver;
-        uint256 amount;
-        if (data.length == 0) {
-            token = 0;
-            receiver = to;
-            amount = value;
-        }
-        else {
-            token = to;
-            bytes4 functionIdentifier;
-            // solium-disable-next-line security/no-inline-assembly
-            assembly {
-                functionIdentifier := mload(add(data, 0x20))
-                receiver := mload(add(data, 0x24))
-                amount := mload(add(data, 0x44))
-            }
-            require(functionIdentifier == TRANSFER_FUNCTION_IDENTIFIER);
-        }
-        require(receiver != 0);
+        require(OwnerManager(manager).isOwner(msg.sender));
+        require(to != 0);
         require(amount > 0);
         // Validate that transfer is not exceeding daily limit.
         require(isUnderLimit(token, amount));
         dailyLimits[token].spentToday += amount;
-        require(manager.execTransactionFromModule(to, value, data, Enum.Operation.Call));
-    }
-
-    /// @dev Returns if Safe transaction is a valid daily limit transaction.
-    /// @param to Receiver address in case of Ether transfer, token address in case of a token transfer.
-    /// @param value Ether value in case of an Ether transfer.
-    /// @param data Encoded token transfer. Empty in case of Ether transfer.
-    /// @return Returns if transaction can be executed.
-    function executeDailyLimit(address to, uint256 value, bytes data)
-        public
-    {
-        executeInternal(msg.sender, to, value, data);
+        if (token == 0) {
+            require(manager.execTransactionFromModule(to, amount, "", Enum.Operation.Call));
+        } else {
+            bytes memory data = abi.encodeWithSignature("transfer(address,uint256)", to, amount);
+            require(manager.execTransactionFromModule(token, 0, data, Enum.Operation.Call));
+        }
     }
 
     function isUnderLimit(address token, uint256 amount)

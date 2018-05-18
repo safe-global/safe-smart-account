@@ -46,7 +46,7 @@ contract('DailyLimitModule', function(accounts) {
         // Withdrawal should fail as there is no ETH in the Safe
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, 0, {from: accounts[0]}
+                0, accounts[0], 50, {from: accounts[0]}
             ),
             "Not enough funds"
         )
@@ -57,13 +57,13 @@ contract('DailyLimitModule', function(accounts) {
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit',
             await dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, "0x", {from: accounts[0]}
+                0, accounts[0], 50, {from: accounts[0]}
             )
         )
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit 2nd time',
             await dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, "0x", {from: accounts[0]}
+                0, accounts[0], 50, {from: accounts[0]}
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 100);
@@ -128,21 +128,23 @@ contract('DailyLimitModule', function(accounts) {
         transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         await gnosisSafe.execAndPayTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS)
+
         // Withdrawal should fail as there are no tokens
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
-        data = await testToken.transfer.getData(accounts[0], 10)
         await utils.assertRejects(
-            dailyLimitModule.executeDailyLimit(testToken.address, 0, data, {from: accounts[0]}),
+            dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
             "Not enough funds"
         )
+
         // Transfer 100 tokens to Safe
         await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})
         assert.equal(await testToken.balances(gnosisSafe.address), 100);
+
         // Withdraw daily limit
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit for ERC20 token',
             await dailyLimitModule.executeDailyLimit(
-                testToken.address, 0, data, {from: accounts[0]}
+                testToken.address, accounts[0], 10, {from: accounts[0]}
             )
         )
         assert.equal(await testToken.balances(gnosisSafe.address), 90);
@@ -150,14 +152,15 @@ contract('DailyLimitModule', function(accounts) {
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit for ERC20 token 2nd time',
             await dailyLimitModule.executeDailyLimit(
-                testToken.address, 0, data, {from: accounts[0]}
+                testToken.address, accounts[0], 10, {from: accounts[0]}
             )
         )
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
+
         // Third withdrawal will fail
         await utils.assertRejects(
-            dailyLimitModule.executeDailyLimit(testToken.address, 0, data, {from: accounts[0]}),
+            dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
             "Daily limit exceeded for ERC20 token"
         )
         // Balances didn't change

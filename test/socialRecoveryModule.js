@@ -56,12 +56,12 @@ contract('SocialRecoveryModule', function(accounts) {
         dataHash = await socialRecoveryModule.getDataHash(data)
         await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[3]})
         await utils.assertRejects(
-            socialRecoveryModule.recoverAccess(data, {from: accounts[3]}),
+            socialRecoveryModule.recoverAccess("0x1", accounts[0], accounts[9], {from: accounts[3]}),
             "It was not confirmed by the required number of friends"
         )
         // Confirm with 2nd friend
-        await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[2]})
-        await socialRecoveryModule.recoverAccess(data, {from: accounts[3]})
+        utils.logGasUsage("confirm recovery", await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[2]}))
+        utils.logGasUsage("recover access", await socialRecoveryModule.recoverAccess("0x1", accounts[0], accounts[9], {from: accounts[3]}))
         assert.equal(await gnosisSafe.isOwner(accounts[9]), true);
     })
 });
