@@ -15,7 +15,8 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     mapping (bytes32 => bool) public isExecuted;
 
     // isApproved mapping allows to check if a transaction (by hash) was confirmed by an owner.
-    mapping (bytes32 => mapping(address => bool)) public isApproved;
+    // uint256 is used to optimize the generated assembly. if 0 then false else true
+    mapping (bytes32 => mapping(address => uint256)) public isApproved;
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.
@@ -35,12 +36,10 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     {
         // Only Safe owners are allowed to confirm Safe transactions.
         require(owners[msg.sender] != 0);
-        // It should not be possible to confirm an executed transaction
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
+        // It should not be possible to confirm an executed transaction
         require(!isExecuted[transactionHash]);
-        // It is only possible to confirm a transaction once.
-        require(!isApproved[transactionHash][msg.sender]);
-        isApproved[transactionHash][msg.sender] = true;
+        isApproved[transactionHash][msg.sender] = 1;
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners. If the sender is an owner this is automatically confirmed.
@@ -69,14 +68,15 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     function checkAndClearConfirmations(bytes32 transactionHash)
         internal
     {
+        mapping(address => uint256) approvals = isApproved[transactionHash];
         uint256 confirmations = 0;
         // Validate threshold is reached.
         address currentOwner = owners[SENTINEL_OWNERS];
         while (currentOwner != SENTINEL_OWNERS) {
-            bool ownerConfirmed = isApproved[transactionHash][currentOwner];
+            bool ownerConfirmed = approvals[currentOwner] != 0;
             if(currentOwner == msg.sender || ownerConfirmed) {
                 if (ownerConfirmed) {
-                    isApproved[transactionHash][currentOwner] = false;
+                    approvals[currentOwner] = 0;
                 }
                 confirmations ++;
             }
