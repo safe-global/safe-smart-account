@@ -15,14 +15,15 @@ contract('GnosisSafeTeamEdition', function(accounts) {
     const CALL = 0
     const CREATE = 2
 
-    let executeTransaction = async function(subject, accounts, to, value, data, operation) {
+    let executeTransaction = async function(subject, accounts, to, value, data, operation, sender) {
+        let txSender = sender || executor 
         let nonce = utils.currentTimeNs()
         
-        for (let account of accounts) {
+        for (let account of (accounts.filter(a => a != txSender))) {
             utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, nonce, {from: account}))
         }
 
-        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: executor})
+        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: txSender})
         utils.logGasUsage(subject, tx)
         return tx
     }
@@ -50,6 +51,20 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL)
 
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL)
+
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
+    })
+
+    it('should deposit and withdraw 1 ETH with sender as owner', async () => {
+        // Deposit 1 ETH + some spare money for execution 
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+
+        // Withdraw 1 ETH
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[2])
+
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[2])
 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
     })
