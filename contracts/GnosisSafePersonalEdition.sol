@@ -65,7 +65,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
                 tx.origin.transfer(amount);
             } else {
                  // solium-disable-next-line security/no-tx-origin
-                ERC20Token(gasToken).transfer(tx.origin, amount);
+                require(ERC20Token(gasToken).transfer(tx.origin, amount));
             }
         }  
     }

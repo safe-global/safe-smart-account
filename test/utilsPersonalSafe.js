@@ -78,9 +78,12 @@ let deployToken = async function(deployer) {
             balances[msg.sender] = 10000000;
         }
         function transfer(address to, uint value) public returns (bool) {
-            require(balances[msg.sender] >= value);
+            if (balances[msg.sender] < value) {
+                return false;
+            }
             balances[msg.sender] -= value;
             balances[to] += value;
+            return true;
         }
     }`
     let solcOutput = await solc.compile(tokenSource, 0);

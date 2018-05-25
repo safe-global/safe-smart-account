@@ -21,7 +21,7 @@ contract PayingProxy is DelegateConstructorProxy {
             if (paymentToken == address(0)) {
                 funder.transfer(payment);
             } else {
-                ERC20Token(paymentToken).transfer(funder, payment);
+                require(ERC20Token(paymentToken).transfer(funder, payment));
             }
         } 
     }
