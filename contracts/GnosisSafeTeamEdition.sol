@@ -35,10 +35,10 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         public
     {
         // Only Safe owners are allowed to confirm Safe transactions.
-        require(owners[msg.sender] != 0);
+        require(owners[msg.sender] != 0, "Sender is not an owner");
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         // It should not be possible to confirm an executed transaction
-        require(!isExecuted[transactionHash]);
+        require(!isExecuted[transactionHash], "Safe transaction already executed");
         isApproved[transactionHash][msg.sender] = 1;
     }
 
@@ -58,11 +58,11 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        require(!isExecuted[transactionHash]);
+        require(!isExecuted[transactionHash], "Safe transaction already executed");
         checkAndClearConfirmations(transactionHash);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        require(execute(to, value, data, operation, gasleft()));
+        require(execute(to, value, data, operation, gasleft()), "Could not execute safe transaction");
     }
 
     function checkAndClearConfirmations(bytes32 transactionHash)
@@ -82,7 +82,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
             }
             currentOwner = owners[currentOwner];
         }
-        require(confirmations >= threshold);
+        require(confirmations >= threshold, "Not enough confirmations");
     }
 
     /// @dev Returns hash to be signed by owners.

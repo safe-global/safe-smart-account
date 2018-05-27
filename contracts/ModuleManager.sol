@@ -28,11 +28,11 @@ contract ModuleManager is SelfAuthorized {
     function setupModules(address to, bytes data)
         internal
     {
-        require(modules[SENTINEL_MODULES] == 0);
+        require(modules[SENTINEL_MODULES] == 0, "Modules have already been initialized");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != 0)
             // Setup has to complete successfully or transaction fails.
-            require(executeDelegateCall(to, data, gasleft()));
+            require(executeDelegateCall(to, data, gasleft()), "Could not finish initialization");
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -43,9 +43,9 @@ contract ModuleManager is SelfAuthorized {
         authorized
     {
         // Module address cannot be null or sentinel.
-        require(address(module) != 0 && address(module) != SENTINEL_MODULES);
+        require(address(module) != 0 && address(module) != SENTINEL_MODULES, "Invalid module address provided");
         // Module cannot be added twice.
-        require(modules[module] == 0);
+        require(modules[module] == 0, "Module has already been added");
         modules[module] = modules[SENTINEL_MODULES];
         modules[SENTINEL_MODULES] = module;
     }
@@ -59,7 +59,7 @@ contract ModuleManager is SelfAuthorized {
         authorized
     {
         // Validate module address corresponds to module index.
-        require(modules[prevModule] == address(module));
+        require(modules[prevModule] == address(module), "Invalid prevModule, module pair provided");
         modules[prevModule] = modules[module];
         modules[module] = 0;
     }
@@ -74,7 +74,7 @@ contract ModuleManager is SelfAuthorized {
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
-        require(modules[msg.sender] != 0);
+        require(modules[msg.sender] != 0, "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
     }

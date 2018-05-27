@@ -16,7 +16,7 @@ contract MasterCopy is SelfAuthorized {
         authorized
     {
         // Master copy address cannot be null.
-        require(_masterCopy != 0);
+        require(_masterCopy != 0, "Invalid master copy address provided");
         masterCopy = _masterCopy;
     }
 }

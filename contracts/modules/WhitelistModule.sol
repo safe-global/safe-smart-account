@@ -23,7 +23,7 @@ contract WhitelistModule is Module {
         setManager();
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
-            require(account != 0);
+            require(account != 0, "Invalid account provided");
             isWhitelisted[account] = true;
         }
     }
@@ -34,8 +34,8 @@ contract WhitelistModule is Module {
         public
         authorized
     {
-        require(account != 0);
-        require(!isWhitelisted[account]);
+        require(account != 0, "Invalid account provided");
+        require(!isWhitelisted[account], "Account is already whitelisted");
         isWhitelisted[account] = true;
     }
 
@@ -45,7 +45,7 @@ contract WhitelistModule is Module {
         public
         authorized
     {
-        require(isWhitelisted[account]);
+        require(isWhitelisted[account], "Account is not whitelisted");
         isWhitelisted[account] = false;
     }
 
@@ -59,8 +59,8 @@ contract WhitelistModule is Module {
         returns (bool)
     {
         // Only Safe owners are allowed to execute transactions to whitelisted accounts.
-        require(OwnerManager(manager).isOwner(msg.sender));
-        require(isWhitelisted[to]);
-        require(manager.execTransactionFromModule(to, value, data, Enum.Operation.Call));
+        require(OwnerManager(manager).isOwner(msg.sender), "Method can only be called by an owner");
+        require(isWhitelisted[to], "Target account is not whitelisted");
+        require(manager.execTransactionFromModule(to, value, data, Enum.Operation.Call), "Could not execute transaction");
     }
 }

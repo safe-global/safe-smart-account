@@ -33,7 +33,8 @@
     "solidity-coverage": "^0.4.2",
     "truffle": "git://github.com/trufflesuite/truffle.git#develop",
     "web3": "0.20.6",
-    "bignumber.js": "^7.1.0"
+    "bignumber.js": "^7.1.0",
+    "ethereumjs-abi": "^0.6.5"
   },
   "dependencies": {
     "solc": "^0.4.24"

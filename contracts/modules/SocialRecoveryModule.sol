@@ -23,7 +23,7 @@ contract SocialRecoveryModule is Module {
     mapping (bytes32 => mapping (address => bool)) public isConfirmed;
 
     modifier onlyFriend() {
-        require(isFriend[msg.sender]);
+        require(isFriend[msg.sender], "Method can only be called by a friend");
         _;
     }
 
@@ -33,14 +33,14 @@ contract SocialRecoveryModule is Module {
     function setup(address[] _friends, uint8 _threshold)
         public
     {
-        require(_threshold <= _friends.length);
-        require(_threshold >= 2);
+        require(_threshold <= _friends.length, "Threshold too large");
+        require(_threshold >= 2, "At least 2 friends required");
         setManager();
         // Set allowed friends.
         for (uint256 i = 0; i < _friends.length; i++) {
             address friend = _friends[i];
-            require(friend != 0);
-            require(!isFriend[friend]);
+            require(friend != 0, "Invalid friend address provided");
+            require(!isFriend[friend], "Duplicate friend address provided");
             isFriend[friend] = true;
         }
         friends = _friends;
@@ -53,7 +53,7 @@ contract SocialRecoveryModule is Module {
         public
         onlyFriend
     {
-        require(!isExecuted[dataHash]);
+        require(!isExecuted[dataHash], "Recovery already executed");
         isConfirmed[dataHash][msg.sender] = true;
     }
 
@@ -64,15 +64,14 @@ contract SocialRecoveryModule is Module {
     /// @return Returns if transaction can be executed.
     function recoverAccess(address prevOwner, address oldOwner, address newOwner)
         public
+        onlyFriend
     {
-        // Only friends are allowed to execute the replacement.
-        require(isFriend[msg.sender]);
         bytes memory data = abi.encodeWithSignature("swapOwner(address,address,address)", prevOwner, oldOwner, newOwner);
         bytes32 dataHash = getDataHash(data);
-        require(!isExecuted[dataHash]);
-        require(isConfirmedByRequiredFriends(dataHash));
+        require(!isExecuted[dataHash], "Recovery already executed");
+        require(isConfirmedByRequiredFriends(dataHash), "Recovery has not enough confirmations");
         isExecuted[dataHash] = true;
-        require(manager.execTransactionFromModule(address(manager), 0, data, Enum.Operation.Call));
+        require(manager.execTransactionFromModule(address(manager), 0, data, Enum.Operation.Call), "Could not execute recovery");
     }
 
     /// @dev Returns if Safe transaction is a valid owner replacement transaction.

@@ -20,19 +20,19 @@ contract OwnerManager is SelfAuthorized {
     {
         // Threshold can only be 0 at initialization.
         // Check ensures that setup function can only be called once.
-        require(threshold == 0);
+        require(threshold == 0, "Owners have already been setup");
         // Validate that threshold is smaller than number of added owners.
-        require(_threshold <= _owners.length);
+        require(_threshold <= _owners.length, "Threshold too big");
         // There has to be at least one Safe owner.
-        require(_threshold >= 1);
+        require(_threshold >= 1, "Threshold too small");
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            require(owner != 0 && owner != SENTINEL_OWNERS);
+            require(owner != 0 && owner != SENTINEL_OWNERS, "Invalid owner address provided");
             // No duplicate owners allowed.
-            require(owners[owner] == 0);
+            require(owners[owner] == 0, "Duplicate owner address provided");
             owners[currentOwner] = owner;
             currentOwner = owner;
         }
@@ -50,9 +50,9 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Owner address cannot be null.
-        require(owner != 0 && owner != SENTINEL_OWNERS);
+        require(owner != 0 && owner != SENTINEL_OWNERS, "Invalid owner address provided");
         // No duplicate owners allowed.
-        require(owners[owner] == 0);
+        require(owners[owner] == 0, "Address is already an owner");
         owners[owner] = owners[SENTINEL_OWNERS];
         owners[SENTINEL_OWNERS] = owner;
         ownerCount++;
@@ -71,9 +71,9 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Only allow to remove an owner, if threshold can still be reached.
-        require(ownerCount - 1 >= _threshold);
+        require(ownerCount - 1 >= _threshold, "New owner count too small");
         // Validate owner address corresponds to owner index.
-        require(owners[prevOwner] == owner);
+        require(owners[prevOwner] == owner, "Invalid prevOwner, owner pair provided");
         owners[prevOwner] = owners[owner];
         owners[owner] = 0;
         ownerCount--;
@@ -92,11 +92,11 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Owner address cannot be null.
-        require(newOwner != 0 && newOwner != SENTINEL_OWNERS);
+        require(newOwner != 0 && newOwner != SENTINEL_OWNERS, "Invalid owner address provided");
         // No duplicate owners allowed.
-        require(owners[newOwner] == 0);
+        require(owners[newOwner] == 0, "Address is already an owner");
         // Validate owner address corresponds to owner index.
-        require(owners[prevOwner] == oldOwner);
+        require(owners[prevOwner] == oldOwner, "Invalid prevOwner, owner pair provided");
         owners[newOwner] = owners[oldOwner];
         owners[prevOwner] = newOwner;
         owners[oldOwner] = 0;
@@ -110,9 +110,9 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Validate that threshold is smaller than number of owners.
-        require(_threshold <= ownerCount);
+        require(_threshold <= ownerCount, "Threshold too big");
         // There has to be at least one Safe owner.
-        require(_threshold >= 1);
+        require(_threshold >= 1, "Threshold too small");
         threshold = _threshold;
     }
 

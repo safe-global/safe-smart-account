@@ -51,17 +51,17 @@ contract DailyLimitModule is Module {
         public
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(OwnerManager(manager).isOwner(msg.sender));
-        require(to != 0);
-        require(amount > 0);
+        require(OwnerManager(manager).isOwner(msg.sender), "Method can only be called by an owner");
+        require(to != 0, "Invalid to address provided");
+        require(amount > 0, "Invalid amount provided");
         // Validate that transfer is not exceeding daily limit.
-        require(isUnderLimit(token, amount));
+        require(isUnderLimit(token, amount), "Daily limit has been reached");
         dailyLimits[token].spentToday += amount;
         if (token == 0) {
-            require(manager.execTransactionFromModule(to, amount, "", Enum.Operation.Call));
+            require(manager.execTransactionFromModule(to, amount, "", Enum.Operation.Call), "Could not execute ether transfer");
         } else {
             bytes memory data = abi.encodeWithSignature("transfer(address,uint256)", to, amount);
-            require(manager.execTransactionFromModule(token, 0, data, Enum.Operation.Call));
+            require(manager.execTransactionFromModule(token, 0, data, Enum.Operation.Call), "Could not execute token transfer");
         }
     }
 

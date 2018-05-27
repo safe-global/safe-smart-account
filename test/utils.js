@@ -1,5 +1,6 @@
 const util = require('util');
 const lightwallet = require('eth-lightwallet')
+const abi = require("ethereumjs-abi");
 const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
    
 function createAndAddModulesData(dataArray) {
@@ -118,6 +119,12 @@ async function assertRejects(q, msg) {
     return res
 }
 
+async function getErrorMessage(to, value, data, from) {
+    let returnData = await web3.eth.call({to: to, from: from, value: value, data: data})
+    let returnBuffer = Buffer.from(returnData.slice(2), "hex")
+    return abi.rawDecode(["string"], returnBuffer.slice(4))[0];
+}
+
 Object.assign(exports, {
     createAndAddModulesData,
     currentTimeNs,
@@ -128,5 +135,6 @@ Object.assign(exports, {
     createLightwallet,
     signTransaction,
     assertRejects,
-    estimateDataGasCosts
+    estimateDataGasCosts,
+    getErrorMessage
 })

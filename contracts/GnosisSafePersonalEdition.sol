@@ -51,7 +51,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         checkHash(getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce), v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
-        require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas);
+        require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas, "Not enough gas to execute safe transaction");
         if (!execute(to, value, data, operation, safeTxGas)) {
             emit ExecutionFailed();
         }
@@ -65,7 +65,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
                 tx.origin.transfer(amount);
             } else {
                  // solium-disable-next-line security/no-tx-origin
-                require(ERC20Token(gasToken).transfer(tx.origin, amount));
+                require(ERC20Token(gasToken).transfer(tx.origin, amount), "Could not pay gas costs with token");
             }
         }  
     }
@@ -99,9 +99,10 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         returns (uint256)
     {
         uint256 startGas = gasleft();
+        // We don't provide an error message here, as we use it to return the estimate
         require(execute(to, value, data, operation, gasleft()));
         uint256 requiredGas = startGas - gasleft();
-        // Convert response to string
+        // Convert response to string and return via error message
         revert(string(abi.encodePacked(requiredGas)));
     }
 
@@ -116,8 +117,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = ecrecover(hash, v[i], r[i], s[i]);
-            require(owners[currentOwner] != 0);
-            require(currentOwner > lastOwner);
+            require(owners[currentOwner] != 0, "Signature not provided by owner");
+            require(currentOwner > lastOwner, "Signatures are not ordered by owner address");
             lastOwner = currentOwner;
         }
     }

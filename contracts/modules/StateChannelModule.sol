@@ -43,11 +43,11 @@ contract StateChannelModule is Module {
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        require(!isExecuted[transactionHash]);
+        require(!isExecuted[transactionHash], "Transaction already executed");
         checkHash(transactionHash, v, r, s);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = true;
-        require(manager.execTransactionFromModule(to, value, data, operation));
+        require(manager.execTransactionFromModule(to, value, data, operation), "Could not execute transaction");
     }
 
     function checkHash(bytes32 transactionHash, uint8[] v, bytes32[] r, bytes32[] s)
@@ -62,8 +62,8 @@ contract StateChannelModule is Module {
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = ecrecover(transactionHash, v[i], r[i], s[i]);
-            require(OwnerManager(manager).isOwner(currentOwner));
-            require(currentOwner > lastOwner);
+            require(OwnerManager(manager).isOwner(currentOwner), "Signature not provided by owner");
+            require(currentOwner > lastOwner, "Signatures are not ordered by owner address");
             lastOwner = currentOwner;
         }
     }
