@@ -33,7 +33,7 @@ contract SocialRecoveryModule is Module {
     function setup(address[] _friends, uint8 _threshold)
         public
     {
-        require(_threshold <= _friends.length, "Threshold needs to be below the friends count");
+        require(_threshold <= _friends.length, "Threshold cannot exceed friends count");
         require(_threshold >= 2, "At least 2 friends required");
         setManager();
         // Set allowed friends.

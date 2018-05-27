@@ -22,7 +22,7 @@ contract OwnerManager is SelfAuthorized {
         // Check ensures that setup function can only be called once.
         require(threshold == 0, "Owners have already been setup");
         // Validate that threshold is smaller than number of added owners.
-        require(_threshold <= _owners.length, "Threshold cannot be higher than owner count");
+        require(_threshold <= _owners.length, "Threshold cannot exceed owner count");
         // There has to be at least one Safe owner.
         require(_threshold >= 1, "Threshold needs to be greater than 0");
         // Initializing Safe owners.
@@ -110,7 +110,7 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Validate that threshold is smaller than number of owners.
-        require(_threshold <= ownerCount, "Threshold cannot be higher than owner count");
+        require(_threshold <= ownerCount, "Threshold cannot exceed owner count");
         // There has to be at least one Safe owner.
         require(_threshold >= 1, "Threshold needs to be greater than 0");
         threshold = _threshold;
