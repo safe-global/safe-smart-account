@@ -22,9 +22,9 @@ contract OwnerManager is SelfAuthorized {
         // Check ensures that setup function can only be called once.
         require(threshold == 0, "Owners have already been setup");
         // Validate that threshold is smaller than number of added owners.
-        require(_threshold <= _owners.length, "Threshold too big");
+        require(_threshold <= _owners.length, "Threshold cannot be higher than owner count");
         // There has to be at least one Safe owner.
-        require(_threshold >= 1, "Threshold too small");
+        require(_threshold >= 1, "Threshold needs to be greater than 0");
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
         for (uint256 i = 0; i < _owners.length; i++) {
@@ -71,7 +71,7 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Only allow to remove an owner, if threshold can still be reached.
-        require(ownerCount - 1 >= _threshold, "New owner count too small");
+        require(ownerCount - 1 >= _threshold, "New owner count needs to be larger than new threshold");
         // Validate owner address corresponds to owner index.
         require(owners[prevOwner] == owner, "Invalid prevOwner, owner pair provided");
         owners[prevOwner] = owners[owner];
@@ -110,9 +110,9 @@ contract OwnerManager is SelfAuthorized {
         authorized
     {
         // Validate that threshold is smaller than number of owners.
-        require(_threshold <= ownerCount, "Threshold too big");
+        require(_threshold <= ownerCount, "Threshold cannot be higher than owner count");
         // There has to be at least one Safe owner.
-        require(_threshold >= 1, "Threshold too small");
+        require(_threshold >= 1, "Threshold needs to be greater than 0");
         threshold = _threshold;
     }
 
