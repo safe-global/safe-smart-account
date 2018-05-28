@@ -10,9 +10,9 @@ pragma experimental ABIEncoderV2;
 contract MultiSendStruct {
 
     struct Transaction {
-      address to;
-      uint256 value;
-      bytes data;
+        address to;
+        uint256 value;
+        bytes data;
     }
 
     /// @dev Sends multiple transactions and reverts all if one fails.
@@ -20,7 +20,7 @@ contract MultiSendStruct {
     function multiSend(Transaction[] transactions)
         public
     {
-        for(uint256 i = 0; i < transactions.length; i++) {
+        for (uint256 i = 0; i < transactions.length; i++) {
             Transaction memory transaction = transactions[i];
             require(executeCall(transaction.to, transaction.value, transaction.data));
         }

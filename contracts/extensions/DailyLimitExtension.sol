@@ -30,7 +30,7 @@ contract DailyLimitExtension is Extension {
 
     /// @dev Constructor function triggers setup function.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
-    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether). 
+    /// @param _dailyLimits List of daily limits in smallest unit (e.g. Wei for Ether).
     ///        First entry of array corresponds to first entry in token address array.
     function DailyLimitExtension(address[] tokens, uint256[] _dailyLimits)
         public
@@ -96,8 +96,7 @@ contract DailyLimitExtension is Extension {
             token = 0;
             receiver = to;
             amount = value;
-        }
-        else {
+        } else {
             token = to;
             bytes4 functionIdentifier;
             assembly {
@@ -126,7 +125,7 @@ contract DailyLimitExtension is Extension {
             dailyLimit.lastDay = today();
             dailyLimit.spentToday = 0;
         }
-        if (   dailyLimit.spentToday + amount <= dailyLimit.dailyLimit
+        if (dailyLimit.spentToday + amount <= dailyLimit.dailyLimit
             && dailyLimit.spentToday + amount > dailyLimit.spentToday)
             return true;
         return false;

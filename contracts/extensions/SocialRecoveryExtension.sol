@@ -3,7 +3,8 @@ import "../Extension.sol";
 import "../GnosisSafe.sol";
 
 
-/// @title Social Recovery Extension - Allows to replace an owner without Safe confirmations if friends approve the replacement.
+/// @title Social Recovery Extension - Allows to replace an owner without
+/// Safe confirmations if friends approve the replacement.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract SocialRecoveryExtension is Extension {
 
@@ -108,7 +109,7 @@ contract SocialRecoveryExtension is Extension {
         }
         require(functionIdentifier == REPLACE_OWNER_FUNCTION_IDENTIFIER);
         bytes32 dataHash = getDataHash(data);
-        if (   !isExecuted[dataHash]
+        if (!isExecuted[dataHash]
             && isConfirmedByRequiredFriends(dataHash)) {
             isExecuted[dataHash] = true;
             return true;

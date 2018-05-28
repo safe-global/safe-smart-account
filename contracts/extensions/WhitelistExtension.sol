@@ -41,7 +41,7 @@ contract WhitelistExtension is Extension {
         gnosisSafe = GnosisSafe(msg.sender);
         for (uint256 i = 0; i < accounts.length; i++) {
             require(accounts[i] != 0);
-            isWhitelisted[accounts[i]]= true;
+            isWhitelisted[accounts[i]] = true;
         }
     }
 
