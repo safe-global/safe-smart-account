@@ -10,7 +10,7 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     // For signature array length and dataGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
     let signatureCost = 3 * (64 + 64) + signatureCount * (192 + 2176 + 2176) // array count (3 -> r, s, v) * (array pointer + array length) + signature count * (v, r, s)
     let payload = safe.contract.execAndPayTransaction.getData(
-        to, value, data, operation, txGasEstimate, gasToken, GAS_PRICE, 0, [], [], []
+        to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, [], [], []
     )
     let dataGasEstimate = utils.estimateDataGasCosts(payload) + signatureCost
     if (dataGasEstimate > 65536) {

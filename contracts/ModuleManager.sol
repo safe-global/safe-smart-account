@@ -58,7 +58,8 @@ contract ModuleManager is SelfAuthorized {
         public
         authorized
     {
-        // Validate module address corresponds to module index.
+        // Validate module address and check that it corresponds to module index.
+        require(address(module) != 0 && address(module) != SENTINEL_MODULES, "Invalid module address provided");
         require(modules[prevModule] == address(module), "Invalid prevModule, module pair provided");
         modules[prevModule] = modules[module];
         modules[module] = 0;

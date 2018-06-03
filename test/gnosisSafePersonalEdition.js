@@ -79,6 +79,95 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         assert.ok(executorDiff > 0)
     })
 
+    it('should not be able to add/remove/replace invalid owners', async () => {
+        let zeroAcc = "0x0000000000000000000000000000000000000000"
+        let sentinel = "0x0000000000000000000000000000000000000001"
+        // Fund account for execution 
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+
+        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        // Check initial state
+        assert.equal(await gnosisSafe.getThreshold(), 2)
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
+
+        // Invalid owner additions
+        let data = await gnosisSafe.contract.addOwnerWithThreshold.getData(zeroAcc, 3)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.addOwnerWithThreshold.getData(sentinel, 3)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        // Invalid owner replacements
+        data = await gnosisSafe.contract.swapOwner.getData(sentinel, accounts[0], accounts[1])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.swapOwner.getData(lw.accounts[2], sentinel, accounts[1])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.swapOwner.getData(accounts[1], zeroAcc, accounts[2])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        // Invalid owner removals
+        data = await gnosisSafe.contract.removeOwner.getData(sentinel, accounts[0], 1)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[2], sentinel, 1)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        
+        data = await gnosisSafe.contract.removeOwner.getData(accounts[1], zeroAcc, 1)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        assert.ok(executorDiff > 0)
+
+        // Check that initial state still applies
+        assert.equal(await gnosisSafe.getThreshold(), 2)
+        assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
+    })
+
+    it('should not be able to add/remove invalid modules', async () => {
+        let zeroAcc = "0x0000000000000000000000000000000000000000"
+        let sentinel = "0x0000000000000000000000000000000000000001"
+
+        // Fund account for execution 
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+
+        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+
+        // Add random account as module
+        let randomModule = accounts[6]
+        let data = await gnosisSafe.contract.enableModule.getData(randomModule)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add random module', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor)
+
+        // Check initial state
+        assert.deepEqual(await gnosisSafe.getModules(), [randomModule])
+
+        // Invalid module additions
+        data = await gnosisSafe.contract.enableModule.getData(zeroAcc)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.enableModule.getData(sentinel)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        // Invalid module removals
+        data = await gnosisSafe.contract.disableModule.getData(sentinel, accounts[0])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-module', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        data = await gnosisSafe.contract.disableModule.getData(randomModule, sentinel)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        
+        data = await gnosisSafe.contract.disableModule.getData(accounts[1], zeroAcc)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+
+        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        assert.ok(executorDiff > 0)
+
+        // Check that initial state still applies
+        assert.deepEqual(await gnosisSafe.getModules(), [accounts[6]])
+    })
+
     it('should do a CREATE transaction', async () => {
         // Fund account for execution 
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
