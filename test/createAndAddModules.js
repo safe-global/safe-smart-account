@@ -35,11 +35,11 @@ contract('CreateAndAddModules', function(accounts) {
         // Create module data
         let recoverySetupData = await socialRecoveryModuleMasterCopy.contract.setup.getData([accounts[2], accounts[3]], 2)
         let recoveryCreationData = await proxyFactory.contract.createProxy.getData(socialRecoveryModuleMasterCopy.address, recoverySetupData)
-        let dailyLimitSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
-        let dailyLimitCreationData = await proxyFactory.contract.createProxy.getData(stateChannelModuleMasterCopy.address, dailyLimitSetupData)
+        let stateChannelSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
+        let stateChannelCreationData = await proxyFactory.contract.createProxy.getData(stateChannelModuleMasterCopy.address, stateChannelSetupData)
 
         // Create library data
-        let modulesCreationData = utils.createAndAddModulesData([recoveryCreationData,dailyLimitCreationData])
+        let modulesCreationData = utils.createAndAddModulesData([recoveryCreationData,stateChannelCreationData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe
