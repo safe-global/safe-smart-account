@@ -16,7 +16,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     uint256 internal constant BASE_TX_GAS_COSTS = 21000;
     uint256 internal constant PAYMENT_GAS_COSTS = 11000;
 
-    event ExecutionFailed();
+    event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
 
@@ -48,12 +48,13 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         public
     {
         uint256 startGas = gasleft();
-        checkHash(getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce), v, r, s);
+        bytes32 txHash = getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
+        checkHash(txHash, v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
         require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas, "Not enough gas to execute safe transaction");
         if (!execute(to, value, data, operation, safeTxGas)) {
-            emit ExecutionFailed();
+            emit ExecutionFailed(txHash);
         }
         
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls

@@ -63,6 +63,7 @@ function checkTxEvent(transaction, eventName, contract, exists, subject) {
       logs = logs.filter((l) => l.event === eventName && l.address === contract)
   }
   assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
+  return logs
 }
 
 function logGasUsage(subject, transactionOrReceipt) {

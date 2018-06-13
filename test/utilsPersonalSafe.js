@@ -66,7 +66,10 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     let tx = await safe.execAndPayTransaction(
         to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
-    utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
+    let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
+    if (txFailed) {
+        assert.equal(transactionHash, events[0].args.txHash)
+    }
     return tx
 }
 
