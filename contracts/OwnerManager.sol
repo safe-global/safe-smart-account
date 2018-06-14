@@ -10,7 +10,7 @@ contract OwnerManager is SelfAuthorized {
 
     mapping(address => address) internal owners;
     uint256 ownerCount;
-    uint8 internal threshold;
+    uint256 internal threshold;
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
@@ -123,7 +123,7 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (uint8)
     {
-        return threshold;
+        return uint8(threshold);
     }
 
     function isOwner(address owner)

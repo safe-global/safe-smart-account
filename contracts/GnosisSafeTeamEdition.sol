@@ -12,7 +12,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     string public constant VERSION = "0.0.1";
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
-    mapping (bytes32 => bool) public isExecuted;
+    mapping (bytes32 => uint256) public isExecuted;
 
     // isApproved mapping allows to check if a transaction (by hash) was confirmed by an owner.
     // uint256 is used to optimize the generated assembly. if 0 then false else true
@@ -38,7 +38,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         require(owners[msg.sender] != 0, "Sender is not an owner");
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
         // It should not be possible to confirm an executed transaction
-        require(!isExecuted[transactionHash], "Safe transaction already executed");
+        require(isExecuted[transactionHash] == 0, "Safe transaction already executed");
         isApproved[transactionHash][msg.sender] = 1;
     }
 
@@ -58,10 +58,10 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        require(!isExecuted[transactionHash], "Safe transaction already executed");
+        require(isExecuted[transactionHash] == 0, "Safe transaction already executed");
         checkAndClearConfirmations(transactionHash);
         // Mark as executed and execute transaction.
-        isExecuted[transactionHash] = true;
+        isExecuted[transactionHash] = 1;
         require(execute(to, value, data, operation, gasleft()), "Could not execute safe transaction");
     }
 

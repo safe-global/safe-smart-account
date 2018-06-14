@@ -18,7 +18,7 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     } else {
         dataGasEstimate += 128
     }
-    return dataGasEstimate;
+    return dataGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
 }
 
 let executeTransaction = async function(lw, safe, subject, accounts, to, value, data, operation, executor, gasToken, fails) {

@@ -12,7 +12,7 @@ contract StateChannelModule is Module {
     string public constant VERSION = "0.0.1";
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
-    mapping (bytes32 => bool) public isExecuted;
+    mapping (bytes32 => uint256) public isExecuted;
 
     /// @dev Setup function sets manager
     function setup()
@@ -43,10 +43,10 @@ contract StateChannelModule is Module {
         public
     {
         bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        require(!isExecuted[transactionHash], "Transaction already executed");
+        require(isExecuted[transactionHash] == 0, "Transaction already executed");
         checkHash(transactionHash, v, r, s);
         // Mark as executed and execute transaction.
-        isExecuted[transactionHash] = true;
+        isExecuted[transactionHash] = 1;
         require(manager.execTransactionFromModule(to, value, data, operation), "Could not execute transaction");
     }
 

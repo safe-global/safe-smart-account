@@ -43,7 +43,6 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         bytes32[] s
     )
         public
-        returns (bool)
     {
         uint256 startGas = gasleft();
         bytes32 txHash = getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
