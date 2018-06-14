@@ -8,9 +8,9 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     // numbers < 256 are 192 -> 31 * 4 + 68
     // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and dataGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
-    let signatureCost = 3 * (64 + 64) + signatureCount * (192 + 2176 + 2176) // array count (3 -> r, s, v) * (array pointer + array length) + signature count * (v, r, s)
-    let payload = safe.contract.execAndPayTransaction.getData(
-        to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, [], [], []
+    let signatureCost = signatureCount * (68 + 2176 + 2176) // array count (3 -> r, s, v) * signature count
+    let payload = safe.contract.execTransactionAndPaySubmitter.getData(
+        to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, "0x"
     )
     let dataGasEstimate = utils.estimateDataGasCosts(payload) + signatureCost
     if (dataGasEstimate > 65536) {
@@ -51,20 +51,20 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     // Confirm transaction with signed messages
     let sigs = utils.signTransaction(lw, accounts, transactionHash)
     
-    let payload = safe.contract.execAndPayTransaction.getData(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS
+    let payload = safe.contract.execTransactionAndPaySubmitter.getData(
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs
     )
     console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Estimate gas of paying transaction
-    let estimate = await safe.execAndPayTransaction.estimateGas(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS
+    let estimate = await safe.execTransactionAndPaySubmitter.estimateGas(
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs
     )
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-    let tx = await safe.execAndPayTransaction(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor, gas: estimate + txGasEstimate + 10000}
+    let tx = await safe.execTransactionAndPaySubmitter(
+        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
     let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
     if (txFailed) {

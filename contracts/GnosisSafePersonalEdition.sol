@@ -2,13 +2,14 @@ pragma solidity 0.4.24;
 import "./interfaces/ERC20Token.sol";
 import "./GnosisSafe.sol";
 import "./MasterCopy.sol";
+import "./SignatureValidator.sol";
 
 
 /// @title Gnosis Safe Personal Edition - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
+contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator {
 
     string public constant NAME = "Gnosis Safe Personal Edition";
     string public constant VERSION = "0.0.1";
@@ -17,7 +18,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
 
     uint256 public nonce;
 
-    /// @dev Allows to execute a Safe transaction confirmed by required number of owners.
+    /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
+    ///      Note: The fees are always transfered, even if the user transaction fails. 
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -26,10 +28,8 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
-    /// @param v Array of signature V values sorted by owner addresses.
-    /// @param r Array of signature R values sorted by owner addresses.
-    /// @param s Array of signature S values sorted by owner addresses.
-    function execAndPayTransaction(
+    /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+    function execTransactionAndPaySubmitter(
         address to, 
         uint256 value, 
         bytes data, 
@@ -38,19 +38,19 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
-        uint8[] v, 
-        bytes32[] r, 
-        bytes32[] s
+        bytes signatures
     )
         public
+        returns (bool success)
     {
         uint256 startGas = gasleft();
         bytes32 txHash = getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
-        checkHash(txHash, v, r, s);
+        checkHash(txHash, signatures);
         // Increase nonce and execute transaction.
         nonce++;
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
-        if (!execute(to, value, data, operation, safeTxGas)) {
+        success = execute(to, value, data, operation, safeTxGas);
+        if (!success) {
             emit ExecutionFailed(txHash);
         }
         
@@ -73,7 +73,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
     ///      When estimating set `from` to the address of the safe.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execAndPayTransaction`
+    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransactionAndPaySubmitter`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -92,7 +92,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         revert(string(abi.encodePacked(requiredGas)));
     }
 
-    function checkHash(bytes32 hash, uint8[] v, bytes32[] r, bytes32[] s)
+    function checkHash(bytes32 txHash, bytes signatures)
         internal
         view
     {
@@ -102,7 +102,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         uint256 i;
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
-            currentOwner = ecrecover(hash, v[i], r[i], s[i]);
+            currentOwner = recoverKey(txHash, signatures, i);
             require(owners[currentOwner] != 0, "Signature not provided by owner");
             require(currentOwner > lastOwner, "Signatures are not ordered by owner address");
             lastOwner = currentOwner;

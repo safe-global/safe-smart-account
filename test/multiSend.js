@@ -66,8 +66,8 @@ contract('MultiSend', function(accounts) {
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
-            await gnosisSafe.execAndPayTransaction(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
+            await gnosisSafe.execTransactionAndPaySubmitter(
+                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
@@ -88,8 +88,8 @@ contract('MultiSend', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execAndPayTransaction(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
+            await gnosisSafe.execTransactionAndPaySubmitter(
+                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )
@@ -112,8 +112,8 @@ contract('MultiSend', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execAndPayTransaction(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs.sigV, sigs.sigR, sigs.sigS
+            await gnosisSafe.execTransactionAndPaySubmitter(
+                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )

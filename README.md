@@ -54,9 +54,9 @@ There are multiple implementations of the Gnosis Safe contract with different me
 #### GnosisSafePersonalEdition.sol
 This version is targeted at users that control all keys owning a safe. The transaction hash can be signed with the private keys that manage the safe. 
 
-Once the required number of confirmations is available `execAndPayTransaction` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
+Once the required number of confirmations is available `execTransactionAndPaySubmitter` can be called with the sending confirmation signatures. This method will pay the submitter of the transaction for the transaction fees after the Safe transaction has been executed.
 
-`execAndPayTransaction` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
+`execTransactionAndPaySubmitter` expects all confirmations sorted by owner address. This is required to easily validate no confirmation duplicates exist.
 
 #### GnosisSafeTeamEdition.sol
 This version is targeted at teams where each owner is a different user. Each owner has to confirm a transaction by using `confirmTransaction`. Once the required number of owners has confirmed, the transaction can be executed via `execTransactionIfApproved`. If the sender of `execTransactionIfApproved` is an owner it is not necessary to confirm the transaction before. Furthermore this version doesn't store the nonce in the contract but for each transaction a nonce needs to be specified.
@@ -70,12 +70,10 @@ Assuming we have 2 owners in a 2 out of 2 multisig configuration:
 
 `0x1` and `0x2` are confirming by signing a message.
 
-The Safe transaction parameters used for `execTransaction` have to be set like the following:
-* `v = [v_0x1, v_0x2]`
-* `r = [r_0x1, r_0x2]`
-* `s = [s_0x1, s_0x2]`
+The signatures bytes used for `execTransaction` have to be build like the following:
+* `bytes = 0x{r_0x1}{s_0x1}{v_0x1}{r_0x2}{s_0x2}{v_0x2}`
 
-`v`, `r` and `s` are the signature parameters for the signed confirmation messages. Position `0` in `v` represents `0x1`'s signature part and corresponds to position `0` in `r` and `s`.
+`v`, `r` and `s` are the signature parameters for the signed confirmation messages. All values are hex encoded. `r` and `s` are padded to 32 bytes and `v` is padded to 8 bytes.
 
 ### Modules
 Modules allow to execute transactions from the Safe without the requirement of multiple signatures. For this Modules that have been added to a Safe can use the `execTransactionFromModule` function. Modules define their own requirements for execution. Modules need to implement their own replay protection.

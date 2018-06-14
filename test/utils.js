@@ -90,21 +90,13 @@ async function createLightwallet() {
 }
 
 function signTransaction(lw, signers, transactionHash) {
-    let sigV = []
-    let sigR = []
-    let sigS = []
+    let signatureBytes = "0x"
     signers.sort()
     for (var i=0; i<signers.length; i++) {
         let sig = lightwallet.signing.signMsgHash(lw.keystore, lw.passwords, transactionHash, signers[i])
-        sigV.push(sig.v)
-        sigR.push('0x' + sig.r.toString('hex'))
-        sigS.push('0x' + sig.s.toString('hex'))
+        signatureBytes += sig.r.toString('hex') + sig.s.toString('hex') + sig.v.toString(16)
     }
-    return {
-        sigV: sigV,
-        sigR: sigR,
-        sigS: sigS
-    }
+    return signatureBytes
 }
 
 async function assertRejects(q, msg) {

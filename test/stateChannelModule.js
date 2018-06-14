@@ -27,7 +27,7 @@ contract('StateChannelModule', function(accounts) {
         // Execute paying transaction
         // We add the minGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
         let tx = stateChannelModule.execTransaction(
-            to, value, data, operation, nonce, sigs.sigV, sigs.sigR, sigs.sigS, {from: executor}
+            to, value, data, operation, nonce, sigs, {from: executor}
         )
 
         let res
