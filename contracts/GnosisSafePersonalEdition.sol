@@ -13,9 +13,6 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     string public constant NAME = "Gnosis Safe Personal Edition";
     string public constant VERSION = "0.0.1";
     
-    uint256 internal constant BASE_TX_GAS_COSTS = 21000;
-    uint256 internal constant PAYMENT_GAS_COSTS = 11000;
-
     event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
@@ -26,7 +23,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param dataGas Gas costs for data used to trigger the safe transaction.
+    /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param v Array of signature V values sorted by owner addresses.
@@ -46,41 +43,30 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe {
         bytes32[] s
     )
         public
+        returns (bool)
     {
         uint256 startGas = gasleft();
         bytes32 txHash = getTransactionHash(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
         checkHash(txHash, v, r, s);
         // Increase nonce and execute transaction.
         nonce++;
-        require(gasleft() - PAYMENT_GAS_COSTS >= safeTxGas, "Not enough gas to execute safe transaction");
+        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         if (!execute(to, value, data, operation, safeTxGas)) {
             emit ExecutionFailed(txHash);
         }
         
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
-            uint256 gasCosts = totalGasCosts(startGas - gasleft(), dataGas);
+            uint256 gasCosts = (startGas - gasleft()) + dataGas;
             uint256 amount = gasCosts * gasPrice;
             if (gasToken == address(0)) {
-                 // solium-disable-next-line security/no-tx-origin
-                tx.origin.transfer(amount);
+                 // solium-disable-next-line security/no-tx-origin,security/no-send
+                require(tx.origin.send(amount), "Could not pay gas costs with ether");
             } else {
                  // solium-disable-next-line security/no-tx-origin
                 require(ERC20Token(gasToken).transfer(tx.origin, amount), "Could not pay gas costs with token");
             }
         }  
-    }
-
-    /// @dev Calculates the total gas costs for a safe transaction with the gas costs for the execution of the transaction.
-    /// @param executionGas Gas costs for the execution of the safe transaction.
-    /// @param dataGas Gas costs for data used to trigger the safe transaction.
-    /// @return Total gas costs for the execution (this includes gas costs for the payment to tx.origin, base transaction and payload data).
-    function totalGasCosts(uint256 executionGas, uint256 dataGas) 
-        public 
-        pure
-        returns (uint256) 
-    {
-        return executionGas + dataGas + PAYMENT_GAS_COSTS + BASE_TX_GAS_COSTS;
     }
 
     /// @dev Allows to estimate a Safe transaction. 
