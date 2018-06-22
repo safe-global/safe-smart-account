@@ -55,7 +55,7 @@ contract StateChannelModule is Module, SignatureValidator {
         address lastOwner = address(0);
         address currentOwner;
         uint256 i;
-        uint8 threshold = OwnerManager(manager).getThreshold();
+        uint256 threshold = OwnerManager(manager).getThreshold();
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = recoverKey(transactionHash, signatures, i);

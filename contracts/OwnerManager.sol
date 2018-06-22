@@ -15,7 +15,7 @@ contract OwnerManager is SelfAuthorized {
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
     /// @param _threshold Number of required confirmations for a Safe transaction.
-    function setupOwners(address[] _owners, uint8 _threshold)
+    function setupOwners(address[] _owners, uint256 _threshold)
         internal
     {
         // Threshold can only be 0 at initialization.
@@ -45,7 +45,7 @@ contract OwnerManager is SelfAuthorized {
     ///      This can only be done via a Safe transaction.
     /// @param owner New owner address.
     /// @param _threshold New threshold.
-    function addOwnerWithThreshold(address owner, uint8 _threshold)
+    function addOwnerWithThreshold(address owner, uint256 _threshold)
         public
         authorized
     {
@@ -66,7 +66,7 @@ contract OwnerManager is SelfAuthorized {
     /// @param prevOwner Owner that pointed to the owner to be removed in the linked list
     /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
-    function removeOwner(address prevOwner, address owner, uint8 _threshold)
+    function removeOwner(address prevOwner, address owner, uint256 _threshold)
         public
         authorized
     {
@@ -107,7 +107,7 @@ contract OwnerManager is SelfAuthorized {
     /// @dev Allows to update the number of required confirmations by Safe owners.
     ///      This can only be done via a Safe transaction.
     /// @param _threshold New threshold.
-    function changeThreshold(uint8 _threshold)
+    function changeThreshold(uint256 _threshold)
         public
         authorized
     {
@@ -121,9 +121,9 @@ contract OwnerManager is SelfAuthorized {
     function getThreshold()
         public
         view
-        returns (uint8)
+        returns (uint256)
     {
-        return uint8(threshold);
+        return uint256(threshold);
     }
 
     function isOwner(address owner)

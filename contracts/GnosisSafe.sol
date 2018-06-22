@@ -13,7 +13,7 @@ contract GnosisSafe is ModuleManager, OwnerManager {
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setup(address[] _owners, uint8 _threshold, address to, bytes data)
+    function setup(address[] _owners, uint256 _threshold, address to, bytes data)
         public
     {
         setupOwners(_owners, _threshold);

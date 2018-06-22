@@ -12,7 +12,7 @@ contract SocialRecoveryModule is Module {
     string public constant NAME = "Social Recovery Module";
     string public constant VERSION = "0.0.1";
 
-    uint8 public threshold;
+    uint256 public threshold;
     address[] public friends;
 
     // isFriend mapping maps friend's address to friend status.
@@ -30,7 +30,7 @@ contract SocialRecoveryModule is Module {
     /// @dev Setup function sets initial storage of contract.
     /// @param _friends List of friends' addresses.
     /// @param _threshold Required number of friends to confirm replacement.
-    function setup(address[] _friends, uint8 _threshold)
+    function setup(address[] _friends, uint256 _threshold)
         public
     {
         require(_threshold <= _friends.length, "Threshold cannot exceed friends count");
