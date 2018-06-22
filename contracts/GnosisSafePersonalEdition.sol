@@ -1,15 +1,15 @@
 pragma solidity 0.4.24;
-import "./interfaces/ERC20Token.sol";
 import "./GnosisSafe.sol";
 import "./MasterCopy.sol";
 import "./SignatureValidator.sol";
+import "./SecuredTokenTransfer.sol";
 
 
 /// @title Gnosis Safe Personal Edition - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator {
+contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator, SecuredTokenTransfer {
 
     string public constant NAME = "Gnosis Safe Personal Edition";
     string public constant VERSION = "0.0.1";
@@ -63,7 +63,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator
                 require(tx.origin.send(amount), "Could not pay gas costs with ether");
             } else {
                  // solium-disable-next-line security/no-tx-origin
-                require(ERC20Token(gasToken).transfer(tx.origin, amount), "Could not pay gas costs with token");
+                require(transferToken(gasToken, tx.origin, amount), "Could not pay gas costs with token");
             }
         }  
     }

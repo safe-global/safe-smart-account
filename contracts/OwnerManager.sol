@@ -123,7 +123,7 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (uint256)
     {
-        return uint256(threshold);
+        return threshold;
     }
 
     function isOwner(address owner)

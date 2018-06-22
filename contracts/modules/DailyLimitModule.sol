@@ -74,8 +74,8 @@ contract DailyLimitModule is Module {
             dailyLimit.lastDay = today();
             dailyLimit.spentToday = 0;
         }
-        if (   dailyLimit.spentToday + amount <= dailyLimit.dailyLimit
-            && dailyLimit.spentToday + amount > dailyLimit.spentToday)
+        if (dailyLimit.spentToday + amount <= dailyLimit.dailyLimit && 
+            dailyLimit.spentToday + amount > dailyLimit.spentToday)
             return true;
         return false;
     }
