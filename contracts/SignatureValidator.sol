@@ -16,7 +16,7 @@ contract SignatureValidator {
         uint256 pos
     )
         pure
-        public
+        internal
         returns (address) 
     {
         uint8 v;
@@ -31,7 +31,7 @@ contract SignatureValidator {
     /// @param signatures concatenated rsv signatures
     function signatureSplit(bytes signatures, uint256 pos)
         pure
-        public
+        internal
         returns (uint8 v, bytes32 r, bytes32 s)
     {
         // The signature format is a compact form of:
