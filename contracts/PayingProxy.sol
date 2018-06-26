@@ -21,7 +21,7 @@ contract PayingProxy is DelegateConstructorProxy, SecuredTokenTransfer {
             if (paymentToken == address(0)) {
                 funder.transfer(payment);
             } else {
-                transferToken(paymentToken, funder, payment);
+                require(transferToken(paymentToken, funder, payment));
             }
         } 
     }

@@ -4,7 +4,7 @@ pragma solidity 0.4.24;
 /// @title SecuredTokenTransfer - Secure token transfer
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SecuredTokenTransfer {
-    
+
     /// @dev Transfers a token and returns if it was a success
     /// @param token Token that should be transferred
     /// @param receiver Receiver to whom the token should be transferred
@@ -25,7 +25,7 @@ contract SecuredTokenTransfer {
             returndatacopy(ptr, 0, returndatasize)
             switch returndatasize 
             case 0 { transferred := success }
-            case 0x20 { transferred := not(or(iszero(success), iszero(ptr))) }
+            case 0x20 { transferred := iszero(or(iszero(success), iszero(mload(ptr)))) }
             default { transferred := 0 }
         }
     }
