@@ -15,10 +15,14 @@ contract StateChannelModule is Module, SignatureValidator {
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => uint256) public isExecuted;
 
+    // uniqueHash is a unique bytes32 for this instance of a gnosis-safe multisig
+    bytes32 uniqueHash;
+
     /// @dev Setup function sets manager
-    function setup()
+    function setup(bytes32 _uniqueHash)
         public
     {
+        uniqueHash = _uniqueHash;
         setManager();
     }
 
@@ -83,6 +87,6 @@ contract StateChannelModule is Module, SignatureValidator {
         view
         returns (bytes32)
     {
-        return keccak256(abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, nonce));
+        return keccak256(abi.encodePacked(byte(0x19), byte(0), uniqueHash, to, value, data, operation, nonce));
     }
 }
