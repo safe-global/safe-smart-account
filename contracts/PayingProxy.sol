@@ -19,9 +19,10 @@ contract PayingProxy is DelegateConstructorProxy, SecuredTokenTransfer {
     {
         if (payment > 0) {
             if (paymentToken == address(0)) {
-                funder.transfer(payment);
+                 // solium-disable-next-line security/no-send
+                require(funder.send(payment), "Could not pay safe creation with ether");
             } else {
-                require(transferToken(paymentToken, funder, payment));
+                require(transferToken(paymentToken, funder, payment), "Could not pay safe creation with token");
             }
         } 
     }
