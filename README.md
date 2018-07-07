@@ -122,6 +122,10 @@ truffle test
 truffle deploy
 ```
 
+Audits
+---------
+- [by Alexey Akhunov](docs/alexey_audit.md)
+
 Security and Liability
 ----------------------
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -133,11 +137,7 @@ All smart contracts are released under GPL v.3.
 Contributors
 ------------
 - Stefan George ([Georgi87](https://github.com/Georgi87))
+- Richard Meissner ([rmeissner](https://github.com/rmeissner))
 - Christian Lundkvist ([christianlundkvist](https://github.com/christianlundkvist))
 - Nick Dodson ([SilentCicero](https://github.com/SilentCicero))
 - Gonçalo Sá ([GNSPS](https://github.com/GNSPS))
-- Richard Meissner ([rmeissner](https://github.com/rmeissner))
-
-Reviewers
----------
-The code has not been reviewed yet.
