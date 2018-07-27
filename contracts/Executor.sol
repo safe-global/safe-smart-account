@@ -1,23 +1,16 @@
 pragma solidity 0.4.24;
 import "./Enum.sol";
+import "./EtherPaymentFallback.sol";
 
 
 /// @title Executor - A contract that can execute transactions
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract Executor {
+contract Executor is EtherPaymentFallback {
 
     event ContractCreation(address newContract);
 
     string public constant NAME = "Executor";
     string public constant VERSION = "0.0.1";
-
-    /// @dev Fallback function accepts Ether transactions.
-    function ()
-        external
-        payable
-    {
-
-    }
 
     function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 txGas)
         internal
