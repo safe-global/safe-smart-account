@@ -1,30 +1,21 @@
 pragma solidity 0.4.24;
-import "./Module.sol";
-import "./MasterCopy.sol";
 import "./Enum.sol";
+import "./Executor.sol";
+import "./Module.sol";
+import "./SelfAuthorized.sol";
 
 
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract ModuleManager is SelfAuthorized {
-
-    event ContractCreation(address newContract);
+contract ModuleManager is SelfAuthorized, Executor {
 
     string public constant NAME = "Module Manager";
     string public constant VERSION = "0.0.1";
     address public constant SENTINEL_MODULES = address(0x1);
 
     mapping (address => address) internal modules;
-
-    /// @dev Fallback function accepts Ether transactions.
-    function ()
-        external
-        payable
-    {
-
-    }
-
+    
     function setupModules(address to, bytes data)
         internal
     {
@@ -78,51 +69,6 @@ contract ModuleManager is SelfAuthorized {
         require(modules[msg.sender] != 0, "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
-    }
-
-    function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 txGas)
-        internal
-        returns (bool success)
-    {
-        if (operation == Enum.Operation.Call)
-            success = executeCall(to, value, data, txGas);
-        else if (operation == Enum.Operation.DelegateCall)
-            success = executeDelegateCall(to, data, txGas);
-        else {
-            address newContract = executeCreate(data);
-            success = newContract != 0;
-            emit ContractCreation(newContract);
-        }
-    }
-
-    function executeCall(address to, uint256 value, bytes data, uint256 txGas)
-        internal
-        returns (bool success)
-    {
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
-        }
-    }
-
-    function executeDelegateCall(address to, bytes data, uint256 txGas)
-        internal
-        returns (bool success)
-    {
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-        }
-    }
-
-    function executeCreate(bytes data)
-        internal
-        returns (address newContract)
-    {
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            newContract := create(0, add(data, 0x20), mload(data))
-        }
     }
 
     /// @dev Returns array of modules.
