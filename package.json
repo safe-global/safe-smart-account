@@ -37,7 +37,8 @@
     "ethereumjs-abi": "^0.6.5"
   },
   "dependencies": {
+    "sleep": "^5.1.1",
     "solc": "^0.4.24",
-    "truffle-hdwallet-provider": "^0.0.3"
+    "truffle-hdwallet-provider": "0.0.3"
   }
 }
