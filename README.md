@@ -8,7 +8,7 @@ Contracts
 ### Gnosis Safe Transactions
 A Safe transaction has the same parameters as a regular Ethereum transaction: A destination address, an Ether value and a data payload as a bytes array. In addition, Safe transactions have two more parameters: `operation` and `nonce`.
 
-The operation type specifies if the transaction is executed as a `CALL`, `DELEGATECALL` or `CREATE` operation. While most wallet contracts only support `CALL` operations, adding `DELEGATECALL` operations allows to enhance the functionality of the wallet without updating the wallet code. As a `DELEGATCALL` is executed in the context of the wallet contract, it can potentially mutate the state of the wallet (like changing owners) and therefore can only be used with known, trusted contracts. The `CREATE` operation allows to create new contracts with bytecode sent from the wallet itself.
+The operation type specifies if the transaction is executed as a `CALL`, `DELEGATECALL` or `CREATE` operation. While most wallet contracts only support `CALL` operations, adding `DELEGATECALL` operations allows to enhance the functionality of the wallet without updating the wallet code. As a `DELEGATECALL` is executed in the context of the wallet contract, it can potentially mutate the state of the wallet (like changing owners) and therefore can only be used with known, trusted contracts. The `CREATE` operation allows to create new contracts with bytecode sent from the wallet itself.
 
 The nonce prevents replay attacks and is increased with every successfully executed Safe transaction. The number of executed Safe transactions is therefore equal to the current nonce saved in the wallet storage.
 
