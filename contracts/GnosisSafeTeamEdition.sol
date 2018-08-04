@@ -81,7 +81,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         checkAndClearConfirmations(transactionHash);
         // Mark as executed and execute transaction.
         isExecuted[transactionHash] = 1;
-        //require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         success = execute(to, value, data, operation, safeTxGas);
         if (!success) {
             emit ExecutionFailed(transactionHash);
