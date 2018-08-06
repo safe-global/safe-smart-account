@@ -20,29 +20,4 @@ contract GnosisSafe is ModuleManager, OwnerManager {
         // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
         setupModules(to, data);
     }
-
-    /// @dev Fallback function accepts Ether transactions.
-    function ()
-    external
-    payable
-    {
-        if (!isQaxhSafe(msg.sender))
-            revert("Qaxh Safe doesn't accept ether from non-Qaxh users");
-
-    }
-
-    function isQaxhSafe(address sender)
-    internal
-    pure
-    returns (bool result)
-    {
-        //Simple test for now
-        //Should verify certifications transactions in the future : most probably by asking the sender to give
-        //his certification tx.
-        //Possible if the sender is a safe, but what if it's an account ?
-        if (sender == 0xeA41A27F8545d091ED604ac99CE46002eDA3E360)
-            return true;
-        else return false;
-    }
-
 }

@@ -23,4 +23,15 @@ contract Module is MasterCopy {
         require(address(manager) == 0, "Manager has already been set");
         manager = ModuleManager(msg.sender);
     }
+
+    //left empty
+    //to be overwritten in QaxhModule
+    function handle(
+        address sender,
+        uint256 value
+    )
+    public
+    {
+
+    }
 }
