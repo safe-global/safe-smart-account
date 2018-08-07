@@ -1,14 +1,13 @@
 pragma solidity 0.4.24;
-//import "../Module.sol";
+import "../Module.sol";
 import "../ModuleManager.sol";
 import "../OwnerManager.sol";
 import "../Enum.sol";
-import "./Filter.sol";
 
 
 /// @title Daily Limit Module - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract DailyLimitModule is Filter {
+contract DailyLimitModule is Module {
 
     string public constant NAME = "Daily Limit Module";
     string public constant VERSION = "0.0.1";
@@ -50,7 +49,6 @@ contract DailyLimitModule is Filter {
     /// @return Returns if transaction can be executed.
     function executeDailyLimit(address token, address to, uint256 amount)
         public
-        filterOwner
     {
         // Only Safe owners are allowed to execute daily limit transactions.
         require(OwnerManager(manager).isOwner(msg.sender), "Method can only be called by an owner");

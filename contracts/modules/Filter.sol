@@ -8,16 +8,19 @@ contract Filter is Module {
 
     address private constant qaxh = 0xeA41A27F8545d091ED604ac99CE46002eDA3E360;
     address private owner;
+    address tokenAddress = 0x2414B35612cC7C4f2d49bf674651c9204a8164e4;
 
-    modifier filterQaxh() {
+    modifier filterQaxh()
+    {
         emit Event(msg.sender);
-        require(msg.sender == qaxh, "Method can only be called by the qaxh address");
+        require(msg.sender == qaxh, "This method can only be called by the qaxh address");
         _;
     }
 
-    modifier filterOwner() {
+    modifier filterOwner()
+    {
         emit Event(msg.sender);
-        require(msg.sender == owner, "Method can only be called by the owner of the safe");
+        require(msg.sender == owner, "This method can only be called by the owner of the safe");
         _;
     }
 
@@ -25,15 +28,35 @@ contract Filter is Module {
         address _address
     );
 
-    function executeFilter(address to, uint256 amount)
+    event Log(
+        uint256 _value
+    );
+
+    function loadAccount()
+    filterOwner
+    payable
+    public
+    {
+        //transfert the money to the safe
+        emit Log(msg.value);
+    }
+
+    function sendTo(address to, uint256 amount)
     filterOwner
     public
     {
-        // Only Safe owners are allowed to execute daily limit transactions.
-        //require(OwnerManager(manager).isOwner(msg.sender), "Method can only be called by an owner");
         require(to != 0, "Invalid to address provided");
         require(amount > 0, "Invalid amount provided");
         require(manager.execTransactionFromModule(to, amount, "", Enum.Operation.Call), "Could not execute ether transfer");
+    }
+
+    function transferToken(address to , uint256 amount)
+    filterOwner
+    public
+    {
+        require(to != 0, "Invalid to address provided");
+        require(amount > 0, "Invalid amount provided");
+        //require(manager.execTransactionAndPaySubmitter(to, amount, "Ox", Enum.Operation.Call, 50000, 50000, 1, tokenAddress ,"Ox"));
     }
 
     function replaceOwner(address newOwner)
@@ -58,4 +81,7 @@ contract Filter is Module {
         setManager();
         //owner = _owner;
     }
+
+    bool public test = false;
+
 }
