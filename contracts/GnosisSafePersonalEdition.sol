@@ -13,6 +13,10 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator
 
     string public constant NAME = "Gnosis Safe Personal Edition";
     string public constant VERSION = "0.0.1";
+    //keccak256(
+    //    "PersonalSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
+    //);
+    bytes32 public constant SAFE_TX_TYPEHASH = 0x068c3b33cc9bff6dde08209527b62abfb1d4ed576706e2078229623d72374b5b;
     
     event ExecutionFailed(bytes32 txHash);
 
@@ -135,8 +139,11 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator
         view
         returns (bytes32)
     {
+        bytes32 safeTxHash = keccak256(
+            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce)
+        );
         return keccak256(
-            abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce)
+            abi.encodePacked(byte(0x19), byte(1), domainSeperator, safeTxHash)
         );
     }
 }

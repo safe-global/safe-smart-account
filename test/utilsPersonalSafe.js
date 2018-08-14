@@ -21,7 +21,7 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     return dataGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
 }
 
-let executeTransaction = async function(lw, safe, subject, accounts, to, value, data, operation, executor, gasToken, fails) {
+let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, gasToken, fails) {
     let txFailed = fails || false
     let txGasToken = gasToken || 0
 
@@ -46,10 +46,7 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     if (txGasToken != 0) {
         gasPrice = 1
     }
-    let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce)
-
-    // Confirm transaction with signed messages
-    let sigs = utils.signTransaction(lw, accounts, transactionHash)
+    let sigs = await signer(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce)
     
     let payload = safe.contract.execTransactionAndPaySubmitter.getData(
         to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, sigs
@@ -68,9 +65,19 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
     )
     let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
     if (txFailed) {
+        let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce)
         assert.equal(transactionHash, events[0].args.txHash)
     }
     return tx
+}
+
+let executeTransaction = async function(lw, safe, subject, accounts, to, value, data, operation, executor, gasToken, fails) {
+    let signer = async function(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce) {
+        let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce)
+        // Confirm transaction with signed messages
+        return utils.signTransaction(lw, accounts, transactionHash)
+    }
+    return executeTransactionWithSigner(signer, safe, subject, accounts, to, value, data, operation, executor, gasToken, fails)
 }
 
 let deployToken = async function(deployer) {
@@ -101,5 +108,6 @@ let deployToken = async function(deployer) {
 Object.assign(exports, {
     estimateDataGas,
     executeTransaction,
+    executeTransactionWithSigner,
     deployToken
 })

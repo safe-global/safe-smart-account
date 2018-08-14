@@ -8,8 +8,12 @@ import "./MasterCopy.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
 
-    string public constant NAME = "Gnosis Safe Team Edition";
+    string public constant NAME = "Gnosis Safe Team Edition"; 
     string public constant VERSION = "0.0.1";
+    //keccak256(
+    //    "TeamSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 nonce)"
+    //);
+    bytes32 public constant SAFE_TX_TYPEHASH = 0x5d1bba48ff479eb8a88ec6029f6b5eebc805c7dcb87470d5b1121d36d824c873;
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => uint256) public isExecuted;
@@ -103,6 +107,11 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
         view
         returns (bytes32)
     {
-        return keccak256(abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, nonce));
+        bytes32 safeTxHash = keccak256(
+            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, nonce)
+        );
+        return keccak256(
+            abi.encodePacked(byte(0x19), byte(1), this, safeTxHash)
+        );
     }
 }
