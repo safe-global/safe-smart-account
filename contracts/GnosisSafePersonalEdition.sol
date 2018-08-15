@@ -90,6 +90,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureValidator
     {
         uint256 startGas = gasleft();
         // We don't provide an error message here, as we use it to return the estimate
+        // solium-disable-next-line error-reason
         require(execute(to, value, data, operation, gasleft()));
         uint256 requiredGas = startGas - gasleft();
         // Convert response to string and return via error message
