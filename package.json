@@ -29,7 +29,7 @@
     "eth-lightwallet": "^3.0.1",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
-    "ganache-cli": "6.1.2",
+    "ganache-cli": "6.1.7",
     "solidity-coverage": "^0.4.2",
     "truffle": "4.1.11",
     "web3": "0.20.6",
