@@ -24,6 +24,19 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.
+    /// @param transactionHash Hash of the Safe transaction.
+    function approveTransactionByHash(bytes32 transactionHash)
+        public
+    {
+        // Only Safe owners are allowed to confirm Safe transactions.
+        require(owners[msg.sender] != 0, "Sender is not an owner");
+        // It should not be possible to confirm an executed transaction
+        require(isExecuted[transactionHash] == 0, "Safe transaction already executed");
+        isApproved[transactionHash][msg.sender] = 1;
+    }
+
+    /// @dev Allows to confirm a Safe transaction with a regular transaction.
+    ///      This can only be done from an owner address.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -38,12 +51,7 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     )
         public
     {
-        // Only Safe owners are allowed to confirm Safe transactions.
-        require(owners[msg.sender] != 0, "Sender is not an owner");
-        bytes32 transactionHash = getTransactionHash(to, value, data, operation, nonce);
-        // It should not be possible to confirm an executed transaction
-        require(isExecuted[transactionHash] == 0, "Safe transaction already executed");
-        isApproved[transactionHash][msg.sender] = 1;
+        approveTransactionByHash(getTransactionHash(to, value, data, operation, nonce));
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners. If the sender is an owner this is automatically confirmed.
