@@ -1,5 +1,6 @@
 const utils = require('./utils')
 const solc = require('solc')
+const BigNumber = require('bignumber.js');
 
 const GnosisSafe = artifacts.require("./GnosisSafeTeamEdition.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
@@ -19,25 +20,40 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         let options = opts || {}
         let txSender = options.sender || executor 
         let nonce = utils.currentTimeNs()
-        
-        let executeData = gnosisSafe.contract.execTransactionIfApproved.getData(to, value, data, operation, nonce)
+        // Estimate safe transaction (need to be called with from set to the safe address)
+        let txGasEstimate = 0
+        let estimateResponse
+        try {
+            let estimateData = gnosisSafe.contract.requiredTxGas.getData(to, value, data, operation)
+            estimateResponse = await web3.eth.call({to: gnosisSafe.address, from: gnosisSafe.address, data: estimateData})
+            txGasEstimate = new BigNumber(estimateResponse.substring(138), 16)
+            // Add 10k else we will fail in case of nested calls
+            txGasEstimate = txGasEstimate.toNumber() + 10000
+            console.log("    Tx Gas estimate: " + txGasEstimate)
+        } catch(e) {
+            let reason = estimateResponse || "Unknown error"
+            console.log("    Could not estimate " + subject + " (" + reason + ")")
+            console.log(e)
+        }
+
+        let executeData = gnosisSafe.contract.execTransactionIfApproved.getData(to, value, data, operation, txGasEstimate, nonce)
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeData), "Not enough confirmations")
 
-        let approveData = gnosisSafe.contract.approveTransactionWithParameters.getData(to, value, data, operation, nonce)
+        let approveData = gnosisSafe.contract.approveTransactionWithParameters.getData(to, value, data, operation, txGasEstimate, nonce)
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, "0x0000000000000000000000000000000000000002"), "Sender is not an owner")
         
         if (options.approveByHash) {
-            let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
+            let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, txGasEstimate, nonce)
             for (let account of (accounts.filter(a => a != txSender))) {
                 utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveTransactionByHash(txHash, {from: account}))
             }
         } else {
             for (let account of (accounts.filter(a => a != txSender))) {
-                utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, nonce, {from: account}))
+                utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, txGasEstimate, nonce, {from: account}))
             }
         }
 
-        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: txSender})
+        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, txGasEstimate, nonce, {from: txSender})
         utils.logGasUsage(subject, tx)
 
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, accounts[0]), "Safe transaction already executed")

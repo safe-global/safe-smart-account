@@ -112,8 +112,8 @@ async function assertRejects(q, msg) {
     return res
 }
 
-async function getErrorMessage(to, value, data, from) {
-    let returnData = await web3.eth.call({to: to, from: from, value: value, data: data})
+async function getErrorMessage(to, value, data, from, gas) {
+    let returnData = await web3.eth.call({to: to, from: from, value: value, data: data, gas: gas})
     let returnBuffer = Buffer.from(returnData.slice(2), "hex")
     return abi.rawDecode(["string"], returnBuffer.slice(4))[0];
 }
