@@ -74,7 +74,7 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
                 domain: {
                     verifyingContract: gnosisSafe.address
                 },
-                primaryType: "PersonalSafeTx",
+                primaryType: "SafeTx",
                 message: {
                     to: to,
                     value: value,

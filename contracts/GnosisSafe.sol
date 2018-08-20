@@ -231,6 +231,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         if (_signature.length == 0) {
             isValid = signedMessage[messageHash] != 0;
         } else {
+            // consumeHash needs to be false, as the state should not be changed
             isValid = checkSignatures(messageHash, _data, _signature, false);
         }
     }
