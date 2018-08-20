@@ -1,37 +1,37 @@
 pragma solidity 0.4.24;
 
 
-/// @title SignatureValidator - recovers a sender from a signature 
+/// @title SignatureDecoder - Decodes signatures that a encoded as bytes
 /// @author Ricardo Guilherme Schmidt (Status Research & Development GmbH) 
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract SignatureValidator {
+contract SignatureDecoder {
     
     /// @dev Recovers address who signed the message 
-    /// @param txHash operation ethereum signed message hash
+    /// @param messageHash operation ethereum signed message hash
     /// @param messageSignature message `txHash` signature
     /// @param pos which signature to read
     function recoverKey (
-        bytes32 txHash, 
+        bytes32 messageHash, 
         bytes messageSignature,
         uint256 pos
     )
-        pure
         internal
+        pure
         returns (address) 
     {
         uint8 v;
         bytes32 r;
         bytes32 s;
         (v, r, s) = signatureSplit(messageSignature, pos);
-        return ecrecover(txHash, v, r, s);
+        return ecrecover(messageHash, v, r, s);
     }
 
     /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`
     /// @param pos which signature to read
     /// @param signatures concatenated rsv signatures
     function signatureSplit(bytes signatures, uint256 pos)
-        pure
         internal
+        pure
         returns (uint8 v, bytes32 r, bytes32 s)
     {
         // The signature format is a compact form of:

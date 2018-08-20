@@ -1,13 +1,13 @@
 pragma solidity 0.4.24;
 import "../Module.sol";
 import "../OwnerManager.sol";
-import "../SignatureValidator.sol";
+import "../SignatureDecoder.sol";
 
 
 /// @title Gnosis Safe State Module - A module that allows interaction with statechannels.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract StateChannelModule is Module, SignatureValidator {
+contract StateChannelModule is Module, SignatureDecoder {
 
     string public constant NAME = "State Channel Module";
     string public constant VERSION = "0.0.1";
