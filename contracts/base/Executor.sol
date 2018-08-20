@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
-import "./Enum.sol";
-import "./EtherPaymentFallback.sol";
+import "../common/Enum.sol";
+import "../common/EtherPaymentFallback.sol";
 
 
 /// @title Executor - A contract that can execute transactions

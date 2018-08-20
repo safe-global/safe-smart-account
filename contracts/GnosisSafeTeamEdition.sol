@@ -1,12 +1,12 @@
 pragma solidity 0.4.24;
-import "./GnosisSafe.sol";
-import "./MasterCopy.sol";
+import "./base/BaseSafe.sol";
+import "./common/MasterCopy.sol";
 
 
 /// @title Gnosis Safe Team Edition - A multisignature wallet with support for confirmations.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
+contract GnosisSafeTeamEdition is MasterCopy, BaseSafe {
 
     string public constant NAME = "Gnosis Safe Team Edition"; 
     string public constant VERSION = "0.0.1";
@@ -21,6 +21,17 @@ contract GnosisSafeTeamEdition is MasterCopy, GnosisSafe {
     // isApproved mapping allows to check if a transaction (by hash) was confirmed by an owner.
     // uint256 is used to optimize the generated assembly. if 0 then false else true
     mapping (bytes32 => mapping(address => uint256)) public isApproved;
+
+    /// @dev Setup function sets initial storage of contract.
+    /// @param _owners List of Safe owners.
+    /// @param _threshold Number of required confirmations for a Safe transaction.
+    /// @param to Contract address for optional delegate call.
+    /// @param data Data payload for optional delegate call.
+    function setup(address[] _owners, uint256 _threshold, address to, bytes data)
+        public
+    {
+        setupSafe(_owners, _threshold, to, data);
+    }
 
     /// @dev Allows to confirm a Safe transaction with a regular transaction.
     ///      This can only be done from an owner address.

@@ -1,38 +1,29 @@
 pragma solidity 0.4.24;
-import "./GnosisSafe.sol";
-import "./MasterCopy.sol";
-import "./SignatureDecoder.sol";
-import "./SecuredTokenTransfer.sol";
-
-contract ISingatureValidator {
-    /**
-    * @dev Should return whether the signature provided is valid for the provided data
-    * @param _data Arbitrary length data signed on the behalf of address(this)
-    * @param _signature Signature byte array associated with _data
-    *
-    * MUST return a bool upon valid or invalid signature with corresponding _data
-    * MUST take (bytes, bytes) as arguments
-    */ 
-    function isValidSignature(
-        bytes _data, 
-        bytes _signature)
-        public
-        view 
-        returns (bool isValid); 
-}
+import "./base/BaseSafe.sol";
+import "./common/MasterCopy.sol";
+import "./common/SignatureDecoder.sol";
+import "./common/SecuredTokenTransfer.sol";
+import "./interfaces/ISignatureValidator.sol";
 
 /// @title Gnosis Safe Personal Edition - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureDecoder, SecuredTokenTransfer, ISingatureValidator {
+contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
 
     string public constant NAME = "Gnosis Safe Personal Edition";
     string public constant VERSION = "0.0.1";
+
+    //keccak256(
+    //    "EIP712Domain(address verifyingContract)"
+    //);
+    bytes32 public constant DOMAIN_SEPERATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
+
     //keccak256(
     //    "PersonalSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
     //);
     bytes32 public constant SAFE_TX_TYPEHASH = 0x068c3b33cc9bff6dde08209527b62abfb1d4ed576706e2078229623d72374b5b;
+
     //keccak256(
     //    "PersonalSafeMessage(bytes message)"
     //);
@@ -41,7 +32,21 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureDecoder, 
     event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
+    bytes32 public domainSeperator;
     mapping(bytes32 => uint256) signedMessage;
+
+    /// @dev Setup function sets initial storage of contract.
+    /// @param _owners List of Safe owners.
+    /// @param _threshold Number of required confirmations for a Safe transaction.
+    /// @param to Contract address for optional delegate call.
+    /// @param data Data payload for optional delegate call.
+    function setup(address[] _owners, uint256 _threshold, address to, bytes data)
+        public
+    {
+        require(domainSeperator == 0, "Domain Seperator already set!");
+        domainSeperator = keccak256(abi.encode(DOMAIN_SEPERATOR_TYPEHASH, this));
+        setupSafe(_owners, _threshold, to, data);
+    }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
     ///      Note: The fees are always transfered, even if the user transaction fails. 
@@ -124,7 +129,7 @@ contract GnosisSafePersonalEdition is MasterCopy, GnosisSafe, SignatureDecoder, 
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                if (!ISingatureValidator(currentOwner).isValidSignature(message, contractSignature)) {
+                if (!ISignatureValidator(currentOwner).isValidSignature(message, contractSignature)) {
                     return false;
                 }
             } else {
