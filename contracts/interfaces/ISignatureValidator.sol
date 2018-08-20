@@ -13,6 +13,5 @@ contract ISignatureValidator {
         bytes _data, 
         bytes _signature)
         public
-        view 
         returns (bool isValid); 
 }

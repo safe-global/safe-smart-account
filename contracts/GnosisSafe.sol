@@ -224,7 +224,6 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     */ 
     function isValidSignature(bytes _data, bytes _signature)
         public
-        view 
         returns (bool isValid)
     {
         bytes32 messageHash = getMessageHash(_data);
