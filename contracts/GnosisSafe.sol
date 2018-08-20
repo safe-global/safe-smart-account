@@ -5,13 +5,13 @@ import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
 
-/// @title Gnosis Safe Personal Edition - A multisignature wallet with support for confirmations using signed messages based on ERC191.
+/// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
+contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
 
-    string public constant NAME = "Gnosis Safe Personal Edition";
+    string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.1";
 
     //keccak256(
@@ -20,20 +20,23 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
     bytes32 public constant DOMAIN_SEPERATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     //keccak256(
-    //    "PersonalSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
+    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
     //);
-    bytes32 public constant SAFE_TX_TYPEHASH = 0x068c3b33cc9bff6dde08209527b62abfb1d4ed576706e2078229623d72374b5b;
+    bytes32 public constant SAFE_TX_TYPEHASH = 0x25d046d03ed382d9c56da5eda028b368da618747b9a6080c9422e835abd69574;
 
     //keccak256(
-    //    "PersonalSafeMessage(bytes message)"
+    //    "SafeMessage(bytes message)"
     //);
-    bytes32 public constant SAFE_MSG_TYPEHASH = 0x1dfa4160f82a6e0d96a1aabb41071e8f04e57366990e6134b0092beba479c1f1;
+    bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
     
     event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
     bytes32 public domainSeperator;
+    // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
     mapping(bytes32 => uint256) signedMessage;
+    // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
+    mapping(address => mapping(bytes32 => uint256)) approvedHashes;
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
@@ -75,7 +78,7 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
     {
         uint256 startGas = gasleft();
         bytes memory txHashData = encodeTransactionData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
-        require(checkSignatures(keccak256(txHashData), txHashData, signatures), "Invalid signatures provided");
+        require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
         // Increase nonce and execute transaction.
         nonce++;
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
@@ -105,11 +108,22 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
         }
     }
 
-    function checkSignatures(bytes32 messageHash, bytes message, bytes signatures)
+    /**
+    * @dev Should return whether the signature provided is valid for the provided data, hash
+    * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+    * @param data That should be signed (this is passed to an external validator contract)
+    * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
+    * @param consumeHash Indicates that in case of an approved hash the storage can be freed to save gas
+    * @return a bool upon valid or invalid signature with corresponding _data
+    */
+    function checkSignatures(bytes32 dataHash, bytes data, bytes signatures, bool consumeHash)
         internal
-        view
         returns (bool)
     {
+        // Check that the provided signature data is not too short
+        if (signatures.length < threshold * 65) {
+            return false;
+        }
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -119,7 +133,7 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
         uint256 i;
         for (i = 0; i < threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
-            // If v is zero then it is a contract signature
+            // If v is 0 then it is a contract signature
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(r);
@@ -129,12 +143,24 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                if (!ISignatureValidator(currentOwner).isValidSignature(message, contractSignature)) {
+                if (!ISignatureValidator(currentOwner).isValidSignature(data, contractSignature)) {
                     return false;
+                }
+            // If v is 1 then it is an approved hash
+            } else if (v == 1) {
+                // When handling approved hashes the address of the approver is encoded into r
+                currentOwner = address(r);
+                // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
+                if (msg.sender != currentOwner && approvedHashes[currentOwner][dataHash] == 0) {
+                    return false;
+                }
+                // Hash has been marked for consumption. If this hash was pre-approved free storage
+                if (consumeHash && msg.sender != currentOwner) {
+                    approvedHashes[currentOwner][dataHash] = 0;
                 }
             } else {
                 // Use ecrecover with the messageHash for EOA signatures
-                currentOwner = ecrecover(messageHash, v, r, s);
+                currentOwner = ecrecover(dataHash, v, r, s);
             }
             if (currentOwner <= lastOwner || owners[currentOwner] == 0) {
                 return false;
@@ -170,6 +196,16 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
     }
 
     /**
+    * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
+    * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
+    */
+    function approveHash(bytes32 hashToApprove) 
+        public
+    {
+        approvedHashes[msg.sender][hashToApprove] = 1;
+    }
+
+    /**
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
     */ 
@@ -195,7 +231,7 @@ contract GnosisSafePersonalEdition is MasterCopy, BaseSafe, SignatureDecoder, Se
         if (_signature.length == 0) {
             isValid = signedMessage[messageHash] != 0;
         } else {
-            isValid = checkSignatures(messageHash, _data, _signature);
+            isValid = checkSignatures(messageHash, _data, _signature, false);
         }
     }
 

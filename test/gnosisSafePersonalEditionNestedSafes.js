@@ -3,7 +3,7 @@ const safeUtils = require('./utilsPersonalSafe')
 const abi = require('ethereumjs-abi')
 
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 contract('GnosisSafePersonalEdition using nested safes', function(accounts) {

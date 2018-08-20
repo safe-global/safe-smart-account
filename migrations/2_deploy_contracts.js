@@ -1,5 +1,5 @@
 var ProxyFactory = artifacts.require("./ProxyFactory.sol");
-var GnosisSafePersonalEdition = artifacts.require("./GnosisSafePersonalEdition.sol");
+var GnosisSafePersonalEdition = artifacts.require("./GnosisSafe.sol");
 var GnosisSafeTeamEdition = artifacts.require("./GnosisSafeTeamEdition.sol");
 var StateChannelModule = artifacts.require("./StateChannelModule.sol");
 var DailyLimitModule = artifacts.require("./DailyLimitModule.sol")

@@ -1,7 +1,7 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");

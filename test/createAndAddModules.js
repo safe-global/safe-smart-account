@@ -3,7 +3,7 @@ const safeUtils = require('./utilsPersonalSafe')
 const solc = require('solc')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol");

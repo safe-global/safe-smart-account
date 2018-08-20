@@ -1,7 +1,7 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const GnosisSafe = artifacts.require("./GnosisSafeTeamEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
@@ -10,38 +10,30 @@ contract('GnosisSafeTeamEdition', function(accounts) {
     let gnosisSafe
     let executor = accounts[8]
 
-    const MAX_GAS_PRICE = web3.toWei(100, 'gwei')
-
     const CALL = 0
     const CREATE = 2
 
     let executeTransaction = async function(subject, accounts, to, value, data, operation, opts) {
         let options = opts || {}
         let txSender = options.sender || executor 
-        let nonce = utils.currentTimeNs()
-        
-        let executeData = gnosisSafe.contract.execTransactionIfApproved.getData(to, value, data, operation, nonce)
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeData), "Not enough confirmations")
+        let nonce = await gnosisSafe.nonce()
+        let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, 0, 0, 0, 0, nonce)
+        let executeDataWithoutSignatures = gnosisSafe.contract.execTransactionAndPaySubmitter.getData(to, value, data, operation, 0, 0, 0, 0, "0x")
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Invalid signatures provided")
 
-        let approveData = gnosisSafe.contract.approveTransactionWithParameters.getData(to, value, data, operation, nonce)
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, "0x0000000000000000000000000000000000000002"), "Sender is not an owner")
-        
-        if (options.approveByHash) {
-            let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, nonce)
-            for (let account of (accounts.filter(a => a != txSender))) {
-                utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveTransactionByHash(txHash, {from: account}))
+        let sigs = "0x"
+        for (let account of (accounts.sort())) {
+            if (account != txSender) {
+                utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveHash(txHash, {from: account}))
             }
-        } else {
-            for (let account of (accounts.filter(a => a != txSender))) {
-                utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, nonce, {from: account}))
-            }
+            sigs += "000000000000000000000000" + account.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
         }
 
-        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: txSender})
+        let tx = await gnosisSafe.execTransactionAndPaySubmitter(to, value, data, operation, 0, 0, 0, 0, sigs, {from: txSender})
         utils.logGasUsage(subject, tx)
 
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, accounts[0]), "Safe transaction already executed")
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeData), "Safe transaction already executed")
+        let executeDataUsedSignatures = gnosisSafe.contract.execTransactionAndPaySubmitter.getData(to, value, data, operation, 0, 0, 0, 0, sigs)
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataUsedSignatures), "Invalid signatures provided")
         return tx
     }
 
@@ -65,7 +57,7 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
 
         // Withdraw 1 ETH
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { approveByHash: true })
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL)
 
         await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL)
 
@@ -79,9 +71,9 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
 
         // Withdraw 1 ETH
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
 
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
     })

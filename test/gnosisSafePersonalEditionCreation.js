@@ -5,7 +5,7 @@ const randomBuffer = require("random-buffer")
 const ethUtil = require('ethereumjs-util')
 const EthereumTx = require('ethereumjs-tx')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 
 contract('GnosisSafePersonalEdition', function(accounts) {
 
