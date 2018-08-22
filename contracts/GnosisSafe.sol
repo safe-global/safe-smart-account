@@ -83,21 +83,14 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         nonce++;
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
-        uint256 gasLimit;
-        if (safeTxGas == 0 && gasPrice == 0) {
-            gasLimit = gasleft();
-        } else {
-            gasLimit = safeTxGas;
-        }
-        success = execute(to, value, data, operation, gasLimit);
+        success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
         if (!success) {
             emit ExecutionFailed(keccak256(txHashData));
         }
         
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
-            uint256 gasCosts = (startGas - gasleft()) + dataGas;
-            uint256 amount = gasCosts * gasPrice;
+            uint256 amount = ((startGas - gasleft()) + dataGas) * gasPrice;
             if (gasToken == address(0)) {
                  // solium-disable-next-line security/no-tx-origin,security/no-send
                 require(tx.origin.send(amount), "Could not pay gas costs with ether");
