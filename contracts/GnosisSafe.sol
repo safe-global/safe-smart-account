@@ -20,9 +20,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     bytes32 public constant DOMAIN_SEPERATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     //keccak256(
-    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
+    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     //);
-    bytes32 public constant SAFE_TX_TYPEHASH = 0x25d046d03ed382d9c56da5eda028b368da618747b9a6080c9422e835abd69574;
+    bytes32 public constant SAFE_TX_TYPEHASH = 0x14d461bc7412367e924637b363c7bf29b8f47e2f84869f4426e5633d8af47b20;
 
     //keccak256(
     //    "SafeMessage(bytes message)"
@@ -61,8 +61,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
+    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
-    function execTransactionAndPaySubmitter(
+    function execTransaction32785586(
         address to, 
         uint256 value, 
         bytes data, 
@@ -71,13 +72,18 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
+        address refundReceiver,
         bytes signatures
     )
         public
         returns (bool success)
     {
         uint256 startGas = gasleft();
-        bytes memory txHashData = encodeTransactionData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, nonce);
+        bytes memory txHashData = encodeTransactionData(
+            to, value, data, operation, // Transaction info
+            safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, // Payment info
+            nonce
+        );
         require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
         // Increase nonce and execute transaction.
         nonce++;
@@ -90,16 +96,29 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
-            uint256 amount = ((startGas - gasleft()) + dataGas) * gasPrice;
-            if (gasToken == address(0)) {
-                 // solium-disable-next-line security/no-tx-origin,security/no-send
-                require(tx.origin.send(amount), "Could not pay gas costs with ether");
-            } else {
-                 // solium-disable-next-line security/no-tx-origin
-                require(transferToken(gasToken, tx.origin, amount), "Could not pay gas costs with token");
-            }
+            handlePayment(startGas, dataGas, gasPrice, gasToken, refundReceiver);
         }
     }
+
+    function handlePayment(
+        uint256 gasUsed,
+        uint256 dataGas,
+        uint256 gasPrice,
+        address gasToken,
+        address refundReceiver
+    ) 
+        private
+    {
+        uint256 amount = ((gasUsed - gasleft()) + dataGas) * gasPrice;
+        // solium-disable-next-line security/no-tx-origin
+        address receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
+        if (gasToken == address(0)) {
+                // solium-disable-next-line security/no-send
+            require(receiver.send(amount), "Could not pay gas costs with ether");
+        } else {
+            require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");
+        }
+    } 
 
     /**
     * @dev Should return whether the signature provided is valid for the provided data, hash
@@ -168,7 +187,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
     ///      When estimating set `from` to the address of the safe.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransactionAndPaySubmitter`
+    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransaction32785586`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -256,6 +275,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param dataGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
+    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
@@ -267,6 +287,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 dataGas, 
         uint256 gasPrice, 
         address gasToken,
+        address refundReceiver,
         uint256 _nonce
     )
         public
@@ -274,7 +295,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         returns (bytes)
     {
         bytes32 safeTxHash = keccak256(
-            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce)
+            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
         return abi.encodePacked(byte(0x19), byte(1), domainSeperator, safeTxHash);
     }
@@ -288,6 +309,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param dataGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
+    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
@@ -299,12 +321,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 dataGas, 
         uint256 gasPrice, 
         address gasToken,
+        address refundReceiver,
         uint256 _nonce
     )
         public
         view
         returns (bytes32)
     {
-        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, _nonce));
+        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
 }

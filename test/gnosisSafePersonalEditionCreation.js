@@ -95,7 +95,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
 
         let rawTx = {
             value: 0,
-            data: PayingProxy.new.getData(gnosisSafeMasterCopy.address, gnosisSafeData, funder, 0, 0, {data: payingProxyJson.bytecode}),
+            data: PayingProxy.new.getData(gnosisSafeMasterCopy.address, gnosisSafeData, funder, 0, 0, { data: payingProxyJson.bytecode }),
         }
         let estimate = web3.eth.estimateGas(rawTx) + 80000
 
@@ -140,8 +140,8 @@ contract('GnosisSafePersonalEdition', function(accounts) {
 
         token.transfer(gnosisSafe.address, 3141596, {from: accounts[0]})
         let data = await token.transfer.getData(accounts[1], 212121)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction token transfer', [lw.accounts[0], lw.accounts[2]], token.address, 0, data, CALL, accounts[8], token.address, false)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction token transfer', [lw.accounts[0], lw.accounts[2]], token.address, 0, data, CALL, accounts[8], token.address, false)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction token transfer', [lw.accounts[0], lw.accounts[2]], token.address, 0, data, CALL, accounts[8], { gasToken: token.address })
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction token transfer', [lw.accounts[0], lw.accounts[2]], token.address, 0, data, CALL, accounts[8], { gasToken: token.address })
 
         assert.equal(await token.balances(accounts[1]), 424242)
     })

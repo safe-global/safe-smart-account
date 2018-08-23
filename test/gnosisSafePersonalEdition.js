@@ -44,7 +44,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
         // Should fail as it is over the balance (payment should still happen)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
@@ -92,30 +92,30 @@ contract('GnosisSafePersonalEdition', function(accounts) {
 
         // Invalid owner additions
         let data = await gnosisSafe.contract.addOwnerWithThreshold.getData(zeroAcc, 3)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.addOwnerWithThreshold.getData(sentinel, 3)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         // Invalid owner replacements
         data = await gnosisSafe.contract.swapOwner.getData(sentinel, accounts[0], accounts[1])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.swapOwner.getData(lw.accounts[2], sentinel, accounts[1])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.swapOwner.getData(accounts[1], zeroAcc, accounts[2])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'replace with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         // Invalid owner removals
         data = await gnosisSafe.contract.removeOwner.getData(sentinel, accounts[0], 1)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[2], sentinel, 1)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
         
         data = await gnosisSafe.contract.removeOwner.getData(accounts[1], zeroAcc, 1)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
@@ -145,20 +145,20 @@ contract('GnosisSafePersonalEdition', function(accounts) {
 
         // Invalid module additions
         data = await gnosisSafe.contract.enableModule.getData(zeroAcc)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.enableModule.getData(sentinel)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'add sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         // Invalid module removals
         data = await gnosisSafe.contract.disableModule.getData(sentinel, accounts[0])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-module', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-module', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         data = await gnosisSafe.contract.disableModule.getData(randomModule, sentinel)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
         
         data = await gnosisSafe.contract.disableModule.getData(accounts[1], zeroAcc)
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, 0, true)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
