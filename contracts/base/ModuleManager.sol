@@ -10,6 +10,9 @@ import "./Module.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract ModuleManager is SelfAuthorized, Executor {
 
+    event EnabledModule(Module module);
+    event DisabledModule(Module module);
+
     string public constant NAME = "Module Manager";
     string public constant VERSION = "0.0.1";
     address public constant SENTINEL_MODULES = address(0x1);
@@ -39,6 +42,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(modules[module] == 0, "Module has already been added");
         modules[module] = modules[SENTINEL_MODULES];
         modules[SENTINEL_MODULES] = module;
+        emit EnabledModule(module);
     }
 
     /// @dev Allows to remove a module from the whitelist.
@@ -54,6 +58,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(modules[prevModule] == address(module), "Invalid prevModule, module pair provided");
         modules[prevModule] = modules[module];
         modules[module] = 0;
+        emit DisabledModule(module);
     }
 
     /// @dev Allows a Module to execute a Safe transaction without any further confirmations.

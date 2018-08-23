@@ -68,7 +68,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
     if (txFailed) {
         let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
-        assert.equal(transactionHash, events[0].args.txHash)
+        assert.equal(transactionHash, events.args.txHash)
     }
     return tx
 }
