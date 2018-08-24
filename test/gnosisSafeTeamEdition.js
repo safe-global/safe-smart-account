@@ -17,8 +17,8 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         let options = opts || {}
         let txSender = options.sender || executor 
         let nonce = await gnosisSafe.nonce()
-        let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, 0, 0, 0, 0, nonce)
-        let executeDataWithoutSignatures = gnosisSafe.contract.execTransactionAndPaySubmitter.getData(to, value, data, operation, 0, 0, 0, 0, "0x")
+        let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, 0, 0, 0, 0, 0, nonce)
+        let executeDataWithoutSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, "0x")
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Invalid signatures provided")
 
         let approveData = gnosisSafe.contract.approveHash.getData(txHash)
@@ -32,10 +32,10 @@ contract('GnosisSafeTeamEdition', function(accounts) {
             sigs += "000000000000000000000000" + account.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
         }
 
-        let tx = await gnosisSafe.execTransactionAndPaySubmitter(to, value, data, operation, 0, 0, 0, 0, sigs, {from: txSender})
+        let tx = await gnosisSafe.execTransaction(to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: txSender})
         utils.logGasUsage(subject, tx)
 
-        let executeDataUsedSignatures = gnosisSafe.contract.execTransactionAndPaySubmitter.getData(to, value, data, operation, 0, 0, 0, 0, sigs)
+        let executeDataUsedSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, sigs)
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataUsedSignatures), "Invalid signatures provided")
         return tx
     }
