@@ -2,7 +2,7 @@ const utils = require('./utils')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const WhitelistModule = artifacts.require("./WhitelistModule.sol");
 
 

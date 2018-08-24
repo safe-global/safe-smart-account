@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
+import "../common/SecuredTokenTransfer.sol";
 import "./DelegateConstructorProxy.sol";
-import "./SecuredTokenTransfer.sol";
 
 /// @title Paying Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract. It is possible to send along initialization data with the constructor. And sends funds after creation to a specified account.
 /// @author Stefan George - <stefan@gnosis.pm>

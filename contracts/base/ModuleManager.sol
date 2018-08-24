@@ -1,8 +1,8 @@
 pragma solidity 0.4.24;
-import "./Enum.sol";
+import "../common/Enum.sol";
+import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
 import "./Module.sol";
-import "./SelfAuthorized.sol";
 
 
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract

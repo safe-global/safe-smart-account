@@ -1,5 +1,5 @@
 pragma solidity 0.4.24;
-import "./MasterCopy.sol";
+import "../common/MasterCopy.sol";
 import "./ModuleManager.sol";
 
 

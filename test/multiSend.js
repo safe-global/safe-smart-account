@@ -1,6 +1,6 @@
 const utils = require('./utils')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const Proxy = artifacts.require("./Proxy.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")

@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
-import "../Module.sol";
-import "../OwnerManager.sol";
-import "../SignatureDecoder.sol";
+import "../base/Module.sol";
+import "../base/OwnerManager.sol";
+import "../common/SignatureDecoder.sol";
 
 
 /// @title Gnosis Safe State Module - A module that allows interaction with statechannels.

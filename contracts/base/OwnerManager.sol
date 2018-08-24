@@ -1,5 +1,5 @@
 pragma solidity 0.4.24;
-import "./SelfAuthorized.sol";
+import "../common/SelfAuthorized.sol";
 
 /// @title OwnerManager - Manages a set of owners and a threshold to perform actions.
 /// @author Stefan George - <stefan@gnosis.pm>

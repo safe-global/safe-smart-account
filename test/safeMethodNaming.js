@@ -1,9 +1,7 @@
 const utils = require('./utils')
 const solc = require('solc')
 
-const StateChannelModule = artifacts.require("./StateChannelModule.sol");
-const GnosisSafeTeam = artifacts.require("./GnosisSafeTeamEdition.sol");
-const GnosisSafePersonal = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafePersonal = artifacts.require("./GnosisSafe.sol");
 
 contract('GnosisSafeEditions', function(accounts) {
 

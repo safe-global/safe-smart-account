@@ -2,7 +2,7 @@ const utils = require('./utils')
 const safeUtils = require('./utilsPersonalSafe')
 
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
@@ -58,8 +58,8 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
                     EIP712Domain: [
                         { type: "address", name: "verifyingContract" }
                     ],
-                    // "PersonalSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
-                    PersonalSafeTx: [
+                    // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
+                    SafeTx: [
                         { type: "address", name: "to" },
                         { type: "uint256", name: "value" },
                         { type: "bytes", name: "data" },
@@ -74,7 +74,7 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
                 domain: {
                     verifyingContract: gnosisSafe.address
                 },
-                primaryType: "PersonalSafeTx",
+                primaryType: "SafeTx",
                 message: {
                     to: to,
                     value: value,
