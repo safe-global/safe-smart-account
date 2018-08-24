@@ -12,7 +12,7 @@ contract('GnosisSafeEditions', function(accounts) {
                         return {
                             "name": f.name, 
                             "id": web3.sha3(sig).substr(0,10),
-                            "sig": sig
+                            //"sig": sig
                         }
                     })
                     .sort((a, b) => {
@@ -28,6 +28,5 @@ contract('GnosisSafeEditions', function(accounts) {
     it('check method naming of personal safe', async () => {
         let functions = getSortedFunctions(GnosisSafePersonal.abi)
         console.log(functions)
-        assert.equal('execTransaction', functions[0].name)
     })
 });
