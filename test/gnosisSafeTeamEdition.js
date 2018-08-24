@@ -21,6 +21,9 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         let executeDataWithoutSignatures = gnosisSafe.contract.execTransactionAndPaySubmitter.getData(to, value, data, operation, 0, 0, 0, 0, "0x")
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Invalid signatures provided")
 
+        let approveData = gnosisSafe.contract.approveHash.getData(txHash)
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, executor), "Only owners can approve a hash")
+
         let sigs = "0x"
         for (let account of (accounts.sort())) {
             if (account != txSender) {

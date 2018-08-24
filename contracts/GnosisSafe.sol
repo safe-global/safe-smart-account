@@ -195,6 +195,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function approveHash(bytes32 hashToApprove) 
         public
     {
+        require(owners[msg.sender] != 0, "Only owners can approve a hash");
         approvedHashes[msg.sender][hashToApprove] = 1;
     }
 
