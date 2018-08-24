@@ -66,7 +66,7 @@ contract('MultiSend', function(accounts) {
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
-            await gnosisSafe.execTransaction32785586(
+            await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             )
         )
@@ -88,7 +88,7 @@ contract('MultiSend', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execTransaction32785586(
+            await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
@@ -112,7 +112,7 @@ contract('MultiSend', function(accounts) {
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execTransaction32785586(
+            await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'

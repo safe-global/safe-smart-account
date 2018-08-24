@@ -9,7 +9,7 @@ let estimateDataGas = function(safe, to, value, data, operation, txGasEstimate, 
     // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and dataGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
     let signatureCost = signatureCount * (68 + 2176 + 2176) // array count (3 -> r, s, v) * signature count
-    let payload = safe.contract.execTransaction32785586.getData(
+    let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
     let dataGasEstimate = utils.estimateDataGasCosts(payload) + signatureCost
@@ -50,19 +50,19 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     }
     let sigs = await signer(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
     
-    let payload = safe.contract.execTransaction32785586.getData(
+    let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
     console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Estimate gas of paying transaction
-    let estimate = await safe.execTransaction32785586.estimateGas(
+    let estimate = await safe.execTransaction.estimateGas(
         to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
-    let tx = await safe.execTransaction32785586(
+    let tx = await safe.execTransaction(
         to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + txGasEstimate + 10000}
     )
     let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)

@@ -63,7 +63,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
-    function execTransaction32785586(
+    function execTransaction(
         address to, 
         uint256 value, 
         bytes data, 
@@ -187,7 +187,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
     ///      When estimating set `from` to the address of the safe.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransaction32785586`
+    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransaction`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.

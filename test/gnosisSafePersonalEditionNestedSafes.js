@@ -88,7 +88,7 @@ contract('GnosisSafePersonalEdition using nested safes', function(accounts) {
         sigs += "0000000000000000000000000000000000000000000000000000000000000000" + encodedOwner2Signs
 
         // Execute Transaction
-        let tx = await gnosisSafe.execTransaction32785586(
+        let tx = await gnosisSafe.execTransaction(
             to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: executor}
         )
         utils.checkTxEvent(tx, 'ExecutionFailed', gnosisSafe.address, false, "execute withdrawal")

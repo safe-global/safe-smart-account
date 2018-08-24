@@ -28,6 +28,6 @@ contract('GnosisSafeEditions', function(accounts) {
     it('check method naming of personal safe', async () => {
         let functions = getSortedFunctions(GnosisSafePersonal.abi)
         console.log(functions)
-        assert.equal('execTransaction32785586', functions[0].name)
+        assert.equal('execTransaction', functions[0].name)
     })
 });

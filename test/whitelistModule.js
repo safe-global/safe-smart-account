@@ -69,7 +69,7 @@ contract('WhitelistModule', function(accounts) {
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction add account to whitelist',
-            await gnosisSafe.execTransaction32785586(
+            await gnosisSafe.execTransaction(
                 whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
@@ -81,7 +81,7 @@ contract('WhitelistModule', function(accounts) {
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction remove account from whitelist',
-            await gnosisSafe.execTransaction32785586(
+            await gnosisSafe.execTransaction(
                 whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
