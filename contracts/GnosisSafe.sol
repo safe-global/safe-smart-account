@@ -32,7 +32,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
-    bytes32 public domainSeperator;
+    bytes32 public domainSeparator;
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
     mapping(bytes32 => uint256) signedMessage;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
@@ -46,8 +46,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function setup(address[] _owners, uint256 _threshold, address to, bytes data)
         public
     {
-        require(domainSeperator == 0, "Domain Seperator already set!");
-        domainSeperator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
+        require(domainSeparator == 0, "Domain Seperator already set!");
+        domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         setupSafe(_owners, _threshold, to, data);
     }
 
@@ -262,7 +262,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             abi.encode(SAFE_MSG_TYPEHASH, keccak256(message))
         );
         return keccak256(
-            abi.encodePacked(byte(0x19), byte(1), domainSeperator, safeMessageHash)
+            abi.encodePacked(byte(0x19), byte(1), domainSeparator, safeMessageHash)
         );
     }
 
@@ -297,7 +297,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         bytes32 safeTxHash = keccak256(
             abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
-        return abi.encodePacked(byte(0x19), byte(1), domainSeperator, safeTxHash);
+        return abi.encodePacked(byte(0x19), byte(1), domainSeparator, safeTxHash);
     }
 
     /// @dev Returns hash to be signed by owners.
