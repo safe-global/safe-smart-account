@@ -46,7 +46,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function setup(address[] _owners, uint256 _threshold, address to, bytes data)
         public
     {
-        require(domainSeparator == 0, "Domain Seperator already set!");
+        require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         setupSafe(_owners, _threshold, to, data);
     }
