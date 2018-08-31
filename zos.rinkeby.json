@@ -1,0 +1,54 @@
+{
+  "contracts": {
+    "StateChannelModule": {
+      "address": "0x519905a9e5b58e4e75ac3b037717933c99d6d363",
+      "constructorCode": "608060405234801561001057600080fd5b5061117e806100206000396000f300",
+      "bodyBytecodeHash": "7c0742f8c3a26628082c35f31b0b12a38fd2ebf96c812e0c26ee104613dc49e3",
+      "bytecodeHash": "b5d959c0612d8f3469960528a5d54946c69dfb7dbf78a8661a05291dbb52d0dc"
+    },
+    "WhitelistModule": {
+      "address": "0xa12cf419c47aa07bebd393e16ddd721ac4d0058d",
+      "constructorCode": "608060405234801561001057600080fd5b50611248806100206000396000f300",
+      "bodyBytecodeHash": "e655b75076e83db49ad5641063d4ca27ccd3813566582215e6c29dd0473dbe1f",
+      "bytecodeHash": "c63a03935c6cb1bda99b091b7b2ef5bb58f9147b87df1ddf717cfce7dd389bf0"
+    },
+    "DailyLimitModule": {
+      "address": "0x81dbcbe3b8cd964c176fde0db340e276adcb6611",
+      "constructorCode": "608060405234801561001057600080fd5b5061129b806100206000396000f300",
+      "bodyBytecodeHash": "13fed1f962b2df242c5a7c467c1aac79dc3a75b5dd60298072763ffb6ff1d75f",
+      "bytecodeHash": "2c2ade3126e1b83cba0ff42018da3da6f8f7daefcf15a9ad233b3354b4a27f6d"
+    },
+    "SocialRecoveryModule": {
+      "address": "0x0754fe66bfc01cb377068f61f6945bf7e78ba207",
+      "constructorCode": "608060405234801561001057600080fd5b50611790806100206000396000f300",
+      "bodyBytecodeHash": "934b29f3cc15e1e19bdf3d7259e9891171e440b429ff9dbd65e247d9ae6008b6",
+      "bytecodeHash": "b3d354909ea4e5771b8f03aaad72d5c10bff9acbc8c9bdc2fa4d8907c842aa26"
+    },
+    "MultiSend": {
+      "address": "0xd3a1c9e72a6dfa35f5ec63a97de492f1696544a8",
+      "constructorCode": "608060405234801561001057600080fd5b50610169806100206000396000f300",
+      "bodyBytecodeHash": "b336050657ea78b01f3b8f10f4ed2579b537d682fe6bf78c0aed832531c2c3bd",
+      "bytecodeHash": "1d6ee3e764c41da6c7c729d52605780d6f18b608f224f0e722eb66bc9b859128"
+    },
+    "CreateAndAddModules": {
+      "address": "0x402dfc0b9e80c5a06e9900d6aba3e6a9ad54e1fc",
+      "constructorCode": "608060405234801561001057600080fd5b50610275806100206000396000f300",
+      "bodyBytecodeHash": "afe71c0ef554a075df350279073d95da192ada53cc4e46769213ae1c359fef6c",
+      "bytecodeHash": "23d4e2d15016a272788586951f6c389be0043ae6cf434a7bdcc58e99c623e762"
+    },
+    "GnosisSafe": {
+      "address": "0x1cd1d23c0c650bc1f52767b45db1cac2c4e30c1c",
+      "constructorCode": "608060405234801561001057600080fd5b506153e7806100206000396000f300",
+      "bodyBytecodeHash": "443bbfeb3074e4897295f3a60c7a682364ae0d3211e901300482cd8429fa80df",
+      "bytecodeHash": "1dec16a44033c6610ffe029f1887a9a7ae08dde1f3ae8eea541a1da27fe0ca66"
+    }
+  },
+  "version": "0.0.1",
+  "frozen": false,
+  "package": {
+    "address": "0xdab99fc2e864badf4dab8429b62ba698a3674e58"
+  },
+  "provider": {
+    "address": "0xd62802679b830d39d9e17880e42e30909ed647a8"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "gnosis-safe",
+  "version": "0.0.1",
+  "lib": true,
+  "contracts": {
+    "GnosisSafe": "GnosisSafe",
+    "CreateAndAddModules": "CreateAndAddModules",
+    "MultiSend": "MultiSend",
+    "DailyLimitModule": "DailyLimitModule",
+    "SocialRecoveryModule": "SocialRecoveryModule",
+    "StateChannelModule": "StateChannelModule",
+    "WhitelistModule": "WhitelistModule"
+  }
+}
