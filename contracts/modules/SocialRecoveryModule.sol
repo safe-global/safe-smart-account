@@ -1,8 +1,8 @@
 pragma solidity 0.4.24;
-import "../Enum.sol";
-import "../Module.sol";
-import "../ModuleManager.sol";
-import "../OwnerManager.sol";
+import "../base/Module.sol";
+import "../base/ModuleManager.sol";
+import "../base/OwnerManager.sol";
+import "../common/Enum.sol";
 
 
 /// @title Social Recovery Module - Allows to replace an owner without Safe confirmations if friends approve the replacement.

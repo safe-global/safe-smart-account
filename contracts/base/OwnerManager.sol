@@ -1,10 +1,14 @@
 pragma solidity 0.4.24;
-import "./SelfAuthorized.sol";
+import "../common/SelfAuthorized.sol";
 
 /// @title OwnerManager - Manages a set of owners and a threshold to perform actions.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract OwnerManager is SelfAuthorized {
+
+    event AddedOwner(address owner);
+    event RemovedOwner(address owner);
+    event ChangedThreshold(uint256 threshold);
 
     address public constant SENTINEL_OWNERS = address(0x1);
 
@@ -56,6 +60,7 @@ contract OwnerManager is SelfAuthorized {
         owners[owner] = owners[SENTINEL_OWNERS];
         owners[SENTINEL_OWNERS] = owner;
         ownerCount++;
+        emit AddedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
@@ -78,6 +83,7 @@ contract OwnerManager is SelfAuthorized {
         owners[prevOwner] = owners[owner];
         owners[owner] = 0;
         ownerCount--;
+        emit RemovedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold)
             changeThreshold(_threshold);
@@ -102,6 +108,8 @@ contract OwnerManager is SelfAuthorized {
         owners[newOwner] = owners[oldOwner];
         owners[prevOwner] = newOwner;
         owners[oldOwner] = 0;
+        emit RemovedOwner(oldOwner);
+        emit AddedOwner(newOwner);
     }
 
     /// @dev Allows to update the number of required confirmations by Safe owners.
@@ -116,6 +124,7 @@ contract OwnerManager is SelfAuthorized {
         // There has to be at least one Safe owner.
         require(_threshold >= 1, "Threshold needs to be greater than 0");
         threshold = _threshold;
+        emit ChangedThreshold(threshold);
     }
 
     function getThreshold()

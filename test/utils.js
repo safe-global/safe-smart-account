@@ -55,7 +55,7 @@ function getParamFromTxEvent(transaction, eventName, paramName, contract, contra
 
 function checkTxEvent(transaction, eventName, contract, exists, subject) {
   assert.isObject(transaction)
-  if (subject != null) {
+  if (subject && subject != null) {
       logGasUsage(subject, transaction)
   }
   let logs = transaction.logs
@@ -63,7 +63,7 @@ function checkTxEvent(transaction, eventName, contract, exists, subject) {
       logs = logs.filter((l) => l.event === eventName && l.address === contract)
   }
   assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
-  return logs
+  return exists ? logs[0] : null
 }
 
 function logGasUsage(subject, transactionOrReceipt) {

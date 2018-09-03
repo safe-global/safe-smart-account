@@ -1,8 +1,8 @@
 pragma solidity 0.4.24;
-import "../Module.sol";
-import "../ModuleManager.sol";
-import "../OwnerManager.sol";
-import "../Enum.sol";
+import "../base/Module.sol";
+import "../base/ModuleManager.sol";
+import "../base/OwnerManager.sol";
+import "../common/Enum.sol";
 
 
 /// @title Daily Limit Module - Allows to transfer limited amounts of ERC20 tokens and Ether without confirmations.

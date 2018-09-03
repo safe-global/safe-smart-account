@@ -12,6 +12,7 @@ npm install
 ### Run all tests (requires Node version >=7 for `async/await`):
 
 ```bash
+truffle compile
 truffle test
 ```
 

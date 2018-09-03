@@ -3,7 +3,7 @@ const safeUtils = require('./utilsPersonalSafe')
 const abi = require('ethereumjs-abi')
 
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 contract('GnosisSafePersonalEdition using nested safes', function(accounts) {
@@ -64,7 +64,7 @@ contract('GnosisSafePersonalEdition using nested safes', function(accounts) {
         
         let sigs = "0x"
         let nonce = await gnosisSafe.nonce()
-        let messageData = await gnosisSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, 0, nonce)
+        let messageData = await gnosisSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, 0, 0, nonce)
 
         let signMessageData = owner1Safe.contract.signMessage.getData(messageData)
         // Use on-chain Safe signature
@@ -88,8 +88,8 @@ contract('GnosisSafePersonalEdition using nested safes', function(accounts) {
         sigs += "0000000000000000000000000000000000000000000000000000000000000000" + encodedOwner2Signs
 
         // Execute Transaction
-        let tx = await gnosisSafe.execTransactionAndPaySubmitter(
-            to, value, data, operation, 0, 0, 0, 0, sigs, {from: executor}
+        let tx = await gnosisSafe.execTransaction(
+            to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: executor}
         )
         utils.checkTxEvent(tx, 'ExecutionFailed', gnosisSafe.address, false, "execute withdrawal")
 

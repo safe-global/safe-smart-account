@@ -1,5 +1,5 @@
 pragma solidity 0.4.24;
-import "../Module.sol";
+import "../base/Module.sol";
 
 
 /// @title Create and Add Modules - Allows to create and add multiple module in one transaction.

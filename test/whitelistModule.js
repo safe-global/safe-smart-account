@@ -2,7 +2,7 @@ const utils = require('./utils')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const WhitelistModule = artifacts.require("./WhitelistModule.sol");
 
 
@@ -65,24 +65,24 @@ contract('WhitelistModule', function(accounts) {
         // Add account 3 to whitelist
         let data = await whitelistModule.contract.addToWhitelist.getData(accounts[1])
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction add account to whitelist',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), true)
         // Remove account 3 from whitelist
         data = await whitelistModule.contract.removeFromWhitelist.getData(accounts[1])
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, nonce)
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction remove account from whitelist',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), false)

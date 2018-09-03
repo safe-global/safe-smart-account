@@ -1,14 +1,17 @@
 pragma solidity 0.4.24;
-import "./Enum.sol";
+import "../common/Enum.sol";
+import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
 import "./Module.sol";
-import "./SelfAuthorized.sol";
 
 
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract ModuleManager is SelfAuthorized, Executor {
+
+    event EnabledModule(Module module);
+    event DisabledModule(Module module);
 
     string public constant NAME = "Module Manager";
     string public constant VERSION = "0.0.1";
@@ -39,6 +42,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(modules[module] == 0, "Module has already been added");
         modules[module] = modules[SENTINEL_MODULES];
         modules[SENTINEL_MODULES] = module;
+        emit EnabledModule(module);
     }
 
     /// @dev Allows to remove a module from the whitelist.
@@ -54,6 +58,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(modules[prevModule] == address(module), "Invalid prevModule, module pair provided");
         modules[prevModule] = modules[module];
         modules[module] = 0;
+        emit DisabledModule(module);
     }
 
     /// @dev Allows a Module to execute a Safe transaction without any further confirmations.

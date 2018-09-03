@@ -2,7 +2,7 @@ const utils = require('./utils')
 const safeUtils = require('./utilsPersonalSafe')
 
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
@@ -52,14 +52,14 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
         let confirmingAccounts = [accounts[0], accounts[2]]
-        let signer = async function(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, nonce) {
+        let signer = async function(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, nonce) {
             let typedData = {
                 types: {
                     EIP712Domain: [
                         { type: "address", name: "verifyingContract" }
                     ],
-                    // "PersonalSafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,uint256 nonce)"
-                    PersonalSafeTx: [
+                    // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+                    SafeTx: [
                         { type: "address", name: "to" },
                         { type: "uint256", name: "value" },
                         { type: "bytes", name: "data" },
@@ -68,13 +68,14 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
                         { type: "uint256", name: "dataGas" },
                         { type: "uint256", name: "gasPrice" },
                         { type: "address", name: "gasToken" },
+                        { type: "address", name: "refundReceiver" },
                         { type: "uint256", name: "nonce" },
                     ]
                 },
                 domain: {
                     verifyingContract: gnosisSafe.address
                 },
-                primaryType: "PersonalSafeTx",
+                primaryType: "SafeTx",
                 message: {
                     to: to,
                     value: value,
@@ -84,6 +85,7 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
                     dataGas: dataGasEstimate,
                     gasPrice: gasPrice,
                     gasToken: txGasToken,
+                    refundReceiver: refundReceiver,
                     nonce: nonce.toNumber()
                 }
             }
@@ -101,7 +103,7 @@ contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts)
         await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
         // Should fail as it is over the balance (payment should still happen)
-        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor, 0, true)
+        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true })
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
