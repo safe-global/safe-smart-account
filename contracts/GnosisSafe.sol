@@ -12,7 +12,7 @@ import "./interfaces/ISignatureValidator.sol";
 contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.0.1";
+    string public constant VERSION = "0.0.2";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"

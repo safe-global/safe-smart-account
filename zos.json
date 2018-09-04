@@ -1,6 +1,6 @@
 {
   "name": "gnosis-safe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "lib": true,
   "contracts": {
     "GnosisSafe": "GnosisSafe",
@@ -9,6 +9,7 @@
     "DailyLimitModule": "DailyLimitModule",
     "SocialRecoveryModule": "SocialRecoveryModule",
     "StateChannelModule": "StateChannelModule",
-    "WhitelistModule": "WhitelistModule"
+    "WhitelistModule": "WhitelistModule",
+    "ProxyFactory": "ProxyFactory"
   }
 }

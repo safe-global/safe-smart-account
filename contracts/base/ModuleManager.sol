@@ -13,8 +13,6 @@ contract ModuleManager is SelfAuthorized, Executor {
     event EnabledModule(Module module);
     event DisabledModule(Module module);
 
-    string public constant NAME = "Module Manager";
-    string public constant VERSION = "0.0.1";
     address public constant SENTINEL_MODULES = address(0x1);
 
     mapping (address => address) internal modules;

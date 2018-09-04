@@ -1,9 +1,9 @@
 {
   "name": "gnosis-safe",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "Ethereum multisig contract",
   "license": "GPL-3.0",
-  "main": "test/gnosisSafe.js",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
@@ -39,6 +39,6 @@
   },
   "dependencies": {
     "solc": "^0.4.24",
-    "truffle-hdwallet-provider": "^0.0.3"
+    "truffle-hdwallet-provider": "nonce"
   }
 }
