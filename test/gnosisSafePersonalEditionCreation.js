@@ -169,9 +169,15 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
         creationData = await getCreationData(mockToken.address, 1337)
-
         const transferData = mockToken.contract.transfer.getData(funder, creationData.userCosts);
         await mockContract.givenOutOfGas(transferData);
+        await deployWithCreationData(creationData);
+        assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
+
+        mockContract = await MockContract.new();
+        mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenRevert(transferData);
+        creationData = await getCreationData(mockToken.address, 1337);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
     });
