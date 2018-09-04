@@ -5,7 +5,9 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
-
+const MockContract = artifacts.require('./mocks/MockContract');
+const MockToken = artifacts.require('./mocks/Token.sol');
+const abi = require('ethereumjs-abi');
 
 contract('DailyLimitModule', function(accounts) {
 
@@ -158,13 +160,44 @@ contract('DailyLimitModule', function(accounts) {
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
 
+
         // Third withdrawal will fail
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
             "Daily limit exceeded for ERC20 token"
         )
+
         // Balances didn't change
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
-    })
+
+        // Withdrawal should  fail because of ERC20 transfer revert
+        let mockContract = await MockContract.new();
+        let mockToken = MockToken.at(mockContract.address);
+        const transferData = mockToken.contract.transfer.getData(accounts[0], 10);
+        await mockContract.givenRevert(transferData);
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "ERC20 token reverted transfer"
+        );
+
+
+        // Withdrawal should fail because of ERC20 transfer out of gas
+        mockContract = await MockContract.new();
+        mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenOutOfGas(transferData);
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "ERC20 token transfer out of gas"
+        );
+
+        // Withdrawal should fail because of ERC20 transfer returns false
+        mockContract = await MockContract.new();
+        mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenReturn(transferData, abi.rawEncode(['bool'], [false]).toString());
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "ERC20 token transfer returns false"
+        );
+    });
 });
