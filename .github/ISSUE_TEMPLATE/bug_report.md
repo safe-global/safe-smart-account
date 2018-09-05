@@ -12,7 +12,7 @@ about: Bug report about the Safe smart contracts
 
 *Please delete the above section and the instructions in the sections below before submitting*
 
-**Description**
+## Description
 
 Please describe considely the bug you have found, and what you expect instead.
 
@@ -24,11 +24,11 @@ Please describe considely the bug you have found, and what you expect instead.
 - EVM execution environment / backend / blockchain client:
 - Operating system:
 
-**Steps to reproduce**
+## Steps to reproduce
 
 If applicable, please provide a *minimal* source code example to trigger the bug you have found.
 Provide as much information as necessary to reproduce the bug.
 
-**Additional context**
+## Additional context
 
 Add any other context about the problem here.
