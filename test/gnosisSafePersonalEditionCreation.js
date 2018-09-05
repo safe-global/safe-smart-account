@@ -9,6 +9,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MockContract = artifacts.require('./mocks/MockContract.sol');
 const MockToken = artifacts.require('./mocks/Token.sol');
 const abi = require('ethereumjs-abi');
+const Web3EthAbi = require('web3-eth-abi');
 
 contract('GnosisSafePersonalEdition', function(accounts) {
 
@@ -165,20 +166,27 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         await deployWithCreationData(creationData)
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0')
 
-
+        const method = Web3EthAbi.encodeFunctionSignature('transfer(address,uint256)');
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenOutOfGasAny(method);
         creationData = await getCreationData(mockToken.address, 1337)
-        const transferData = await mockToken.contract.transfer.getData(funder, creationData.userCosts);
-        await mockContract.givenOutOfGas(transferData);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
 
         mockContract = await MockContract.new();
         mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenRevert(transferData);
+        await mockContract.givenRevertAny(method);
         creationData = await getCreationData(mockToken.address, 1337);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
+
+        mockContract = await MockContract.new();
+        mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenReturnAny(method, abi.rawEncode(['bool'], [false]).toString());
+        creationData = await getCreationData(mockToken.address, 1337);
+        await deployWithCreationData(creationData);
+        assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
+
     });
 })

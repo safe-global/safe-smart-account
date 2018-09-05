@@ -8,6 +8,7 @@ const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
 const MockContract = artifacts.require('./mocks/MockContract.sol');
 const MockToken = artifacts.require('./mocks/Token.sol');
 const abi = require('ethereumjs-abi');
+const Web3EthAbi = require('web3-eth-abi');
 
 contract('DailyLimitModule', function(accounts) {
 
@@ -174,8 +175,8 @@ contract('DailyLimitModule', function(accounts) {
         // Withdrawal should  fail because of ERC20 transfer revert
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
-        const transferData = mockToken.contract.transfer.getData(accounts[0], 10);
-        await mockContract.givenRevert(transferData);
+        const method = Web3EthAbi.encodeFunctionSignature('transfer(address,uint256)');
+        await mockContract.givenRevertAny(method);
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "ERC20 token reverted transfer"
@@ -185,7 +186,7 @@ contract('DailyLimitModule', function(accounts) {
         // Withdrawal should fail because of ERC20 transfer out of gas
         mockContract = await MockContract.new();
         mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenOutOfGas(transferData);
+        await mockContract.givenRevertAny(method);
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "ERC20 token transfer out of gas"
@@ -194,7 +195,7 @@ contract('DailyLimitModule', function(accounts) {
         // Withdrawal should fail because of ERC20 transfer returns false
         mockContract = await MockContract.new();
         mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenReturn(transferData, abi.rawEncode(['bool'], [false]).toString());
+        await mockContract.givenReturnAny(method, abi.rawEncode(['bool'], [false]).toString());
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "ERC20 token transfer returns false"
