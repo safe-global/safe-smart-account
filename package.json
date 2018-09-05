@@ -4,9 +4,10 @@
   "description": "Ethereum multisig contract",
   "license": "GPL-3.0",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "files": [
+    "contracts",
+    "test"
+  ],
   "scripts": {
     "test-norpc": "truffle test",
     "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'"
