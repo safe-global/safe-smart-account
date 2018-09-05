@@ -6,7 +6,7 @@ const ethUtil = require('ethereumjs-util')
 const EthereumTx = require('ethereumjs-tx')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const MockContract = artifacts.require('./mocks/MockContract');
+const MockContract = artifacts.require('@gnosis.pm/mock-contract/MockContract');
 const MockToken = artifacts.require('./mocks/Token.sol');
 const abi = require('ethereumjs-abi');
 
@@ -169,7 +169,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
         creationData = await getCreationData(mockToken.address, 1337)
-        const transferData = mockToken.contract.transfer.getData(funder, creationData.userCosts);
+        const transferData = await mockToken.contract.transfer.getData(funder, creationData.userCosts);
         await mockContract.givenOutOfGas(transferData);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');

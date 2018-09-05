@@ -4,6 +4,8 @@ const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const MockContract = artifacts.require('@gnosis.pm/mock-contract/MockContract');
+const MockToken = artifacts.require('./mocks/Token.sol');
 
 
 contract('GnosisSafePersonalEdition', function(accounts) {
@@ -31,7 +33,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
     })
 
     it('should deposit and withdraw 1 ETH', async () => {
-        // Deposit 1 ETH + some spare money for execution 
+        // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1.1, 'ether'))
@@ -59,9 +61,23 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, {
           gasToken: token.address
         });
+
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, {
+          gasToken: token.address
+        })
         let executorDiff = (await token.balances(executor)).toNumber() - executorBalance;
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " Tokens")
+        console.log("    Executor earned " + executorDiff + " Tokens")
         assert.ok(executorDiff > 0);
+    });
+
+    it('should fail when depositing 1 ETH paying with token due to token transfer fail', async () => {
+        let mockContract = await MockContract.new();
+        let mockToken = MockToken.at(mockContract.address);
+        let transferData = await mockToken.contract.transfer.getData(executor, 91861);
+        await mockContract.givenRevert(transferData);
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
+        let tx = await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address })
+        console.log("tx", tx);
     });
 
     it('should add, remove and replace an owner and update the threshold and emit events', async () => {

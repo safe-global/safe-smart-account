@@ -5,7 +5,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
-const MockContract = artifacts.require('./mocks/MockContract');
+const MockContract = artifacts.require('@gnosis.pm/mock-contract/MockContract');
 const MockToken = artifacts.require('./mocks/Token.sol');
 const abi = require('ethereumjs-abi');
 
