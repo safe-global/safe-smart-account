@@ -6,7 +6,7 @@ const ethUtil = require('ethereumjs-util')
 const EthereumTx = require('ethereumjs-tx')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const MockContract = artifacts.require('@gnosis.pm/mock-contract/MockContract');
+const MockContract = artifacts.require('./mocks/MockContract.sol');
 const MockToken = artifacts.require('./mocks/Token.sol');
 const abi = require('ethereumjs-abi');
 

@@ -37,7 +37,6 @@
     "web3": "0.20.6"
   },
   "dependencies": {
-    "@gnosis.pm/mock-contract": "^1.0.0",
     "solc": "^0.4.24",
     "truffle-hdwallet-provider": "^0.0.3"
   }
