@@ -30,6 +30,7 @@
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ganache-cli": "6.1.7",
+    "mock-contract": "github:fleupold/mock-contract#82b0aba9e57d20f0aa9c22b125a3f60a1329262c",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",
@@ -38,7 +39,6 @@
   },
   "dependencies": {
     "solc": "^0.4.24",
-    "truffle-hdwallet-provider": "^0.0.3",
-    "web3-eth-abi": "^1.0.0-beta.36"
+    "truffle-hdwallet-provider": "^0.0.3"
   }
 }
