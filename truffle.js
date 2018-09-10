@@ -1,11 +1,7 @@
 const HDWalletProvider = require('truffle-hdwallet-provider')
 
 const mnemonic = process.env.MNEMONIC
-var hdProvider
-const getHDProvider = function() {
-  if (!hdProvider) hdProvider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/');
-  return hdProvider;
-}
+const token = process.env.INFURA_TOKEN
 
 module.exports = {
   networks: {
@@ -16,13 +12,17 @@ module.exports = {
       gas: 6000000
     },
     rinkeby: {
-      provider: getHDProvider,
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/' + token)
+      },
       network_id: '4',
       gas: 6700000,
       gasPrice: 1000000000, // 1 Gwei
     },
     mainnet: {
-      provider: getHDProvider,
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://mainnet.infura.io/' + token)
+      },
       network_id: '1',
       gas: 6700000,
       gasPrice: 25000000000, // 25 Gwei

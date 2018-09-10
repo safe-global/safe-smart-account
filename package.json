@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "solc": "^0.4.24",
-    "truffle-hdwallet-provider": "nonce"
+    "truffle-hdwallet-provider": "0.0.7-beta.1"
   }
 }
