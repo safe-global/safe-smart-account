@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 
 
 /// @title EtherPaymentFallback - A contract that has a fallback to accept ether payments

@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 import "./Proxy.sol";
 
 
@@ -11,7 +11,7 @@ contract ProxyFactory {
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
     /// @param masterCopy Address of master copy.
     /// @param data Payload for message call sent to new proxy contract.
-    function createProxy(address masterCopy, bytes data)
+    function createProxy(address masterCopy, bytes memory data)
         public
         returns (Proxy proxy)
     {

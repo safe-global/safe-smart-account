@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 import "../base/Module.sol";
 import "../base/ModuleManager.sol";
 import "../base/OwnerManager.sol";
@@ -24,7 +24,7 @@ contract DailyLimitModule is Module {
     /// @dev Setup function sets initial storage of contract.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _dailyLimits List of daily limits in smalles units (e.g. Wei for Ether).
-    function setup(address[] tokens, uint256[] _dailyLimits)
+    function setup(address[] memory tokens, uint256[] memory _dailyLimits)
         public
     {
         setManager();
@@ -51,13 +51,13 @@ contract DailyLimitModule is Module {
         public
     {
         // Only Safe owners are allowed to execute daily limit transactions.
-        require(OwnerManager(manager).isOwner(msg.sender), "Method can only be called by an owner");
-        require(to != 0, "Invalid to address provided");
+        require(OwnerManager(address(manager)).isOwner(msg.sender), "Method can only be called by an owner");
+        require(to != address(0), "Invalid to address provided");
         require(amount > 0, "Invalid amount provided");
         // Validate that transfer is not exceeding daily limit.
         require(isUnderLimit(token, amount), "Daily limit has been reached");
         dailyLimits[token].spentToday += amount;
-        if (token == 0) {
+        if (token == address(0)) {
             require(manager.execTransactionFromModule(to, amount, "", Enum.Operation.Call), "Could not execute ether transfer");
         } else {
             bytes memory data = abi.encodeWithSignature("transfer(address,uint256)", to, amount);

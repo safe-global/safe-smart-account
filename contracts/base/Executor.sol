@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 import "../common/Enum.sol";
 import "../common/EtherPaymentFallback.sol";
 
@@ -9,7 +9,7 @@ contract Executor is EtherPaymentFallback {
 
     event ContractCreation(address newContract);
 
-    function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 txGas)
+    function execute(address to, uint256 value, bytes memory data, Enum.Operation operation, uint256 txGas)
         internal
         returns (bool success)
     {
@@ -19,12 +19,12 @@ contract Executor is EtherPaymentFallback {
             success = executeDelegateCall(to, data, txGas);
         else {
             address newContract = executeCreate(data);
-            success = newContract != 0;
+            success = newContract != address(0);
             emit ContractCreation(newContract);
         }
     }
 
-    function executeCall(address to, uint256 value, bytes data, uint256 txGas)
+    function executeCall(address to, uint256 value, bytes memory data, uint256 txGas)
         internal
         returns (bool success)
     {
@@ -34,7 +34,7 @@ contract Executor is EtherPaymentFallback {
         }
     }
 
-    function executeDelegateCall(address to, bytes data, uint256 txGas)
+    function executeDelegateCall(address to, bytes memory data, uint256 txGas)
         internal
         returns (bool success)
     {
@@ -44,7 +44,7 @@ contract Executor is EtherPaymentFallback {
         }
     }
 
-    function executeCreate(bytes data)
+    function executeCreate(bytes memory data)
         internal
         returns (address newContract)
     {

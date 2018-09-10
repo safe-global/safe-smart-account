@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 import "./base/BaseSafe.sol";
 import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
@@ -46,7 +46,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setup(address[] _owners, uint256 _threshold, address to, bytes data)
+    function setup(address[] memory _owners, uint256 _threshold, address to, bytes memory data)
         public
     {
         require(domainSeparator == 0, "Domain Separator already set!");
@@ -67,16 +67,23 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     function execTransaction(
+<<<<<<< HEAD
         address to,
         uint256 value,
         bytes data,
         Enum.Operation operation,
+=======
+        address to, 
+        uint256 value, 
+        bytes memory data, 
+        Enum.Operation operation, 
+>>>>>>> dd768ad... Fix solidity 0.5.0 errors
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
-        bytes signatures
+        bytes memory signatures
     )
         public
         returns (bool success)
@@ -131,7 +138,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param consumeHash Indicates that in case of an approved hash the storage can be freed to save gas
     * @return a bool upon valid or invalid signature with corresponding _data
     */
-    function checkSignatures(bytes32 dataHash, bytes data, bytes signatures, bool consumeHash)
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
         returns (bool)
     {
@@ -151,7 +158,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             // If v is 0 then it is a contract signature
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
-                currentOwner = address(r);
+                currentOwner = address(bytes20(r));
                 bytes memory contractSignature;
                 // solium-disable-next-line security/no-inline-assembly
                 assembly {
@@ -164,7 +171,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
-                currentOwner = address(r);
+                currentOwner = address(bytes20(r));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 if (msg.sender != currentOwner && approvedHashes[currentOwner][dataHash] == 0) {
                     return false;
@@ -177,7 +184,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            if (currentOwner <= lastOwner || owners[currentOwner] == 0) {
+            if (currentOwner <= lastOwner || owners[currentOwner] == address(0)) {
                 return false;
             }
             lastOwner = currentOwner;
@@ -196,7 +203,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
-    function requiredTxGas(address to, uint256 value, bytes data, Enum.Operation operation)
+    function requiredTxGas(address to, uint256 value, bytes memory data, Enum.Operation operation)
         public
         authorized
         returns (uint256)
@@ -217,15 +224,20 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function approveHash(bytes32 hashToApprove)
         public
     {
-        require(owners[msg.sender] != 0, "Only owners can approve a hash");
+        require(owners[msg.sender] != address(0), "Only owners can approve a hash");
         approvedHashes[msg.sender][hashToApprove] = 1;
     }
 
     /**
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
+<<<<<<< HEAD
     */
     function signMessage(bytes _data)
+=======
+    */ 
+    function signMessage(bytes memory _data) 
+>>>>>>> dd768ad... Fix solidity 0.5.0 errors
         public
         authorized
     {
@@ -237,8 +249,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
+<<<<<<< HEAD
     */
     function isValidSignature(bytes _data, bytes _signature)
+=======
+    */ 
+    function isValidSignature(bytes memory _data, bytes memory _signature)
+>>>>>>> dd768ad... Fix solidity 0.5.0 errors
         public
         returns (bool isValid)
     {
@@ -255,7 +272,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param message Message that should be hashed
     /// @return Message hash.
     function getMessageHash(
-        bytes message
+        bytes memory message
     )
         public
         view
@@ -265,7 +282,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             abi.encode(SAFE_MSG_TYPEHASH, keccak256(message))
         );
         return keccak256(
-            abi.encodePacked(byte(0x19), byte(1), domainSeparator, safeMessageHash)
+            abi.encodePacked(byte(0x19), byte(0x01), domainSeparator, safeMessageHash)
         );
     }
 
@@ -282,6 +299,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
+<<<<<<< HEAD
         address to,
         uint256 value,
         bytes data,
@@ -289,18 +307,27 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
+=======
+        address to, 
+        uint256 value, 
+        bytes memory data, 
+        Enum.Operation operation, 
+        uint256 safeTxGas, 
+        uint256 dataGas, 
+        uint256 gasPrice, 
+>>>>>>> dd768ad... Fix solidity 0.5.0 errors
         address gasToken,
         address refundReceiver,
         uint256 _nonce
     )
         public
         view
-        returns (bytes)
+        returns (bytes memory)
     {
         bytes32 safeTxHash = keccak256(
             abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
-        return abi.encodePacked(byte(0x19), byte(1), domainSeparator, safeTxHash);
+        return abi.encodePacked(byte(0x19), byte(0x01), domainSeparator, safeTxHash);
     }
 
     /// @dev Returns hash to be signed by owners.
@@ -316,6 +343,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
+<<<<<<< HEAD
         address to,
         uint256 value,
         bytes data,
@@ -323,6 +351,15 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
+=======
+        address to, 
+        uint256 value, 
+        bytes memory data, 
+        Enum.Operation operation, 
+        uint256 safeTxGas, 
+        uint256 dataGas, 
+        uint256 gasPrice, 
+>>>>>>> dd768ad... Fix solidity 0.5.0 errors
         address gasToken,
         address refundReceiver,
         uint256 _nonce

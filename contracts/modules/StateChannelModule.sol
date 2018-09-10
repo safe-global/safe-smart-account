@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 import "../base/Module.sol";
 import "../base/OwnerManager.sol";
 import "../common/SignatureDecoder.sol";
@@ -32,10 +32,10 @@ contract StateChannelModule is Module, SignatureDecoder {
     function execTransaction(
         address to, 
         uint256 value, 
-        bytes data, 
+        bytes memory data, 
         Enum.Operation operation, 
         uint256 nonce,
-        bytes signatures
+        bytes memory signatures
     )
         public
     {
@@ -47,7 +47,7 @@ contract StateChannelModule is Module, SignatureDecoder {
         require(manager.execTransactionFromModule(to, value, data, operation), "Could not execute transaction");
     }
 
-    function checkHash(bytes32 transactionHash, bytes signatures)
+    function checkHash(bytes32 transactionHash, bytes memory signatures)
         internal
         view
     {
@@ -55,11 +55,11 @@ contract StateChannelModule is Module, SignatureDecoder {
         address lastOwner = address(0);
         address currentOwner;
         uint256 i;
-        uint256 threshold = OwnerManager(manager).getThreshold();
+        uint256 threshold = OwnerManager(address(manager)).getThreshold();
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = recoverKey(transactionHash, signatures, i);
-            require(OwnerManager(manager).isOwner(currentOwner), "Signature not provided by owner");
+            require(OwnerManager(address(manager)).isOwner(currentOwner), "Signature not provided by owner");
             require(currentOwner > lastOwner, "Signatures are not ordered by owner address");
             lastOwner = currentOwner;
         }
@@ -75,7 +75,7 @@ contract StateChannelModule is Module, SignatureDecoder {
     function getTransactionHash(
         address to, 
         uint256 value, 
-        bytes data, 
+        bytes memory data, 
         Enum.Operation operation, 
         uint256 nonce
     )

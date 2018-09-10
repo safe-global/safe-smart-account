@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 
 contract ISignatureValidator {
     /**
@@ -10,8 +10,8 @@ contract ISignatureValidator {
     * MUST take (bytes, bytes) as arguments
     */ 
     function isValidSignature(
-        bytes _data, 
-        bytes _signature)
+        bytes memory _data, 
+        bytes memory _signature)
         public
         returns (bool isValid); 
 }
