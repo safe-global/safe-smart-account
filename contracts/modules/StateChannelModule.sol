@@ -10,7 +10,7 @@ import "../common/SignatureDecoder.sol";
 contract StateChannelModule is Module, SignatureDecoder {
 
     string public constant NAME = "State Channel Module";
-    string public constant VERSION = "0.0.1";
+    string public constant VERSION = "0.0.2";
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => uint256) public isExecuted;

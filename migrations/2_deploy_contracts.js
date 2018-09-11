@@ -1,5 +1,5 @@
 var ProxyFactory = artifacts.require("./ProxyFactory.sol");
-var GnosisSafePersonalEdition = artifacts.require("./GnosisSafe.sol");
+var GnosisSafe = artifacts.require("./GnosisSafe.sol");
 var StateChannelModule = artifacts.require("./StateChannelModule.sol");
 var DailyLimitModule = artifacts.require("./DailyLimitModule.sol")
 var SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
@@ -13,7 +13,7 @@ const notOwnedAddress2 = "0x0000000000000000000000000000000000000003"
 
 module.exports = function(deployer) {
     deployer.deploy(ProxyFactory);
-    deployer.deploy(GnosisSafePersonalEdition).then(function (safe) {
+    deployer.deploy(GnosisSafe).then(function (safe) {
         safe.setup([notOwnedAddress], 1, 0, 0)
         return safe
     });

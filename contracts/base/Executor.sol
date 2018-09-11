@@ -9,9 +9,6 @@ contract Executor is EtherPaymentFallback {
 
     event ContractCreation(address newContract);
 
-    string public constant NAME = "Executor";
-    string public constant VERSION = "0.0.1";
-
     function execute(address to, uint256 value, bytes data, Enum.Operation operation, uint256 txGas)
         internal
         returns (bool success)
