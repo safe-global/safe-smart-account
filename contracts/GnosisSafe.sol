@@ -34,7 +34,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     uint256 public nonce;
     bytes32 public domainSeparator;
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
-    mapping(bytes32 => uint256) public signedMessage;
+    mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
@@ -226,7 +226,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         public
         authorized
     {
-        signedMessage[getMessageHash(_data)] = 1;
+        signedMessages[getMessageHash(_data)] = 1;
     }
 
     /**
@@ -241,7 +241,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     {
         bytes32 messageHash = getMessageHash(_data);
         if (_signature.length == 0) {
-            isValid = signedMessage[messageHash] != 0;
+            isValid = signedMessages[messageHash] != 0;
         } else {
             // consumeHash needs to be false, as the state should not be changed
             isValid = checkSignatures(messageHash, _data, _signature, false);
