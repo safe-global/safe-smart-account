@@ -1,10 +1,10 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0xc65f75fbffb1628293f9320168500ed336cf3e24",
-      "constructorCode": "608060405234801561001057600080fd5b506153e7806100206000396000f300",
-      "bodyBytecodeHash": "eae98c43b93b9068b780e6a6ec841a65e54c87fca56e200baf8d23b8e03905e2",
-      "bytecodeHash": "a729ae2d11e75b02b88817f328d0c59e474fea1843033575ecb60c9e8bde1125"
+      "address": "0x2727d69c0bd14b1ddd28371b8d97e808adc1c2f7",
+      "constructorCode": "608060405234801561001057600080fd5b506154e4806100206000396000f300",
+      "bodyBytecodeHash": "f2d068affc3ba0ab316ac49340f562969ca2904776f8e640109902c82a79b513",
+      "bytecodeHash": "713a8a57ac0636fc6e30329eff1420d0216bbed6635baae93e3ac293eeb3ab09"
     },
     "MultiSend": {
       "address": "0x607ecc85c613548367ebdee103d6d256d42d5978",
