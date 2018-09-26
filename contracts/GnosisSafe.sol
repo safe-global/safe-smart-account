@@ -28,15 +28,15 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     //    "SafeMessage(bytes message)"
     //);
     bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
-    
+
     event ExecutionFailed(bytes32 txHash);
 
     uint256 public nonce;
     bytes32 public domainSeparator;
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
-    mapping(bytes32 => uint256) signedMessage;
+    mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
-    mapping(address => mapping(bytes32 => uint256)) approvedHashes;
+    mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
@@ -52,7 +52,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
-    ///      Note: The fees are always transfered, even if the user transaction fails. 
+    ///      Note: The fees are always transfered, even if the user transaction fails.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
@@ -64,10 +64,10 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     function execTransaction(
-        address to, 
-        uint256 value, 
-        bytes data, 
-        Enum.Operation operation, 
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
@@ -93,7 +93,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         if (!success) {
             emit ExecutionFailed(keccak256(txHashData));
         }
-        
+
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
             handlePayment(startGas, dataGas, gasPrice, gasToken, refundReceiver);
@@ -106,7 +106,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 gasPrice,
         address gasToken,
         address refundReceiver
-    ) 
+    )
         private
     {
         uint256 amount = ((gasUsed - gasleft()) + dataGas) * gasPrice;
@@ -118,7 +118,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         } else {
             require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");
         }
-    } 
+    }
 
     /**
     * @dev Should return whether the signature provided is valid for the provided data, hash
@@ -182,7 +182,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         return true;
     }
 
-    /// @dev Allows to estimate a Safe transaction. 
+    /// @dev Allows to estimate a Safe transaction.
     ///      This method is only meant for estimation purpose, therfore two different protection mechanism against execution in a transaction have been made:
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
@@ -211,7 +211,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
     * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
     */
-    function approveHash(bytes32 hashToApprove) 
+    function approveHash(bytes32 hashToApprove)
         public
     {
         require(owners[msg.sender] != 0, "Only owners can approve a hash");
@@ -221,12 +221,12 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /**
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
-    */ 
-    function signMessage(bytes _data) 
+    */
+    function signMessage(bytes _data)
         public
         authorized
     {
-        signedMessage[getMessageHash(_data)] = 1;
+        signedMessages[getMessageHash(_data)] = 1;
     }
 
     /**
@@ -234,14 +234,14 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
-    */ 
+    */
     function isValidSignature(bytes _data, bytes _signature)
         public
         returns (bool isValid)
     {
         bytes32 messageHash = getMessageHash(_data);
         if (_signature.length == 0) {
-            isValid = signedMessage[messageHash] != 0;
+            isValid = signedMessages[messageHash] != 0;
         } else {
             // consumeHash needs to be false, as the state should not be changed
             isValid = checkSignatures(messageHash, _data, _signature, false);
@@ -279,13 +279,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
-        address to, 
-        uint256 value, 
-        bytes data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 dataGas, 
-        uint256 gasPrice, 
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 dataGas,
+        uint256 gasPrice,
         address gasToken,
         address refundReceiver,
         uint256 _nonce
@@ -313,13 +313,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-        address to, 
-        uint256 value, 
-        bytes data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 dataGas, 
-        uint256 gasPrice, 
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 dataGas,
+        uint256 gasPrice,
         address gasToken,
         address refundReceiver,
         uint256 _nonce
