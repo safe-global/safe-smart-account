@@ -1,7 +1,6 @@
 const utils = require('./utils')
 const safeUtils = require('./utilsPersonalSafe')
 const solc = require('solc')
-const abi = require('ethereumjs-abi');
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
@@ -16,7 +15,6 @@ contract('GnosisSafePersonalEdition', function(accounts) {
 
     const CALL = 0
     const CREATE = 2
-    const method = "0x" + abi.methodID('transfer', ['address', 'uint256']).toString('hex');
 
     beforeEach(async function () {
         // Create lightwallet
@@ -81,20 +79,20 @@ contract('GnosisSafePersonalEdition', function(accounts) {
     it('should fail when depositing 0.5 ETH paying with token due to token transfer fail', async () => {
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenRevertAny(method);
+        await mockContract.givenAnyRevert();
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.5, 'ether')})
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer is reverted"
         );
 
-        await mockContract.givenOutOfGasAny(method);
+        await mockContract.givenAnyRunOutOfGas();
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer is out of gas"
         );
 
-        await mockContract.givenReturnAny(method, abi.rawEncode(['bool'], [false]).toString());
+        await mockContract.givenAnyReturnBool(false);
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer returns false"

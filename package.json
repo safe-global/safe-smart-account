@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
-    "@gnosis.pm/mock-contract": "1.0.1",
+    "@gnosis.pm/mock-contract": "2.0.0",
     "bignumber.js": "^7.1.0",
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
