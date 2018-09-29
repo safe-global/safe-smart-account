@@ -4,7 +4,6 @@ const fs = require('fs')
 const randomBuffer = require("random-buffer")
 const ethUtil = require('ethereumjs-util')
 const EthereumTx = require('ethereumjs-tx')
-const abi = require('ethereumjs-abi');
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MockContract = artifacts.require('./MockContract.sol');
@@ -13,7 +12,6 @@ const MockToken = artifacts.require('./Token.sol');
 contract('GnosisSafePersonalEdition', function(accounts) {
 
     const CALL = 0
-    const method = "0x" + abi.methodID('transfer', ['address', 'uint256']).toString('hex');
 
     const gasPrice = web3.toWei('20', 'gwei')
     const payingProxyJson = JSON.parse(fs.readFileSync("./build/contracts/PayingProxy.json"))
@@ -169,19 +167,19 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
 
-        await mockContract.givenOutOfGasAny(method);
+        await mockContract.givenAnyRunOutOfGas();
         creationData = await getCreationData(mockToken.address, 1337)
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
 
 
-        await mockContract.givenRevertAny(method);
+        await mockContract.givenAnyRevert();
         creationData = await getCreationData(mockToken.address, 1337);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');
 
 
-        await mockContract.givenReturnAny(method, abi.rawEncode(['bool'], [false]).toString());
+        await mockContract.givenAnyReturnBool(false);
         creationData = await getCreationData(mockToken.address, 1337);
         await deployWithCreationData(creationData);
         assert.equal(await web3.eth.getCode(creationData.safe), '0x0');

@@ -1,6 +1,5 @@
 const utils = require('./utils')
 const solc = require('solc')
-const abi = require('ethereumjs-abi')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
@@ -17,7 +16,6 @@ contract('DailyLimitModule', function(accounts) {
     let lw
 
     const CALL = 0
-    const method = "0x" + abi.methodID('transfer', ['address', 'uint256']).toString('hex');
 
     beforeEach(async function () {
         // Create lightwallet
@@ -176,7 +174,7 @@ contract('DailyLimitModule', function(accounts) {
         // Withdrawal should  fail because of ERC20 transfer revert
         let mockContract = await MockContract.new();
         let mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenRevertAny(method);
+        await mockContract.givenAnyRevert()
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "Transaction should fail if the ERC20 token transfer method reverts"
@@ -184,14 +182,14 @@ contract('DailyLimitModule', function(accounts) {
 
 
         // Withdrawal should fail because of ERC20 transfer out of gas
-        await mockContract.givenOutOfGasAny(method);
+        await mockContract.givenAnyRunOutOfGas();
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "Transaction should fail if the ERC20 token transfer method is out of gas"
         );
 
         // Withdrawal should fail because of ERC20 transfer returns false
-        await mockContract.givenReturnAny(method, abi.rawEncode(['bool'], [false]).toString());
+        await mockContract.givenAnyReturnBool(false);
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
             "Transaction should fail if the ERC20 token transfer method returns false"
