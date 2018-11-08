@@ -11,7 +11,7 @@ const MockToken = artifacts.require('./Token.sol')
 
 const CALL = 0
 
-contract('TransferLimitModule without global cap', (accounts) => {
+contract('TransferLimitModule', (accounts) => {
 
     let safe
     let module
@@ -46,18 +46,13 @@ contract('TransferLimitModule without global cap', (accounts) => {
     })
 
     it('should withdraw transfer limit', async () => {
-        let nonce = await module.nonce()
-        let txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], txHash)
+        let params = [0, accounts[0], 50, 0, 0, 0, 0, 0]
+        let signers = [lw.accounts[0], lw.accounts[1]]
+        let sigs = await signModuleTx(module, params, lw, signers)
 
         // Withdrawal should fail as there is no ETH in the Safe
         await utils.assertRejects(
-            module.executeTransferLimit(
-              0, accounts[0], 50,
-              0, 0, 0, 0, 0,
-              sigs,
-              { from: accounts[0] }
-            ),
+            module.executeTransferLimit(...params, sigs, { from: accounts[0] }),
             'Not enough funds'
         )
 
@@ -65,19 +60,11 @@ contract('TransferLimitModule without global cap', (accounts) => {
         await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
         assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
 
-        nonce = await module.nonce()
-        txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], txHash)
-
+        sigs = await signModuleTx(module, params, lw, signers)
         // Withdraw transfer limit
         utils.logGasUsage(
             'executeTransferLimit withdraw transfer limit',
-            await module.executeTransferLimit(
-              0, accounts[0], 50,
-              0, 0, 0, 0, 0,
-              sigs,
-              { from: accounts[0] }
-            )
+            await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
         )
     })
 
@@ -86,32 +73,18 @@ contract('TransferLimitModule without global cap', (accounts) => {
         await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
         assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
 
-        let nonce = await module.nonce()
-        let txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        let sigs = utils.signTransaction(lw, [lw.accounts[0]], txHash)
+        let params = [0, accounts[0], 50, 0, 0, 0, 0, 0]
+        let sigs = await signModuleTx(module, params, lw, [lw.accounts[0]])
 
         // Withdrawal should fail for only one signature
         await utils.assertRejects(
-            module.executeTransferLimit(
-              0, accounts[0], 50,
-              0, 0, 0, 0, 0,
-              sigs,
-              { from: accounts[0] }
-            ),
+            module.executeTransferLimit(...params, sigs, { from: accounts[0] }),
             'signature threshold not met'
         )
 
-        nonce = await module.nonce()
-        txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], txHash)
-
+        sigs = await signModuleTx(module, params, lw, [lw.accounts[0], lw.accounts[1]])
         // Withdraw transfer limit
-        await module.executeTransferLimit(
-          0, accounts[0], 50,
-          0, 0, 0, 0, 0,
-          sigs,
-          { from: accounts[0] }
-        )
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
     })
 
     it('should allow withdrawal for delegate', async () => {
@@ -123,34 +96,28 @@ contract('TransferLimitModule without global cap', (accounts) => {
         let delegate = await module.delegate.call()
         assert.equal(delegate, lw.accounts[3])
 
-        let nonce = await module.nonce()
-        let txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        let sigs = utils.signTransaction(lw, [lw.accounts[3]], txHash)
+        let params = [0, accounts[0], 50, 0, 0, 0, 0, 0]
+        let sigs = await signModuleTx(module, params, lw, [lw.accounts[3]])
 
         // Withdrawal should fail for only one signature by delegate
         await utils.assertRejects(
-            module.executeTransferLimit(
-              0, accounts[0], 50,
-              0, 0, 0, 0, 0,
-              sigs,
-              { from: accounts[0] }
-            ),
+            module.executeTransferLimit(...params, sigs, { from: accounts[0] }),
             'signature threshold not met'
         )
 
-        nonce = await module.nonce()
-        txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
-        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[3]], txHash)
-
+        sigs = await signModuleTx(module, params, lw, [lw.accounts[0], lw.accounts[3]])
         // Withdraw transfer limit
-        await module.executeTransferLimit(
-          0, accounts[0], 50,
-          0, 0, 0, 0, 0,
-          sigs,
-          { from: accounts[0] }
-        )
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
     })
 })
+
+const signModuleTx = async (module, params, lw, signers) => {
+    let nonce = await module.nonce()
+    let txHash = await module.getTransactionHash(...params, nonce)
+    let sigs = utils.signTransaction(lw, signers, txHash)
+
+    return sigs
+}
 
 const updateDelegate = async (safe, module, lw, delegate) => {
     let data = await module.contract.setDelegate.getData(delegate)
