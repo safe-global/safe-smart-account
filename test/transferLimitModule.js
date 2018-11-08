@@ -11,8 +11,41 @@ const MockToken = artifacts.require('./Token.sol')
 
 const CALL = 0
 
-contract('TransferLimitModule', (accounts) => {
+contract('TransferLimitModule setup', (accounts) => {
+    let lw
 
+    beforeEach(async () => {
+        // Create lightwallet
+        lw = await utils.createLightwallet()
+    })
+
+    it('should validate time period', async () => {
+        assert(await reverts(setupModule(
+            lw,
+            [[0], [100], 60 * 59, 0, 0, 2, 0, accounts[1]],
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
+            3
+        )), 'expected tx to revert')
+    })
+
+    it('should validate threshold', async () => {
+        assert(await reverts(setupModule(
+            lw,
+            [[0], [100], 24 * 60 * 60, 0, 0, 0, 0, accounts[1]],
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
+            3
+        )), 'expected tx to revert')
+
+        assert(await reverts(setupModule(
+            lw,
+            [[0], [100], 24 * 60 * 60, 0, 0, 3, 0, accounts[1]],
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
+            3
+        )), 'expected tx to revert')
+    })
+})
+
+contract('TransferLimitModule', (accounts) => {
     let safe
     let module
     let lw
@@ -20,28 +53,17 @@ contract('TransferLimitModule', (accounts) => {
     beforeEach(async () => {
         // Create lightwallet
         lw = await utils.createLightwallet()
-        // Create Master Copies
-        let proxyFactory = await ProxyFactory.new()
-        let createAndAddModules = await CreateAndAddModules.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
-        // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
-        let transferLimitModuleMasterCopy = await TransferLimitModule.new()
-        // Initialize module master copy
-        //transferLimitModuleMasterCopy.setup([], [], 0, 0, 0, 0, 0, 0)
-        // TODO: Instantiate DutchExchange
-        let dutchxAddr = accounts[1]
-        let moduleData = await transferLimitModuleMasterCopy.contract.setup.getData([0], [100], 60 * 60 * 24, 0, 0, 2, 0, dutchxAddr)
-        let proxyFactoryData = await proxyFactory.contract.createProxy.getData(transferLimitModuleMasterCopy.address, moduleData)
-        let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
-        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]], 3, createAndAddModules.address, createAndAddModulesData)
-        safe = utils.getParamFromTxEvent(
-            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Transfer Limit Module',
+
+        // TODO: Mock DutchExchange
+        let res = await setupModule(
+            lw,
+            [[0], [100], 60 * 60 * 24, 0, 0, 2, 0, accounts[1]],
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
+            3
         )
-        let modules = await safe.getModules()
-        module = TransferLimitModule.at(modules[0])
+        safe = res[0]
+        module = res[1]
+
         assert.equal(await module.manager.call(), safe.address)
     })
 
@@ -111,6 +133,8 @@ contract('TransferLimitModule', (accounts) => {
     })
 })
 
+const reverts = (p) => new Promise((resolve) => p.then(() => resolve(false)).catch((e) => resolve(e.message.search('revert') >= 0)))
+
 const signModuleTx = async (module, params, lw, signers) => {
     let nonce = await module.nonce()
     let txHash = await module.getTransactionHash(...params, nonce)
@@ -129,4 +153,27 @@ const updateDelegate = async (safe, module, lw, delegate) => {
     await safe.execTransaction(
         module.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, sigs
     )
+}
+
+const setupModule = async (lw, params, safeOwners, safeThreshold) => {
+    // Create Master Copies
+    let proxyFactory = await ProxyFactory.new()
+    let createAndAddModules = await CreateAndAddModules.new()
+    let gnosisSafeMasterCopy = await GnosisSafe.new()
+
+    let transferLimitModuleMasterCopy = await TransferLimitModule.new()
+    let moduleData = await transferLimitModuleMasterCopy.contract.setup.getData(...params)
+    let proxyFactoryData = await proxyFactory.contract.createProxy.getData(transferLimitModuleMasterCopy.address, moduleData)
+    let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
+    let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
+    let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData(safeOwners, safeThreshold, createAndAddModules.address, createAndAddModulesData)
+
+    safe = utils.getParamFromTxEvent(
+        await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+        'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Transfer Limit Module',
+    )
+    let modules = await safe.getModules()
+    module = TransferLimitModule.at(modules[0])
+
+    return [ safe, module ]
 }

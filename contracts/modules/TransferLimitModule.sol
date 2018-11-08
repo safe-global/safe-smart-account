@@ -55,7 +55,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     /// @dev Setup function sets initial storage of contract.
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _transferLimits List of transfer limits in smalles units (e.g. Wei for Ether).
-    /// @param _timePeriod Time period for which the transfer limits apply, in seconds.
+    /// @param _timePeriod Time period for which the transfer limits apply, in seconds, between [1 hour, 1 year).
     /// @param _globalEthCap Global limit on transfers, specified in Wei.
     /// @param _globalDaiCap Global limit on transfers, specified in dai.
     /// @param _threshold Number of required confirmations, within the range [1, safeThreshold - 1].
@@ -75,7 +75,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     {
         setManager();
 
-        // Equals 1 days or 1 weeks
+        // Greater than 1 hour and less than 1 year.
         require(isValidTimePeriod(_timePeriod), "Invalid time period");
         // In the range [1, safeThreshold - 1]
         require(isValidThreshold(_threshold), "Invalid threshold");
@@ -264,8 +264,8 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         internal
         returns (bool)
     {
-        if  (_timePeriod == 1 days ||
-             _timePeriod == 1 weeks) {
+        if  (_timePeriod >= 1 hours &&
+             _timePeriod < 1 years) {
             return true;
         }
 
