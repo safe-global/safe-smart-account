@@ -41,7 +41,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     uint256 public nonce;
 
     // Non-owner address who is allowed to perform transfers.
-    address delegate;
+    address public delegate;
 
     // DutchExchange contract used as price oracle.
     DutchExchange dutchx;
@@ -101,6 +101,15 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         authorized
     {
         transferLimits[token].transferLimit = transferLimit;
+    }
+
+    /// @dev Updates the delegate. This can only be done via a Safe transaction.
+    /// @param _delegate New delegate, who is a non-owner account also allowed to make transfers.
+    function setDelegate(address _delegate)
+        public
+        authorized
+    {
+        delegate = _delegate;
     }
 
     /// @dev Returns if Safe transaction is a valid transfer limit transaction.
@@ -288,13 +297,15 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = recoverKey(transactionHash, signatures, i);
-            // If signature is by delegate, this tx is authorized.
-            // In this case, only one signature is expected.
-            if (i == 0 && delegate != 0 && currentOwner == delegate) {
-                return true;
+
+            // Signatures must be sorted by their address, and
+            // there shouldn't be duplicates.
+            if (currentOwner <= lastOwner) {
+                return false;
             }
 
-            if (!OwnerManager(manager).isOwner(currentOwner) || currentOwner <= lastOwner) {
+            // Signer should either be one of the owners, or the delegate
+            if (!(OwnerManager(manager).isOwner(currentOwner) || currentOwner == delegate)) {
                 return false;
             }
 

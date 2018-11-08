@@ -9,7 +9,9 @@ const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
 
 
-contract('TransferLimitModule without global cap or delegate', (accounts) => {
+const CALL = 0
+
+contract('TransferLimitModule without global cap', (accounts) => {
 
     let safe
     let module
@@ -104,14 +106,60 @@ contract('TransferLimitModule without global cap or delegate', (accounts) => {
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], txHash)
 
         // Withdraw transfer limit
-        utils.logGasUsage(
-            'executeTransferLimit withdraw transfer limit',
-            await module.executeTransferLimit(
+        await module.executeTransferLimit(
+          0, accounts[0], 50,
+          0, 0, 0, 0, 0,
+          sigs,
+          { from: accounts[0] }
+        )
+    })
+
+    it('should allow withdrawal for delegate', async () => {
+        // Deposit 1 eth
+        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
+        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
+
+        await updateDelegate(safe, module, lw, lw.accounts[3])
+        let delegate = await module.delegate.call()
+        assert.equal(delegate, lw.accounts[3])
+
+        let nonce = await module.nonce()
+        let txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
+        let sigs = utils.signTransaction(lw, [lw.accounts[3]], txHash)
+
+        // Withdrawal should fail for only one signature by delegate
+        await utils.assertRejects(
+            module.executeTransferLimit(
               0, accounts[0], 50,
               0, 0, 0, 0, 0,
               sigs,
               { from: accounts[0] }
-            )
+            ),
+            'signature threshold not met'
+        )
+
+        nonce = await module.nonce()
+        txHash = await module.getTransactionHash(0, accounts[0], 50, 0, 0, 0, 0, 0, nonce)
+        sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[3]], txHash)
+
+        // Withdraw transfer limit
+        await module.executeTransferLimit(
+          0, accounts[0], 50,
+          0, 0, 0, 0, 0,
+          sigs,
+          { from: accounts[0] }
         )
     })
 })
+
+const updateDelegate = async (safe, module, lw, delegate) => {
+    let data = await module.contract.setDelegate.getData(delegate)
+
+    let nonce = await safe.nonce()
+    let transactionHash = await safe.getTransactionHash(module.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, nonce)
+    let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1], lw.accounts[2]], transactionHash)
+
+    await safe.execTransaction(
+        module.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, sigs
+    )
+}
