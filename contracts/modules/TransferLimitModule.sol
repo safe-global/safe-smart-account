@@ -244,15 +244,17 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
           }
           totalEthSpent += ethAmount;
 
-          // Calculate value in dai.
-          uint256 daiNum;
-          uint256 daiDen;
-          (daiNum, daiDen) = getDaiAmount(ethNum, ethDen);
-          uint256 daiAmount = daiNum / daiDen;
-          if (globalDaiCap > 0 && totalDaiSpent + daiAmount > globalDaiCap) {
-              return false;
+          if (globalDaiCap != 0) {
+            // Calculate value in dai.
+            uint256 daiNum;
+            uint256 daiDen;
+            (daiNum, daiDen) = getDaiAmount(ethNum, ethDen);
+            uint256 daiAmount = daiNum / daiDen;
+            if (totalDaiSpent + daiAmount > globalDaiCap) {
+                return false;
+            }
+            totalDaiSpent += daiAmount;
           }
-          totalDaiSpent += daiAmount;
         }
 
         transferLimits[token].spent += amount;
@@ -320,9 +322,9 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         view
         returns (uint256, uint256)
     {
-        // Amount is in ether
+        // Amount is in wei
         if (token == 0) {
-            return (amount, 1);
+            return (amount, 10**18);
         }
 
         uint256 num;
@@ -339,7 +341,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     {
         PriceOracleInterface priceOracle = PriceOracleInterface(dutchx.ethUSDOracle());
         uint ethDaiPrice = priceOracle.getUSDETHPrice();
-        return (ethNum * ethDaiPrice, den);
+        return (ethNum * 10**18, den);
     }
 
     function handlePayment(
