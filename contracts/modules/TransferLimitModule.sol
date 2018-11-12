@@ -23,6 +23,9 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     // Time period for which the transfer limits apply, in seconds.
     uint256 public timePeriod;
 
+    // Start of the time period, during which the last transfer occured (common for all tokens).
+    uint256 public lastStartTime;
+
     // Global limit on all transfers, specified in ether.
     uint256 public globalEthCap;
 
@@ -49,7 +52,6 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     struct TransferLimit {
         uint256 transferLimit;
         uint256 spent;
-        uint256 startTime;
     }
 
     /// @dev Setup function sets initial storage of contract.
@@ -216,8 +218,8 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     {
         TransferLimit storage transferLimit = transferLimits[token];
         // If time period is over, reset expenditure.
-        if (currentStartTime() > transferLimit.startTime) {
-            transferLimit.startTime = currentStartTime();
+        if (currentStartTime() > lastStartTime) {
+            lastStartTime = currentStartTime();
             transferLimit.spent = 0;
             totalEthSpent = 0;
             totalDaiSpent = 0;

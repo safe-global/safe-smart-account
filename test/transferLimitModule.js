@@ -136,7 +136,9 @@ contract('TransferLimitModule transfer limits', (accounts) => {
 
         // Mock DutchExchange
         dutchx = await MockContract.new()
-        // Each token costs 1 Wei
+        // Each token costs 1 Wei.
+        // Apparently det loses some precision after being encoded, and
+        // token price is not totally exact!
         await dutchx.givenMethodReturn(
             web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
             ABI.rawEncode(['uint256', 'uint256'], [1, det.toString()]).toString()
@@ -157,6 +159,10 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         module = res[1]
 
         assert.equal(await module.manager.call(), safe.address)
+
+        // Deposit 1 eth
+        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
+        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
     })
 
     it('should withdraw ether within transfer limit', async () => {
@@ -164,17 +170,6 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
 
-        // Withdrawal should fail as there is no ETH in the Safe
-        await utils.assertRejects(
-            module.executeTransferLimit(...params, sigs, { from: accounts[0] }),
-            'Not enough funds'
-        )
-
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
-        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
-
-        sigs = await signModuleTx(module, params, lw, signers)
         // Withdraw transfer limit
         utils.logGasUsage(
             'executeTransferLimit withdraw transfer limit',
@@ -183,10 +178,6 @@ contract('TransferLimitModule transfer limits', (accounts) => {
     })
 
     it('should not withdraw ether more than limit', async () => {
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
-        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
-
         let params = [0, accounts[0], 150, 0, 0, 0, 0, 0]
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
@@ -216,11 +207,27 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         )
     })
 
-    it('should not withdraw token more than global ether limit', async () => {
-        let params = [token.address, accounts[0], 170, 0, 0, 0, 0, 0]
+    it('should withdraw within global ether limit', async () => {
+        let params = [0, accounts[0], 70, 0, 0, 0, 0, 0]
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let totalEthSpent = await module.totalEthSpent.call()
+        assert(totalEthSpent.eq(70), 'Total ether spent takes token transfer into account')
 
+        params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+    })
+
+    it('should not withdraw token more than global ether limit', async () => {
+        let params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
+        let signers = [lw.accounts[0], lw.accounts[1]]
+        let sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        params = [0, accounts[0], 90, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
         assert(
             await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })),
             'tx should revert for token over withdraw'
@@ -297,7 +304,10 @@ contract('TransferLimitModule time period', (accounts) => {
 
         sigs = await signModuleTx(module, params, lw, signers)
         // Should fail as limit will be exceeded
-        assert(await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })))
+        assert(
+            await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })),
+            'expected tx to revert when limit is exceeded'
+        )
 
         // Fast forward one day
         now += 60 * 60 * 24
