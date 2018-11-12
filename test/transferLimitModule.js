@@ -316,6 +316,44 @@ contract('TransferLimitModule time period', (accounts) => {
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
     })
+
+    it('should reset global expenditure after period is over', async () => {
+        let now = Date.now()
+        await module.setMockedNow(now)
+
+        let params = [0, accounts[0], 70, 0, 0, 0, 0, 0]
+        let signers = [lw.accounts[0], lw.accounts[1]]
+        let sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        // Fast forward one hour
+        now += 60 * 60
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        // Fast forward one hour
+        now += 60 * 60
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 30, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        // Should fail as limit will be exceeded
+        assert(
+            await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })),
+            'expected tx to revert when limit is exceeded'
+        )
+
+        // Fast forward one day
+        now += 60 * 60 * 24
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 140, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+    })
 })
 
 
