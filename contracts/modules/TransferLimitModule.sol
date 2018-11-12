@@ -238,7 +238,6 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
           uint256 ethNum;
           uint256 ethDen;
           (ethNum, ethDen) = getEthAmount(token, amount);
-          // TODO: How precise should the comparison be?
           // Convert ether to wei
           uint256 weiAmount = (ethNum * 10**18) / ethDen;
           if (globalWeiCap > 0 && totalWeiSpent + weiAmount > globalWeiCap) {
@@ -343,7 +342,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     {
         PriceOracleInterface priceOracle = PriceOracleInterface(dutchx.ethUSDOracle());
         uint ethDaiPrice = priceOracle.getUSDETHPrice();
-        return (ethNum * 10**18, den);
+        return (ethNum * ethDaiPrice, den);
     }
 
     function handlePayment(
