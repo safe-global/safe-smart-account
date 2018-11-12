@@ -26,11 +26,11 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     // Start of the time period, during which the last transfer occured (common for all tokens).
     uint256 public lastStartTime;
 
-    // Global limit on all transfers, specified in ether.
-    uint256 public globalEthCap;
+    // Global limit on all transfers, specified in Wei.
+    uint256 public globalWeiCap;
 
-    // Total amount of ether spent in current time period.
-    uint256 public totalEthSpent;
+    // Total amount of Wei spent in current time period.
+    uint256 public totalWeiSpent;
 
     // Global limit on transfers, specified in usd (dai).
     uint256 public globalDaiCap;
@@ -58,7 +58,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _transferLimits List of transfer limits in smalles units (e.g. Wei for Ether).
     /// @param _timePeriod Time period for which the transfer limits apply, in seconds, between [1 hour, 1 year).
-    /// @param _globalEthCap Global limit on transfers, specified in Wei.
+    /// @param _globalWeiCap Global limit on transfers, specified in Wei.
     /// @param _globalDaiCap Global limit on transfers, specified in dai.
     /// @param _threshold Number of required confirmations, within the range [1, safeThreshold - 1].
     /// @param _delegate A non-owner address who is allowed to perform transfers within limits (optional).
@@ -67,7 +67,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         address[] tokens,
         uint256[] _transferLimits,
         uint256 _timePeriod,
-        uint256 _globalEthCap,
+        uint256 _globalWeiCap,
         uint256 _globalDaiCap,
         uint256 _threshold,
         address _delegate,
@@ -84,7 +84,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         require(_dutchxAddr != 0, "Invalid dutchx address");
 
         timePeriod = _timePeriod;
-        globalEthCap = _globalEthCap;
+        globalWeiCap = _globalWeiCap;
         globalDaiCap = _globalDaiCap;
         threshold = _threshold;
         delegate = _delegate;
@@ -117,7 +117,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     /// @dev Returns if Safe transaction is a valid transfer limit transaction.
     /// @param token Address of the token that should be transfered (0 for Ether)
     /// @param to Address to which the tokens should be transfered
-    /// @param amount Amount of tokens (or Ether) that should be transfered
+    /// @param amount Amount of tokens (or Wei) that should be transfered
     /// @param safeTxGas Gas that should be used for the Safe transaction.
     /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
     /// @param gasPrice Gas price that should be used for the payment calculation.
@@ -173,7 +173,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     /// @dev Returns hash to be signed by owners.
     /// @param token Address of the token that should be transfered (0 for Ether)
     /// @param to Address to which the tokens should be transfered
-    /// @param amount Amount of tokens (or Ether) that should be transfered
+    /// @param amount Amount of tokens (or Wei) that should be transfered
     /// @param _nonce Nonce used for this Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
     /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
@@ -221,7 +221,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         if (currentStartTime() > lastStartTime) {
             lastStartTime = currentStartTime();
             transferLimit.spent = 0;
-            totalEthSpent = 0;
+            totalWeiSpent = 0;
             totalDaiSpent = 0;
         }
 
@@ -233,18 +233,18 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
 
         // If global a global cap is set, transfer amount + value of all
         // previous expenditures (for all tokens) shouldn't exceed global limit.
-        if (globalEthCap != 0 || globalDaiCap != 0) {
+        if (globalWeiCap != 0 || globalDaiCap != 0) {
           // Calculate value in ether.
           uint256 ethNum;
           uint256 ethDen;
           (ethNum, ethDen) = getEthAmount(token, amount);
           // TODO: How precise should the comparison be?
           // Convert ether to wei
-          uint256 ethAmount = (ethNum * 10**18) / ethDen;
-          if (globalEthCap > 0 && totalEthSpent + ethAmount > globalEthCap) {
+          uint256 weiAmount = (ethNum * 10**18) / ethDen;
+          if (globalWeiCap > 0 && totalWeiSpent + weiAmount > globalWeiCap) {
               return false;
           }
-          totalEthSpent += ethAmount;
+          totalWeiSpent += weiAmount;
 
           if (globalDaiCap != 0) {
             // Calculate value in dai.

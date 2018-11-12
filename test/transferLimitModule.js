@@ -212,8 +212,8 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
-        let totalEthSpent = await module.totalEthSpent.call()
-        assert(totalEthSpent.eq(70), 'Total ether spent takes token transfer into account')
+        let totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(70), 'Total ether spent takes token transfer into account')
 
         params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
