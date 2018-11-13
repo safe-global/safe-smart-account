@@ -319,40 +319,11 @@ contract('TransferLimitModule time period', (accounts) => {
         now += 60 * 60
         await module.setMockedNow(now)
 
-        sigs = await signModuleTx(module, params, lw, signers)
-        // Should fail as limit will be exceeded
-        assert(
-            await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })),
-            'expected tx to revert when limit is exceeded'
-        )
-
-        // Fast forward one day
-        now += 60 * 60 * 24
-        await module.setMockedNow(now)
-
-        sigs = await signModuleTx(module, params, lw, signers)
-        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
-        totalWeiSpent = await module.totalWeiSpent.call()
-        assert(totalWeiSpent.eq(70), 'total wei spent is reset and updated after one day')
-    })
-
-    it('should reset global expenditure after period is over', async () => {
-        let now = Date.now()
-        now = (now - (now % timePeriod)) + (60)
-        await module.setMockedNow(now)
-
-        let params = [0, accounts[0], 70, 0, 0, 0, 0, 0]
-        let signers = [lw.accounts[0], lw.accounts[1]]
-        let sigs = await signModuleTx(module, params, lw, signers)
-        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
-
-        // Fast forward one hour
-        now += 60 * 60
-        await module.setMockedNow(now)
-
         params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(140), 'total wei spent is updated after transfer')
 
         // Fast forward one hour
         now += 60 * 60
@@ -373,6 +344,8 @@ contract('TransferLimitModule time period', (accounts) => {
         params = [token.address, accounts[0], 140, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(140), 'total wei spent is reset and updated after one day')
     })
 })
 
@@ -407,6 +380,8 @@ contract('TransferLimitModule rolling time period', (accounts) => {
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(70), 'total wei spent is updated after transfer')
 
         // Fast forward one hour
         now += 60 * 60
@@ -415,6 +390,8 @@ contract('TransferLimitModule rolling time period', (accounts) => {
         params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(140), 'total wei spent is updated after transfer')
 
         // Fast forward one hour
         now += 60 * 60
@@ -435,6 +412,8 @@ contract('TransferLimitModule rolling time period', (accounts) => {
         params = [token.address, accounts[0], 140, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(140), 'total wei spent is updated after transfer')
     })
 })
 

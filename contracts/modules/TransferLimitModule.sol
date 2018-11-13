@@ -350,7 +350,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
             }
 
             // Signer should either be one of the owners, or the delegate
-            if (!(OwnerManager(manager).isOwner(currentOwner) || currentOwner == delegate)) {
+            if (currentOwner != delegate && !OwnerManager(manager).isOwner(currentOwner)) {
                 return false;
             }
 
