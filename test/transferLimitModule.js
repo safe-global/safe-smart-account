@@ -11,8 +11,6 @@ const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
 const CurrentStartTimeMock = artifacts.require('CurrentStartTimeMock')
 const DaiAmountMock = artifacts.require('DaiAmountMock')
-const DutchExchange = artifacts.require('./DutchExchange.sol')
-const PriceOracleInterface = artifacts.require('./PriceOracleInterface.sol')
 
 
 const CALL = 0
@@ -93,6 +91,8 @@ contract('TransferLimitModule authorization', (accounts) => {
         sigs = await signModuleTx(module, params, lw, [lw.accounts[0], lw.accounts[1]])
         // Withdraw transfer limit
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let spent = (await module.transferLimits.call(0))[1]
+        assert(spent.eq(50), 'spent value should be updated')
     })
 
     it('should allow withdrawal for delegate', async () => {
@@ -112,6 +112,8 @@ contract('TransferLimitModule authorization', (accounts) => {
         sigs = await signModuleTx(module, params, lw, [lw.accounts[0], lw.accounts[3]])
         // Withdraw transfer limit
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let spent = (await module.transferLimits.call(0))[1]
+        assert(spent.eq(50), 'spent value should be updated')
     })
 })
 
@@ -136,11 +138,9 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         // Mock DutchExchange
         dutchx = await MockContract.new()
         // Each token costs 1 Wei.
-        // Apparently den loses some precision after being encoded, and
-        // token price is not totally exact!
         await dutchx.givenMethodReturn(
             web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString()
+            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
         )
         let res = await setupModule(
             TransferLimitModule,
@@ -188,6 +188,8 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         let sigs = await signModuleTx(module, params, lw, signers)
 
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let spent = (await module.transferLimits.call(token.address))[1]
+        assert(spent.eq(50), 'transfer is reflected in token expenditure')
     })
 
     it('should not withdraw token more than limit', async () => {
@@ -206,12 +208,20 @@ contract('TransferLimitModule transfer limits', (accounts) => {
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        let weiSpent = (await module.transferLimits.call(0))[1]
+        assert(weiSpent.eq(70), 'transfer is reflected in ether expenditure')
         let totalWeiSpent = await module.totalWeiSpent.call()
-        assert(totalWeiSpent.eq(70), 'Total ether spent takes token transfer into account')
+        assert(totalWeiSpent.eq(70), 'total ether spent takes token transfer into account')
 
         params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        let tokenSpent = (await module.transferLimits.call(token.address))[1]
+        assert(tokenSpent.eq(70), 'transfer is reflected in token expenditure')
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(140), 'total wei spent is updated after transfers')
     })
 
     it('should not withdraw token more than global ether limit', async () => {
@@ -250,11 +260,9 @@ contract('TransferLimitModule global dai transfer limit', (accounts) => {
         // Mock DutchExchange
         dutchx = await MockContract.new()
         // Each token costs 1 Wei.
-        // Apparently den loses some precision after being encoded, and
-        // token price is not totally exact!
         await dutchx.givenMethodReturn(
             web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString()
+            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
         )
         let res = await setupModule(
             DaiAmountMock,
@@ -287,6 +295,8 @@ contract('TransferLimitModule global dai transfer limit', (accounts) => {
         params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        daiSpent = await module.totalDaiSpent.call()
+        assert(daiSpent.eq(160), 'dai expenditure is updated after transfer')
     })
 
     it('should not withdraw more than global dai limit', async () => {
@@ -324,7 +334,7 @@ contract('TransferLimitModule time period', (accounts) => {
         // Each token costs 1 Wei
         await dutchx.givenMethodReturn(
             web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString()
+            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
         )
 
         let res = await setupModule(
@@ -352,6 +362,8 @@ contract('TransferLimitModule time period', (accounts) => {
         let signers = [lw.accounts[0], lw.accounts[1]]
         let sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        let totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(70), 'total wei spent is updated after transfer')
 
         // Fast forward one hour
         now += 60 * 60
@@ -370,6 +382,8 @@ contract('TransferLimitModule time period', (accounts) => {
 
         sigs = await signModuleTx(module, params, lw, signers)
         await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+        totalWeiSpent = await module.totalWeiSpent.call()
+        assert(totalWeiSpent.eq(70), 'total wei spent is reset and updated after one day')
     })
 
     it('should reset global expenditure after period is over', async () => {
