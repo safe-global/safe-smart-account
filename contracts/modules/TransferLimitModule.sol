@@ -26,6 +26,9 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     // Start of the time period, during which the last transfer occured (common for all tokens).
     uint256 public lastStartTime;
 
+    // If true, the expenditure between [now - timePeriod, now] will be considered.
+    bool public rolling;
+
     // Global limit on all transfers, specified in Wei.
     uint256 public globalWeiCap;
 
@@ -58,6 +61,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     /// @param tokens List of token addresses. Ether is represented with address 0x0.
     /// @param _transferLimits List of transfer limits in smalles units (e.g. Wei for Ether).
     /// @param _timePeriod Time period for which the transfer limits apply, in seconds, between [1 hour, 1 year).
+    /// @param _rolling If true, the expenditure between [now - timePeriod, now] will be considered.
     /// @param _globalWeiCap Global limit on transfers, specified in Wei.
     /// @param _globalDaiCap Global limit on transfers, specified in dai.
     /// @param _threshold Number of required confirmations, within the range [1, safeThreshold - 1].
@@ -67,6 +71,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         address[] tokens,
         uint256[] _transferLimits,
         uint256 _timePeriod,
+        bool _rolling,
         uint256 _globalWeiCap,
         uint256 _globalDaiCap,
         uint256 _threshold,
@@ -84,6 +89,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         require(_dutchxAddr != 0, "Invalid dutchx address");
 
         timePeriod = _timePeriod;
+        rolling = _rolling;
         globalWeiCap = _globalWeiCap;
         globalDaiCap = _globalDaiCap;
         threshold = _threshold;
@@ -209,7 +215,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         view
         returns (uint)
     {
-        return now - (now % timePeriod);
+        return getNow() - (getNow() % timePeriod);
     }
 
     function handleTransferLimits(address token, uint256 amount)
@@ -218,8 +224,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
     {
         TransferLimit storage transferLimit = transferLimits[token];
         // If time period is over, reset expenditure.
-        if (currentStartTime() > lastStartTime) {
-            lastStartTime = currentStartTime();
+        if (isPeriodOver()) {
             transferLimit.spent = 0;
             totalWeiSpent = 0;
             totalDaiSpent = 0;
@@ -231,21 +236,37 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
             return false;
         }
 
-        // If global a global cap is set, transfer amount + value of all
+        // If a global cap is set, transfer amount + value of all
         // previous expenditures (for all tokens) shouldn't exceed global limit.
-        if (globalWeiCap != 0 || globalDaiCap != 0) {
-          // Calculate value in ether.
-          uint256 ethNum;
-          uint256 ethDen;
-          (ethNum, ethDen) = getEthAmount(token, amount);
-          // Convert ether to wei
-          uint256 weiAmount = (ethNum * 10**18) / ethDen;
-          if (globalWeiCap > 0 && totalWeiSpent + weiAmount > globalWeiCap) {
-              return false;
-          }
-          totalWeiSpent += weiAmount;
+        if (!isUnderGlobalCap(token, amount)) {
+            return false;
+        }
 
-          if (globalDaiCap != 0) {
+        transferLimits[token].spent += amount;
+
+        return true;
+    }
+
+    function isUnderGlobalCap(address token, uint256 amount)
+        internal
+        returns (bool)
+    {
+        if (globalWeiCap == 0 && globalDaiCap == 0) {
+            return true;
+        }
+
+        // Calculate value in ether.
+        uint256 ethNum;
+        uint256 ethDen;
+        (ethNum, ethDen) = getEthAmount(token, amount);
+        // Convert ether to wei
+        uint256 weiAmount = (ethNum * 10**18) / ethDen;
+        if (globalWeiCap > 0 && totalWeiSpent + weiAmount > globalWeiCap) {
+            return false;
+        }
+        totalWeiSpent += weiAmount;
+
+        if (globalDaiCap != 0) {
             // Calculate value in dai.
             uint256 daiNum;
             uint256 daiDen;
@@ -255,12 +276,33 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
                 return false;
             }
             totalDaiSpent += daiAmount;
-          }
         }
 
-        transferLimits[token].spent += amount;
-
         return true;
+    }
+
+    function isPeriodOver()
+        internal
+        returns (bool)
+    {
+        if (rolling && getNow() > lastStartTime + timePeriod) {
+            lastStartTime = getNow();
+            return true;
+        } else if (!rolling && currentStartTime() > lastStartTime) {
+            lastStartTime = currentStartTime();
+            return true;
+        }
+
+        return false;
+    }
+
+    // Return now from function to allow mocking.
+    function getNow()
+        internal
+        view
+        returns (uint256)
+    {
+        return now;
     }
 
     function isValidTimePeriod(uint256 _timePeriod)

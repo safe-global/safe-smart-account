@@ -9,11 +9,11 @@ const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const TransferLimitModule = artifacts.require("./modules/TransferLimitModule.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
-const CurrentStartTimeMock = artifacts.require('CurrentStartTimeMock')
-const DaiAmountMock = artifacts.require('DaiAmountMock')
+const TransferLimitModuleMock = artifacts.require('./mocks/TransferLimitModuleMock.sol')
 
 
 const CALL = 0
+let ethToWei = (new BigNumber(10)).pow(18)
 
 contract('TransferLimitModule setup', (accounts) => {
     let lw
@@ -27,7 +27,8 @@ contract('TransferLimitModule setup', (accounts) => {
         assert(await reverts(setupModule(
             TransferLimitModule,
             lw,
-            [[0], [100], 60 * 59, 0, 0, 2, 0, accounts[1]],
+            accounts,
+            [[0], [100], 60 * 59, false, 0, 0, 2, 0, accounts[1]],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )), 'expected tx to revert')
@@ -37,7 +38,8 @@ contract('TransferLimitModule setup', (accounts) => {
         assert(await reverts(setupModule(
             TransferLimitModule,
             lw,
-            [[0], [100], 24 * 60 * 60, 0, 0, 0, 0, accounts[1]],
+            accounts,
+            [[0], [100], 24 * 60 * 60, false, 0, 0, 0, 0, accounts[1]],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )), 'expected tx to revert')
@@ -45,7 +47,8 @@ contract('TransferLimitModule setup', (accounts) => {
         assert(await reverts(setupModule(
             TransferLimitModule,
             lw,
-            [[0], [100], 24 * 60 * 60, 0, 0, 3, 0, accounts[1]],
+            accounts,
+            [[0], [100], 24 * 60 * 60, false, 0, 0, 3, 0, accounts[1]],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )), 'expected tx to revert')
@@ -64,17 +67,14 @@ contract('TransferLimitModule authorization', (accounts) => {
         let res = await setupModule(
             TransferLimitModule,
             lw,
-            [[0], [100], 60 * 60 * 24, 0, 0, 2, 0, accounts[1]],
+            accounts,
+            [[0], [100], 60 * 60 * 24, false, 0, 0, 2, 0, accounts[1]],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )
         safe = res[0]
         module = res[1]
-
         assert.equal(await module.manager.call(), safe.address)
-
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
         assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
     })
 
@@ -125,38 +125,24 @@ contract('TransferLimitModule transfer limits', (accounts) => {
     let dutchx
 
     beforeEach(async () => {
-        // Create lightwallet
         lw = await utils.createLightwallet()
 
         // Mock token that always transfers successfully
-        token = await MockContract.new()
-        await token.givenAnyReturnBool(true)
-
-        let den = new BigNumber(10)
-        den = den.pow(18)
+        token = await mockToken()
 
         // Mock DutchExchange
-        dutchx = await MockContract.new()
-        // Each token costs 1 Wei.
-        await dutchx.givenMethodReturn(
-            web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
-        )
+        dutchx = await mockDutchx()
+
         let res = await setupModule(
             TransferLimitModule,
             lw,
-            [[0, token.address], [100, 200], 60 * 60 * 24, 150, 0, 2, 0, dutchx.address],
+            accounts,
+            [[0, token.address], [100, 200], 60 * 60 * 24, false, 150, 0, 2, 0, dutchx.address],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )
         safe = res[0]
         module = res[1]
-
-        assert.equal(await module.manager.call(), safe.address)
-
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
-        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
     })
 
     it('should withdraw ether within transfer limit', async () => {
@@ -247,41 +233,22 @@ contract('TransferLimitModule global dai transfer limit', (accounts) => {
     let dutchx
 
     beforeEach(async () => {
-        // Create lightwallet
         lw = await utils.createLightwallet()
-
-        // Mock token that always transfers successfully
-        token = await MockContract.new()
-        await token.givenAnyReturnBool(true)
-
-        let den = new BigNumber(10)
-        den = den.pow(18)
-
-        // Mock DutchExchange
-        dutchx = await MockContract.new()
-        // Each token costs 1 Wei.
-        await dutchx.givenMethodReturn(
-            web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
-        )
+        token = await mockToken()
+        dutchx = await mockDutchx()
         let res = await setupModule(
-            DaiAmountMock,
+            TransferLimitModuleMock,
             lw,
-            [[0, token.address], [100, 200], 60 * 60 * 24, 0, 170, 2, 0, dutchx.address],
+            accounts,
+            [[0, token.address], [100, 200], 60 * 60 * 24, false, 0, 170, 2, 0, dutchx.address],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )
         safe = res[0]
         module = res[1]
 
-        assert.equal(await module.manager.call(), safe.address)
-
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
-        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
-
         // Set mocked dai price
-        await module.setPrice(den.toString())
+        await module.setPrice(ethToWei.toString())
     })
 
     it('should withdraw token within global dai limit', async () => {
@@ -317,45 +284,28 @@ contract('TransferLimitModule time period', (accounts) => {
     let lw
     let token
     let dutchx
+    const timePeriod = 60 * 60 * 24
 
     beforeEach(async () => {
-        // Create lightwallet
         lw = await utils.createLightwallet()
-
-        // Mock token that always transfers successfully
-        token = await MockContract.new()
-        await token.givenAnyReturnBool(true)
-
-        let den = new BigNumber(10)
-        den = den.pow(18)
-
-        // Mock DutchExchange
-        dutchx = await MockContract.new()
-        // Each token costs 1 Wei
-        await dutchx.givenMethodReturn(
-            web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
-            '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, den.toString()]).toString('hex')
-        )
-
+        token = await mockToken()
+        dutchx = await mockDutchx()
         let res = await setupModule(
-            CurrentStartTimeMock,
+            TransferLimitModuleMock,
             lw,
-            [[0, token.address], [100, 200], 60 * 60 * 24, 150, 0, 2, 0, dutchx.address],
+            accounts,
+            [[0, token.address], [100, 200], timePeriod, false, 150, 0, 2, 0, dutchx.address],
             [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
             3
         )
         safe = res[0]
         module = res[1]
-
-        assert.equal(await module.manager.call(), safe.address)
-
-        // Deposit 1 eth
-        await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
-        assert.equal(await web3.eth.getBalance(safe.address).toNumber(), web3.toWei(1, 'ether'))
     })
 
     it('should reset expenditure after period is over', async () => {
+        // Set "now" to 1 min after beginning of current time period.
         let now = Date.now()
+        now = (now - (now % timePeriod)) + (60)
         await module.setMockedNow(now)
 
         let params = [0, accounts[0], 70, 0, 0, 0, 0, 0]
@@ -387,6 +337,69 @@ contract('TransferLimitModule time period', (accounts) => {
     })
 
     it('should reset global expenditure after period is over', async () => {
+        let now = Date.now()
+        now = (now - (now % timePeriod)) + (60)
+        await module.setMockedNow(now)
+
+        let params = [0, accounts[0], 70, 0, 0, 0, 0, 0]
+        let signers = [lw.accounts[0], lw.accounts[1]]
+        let sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        // Fast forward one hour
+        now += 60 * 60
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 70, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+
+        // Fast forward one hour
+        now += 60 * 60
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 30, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        // Should fail as limit will be exceeded
+        assert(
+            await reverts(module.executeTransferLimit(...params, sigs, { from: accounts[0] })),
+            'expected tx to revert when limit is exceeded'
+        )
+
+        // Fast forward one day
+        now += 60 * 60 * 24
+        await module.setMockedNow(now)
+
+        params = [token.address, accounts[0], 140, 0, 0, 0, 0, 0]
+        sigs = await signModuleTx(module, params, lw, signers)
+        await module.executeTransferLimit(...params, sigs, { from: accounts[0] })
+    })
+})
+
+contract('TransferLimitModule rolling time period', (accounts) => {
+    let safe
+    let module
+    let lw
+    let token
+    let dutchx
+
+    beforeEach(async () => {
+        lw = await utils.createLightwallet()
+        token = await mockToken()
+        dutchx = await mockDutchx()
+        let res = await setupModule(
+            TransferLimitModuleMock,
+            lw,
+            accounts,
+            [[0, token.address], [100, 200], 60 * 60 * 24, true, 150, 0, 2, 0, dutchx.address],
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2], accounts[0]],
+            3
+        )
+        safe = res[0]
+        module = res[1]
+    })
+
+    it('should reset expenditure after rolling period is over', async () => {
         let now = Date.now()
         await module.setMockedNow(now)
 
@@ -425,7 +438,6 @@ contract('TransferLimitModule time period', (accounts) => {
     })
 })
 
-
 const reverts = (p) => new Promise((resolve) => p.then(() => resolve(false)).catch((e) => resolve(e.message.search('revert') >= 0)))
 
 const signModuleTx = async (module, params, lw, signers) => {
@@ -448,7 +460,23 @@ const updateDelegate = async (safe, module, lw, delegate) => {
     )
 }
 
-const setupModule = async (moduleContract, lw, params, safeOwners, safeThreshold) => {
+const mockToken = async () => {
+    let token = await MockContract.new()
+    await token.givenAnyReturnBool(true)
+    return token
+}
+
+const mockDutchx = async () => {
+    let dutchx = await MockContract.new()
+    // Each token costs 1 Wei.
+    await dutchx.givenMethodReturn(
+        web3.sha3('getPriceOfTokenInLastAuction(address)').slice(0, 10),
+        '0x' + ABI.rawEncode(['uint256', 'uint256'], [1, ethToWei.toString()]).toString('hex')
+    )
+    return dutchx
+}
+
+const setupModule = async (moduleContract, lw, accounts, params, safeOwners, safeThreshold) => {
     // Create Master Copies
     let proxyFactory = await ProxyFactory.new()
     let createAndAddModules = await CreateAndAddModules.new()
@@ -467,6 +495,9 @@ const setupModule = async (moduleContract, lw, params, safeOwners, safeThreshold
     )
     let modules = await safe.getModules()
     module = moduleContract.at(modules[0])
+
+    // Deposit 1 ether
+    await web3.eth.sendTransaction({ from: accounts[0], to: safe.address, value: web3.toWei(1, 'ether') })
 
     return [ safe, module ]
 }
