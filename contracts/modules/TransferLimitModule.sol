@@ -9,11 +9,11 @@ import "../common/SecuredTokenTransfer.sol";
 
 import "@gnosis.pm/dx-contracts/contracts/DutchExchange.sol";
 import "@gnosis.pm/dx-contracts/contracts/Oracle/PriceOracleInterface.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /// @title Transfer Limit Module - Allows to transfer limited amounts of ERC20 tokens and Ether.
 contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
-
     string public constant NAME = "Transfer Limit Module";
     string public constant VERSION = "0.0.2";
 
@@ -231,8 +231,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         }
 
         // Transfer + previous expenditure shouldn't exceed limit specified for token.
-        if (transferLimit.spent + amount > transferLimit.transferLimit ||
-            transferLimit.spent + amount <= transferLimit.spent) {
+        if (SafeMath.add(transferLimit.spent, amount) > transferLimit.transferLimit) {
             return false;
         }
 
@@ -242,7 +241,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
             return false;
         }
 
-        transferLimits[token].spent += amount;
+        transferLimits[token].spent = SafeMath.add(transferLimits[token].spent, amount);
 
         return true;
     }
@@ -259,23 +258,25 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         uint256 ethNum;
         uint256 ethDen;
         (ethNum, ethDen) = getEthAmount(token, amount);
+
         // Convert ether to wei
-        uint256 weiAmount = (ethNum * 10**18) / ethDen;
-        if (globalWeiCap > 0 && totalWeiSpent + weiAmount > globalWeiCap) {
+        uint256 weiAmount = SafeMath.div(SafeMath.mul(ethNum, 10**18), ethDen);
+        if (globalWeiCap > 0 && SafeMath.add(totalWeiSpent, weiAmount) > globalWeiCap) {
             return false;
         }
-        totalWeiSpent += weiAmount;
+        totalWeiSpent = SafeMath.add(totalWeiSpent, weiAmount);
 
         if (globalDaiCap != 0) {
             // Calculate value in dai.
             uint256 daiNum;
             uint256 daiDen;
             (daiNum, daiDen) = getDaiAmount(ethNum, ethDen);
-            uint256 daiAmount = daiNum / daiDen;
-            if (totalDaiSpent + daiAmount > globalDaiCap) {
+
+            uint256 daiAmount = SafeMath.div(daiNum, daiDen);
+            if (SafeMath.add(totalDaiSpent, daiAmount) > globalDaiCap) {
                 return false;
             }
-            totalDaiSpent += daiAmount;
+            totalDaiSpent = SafeMath.add(totalDaiSpent, daiAmount);
         }
 
         return true;
@@ -373,8 +374,10 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         uint256 num;
         uint256 den;
         (num, den) = dutchx.getPriceOfTokenInLastAuction(token);
+        require(num != 0, "Price of token is zero");
+        require(den != 0, "Price denominator is zero");
 
-        return (amount * num, den);
+        return (SafeMath.mul(amount, num), den);
     }
 
     function getDaiAmount(uint256 ethNum, uint256 den)
@@ -383,8 +386,9 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         returns (uint256, uint256)
     {
         PriceOracleInterface priceOracle = PriceOracleInterface(dutchx.ethUSDOracle());
-        uint ethDaiPrice = priceOracle.getUSDETHPrice();
-        return (ethNum * ethDaiPrice, den);
+        uint256 ethDaiPrice = priceOracle.getUSDETHPrice();
+        require(ethDaiPrice != 0, "USDETH price is zero");
+        return (SafeMath.mul(ethNum, ethDaiPrice), den);
     }
 
     function handlePayment(
