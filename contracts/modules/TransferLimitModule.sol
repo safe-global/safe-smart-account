@@ -403,7 +403,7 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         uint256 amount = ((gasUsed - gasleft()) + dataGas) * gasPrice;
         // Make sure refund is within transfer limits, to prevent
         // attacker with a compromised key to empty the safe.
-        require(handleTransferLimits(0, amount), "Gas refund exceeds transfer limit");
+        require(handleTransferLimits(gasToken, amount), "Gas refund exceeds transfer limit");
 
         // solium-disable-next-line security/no-tx-origin
         address receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
