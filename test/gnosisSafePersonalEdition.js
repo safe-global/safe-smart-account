@@ -1,6 +1,7 @@
 const utils = require('./utils')
 const safeUtils = require('./utilsPersonalSafe')
 const solc = require('solc')
+const BigNumber = require('bignumber.js');
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
@@ -74,6 +75,24 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         let executorDiff = (await token.balances(executor)).toNumber() - executorBalance;
         console.log("    Executor earned " + executorDiff + " Tokens")
         assert.ok(executorDiff > 0);
+    });
+
+    it('should fail if overflow in payment', async () => {
+        // Deposit 1 ETH + some spare money for execution
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.6, 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0.6, 'ether'))
+
+        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        
+        let gasPrice = (new BigNumber('2')).pow(256).div(80000)
+
+        // Should revert as we have an overflow (no message, as SafeMath doesn't support messages yet)
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { revertMessage: "", gasPrice: gasPrice})
+
+        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        assert.ok(executorDiff == 0)
     });
 
     it('should fail when depositing 0.5 ETH paying with token due to token transfer fail', async () => {
@@ -262,7 +281,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         // Create test contract
         let source = `
         contract Test {
-            function x() pure returns (uint) {
+            function x() public pure returns (uint) {
                 return 21;
             }
         }`

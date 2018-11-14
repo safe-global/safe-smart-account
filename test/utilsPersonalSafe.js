@@ -48,6 +48,8 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     if (txGasToken != 0) {
         gasPrice = 1
     }
+    gasPrice = options.gasPrice || gasPrice
+
     let sigs = await signer(to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
     
     let payload = safe.contract.execTransaction.getData(
@@ -56,9 +58,18 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     console.log("    Data costs: " + utils.estimateDataGasCosts(payload))
 
     // Estimate gas of paying transaction
-    let estimate = await safe.execTransaction.estimateGas(
-        to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
-    )
+    let estimate = null
+    try {
+        estimate = await safe.execTransaction.estimateGas(
+            to, value, data, operation, txGasEstimate, dataGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
+        )
+    } catch (e) {
+        if (options.revertMessage == undefined ||options.revertMessage == null) {
+            throw e
+        }
+        assert.equal(("VM Exception while processing transaction: revert" + opts.revertMessage).trim(), e.message)
+        return null
+    }
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
@@ -86,7 +97,7 @@ let deployToken = async function(deployer) {
     let tokenSource = `
     contract TestToken {
         mapping (address => uint) public balances;
-        function TestToken() {
+        constructor() public {
             balances[msg.sender] = 10000000;
         }
         function transfer(address to, uint value) public returns (bool) {
