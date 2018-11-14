@@ -401,10 +401,14 @@ contract TransferLimitModule is Module, SignatureDecoder, SecuredTokenTransfer {
         private
     {
         uint256 amount = ((gasUsed - gasleft()) + dataGas) * gasPrice;
+        // Make sure refund is within transfer limits, to prevent
+        // attacker with a compromised key to empty the safe.
+        require(handleTransferLimits(0, amount), "Gas refund exceeds transfer limit");
+
         // solium-disable-next-line security/no-tx-origin
         address receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
-                // solium-disable-next-line security/no-send
+            // solium-disable-next-line security/no-send
             require(receiver.send(amount), "Could not pay gas costs with ether");
         } else {
             require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");
