@@ -4,12 +4,15 @@ import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
 contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
+
+    using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "0.0.2";
@@ -101,7 +104,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     }
 
     function handlePayment(
-        uint256 gasUsed,
+        uint256 startGas,
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
@@ -109,11 +112,11 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     )
         private
     {
-        uint256 amount = ((gasUsed - gasleft()) + dataGas) * gasPrice;
+        uint256 amount = startGas.sub(gasleft()).add(dataGas).mul(gasPrice);
         // solium-disable-next-line security/no-tx-origin
         address receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
-                // solium-disable-next-line security/no-send
+            // solium-disable-next-line security/no-send
             require(receiver.send(amount), "Could not pay gas costs with ether");
         } else {
             require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");

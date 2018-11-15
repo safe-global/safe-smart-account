@@ -28,7 +28,7 @@
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
     "@gnosis.pm/mock-contract": "2.0.0",
-    "bignumber.js": "^7.1.0",
+    "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ganache-cli": "6.1.7",
@@ -39,6 +39,7 @@
     "web3": "0.20.6"
   },
   "dependencies": {
+    "openzeppelin-solidity": "^2.0.0",
     "solc": "^0.4.24",
     "truffle-hdwallet-provider": "0.0.7-beta.1"
   }
