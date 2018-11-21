@@ -1,10 +1,10 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 import "./base/BaseSafe.sol";
 import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./external/SafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -67,22 +67,15 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     function execTransaction(
-<<<<<<< HEAD
         address to,
         uint256 value,
-        bytes data,
+        bytes memory data,
         Enum.Operation operation,
-=======
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
->>>>>>> dd768ad... Fix solidity 0.5.0 errors
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
-        address refundReceiver,
+        address payable refundReceiver,
         bytes memory signatures
     )
         public
@@ -115,13 +108,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
-        address refundReceiver
+        address payable refundReceiver
     )
         private
     {
         uint256 amount = startGas.sub(gasleft()).add(dataGas).mul(gasPrice);
         // solium-disable-next-line security/no-tx-origin
-        address receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
+        address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
             // solium-disable-next-line security/no-send
             require(receiver.send(amount), "Could not pay gas costs with ether");
@@ -231,13 +224,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /**
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
-<<<<<<< HEAD
-    */
-    function signMessage(bytes _data)
-=======
     */ 
     function signMessage(bytes memory _data) 
->>>>>>> dd768ad... Fix solidity 0.5.0 errors
         public
         authorized
     {
@@ -249,13 +237,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
-<<<<<<< HEAD
-    */
-    function isValidSignature(bytes _data, bytes _signature)
-=======
     */ 
     function isValidSignature(bytes memory _data, bytes memory _signature)
->>>>>>> dd768ad... Fix solidity 0.5.0 errors
         public
         returns (bool isValid)
     {
@@ -299,23 +282,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
-<<<<<<< HEAD
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 dataGas,
-        uint256 gasPrice,
-=======
         address to, 
         uint256 value, 
         bytes memory data, 
         Enum.Operation operation, 
         uint256 safeTxGas, 
         uint256 dataGas, 
-        uint256 gasPrice, 
->>>>>>> dd768ad... Fix solidity 0.5.0 errors
+        uint256 gasPrice,
         address gasToken,
         address refundReceiver,
         uint256 _nonce
@@ -343,23 +316,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-<<<<<<< HEAD
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 dataGas,
-        uint256 gasPrice,
-=======
         address to, 
         uint256 value, 
         bytes memory data, 
         Enum.Operation operation, 
         uint256 safeTxGas, 
         uint256 dataGas, 
-        uint256 gasPrice, 
->>>>>>> dd768ad... Fix solidity 0.5.0 errors
+        uint256 gasPrice,
         address gasToken,
         address refundReceiver,
         uint256 _nonce
