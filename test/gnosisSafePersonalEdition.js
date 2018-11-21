@@ -285,12 +285,10 @@ contract('GnosisSafePersonalEdition', function(accounts) {
                 return 21;
             }
         }`
-        let output = await solc.compile(source, 0);
-        let interface = JSON.parse(output.contracts[':Test']['interface'])
-        let data = '0x' + output.contracts[':Test']['bytecode']
-        const TestContract = web3.eth.contract(interface);
+        let output = await utils.compile(source);
+        const TestContract = web3.eth.contract(output.interface);
         let testContract = utils.getParamFromTxEvent(
-            await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, data, CREATE, executor),
+            await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, output.data, CREATE, executor),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)

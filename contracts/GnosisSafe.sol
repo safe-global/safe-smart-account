@@ -46,8 +46,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setup(address[] memory _owners, uint256 _threshold, address to, bytes memory data)
-        public
+    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data)
+        external
     {
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
@@ -69,16 +69,16 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function execTransaction(
         address to,
         uint256 value,
-        bytes memory data,
+        bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 dataGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures
+        bytes calldata signatures
     )
-        public
+        external
         returns (bool success)
     {
         uint256 startGas = gasleft();
@@ -151,7 +151,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             // If v is 0 then it is a contract signature
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
-                currentOwner = address(bytes20(r));
+                currentOwner = address(uint256(r));
                 bytes memory contractSignature;
                 // solium-disable-next-line security/no-inline-assembly
                 assembly {
@@ -164,7 +164,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
-                currentOwner = address(bytes20(r));
+                currentOwner = address(uint256(r));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 if (msg.sender != currentOwner && approvedHashes[currentOwner][dataHash] == 0) {
                     return false;
@@ -196,8 +196,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
-    function requiredTxGas(address to, uint256 value, bytes memory data, Enum.Operation operation)
-        public
+    function requiredTxGas(address to, uint256 value, bytes calldata data, Enum.Operation operation)
+        external
         authorized
         returns (uint256)
     {
@@ -215,7 +215,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
     */
     function approveHash(bytes32 hashToApprove)
-        public
+        external
     {
         require(owners[msg.sender] != address(0), "Only owners can approve a hash");
         approvedHashes[msg.sender][hashToApprove] = 1;
@@ -225,8 +225,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
     */ 
-    function signMessage(bytes memory _data) 
-        public
+    function signMessage(bytes calldata _data) 
+        external
         authorized
     {
         signedMessages[getMessageHash(_data)] = 1;
@@ -238,8 +238,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
     */ 
-    function isValidSignature(bytes memory _data, bytes memory _signature)
-        public
+    function isValidSignature(bytes calldata _data, bytes calldata _signature)
+        external
         returns (bool isValid)
     {
         bytes32 messageHash = getMessageHash(_data);

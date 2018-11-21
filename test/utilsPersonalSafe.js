@@ -109,9 +109,9 @@ let deployToken = async function(deployer) {
             return true;
         }
     }`
-    let solcOutput = await solc.compile(tokenSource, 0);
-    let tokenInterface = JSON.parse(solcOutput.contracts[':TestToken']['interface'])
-    let tokenBytecode = '0x' + solcOutput.contracts[':TestToken']['bytecode']
+    let output = await utils.compile(tokenSource);
+    let tokenInterface = output.interface
+    let tokenBytecode = output.data
     let transactionHash = await web3.eth.sendTransaction({from: deployer, data: tokenBytecode, gas: 4000000})
     let receipt = web3.eth.getTransactionReceipt(transactionHash);
     const TestToken = web3.eth.contract(tokenInterface)

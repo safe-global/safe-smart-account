@@ -10,8 +10,8 @@ contract ISignatureValidator {
     * MUST take (bytes, bytes) as arguments
     */ 
     function isValidSignature(
-        bytes memory _data, 
-        bytes memory _signature)
-        public
+        bytes calldata _data, 
+        bytes calldata _signature)
+        external
         returns (bool isValid); 
 }
