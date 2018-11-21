@@ -6,4 +6,4 @@ cache:
     - node_modules
 before_script: 
 - cd node_modules/truffle && npm install solc@0.5.0
-- truffle compile
+- npx truffle compile
