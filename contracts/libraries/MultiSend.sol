@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 
 
 /// @title Multi Send - Allows to batch multiple transactions into one.
@@ -12,7 +12,7 @@ contract MultiSend {
     ///                     tuple(operation,address,uint256,bytes), where operation 
     ///                     can be 0 for a call or 1 for a delegatecall. The bytes 
     ///                     of all encoded transactions are concatenated to form the input.
-    function multiSend(bytes transactions)
+    function multiSend(bytes memory transactions)
         public
     {
         // solium-disable-next-line security/no-inline-assembly

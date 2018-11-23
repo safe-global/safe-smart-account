@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
@@ -17,12 +17,12 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     mapping (address => address) internal modules;
     
-    function setupModules(address to, bytes data)
+    function setupModules(address to, bytes memory data)
         internal
     {
-        require(modules[SENTINEL_MODULES] == 0, "Modules have already been initialized");
+        require(modules[SENTINEL_MODULES] == address(0), "Modules have already been initialized");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
-        if (to != 0)
+        if (to != address(0))
             // Setup has to complete successfully or transaction fails.
             require(executeDelegateCall(to, data, gasleft()), "Could not finish initialization");
     }
@@ -35,11 +35,11 @@ contract ModuleManager is SelfAuthorized, Executor {
         authorized
     {
         // Module address cannot be null or sentinel.
-        require(address(module) != 0 && address(module) != SENTINEL_MODULES, "Invalid module address provided");
+        require(address(module) != address(0) && address(module) != SENTINEL_MODULES, "Invalid module address provided");
         // Module cannot be added twice.
-        require(modules[module] == 0, "Module has already been added");
-        modules[module] = modules[SENTINEL_MODULES];
-        modules[SENTINEL_MODULES] = module;
+        require(modules[address(module)] == address(0), "Module has already been added");
+        modules[address(module)] = modules[SENTINEL_MODULES];
+        modules[SENTINEL_MODULES] = address(module);
         emit EnabledModule(module);
     }
 
@@ -52,10 +52,10 @@ contract ModuleManager is SelfAuthorized, Executor {
         authorized
     {
         // Validate module address and check that it corresponds to module index.
-        require(address(module) != 0 && address(module) != SENTINEL_MODULES, "Invalid module address provided");
-        require(modules[prevModule] == address(module), "Invalid prevModule, module pair provided");
-        modules[prevModule] = modules[module];
-        modules[module] = 0;
+        require(address(module) != address(0) && address(module) != SENTINEL_MODULES, "Invalid module address provided");
+        require(modules[address(prevModule)] == address(module), "Invalid prevModule, module pair provided");
+        modules[address(prevModule)] = modules[address(module)];
+        modules[address(module)] = address(0);
         emit DisabledModule(module);
     }
 
@@ -64,12 +64,12 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param value Ether value of module transaction.
     /// @param data Data payload of module transaction.
     /// @param operation Operation type of module transaction.
-    function execTransactionFromModule(address to, uint256 value, bytes data, Enum.Operation operation)
+    function execTransactionFromModule(address to, uint256 value, bytes memory data, Enum.Operation operation)
         public
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
-        require(modules[msg.sender] != 0, "Method can only be called from an enabled module");
+        require(modules[msg.sender] != address(0), "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
     }
@@ -79,7 +79,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     function getModules()
         public
         view
-        returns (address[])
+        returns (address[] memory)
     {
         // Calculate module count
         uint256 moduleCount = 0;

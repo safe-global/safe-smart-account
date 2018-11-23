@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 import "./Module.sol";
 import "./ModuleManager.sol";
 import "./OwnerManager.sol";
@@ -14,7 +14,7 @@ contract BaseSafe is ModuleManager, OwnerManager {
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setupSafe(address[] _owners, uint256 _threshold, address to, bytes data)
+    function setupSafe(address[] memory _owners, uint256 _threshold, address to, bytes memory data)
         internal
     {
         setupOwners(_owners, _threshold);

@@ -1,4 +1,5 @@
 const util = require('util');
+const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi");
 const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
@@ -118,9 +119,38 @@ async function getErrorMessage(to, value, data, from) {
     return abi.rawDecode(["string"], returnBuffer.slice(4))[0];
 }
 
+async function compile(source) {
+    var input = JSON.stringify({
+        'language': 'Solidity',
+        'settings': {
+            'outputSelection': {
+            '*': {
+                '*': [ 'abi', 'evm.bytecode' ]
+            }
+            }
+        },
+        'sources': {
+            'tmp.sol': {
+                'content': source
+            }
+        }
+    });
+    let solcData = await solc.compile(input)
+    let output = JSON.parse(solcData);
+    let fileOutput = output['contracts']['tmp.sol']
+    let contractOutput = fileOutput[Object.keys(fileOutput)[0]]
+    let interface = contractOutput['abi']
+    let data = '0x' + contractOutput['evm']['bytecode']['object']
+    return {
+        "data": data,
+        "interface": interface
+    }
+}
+
 Object.assign(exports, {
     createAndAddModulesData,
     currentTimeNs,
+    compile,
     getParamFromTxEvent,
     getParamFromTxEventWithAdditionalDefinitions,
     checkTxEvent,

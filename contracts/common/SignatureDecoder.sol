@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 
 
 /// @title SignatureDecoder - Decodes signatures that a encoded as bytes
@@ -12,7 +12,7 @@ contract SignatureDecoder {
     /// @param pos which signature to read
     function recoverKey (
         bytes32 messageHash, 
-        bytes messageSignature,
+        bytes memory messageSignature,
         uint256 pos
     )
         internal
@@ -29,7 +29,7 @@ contract SignatureDecoder {
     /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`
     /// @param pos which signature to read
     /// @param signatures concatenated rsv signatures
-    function signatureSplit(bytes signatures, uint256 pos)
+    function signatureSplit(bytes memory signatures, uint256 pos)
         internal
         pure
         returns (uint8 v, bytes32 r, bytes32 s)

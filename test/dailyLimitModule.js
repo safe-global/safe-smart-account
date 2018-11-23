@@ -1,5 +1,4 @@
 const utils = require('./utils')
-const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
@@ -107,7 +106,7 @@ contract('DailyLimitModule', function(accounts) {
         let source = `
         contract TestToken {
             mapping (address => uint) public balances;
-            function TestToken() {
+            constructor() public {
                 balances[msg.sender] = 100;
             }
             function transfer(address to, uint value) public returns (bool) {
@@ -116,10 +115,10 @@ contract('DailyLimitModule', function(accounts) {
                 balances[to] += value;
             }
         }`
-        let output = await solc.compile(source, 0);
+        let output = await utils.compile(source);
         // Create test token contract
-        let contractInterface = JSON.parse(output.contracts[':TestToken']['interface'])
-        let contractBytecode = '0x' + output.contracts[':TestToken']['bytecode']
+        let contractInterface = output.interface
+        let contractBytecode = output.data
         let transactionHash = await web3.eth.sendTransaction({from: accounts[0], data: contractBytecode, gas: 4000000})
         let receipt = web3.eth.getTransactionReceipt(transactionHash);
         const TestToken = web3.eth.contract(contractInterface)
