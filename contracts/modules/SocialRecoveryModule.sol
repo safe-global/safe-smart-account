@@ -10,7 +10,7 @@ import "../common/Enum.sol";
 contract SocialRecoveryModule is Module {
 
     string public constant NAME = "Social Recovery Module";
-    string public constant VERSION = "0.0.2";
+    string public constant VERSION = "0.1.0";
 
     uint256 public threshold;
     address[] public friends;

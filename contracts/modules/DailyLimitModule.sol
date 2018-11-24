@@ -10,7 +10,7 @@ import "../common/Enum.sol";
 contract DailyLimitModule is Module {
 
     string public constant NAME = "Daily Limit Module";
-    string public constant VERSION = "0.0.2";
+    string public constant VERSION = "0.1.0";
 
     // dailyLimits mapping maps token address to daily limit settings.
     mapping (address => DailyLimit) public dailyLimits;

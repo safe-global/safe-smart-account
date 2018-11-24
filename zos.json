@@ -1,15 +1,11 @@
 {
+  "zosversion": "2",
   "name": "gnosis-safe",
-  "version": "0.0.2",
-  "lib": true,
+  "version": "0.1.0",
   "contracts": {
     "GnosisSafe": "GnosisSafe",
+    "ProxyFactory": "ProxyFactory",
     "CreateAndAddModules": "CreateAndAddModules",
-    "MultiSend": "MultiSend",
-    "DailyLimitModule": "DailyLimitModule",
-    "SocialRecoveryModule": "SocialRecoveryModule",
-    "StateChannelModule": "StateChannelModule",
-    "WhitelistModule": "WhitelistModule",
-    "ProxyFactory": "ProxyFactory"
+    "MultiSend": "MultiSend"
   }
 }

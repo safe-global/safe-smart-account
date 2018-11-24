@@ -10,7 +10,7 @@ import "../common/Enum.sol";
 contract WhitelistModule is Module {
 
     string public constant NAME = "Whitelist Module";
-    string public constant VERSION = "0.0.2";
+    string public constant VERSION = "0.1.0";
 
     // isWhitelisted mapping maps destination address to boolean.
     mapping (address => bool) public isWhitelisted;
