@@ -34,7 +34,7 @@ module.exports = {
   },
   solc: {
     optimizer: {
-      enabled: true
+      enabled: false
     },
   },
 };
