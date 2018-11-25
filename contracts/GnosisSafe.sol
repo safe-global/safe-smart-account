@@ -15,7 +15,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.0.2";
+    string public constant VERSION = "0.1.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
