@@ -5,12 +5,14 @@
   "license": "GPL-3.0",
   "main": "index.js",
   "files": [
+    "build",
     "contracts",
     "test",
     "zos.json",
     "zos.*.json"
   ],
   "scripts": {
+    "prepare": "rm -rf build/contracts && truffle compile",
     "test-norpc": "truffle test",
     "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'"
   },
