@@ -13,5 +13,5 @@ contract ISignatureValidator {
         bytes calldata _data, 
         bytes calldata _signature)
         external
-        returns (bool isValid); 
+        returns (bool isValid);
 }
