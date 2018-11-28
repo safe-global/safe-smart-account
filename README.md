@@ -56,9 +56,26 @@ solidity_flattener contracts/proxies/ProxyFactory.sol --output build/flattened_c
 find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity ^0.5.0;/g' {} \;
 ```
 
-Zeppelin OS
------------
-When using the contracts via the Zeppelin OS make sure to choose an appropriate Proxy. An upgradable proxy enables the user to update the master copy (aka implementation). The default upgradable proxy is managed by an admin address. This admin address is independent from the owners of the Safe. Therefore it would be possible for the admin to change the master copy without the approval of any owner, thus allowing him to gain full access to the Safe.
+Using with ZeppelinOS
+---------------------
+
+You can create a gnosis safe upgradeable instance using [ZeppelinOS](http://zeppelinos.org/) by linking to the provided [EVM package](https://docs.zeppelinos.org/docs/linking.html). This will use the master copy already deployed to mainnet, kovan, or rinkeby, reducing gas deployment costs. 
+
+To create an instance using ZeppelinOS:
+
+```bash
+$ npm install -g zos
+$ zos init YourProject
+$ zos link gnosis-safe
+$ zos push --network rinkeby
+> Connecting to dependency gnosis-safe 0.1.0
+$ zos create gnosis-safe/GnosisSafe --init setup --args "[$ADDRESS1,$ADDRESS2,$ADDRESS3],2,0x0000000000000000000000000000000000000000,\"\"" --network rinkeby --from $SENDER
+> Instance created at SAFE_ADDRESS
+```
+
+It is suggested to [use a non-default address](https://docs.zeppelinos.org/docs/pattern.html#transparent-proxies-and-function-clashes) as `$SENDER`.
+
+> Note: When using the contracts via ZeppelinOS make sure to choose an appropriate Proxy admin. An upgradable proxy enables the user to update the master copy (aka implementation). The default upgradable proxy is managed by an admin address. This admin address is independent from the owners of the Safe. Therefore it would be possible for the admin to change the master copy without the approval of any owner, thus allowing him to gain full access to the Safe.
 
 Documentation
 -------------
