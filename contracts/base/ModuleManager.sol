@@ -69,7 +69,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
-        require(modules[msg.sender] != address(0), "Method can only be called from an enabled module");
+        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
     }

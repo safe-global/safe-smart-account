@@ -177,7 +177,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            if (currentOwner <= lastOwner || owners[currentOwner] == address(0)) {
+            if (currentOwner <= lastOwner || owners[currentOwner] == address(0) || currentOwner == SENTINEL_OWNERS) {
                 return false;
             }
             lastOwner = currentOwner;

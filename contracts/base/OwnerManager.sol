@@ -140,7 +140,7 @@ contract OwnerManager is SelfAuthorized {
         view
         returns (bool)
     {
-        return owners[owner] != address(0);
+        return owner != SENTINEL_OWNERS && owners[owner] != address(0);
     }
 
     /// @dev Returns array of owners.
