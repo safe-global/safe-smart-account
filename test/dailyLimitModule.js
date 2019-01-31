@@ -24,7 +24,7 @@ contract('DailyLimitModule', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0)
         let dailyLimitModuleMasterCopy = await DailyLimitModule.new()
         // Initialize module master copy
         dailyLimitModuleMasterCopy.setup([], [])
@@ -33,7 +33,7 @@ contract('DailyLimitModule', function(accounts) {
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, moduleData)
         let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
