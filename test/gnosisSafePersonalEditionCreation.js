@@ -9,7 +9,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MockContract = artifacts.require('./MockContract.sol');
 const MockToken = artifacts.require('./Token.sol');
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('GnosisSafe Trustless Deployment', function(accounts) {
 
     const CALL = 0
 

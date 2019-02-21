@@ -6,7 +6,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafePersonalEdition using eth_signTypedData', function(accounts) {
+contract('GnosisSafe using eth_signTypedData', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]

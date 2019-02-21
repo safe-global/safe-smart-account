@@ -3,7 +3,7 @@ const utils = require('./utils/general')
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('GnosisSafe Sentinel Checks', function(accounts) {
 
     let gnosisSafe
     let lw

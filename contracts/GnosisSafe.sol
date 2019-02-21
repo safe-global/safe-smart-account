@@ -137,7 +137,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         returns (bool)
     {
         // Check that the provided signature data is not too short
-        if (signatures.length < threshold * 65) {
+        if (signatures.length < threshold.mul(65)) {
             return false;
         }
         // There cannot be an owner with address 0.
@@ -153,8 +153,30 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint256(r));
+
+                // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
+                if (uint256(s) < threshold.mul(65)) {
+                    return false;
+                }
+
+                // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
+                if (uint256(s).add(32) > signatures.length) {
+                    return false;
+                }
+
+                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+                uint256 contractSignatureLen;
+                // solium-disable-next-line security/no-inline-assembly)
+                assembly {
+                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
+                }
+                if (uint256(s).add(32).add(contractSignatureLen) > signatures.length) {
+                    return false;
+                }
+
+                // Check signature
                 bytes memory contractSignature;
-                // solium-disable-next-line security/no-inline-assembly
+                // solium-disable-next-line security/no-inline-assembly)
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)

@@ -75,7 +75,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
-        assert.equal(("VM Exception while processing transaction: revert" + opts.revertMessage).trim(), e.message)
+        assert.equal(("VM Exception while processing transaction: revert " + opts.revertMessage).trim(), e.message)
         return null
     }
 
