@@ -36,7 +36,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
             )
         } catch (e) {
             failed = true
-            assert.equal(("VM Exception while processing transaction: revert " + (message || "Invalid signatures provided")).trim(), e.message)
+            assert.equal(e.message, ("VM Exception while processing transaction: revert " + message).trim())
         } finally {
             assert.ok(failed, "Transaction execution should fail")
         }
@@ -63,20 +63,20 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         let insideSigns = "0x" + "000000000000000000000000" + owner.address.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000020" + "00" + // r, s, v  
             "0000000000000000000000000000000000000000000000000000000000000000" // Some data to read
 
-        await simulateSignatureFailure(to, value, data, operation, insideSigns)
+        await simulateSignatureFailure(to, value, data, operation, insideSigns, "Invalid contract signature location: inside static part")
 
         /** Case: There is no data appended */
         
         let sigsBase = "0x" + "000000000000000000000000" + owner.address.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000041" + "00" // r, s, v
 
-        await simulateSignatureFailure(to, value, data, operation, sigsBase)
+        await simulateSignatureFailure(to, value, data, operation, sigsBase, "Invalid contract signature location: length not present")
 
         /** Case: There is a wrong length specified for the data */
 
         // Append faulty signature data: length, but no data
         let invalidLengthSig = sigsBase + "0000000000000000000000000000000000000000000000000000000000000020"
 
-        await simulateSignatureFailure(to, value, data, operation, invalidLengthSig)
+        await simulateSignatureFailure(to, value, data, operation, invalidLengthSig, "Invalid contract signature location: data not complete")
 
         // Safe should be empty again
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))

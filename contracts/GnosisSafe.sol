@@ -88,7 +88,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         );
         // Increase nonce and execute transaction.
         nonce++;
-        require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
+        checkSignatures(keccak256(txHashData), txHashData, signatures, true);
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         uint256 gasUsed = gasleft();
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
@@ -125,21 +125,17 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     }
 
     /**
-    * @dev Should return whether the signature provided is valid for the provided data, hash
+    * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
     * @param data That should be signed (this is passed to an external validator contract)
     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
     * @param consumeHash Indicates that in case of an approved hash the storage can be freed to save gas
-    * @return a bool upon valid or invalid signature with corresponding _data
     */
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
-        returns (bool)
     {
         // Check that the provided signature data is not too short
-        if (signatures.length < threshold.mul(65)) {
-            return false;
-        }
+        require(signatures.length >= threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -155,14 +151,10 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 currentOwner = address(uint256(r));
 
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
-                if (uint256(s) < threshold.mul(65)) {
-                    return false;
-                }
+                require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
-                if (uint256(s).add(32) > signatures.length) {
-                    return false;
-                }
+                require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
 
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
@@ -170,9 +162,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
-                if (uint256(s).add(32).add(contractSignatureLen) > signatures.length) {
-                    return false;
-                }
+                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "Invalid contract signature location: data not complete");
 
                 // Check signature
                 bytes memory contractSignature;
@@ -181,17 +171,13 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                if (!ISignatureValidator(currentOwner).isValidSignature(data, contractSignature)) {
-                    return false;
-                }
+                require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "Invalid contract signature provided");
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint256(r));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                if (msg.sender != currentOwner && approvedHashes[currentOwner][dataHash] == 0) {
-                    return false;
-                }
+                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "Hash has not been approved");
                 // Hash has been marked for consumption. If this hash was pre-approved free storage
                 if (consumeHash && msg.sender != currentOwner) {
                     approvedHashes[currentOwner][dataHash] = 0;
@@ -200,12 +186,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            if (currentOwner <= lastOwner || owners[currentOwner] == address(0) || currentOwner == SENTINEL_OWNERS) {
-                return false;
-            }
+            require (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "Invalid owner provided");
             lastOwner = currentOwner;
         }
-        return true;
     }
 
     /// @dev Allows to estimate a Safe transaction.
@@ -263,15 +246,16 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     */ 
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         external
-        returns (bool isValid)
+        returns (bytes4)
     {
         bytes32 messageHash = getMessageHash(_data);
         if (_signature.length == 0) {
-            isValid = signedMessages[messageHash] != 0;
+            require(signedMessages[messageHash] != 0, "Hash not approved");
         } else {
             // consumeHash needs to be false, as the state should not be changed
-            isValid = checkSignatures(messageHash, _data, _signature, false);
+            checkSignatures(messageHash, _data, _signature, false);
         }
+        return EIP1271_MAGIC_VALUE;
     }
 
     /// @dev Returns hash of a message that can be signed by owners.
