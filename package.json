@@ -31,6 +31,7 @@
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
     "@gnosis.pm/mock-contract": "github:gnosis/mock-contract#sol_0_5_0",
+    "@gnosis.pm/truffle-nice-tools": "^1.2.3",
     "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
