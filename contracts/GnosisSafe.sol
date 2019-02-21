@@ -87,9 +87,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, // Payment info
             nonce
         );
-        require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
         // Increase nonce and execute transaction.
         nonce++;
+        require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
         success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
