@@ -1,4 +1,4 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 const solc = require('solc')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")

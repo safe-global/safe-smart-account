@@ -1,4 +1,4 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")

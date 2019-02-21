@@ -1,5 +1,5 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
+const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const solc = require('solc')
 const BigNumber = require('bignumber.js');
 
@@ -43,14 +43,25 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         // Withdraw 1 ETH
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
+        console.log("Safe balance", web3.fromWei(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 'ether'))
+
+        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        // We check executor balance here, since we should not execute failing transactions 
+        assert.ok(executorDiff > 0)
+
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
+
+        console.log("Safe balance", web3.fromWei(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 'ether'))
+
+        executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        // We check executor balance here, since we should not execute failing transactions 
+        assert.ok(executorDiff > 0)
 
         // Should fail as it is over the balance (payment should still happen)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true})
 
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
     });
 
     it('should deposit and withdraw 1 ETH paying with token', async () => {

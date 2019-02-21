@@ -1,5 +1,5 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
+const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const solc = require('solc')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");

@@ -1,5 +1,5 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
+const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const fs = require('fs')
 const randomBuffer = require("random-buffer")
 const ethUtil = require('ethereumjs-util')

@@ -15,20 +15,6 @@ function currentTimeNs() {
     return hrTime[0] * 1000000000 + hrTime[1]
 }
 
-function dataGasValue(hexValue) {
-   switch(hexValue) {
-    case "0x": return 0
-    case "00": return 4
-    default: return 68
-  };
-}
-
-function estimateDataGasCosts(dataString) {
-  const reducer = (accumulator, currentValue) => accumulator += dataGasValue(currentValue)
-
-  return dataString.match(/.{2}/g).reduce(reducer, 0)
-}
-
 function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
     transaction.logs = transaction.logs.concat(transaction.receipt.logs.map(event => definitions.formatter(event)))
     return getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject)
@@ -158,6 +144,5 @@ Object.assign(exports, {
     createLightwallet,
     signTransaction,
     assertRejects,
-    estimateDataGasCosts,
     getErrorMessage
 })
