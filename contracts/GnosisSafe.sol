@@ -15,7 +15,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.1.0";
+    string public constant VERSION = "1.0.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
@@ -151,6 +151,8 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 currentOwner = address(uint256(r));
 
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
+                // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
+                // Here we only check that the pointer is not pointing inside the part that is being processed
                 require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
