@@ -1,24 +1,38 @@
 #!/usr/bin/env node
 const fs = require('fs')
-const program = require('commander')
 const util = require('util')
+const path = require('path')
 
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
-program
-  .usage('[options] <zos network json file>')
-  .arguments('[options] <file>')
-  .option('-n, --network [networkId]', 'Set network id')
-  .parse(process.argv)
+zosFiles = [
+  {
+    networkID: 1,
+    fileName: path.join(__dirname, "../zos.mainnet.json")
+  },
+  {
+    networkID: 4,
+    fileName: path.join(__dirname, "../zos.rinkeby.json")
+  },
+  {
+    networkID: 42,
+    fileName: path.join(__dirname, "../zos.kovan.json")
+  }
+]
 
-if (program.args.length == 0 || !program.network) {
-  program.help()
+async function processAll(){
+  for (let zosFile of zosFiles){
+    const zosNetworkFileJson = JSON.parse(fs.readFileSync(zosFile.fileName))
+  
+    
+    for (let name of Object.keys(zosNetworkFileJson.contracts)){
+      var contract = zosNetworkFileJson.contracts[name]
+      var contractName = name
+      await injectNetwork(contractName, zosFile.networkID, contract.address)
+    }
+  }
 }
-
-const networkId = program.network
-const zosNetworkFilePath = program.args[0]
-const zosNetworkFileJson = JSON.parse(fs.readFileSync(zosNetworkFilePath))
 
 async function injectNetwork(contractName, networkId, address) {
   console.log(`Updating ${contractName} with address ${address} on network ${networkId}`)
@@ -33,8 +47,4 @@ async function injectNetwork(contractName, networkId, address) {
   await writeFile(contractFile, JSON.stringify(contractConfig, null, 2))
 }
 
-Promise.all(Object.keys(zosNetworkFileJson.contracts).map(name => {
-  var contract = zosNetworkFileJson.contracts[name]
-  var contractName = name
-  return injectNetwork(contractName, networkId, contract.address)
-}))
+processAll()
