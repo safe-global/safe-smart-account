@@ -86,7 +86,7 @@ contract('GnosisSafe Trustless Deployment', function(accounts) {
         funder = accounts[5]
         // Create lightwallet
         lw = await utils.createLightwallet()
-        gnosisSafeMasterCopy = await GnosisSafe.new()
+        gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
     })
 

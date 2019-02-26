@@ -16,7 +16,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
     beforeEach(async function () {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([accounts[0], accounts[1], accounts[2]], 2, 0, "0x")
         // Create Mock Owners
         owner = await MockContract.new()
@@ -24,7 +24,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([owner.address], 1, 0, "0x")
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
 

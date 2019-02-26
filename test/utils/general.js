@@ -58,6 +58,13 @@ function logGasUsage(subject, transactionOrReceipt) {
     console.log("    Gas costs for " + subject + ": " + receipt.gasUsed)
 }
 
+async function deployContract(subject, contract) {
+    let deployed = await contract.new()
+    let receipt = await web3.eth.getTransactionReceipt(deployed.transactionHash)
+    logGasUsage(subject, receipt)
+    return deployed
+}
+
 async function createLightwallet() {
     // Create lightwallet accounts
     const createVault = util.promisify(lightwallet.keystore.createVault).bind(lightwallet.keystore)
@@ -137,6 +144,7 @@ Object.assign(exports, {
     createAndAddModulesData,
     currentTimeNs,
     compile,
+    deployContract,
     getParamFromTxEvent,
     getParamFromTxEventWithAdditionalDefinitions,
     checkTxEvent,
