@@ -1,9 +1,9 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('GnosisSafe Sentinel Checks', function(accounts) {
 
     let gnosisSafe
     let lw
@@ -13,14 +13,14 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
 
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
 

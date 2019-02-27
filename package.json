@@ -1,6 +1,6 @@
 {
   "name": "gnosis-safe",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Ethereum multisig contract",
   "license": "GPL-3.0",
   "main": "index.js",

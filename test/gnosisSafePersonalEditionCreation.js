@@ -1,5 +1,5 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
+const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const fs = require('fs')
 const randomBuffer = require("random-buffer")
 const ethUtil = require('ethereumjs-util')
@@ -9,7 +9,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MockContract = artifacts.require('./MockContract.sol');
 const MockToken = artifacts.require('./Token.sol');
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('GnosisSafe Trustless Deployment', function(accounts) {
 
     const CALL = 0
 
@@ -86,7 +86,7 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         funder = accounts[5]
         // Create lightwallet
         lw = await utils.createLightwallet()
-        gnosisSafeMasterCopy = await GnosisSafe.new()
+        gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
     })
 
