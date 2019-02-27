@@ -1,9 +1,9 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 const solc = require('solc')
 
 const GnosisSafePersonal = artifacts.require("./GnosisSafe.sol");
 
-contract('GnosisSafeEditions', function(accounts) {
+contract('GnosisSafe Method Signatures', function(accounts) {
 
     let getSortedFunctions = function(abi) {
         return abi.filter((e) => e.type === 'function')

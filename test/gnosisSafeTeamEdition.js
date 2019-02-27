@@ -1,11 +1,10 @@
-const utils = require('./utils')
-const solc = require('solc')
+const utils = require('./utils/general')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafeTeamEdition', function(accounts) {
+contract('GnosisSafe Without Refund', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]
@@ -19,7 +18,7 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         let nonce = await gnosisSafe.nonce()
         let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, 0, 0, 0, 0, 0, nonce)
         let executeDataWithoutSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, "0x")
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Invalid signatures provided")
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Signatures data too short")
 
         let approveData = gnosisSafe.contract.approveHash.getData(txHash)
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, executor), "Only owners can approve a hash")
@@ -36,20 +35,24 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         utils.logGasUsage(subject, tx)
 
         let executeDataUsedSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, sigs)
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataUsedSignatures), "Invalid signatures provided")
+        let errorMsg = await utils.getErrorMessage(gnosisSafe.address, 0, executeDataUsedSignatures)
+        assert.ok(
+            errorMsg == "Hash has not been approved" || errorMsg == "Signatures data too short", 
+            "Expected a signature error: " + errorMsg
+        )
         return tx
     }
 
     beforeEach(async function () {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x")
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
 

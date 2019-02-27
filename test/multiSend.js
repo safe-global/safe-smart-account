@@ -1,4 +1,4 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
@@ -24,7 +24,7 @@ contract('MultiSend', function(accounts) {
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
-        gnosisSafe = await GnosisSafe.new()
+        gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0)
         multiSend = await MultiSend.new()
         createAndAddModules = await CreateAndAddModules.new()

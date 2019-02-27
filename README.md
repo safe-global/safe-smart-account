@@ -24,6 +24,7 @@ export MNEMONIC="<mnemonic>"
 ```
 
 zOS:
+- Make sure that zos is version 2
 - Make sure that all dependencies use solcjs >0.5.0
 - Add `txParams['from'] = txParams['from'] || web3.currentProvider.getAddress(0)` in `Transactions.js` of the `zos-lib` module
 ```bash

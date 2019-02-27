@@ -1,4 +1,4 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
@@ -20,7 +20,7 @@ contract('WhitelistModule', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let createAndAddModules = await CreateAndAddModules.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Initialize safe master copy
         gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x")
         let whitelistModuleMasterCopy = await WhitelistModule.new([])
