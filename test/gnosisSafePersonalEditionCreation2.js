@@ -30,7 +30,7 @@ contract('GnosisSafe via create2', function(accounts) {
             [ gnosisSafeMasterCopy.address ]
         ).toString('hex')
         let encodedNonce = abi.rawEncode(['uint256'], [creationNonce]).toString('hex')
-        let target = "0x" + ethUtil.generateAddress2(proxyFactory.address, ethUtil.keccak256(gnosisSafeData + encodedNonce), proxyCreationCode + constructorData).toString("hex")
+        let target = "0x" + ethUtil.generateAddress2(proxyFactory.address, ethUtil.keccak256("0x" + ethUtil.keccak256(gnosisSafeData).toString("hex") + encodedNonce), proxyCreationCode + constructorData).toString("hex")
         console.log("    Predicted safe address: " + target)
         assert.equal(await web3.eth.getCode(target), "0x")
         return {

@@ -42,8 +42,8 @@ contract ProxyFactory {
         public
         returns (Proxy proxy)
     {
-        // If the initializer changes the proxy address should change too
-        bytes32 salt = keccak256(abi.encodePacked(initializer, nonce));
+        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
+        bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), nonce));
         bytes memory deploymentData = abi.encodePacked(type(Proxy).creationCode, uint256(_mastercopy));
         // solium-disable-next-line security/no-inline-assembly
         assembly {
