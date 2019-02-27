@@ -37,7 +37,7 @@ contract ProxyFactory {
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
     /// @param _mastercopy Address of master copy.
     /// @param initializer Payload for message call sent to new proxy contract.
-    /// @param nonce Nonce that will be used to generate the salt to calculate the address of the new prox contract.
+    /// @param nonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
     function createProxyWithNonce(address _mastercopy, bytes memory initializer, uint256 nonce)
         public
         returns (Proxy proxy)
