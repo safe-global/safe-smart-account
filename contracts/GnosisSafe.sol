@@ -46,12 +46,26 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data)
+    /// @param paymentToken Token that should be used for the payment (0 is ETH)
+    /// @param payment Value that should be paid
+    /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
+    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address paymentToken, uint256 payment, address payable paymentReceiver)
         external
     {
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         setupSafe(_owners, _threshold, to, data);
+        
+        if (payment > 0) {
+            // solium-disable-next-line security/no-tx-origin
+            address payable receiver = paymentReceiver == address(0) ? tx.origin : paymentReceiver;
+            if (paymentToken == address(0)) {
+                 // solium-disable-next-line security/no-send
+                require(receiver.send(payment), "Could not pay safe creation with ether");
+            } else {
+                require(transferToken(paymentToken, receiver, payment), "Could not pay safe creation with token");
+            }
+        } 
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
