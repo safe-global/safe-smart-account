@@ -2,6 +2,7 @@
   "name": "gnosis-safe",
   "version": "1.0.0",
   "description": "Ethereum multisig contract",
+  "homepage": "https://github.com/gnosis/safe-contracts/",
   "license": "GPL-3.0",
   "main": "index.js",
   "files": [
