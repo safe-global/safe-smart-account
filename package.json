@@ -1,7 +1,8 @@
 {
   "name": "gnosis-safe",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Ethereum multisig contract",
+  "homepage": "https://github.com/gnosis/safe-contracts/",
   "license": "GPL-3.0",
   "main": "index.js",
   "files": [
@@ -33,7 +34,8 @@
     "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
-    "ganache-cli": "6.1.7",
+    "ethereumjs-util": "^6.0.0",
+    "ganache-cli": "^6.3.0",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",

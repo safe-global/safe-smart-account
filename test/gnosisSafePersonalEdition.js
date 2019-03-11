@@ -1,6 +1,5 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
-const solc = require('solc')
+const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const BigNumber = require('bignumber.js');
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
@@ -8,7 +7,7 @@ const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const MockContract = artifacts.require('./MockContract.sol');
 const MockToken = artifacts.require('./Token.sol');
 
-contract('GnosisSafePersonalEdition', function(accounts) {
+contract('GnosisSafe', function(accounts) {
 
     let gnosisSafe
     let lw
@@ -22,13 +21,13 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
 
@@ -43,14 +42,21 @@ contract('GnosisSafePersonalEdition', function(accounts) {
         // Withdraw 1 ETH
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
+        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        // We check executor balance here, since we should not execute failing transactions 
+        assert.ok(executorDiff > 0)
+
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
+
+        executorDiff = await web3.eth.getBalance(executor) - executorBalance
+        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        // We check executor balance here, since we should not execute failing transactions 
+        assert.ok(executorDiff > 0)
 
         // Should fail as it is over the balance (payment should still happen)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true})
 
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
     });
 
     it('should deposit and withdraw 1 ETH paying with token', async () => {

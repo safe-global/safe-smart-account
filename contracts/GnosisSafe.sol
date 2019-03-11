@@ -15,7 +15,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "0.1.0";
+    string public constant VERSION = "1.0.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
@@ -23,9 +23,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     bytes32 public constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     //keccak256(
-    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     //);
-    bytes32 public constant SAFE_TX_TYPEHASH = 0x14d461bc7412367e924637b363c7bf29b8f47e2f84869f4426e5633d8af47b20;
+    bytes32 public constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
     //keccak256(
     //    "SafeMessage(bytes message)"
@@ -46,12 +46,26 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
-    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data)
+    /// @param paymentToken Token that should be used for the payment (0 is ETH)
+    /// @param payment Value that should be paid
+    /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
+    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address paymentToken, uint256 payment, address payable paymentReceiver)
         external
     {
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         setupSafe(_owners, _threshold, to, data);
+        
+        if (payment > 0) {
+            // solium-disable-next-line security/no-tx-origin
+            address payable receiver = paymentReceiver == address(0) ? tx.origin : paymentReceiver;
+            if (paymentToken == address(0)) {
+                 // solium-disable-next-line security/no-send
+                require(receiver.send(payment), "Could not pay safe creation with ether");
+            } else {
+                require(transferToken(paymentToken, receiver, payment), "Could not pay safe creation with token");
+            }
+        } 
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
@@ -61,7 +75,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param dataGas Gas costs for data used to trigger the safe transaction and to pay the payment transfer
+    /// @param baseGas Gas costs for that are indipendent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
@@ -72,7 +86,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
-        uint256 dataGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
@@ -81,38 +95,39 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         external
         returns (bool success)
     {
-        uint256 startGas = gasleft();
         bytes memory txHashData = encodeTransactionData(
             to, value, data, operation, // Transaction info
-            safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, // Payment info
+            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
             nonce
         );
-        require(checkSignatures(keccak256(txHashData), txHashData, signatures, true), "Invalid signatures provided");
         // Increase nonce and execute transaction.
         nonce++;
+        checkSignatures(keccak256(txHashData), txHashData, signatures, true);
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        uint256 gasUsed = gasleft();
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
         success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
+        gasUsed = gasUsed.sub(gasleft());
         if (!success) {
             emit ExecutionFailed(keccak256(txHashData));
         }
 
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
-            handlePayment(startGas, dataGas, gasPrice, gasToken, refundReceiver);
+            handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
         }
     }
 
     function handlePayment(
-        uint256 startGas,
-        uint256 dataGas,
+        uint256 gasUsed,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver
     )
         private
     {
-        uint256 amount = startGas.sub(gasleft()).add(dataGas).mul(gasPrice);
+        uint256 amount = gasUsed.add(baseGas).mul(gasPrice);
         // solium-disable-next-line security/no-tx-origin
         address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
@@ -124,21 +139,17 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     }
 
     /**
-    * @dev Should return whether the signature provided is valid for the provided data, hash
+    * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
     * @param data That should be signed (this is passed to an external validator contract)
     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
     * @param consumeHash Indicates that in case of an approved hash the storage can be freed to save gas
-    * @return a bool upon valid or invalid signature with corresponding _data
     */
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
-        returns (bool)
     {
         // Check that the provided signature data is not too short
-        if (signatures.length < threshold * 65) {
-            return false;
-        }
+        require(signatures.length >= threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -152,23 +163,37 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint256(r));
+
+                // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
+                // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
+                // Here we only check that the pointer is not pointing inside the part that is being processed
+                require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
+
+                // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
+                require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
+
+                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+                uint256 contractSignatureLen;
+                // solium-disable-next-line security/no-inline-assembly
+                assembly {
+                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
+                }
+                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "Invalid contract signature location: data not complete");
+
+                // Check signature
                 bytes memory contractSignature;
                 // solium-disable-next-line security/no-inline-assembly
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                if (!ISignatureValidator(currentOwner).isValidSignature(data, contractSignature)) {
-                    return false;
-                }
+                require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "Invalid contract signature provided");
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint256(r));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                if (msg.sender != currentOwner && approvedHashes[currentOwner][dataHash] == 0) {
-                    return false;
-                }
+                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "Hash has not been approved");
                 // Hash has been marked for consumption. If this hash was pre-approved free storage
                 if (consumeHash && msg.sender != currentOwner) {
                     approvedHashes[currentOwner][dataHash] = 0;
@@ -177,12 +202,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            if (currentOwner <= lastOwner || owners[currentOwner] == address(0) || currentOwner == SENTINEL_OWNERS) {
-                return false;
-            }
+            require (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "Invalid owner provided");
             lastOwner = currentOwner;
         }
-        return true;
     }
 
     /// @dev Allows to estimate a Safe transaction.
@@ -240,15 +262,16 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     */ 
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         external
-        returns (bool isValid)
+        returns (bytes4)
     {
         bytes32 messageHash = getMessageHash(_data);
         if (_signature.length == 0) {
-            isValid = signedMessages[messageHash] != 0;
+            require(signedMessages[messageHash] != 0, "Hash not approved");
         } else {
             // consumeHash needs to be false, as the state should not be changed
-            isValid = checkSignatures(messageHash, _data, _signature, false);
+            checkSignatures(messageHash, _data, _signature, false);
         }
+        return EIP1271_MAGIC_VALUE;
     }
 
     /// @dev Returns hash of a message that can be signed by owners.
@@ -275,7 +298,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param data Data payload.
     /// @param operation Operation type.
     /// @param safeTxGas Fas that should be used for the safe transaction.
-    /// @param dataGas Gas costs for data used to trigger the safe transaction.
+    /// @param baseGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
@@ -287,7 +310,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         bytes memory data, 
         Enum.Operation operation, 
         uint256 safeTxGas, 
-        uint256 dataGas, 
+        uint256 baseGas, 
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
@@ -298,7 +321,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         returns (bytes memory)
     {
         bytes32 safeTxHash = keccak256(
-            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce)
+            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
         return abi.encodePacked(byte(0x19), byte(0x01), domainSeparator, safeTxHash);
     }
@@ -309,7 +332,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param data Data payload.
     /// @param operation Operation type.
     /// @param safeTxGas Fas that should be used for the safe transaction.
-    /// @param dataGas Gas costs for data used to trigger the safe transaction.
+    /// @param baseGas Gas costs for data used to trigger the safe transaction.
     /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
@@ -321,7 +344,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         bytes memory data, 
         Enum.Operation operation, 
         uint256 safeTxGas, 
-        uint256 dataGas, 
+        uint256 baseGas, 
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
@@ -331,6 +354,6 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         view
         returns (bytes32)
     {
-        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, _nonce));
+        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
 }
