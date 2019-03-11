@@ -25,7 +25,7 @@ contract('MultiSend', function(accounts) {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
         gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0)
+        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0)
         multiSend = await MultiSend.new()
         createAndAddModules = await CreateAndAddModules.new()
 
@@ -74,7 +74,7 @@ contract('MultiSend', function(accounts) {
         assert.equal(await gnosisSafe.getThreshold(), 2)
         let modules = await gnosisSafe.getModules()
         assert.equal(modules.length, 1)
-        assert.equal(await Proxy.at(modules[0]).implementation.call(), stateChannelModuleMasterCopy.address)
+        assert.equal(await web3.eth.getStorageAt(modules[0], 0), stateChannelModuleMasterCopy.address)
     })
 
     it('invalid operation should fail', async () => {
