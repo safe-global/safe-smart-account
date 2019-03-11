@@ -16,7 +16,8 @@
     "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'",
     "preversion": "npm run restore",
     "truffle-zos-merge": "node scripts/merge_zos.js",
-    "restore": "rm -rf build && truffle compile && npm run truffle-zos-merge && npx tnt cB"
+    "restore": "rm -rf build && truffle compile && npm run truffle-zos-merge && npx tnt cB",
+    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.3"
   },
   "repository": {
     "type": "git",
