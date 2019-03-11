@@ -1,6 +1,4 @@
-const utils = require('./utils')
-const safeUtils = require('./utilsPersonalSafe')
-const solc = require('solc')
+const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
@@ -25,8 +23,8 @@ contract('CreateAndAddModules', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
         let stateChannelModuleMasterCopy = await StateChannelModule.new()
         stateChannelModuleMasterCopy.setup()
         let socialRecoveryModuleMasterCopy = await SocialRecoveryModule.new()
@@ -43,10 +41,10 @@ contract('CreateAndAddModules', function(accounts) {
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, createAndAddModules.address, createAndAddModulesData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
 
         let modules = await gnosisSafe.getModules()
