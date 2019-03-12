@@ -9,7 +9,8 @@
     "contracts",
     "test",
     "zos.json",
-    "zos.*.json"
+    "zos.*.json",
+    "build"
   ],
   "scripts": {
     "test-norpc": "truffle test",
