@@ -1,5 +1,5 @@
 {
-  "name": "gnosis-safe",
+  "name": "@gnosis.pm/safe-contracts",
   "version": "1.0.0",
   "description": "Ethereum multisig contract",
   "homepage": "https://github.com/gnosis/safe-contracts/",
