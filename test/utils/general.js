@@ -2,7 +2,8 @@ const util = require('util');
 const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi");
-const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
+const Web3 = require('web3')
+const ModuleDataWrapper = (new Web3()).eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
    
 function createAndAddModulesData(dataArray) {
     let mw = ModuleDataWrapper.at(1)
