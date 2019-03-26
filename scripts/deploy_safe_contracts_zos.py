@@ -7,7 +7,7 @@ network = os.environ.get('NETWORK')
 if not network:
     sys.exit("NETWORK not set in env")
 
-print("Deploy Safe to", network)
+print("Deploy master copies to", network)
 
 with open('package.json') as f:
     package = json.load(f)
@@ -25,10 +25,6 @@ run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
 
 # Add and deploy ProxyFactory
 run(["npx", "zos", "add", "ProxyFactory", "--skip-compile"])
-run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
-
-# Add and deploy CreateAndAddModules
-run(["npx", "zos", "add", "CreateAndAddModules", "--skip-compile"])
 run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
 
 # Add and deploy MultiSend

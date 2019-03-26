@@ -12,11 +12,13 @@ npm install
 ### Run all tests (requires Node version >=7 for `async/await`):
 
 ```bash
-truffle compile
-truffle test
+npx truffle compile
+npx truffle test
 ```
 
 ### Deploy
+
+Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
 Preparation:
 ```bash
@@ -30,13 +32,13 @@ zOS:
 ```bash
 virtualenv env -p python3
 . env/bin/activate
-python ./scripts/deploy_safe.py
+python ./scripts/deploy_safe_contracts_zos.py
 ```
 
 Truffle:
 
 ```bash
-truffle deploy
+npx truffle deploy
 ```
 
 Verify Contracts:
