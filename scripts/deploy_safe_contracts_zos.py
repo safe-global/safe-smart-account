@@ -31,8 +31,12 @@ run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
 run(["npx", "zos", "add", "MultiSend", "--skip-compile"])
 run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
 
-# Init contracts
+# Init master copies
 run(["npx", "truffle", "--network=" + network, "exec", "scripts/init_contracts.js"])
+
+# Add and deploy CreateAndAddModules
+run(["npx", "zos", "add", "CreateAndAddModules", "--skip-compile"])
+run(["npx", "zos", "push", "--network=" + network, "--skip-compile"])
 
 # Publish zos package
 run(["npx", "zos", "publish", "--network=" + network])

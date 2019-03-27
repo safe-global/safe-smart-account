@@ -168,16 +168,16 @@
   },
   "solidityLibs": {},
   "proxies": {},
-  "zosversion": "2",
+  "zosversion": "2.2",
   "version": "1.0.0",
   "app": {
-    "address": "0x3c47F9098F9e7C6ea942f8A8D8ba8bcCA03a958d"
+    "address": "0x61cBcc8Dd29e1e5abd0dD821E382FCe225CdA0b2"
   },
   "package": {
-    "address": "0x304ee2F5077593b052c5F3A1266e87E029686EF2"
+    "address": "0x94395138cAE52ff99F7c53533e784277c6641738"
   },
   "provider": {
-    "address": "0x2840e535bd6e3182CFEE7b2bc1633473F46858Cd"
+    "address": "0x473F8b49F273e34F992c0B6259740f84D71b8D00"
   },
   "frozen": false
 }

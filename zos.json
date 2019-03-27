@@ -5,6 +5,7 @@
   "contracts": {
     "GnosisSafe": "GnosisSafe",
     "ProxyFactory": "ProxyFactory",
-    "MultiSend": "MultiSend"
+    "MultiSend": "MultiSend",
+    "CreateAndAddModules": "CreateAndAddModules"
   }
 }
