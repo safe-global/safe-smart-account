@@ -1,11 +1,11 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0x3e117Cd4098caB4B354494766ac8638b7dAadF94",
-      "constructorCode": "608060405234801561001057600080fd5b50615f8080620000216000396000f3fe",
-      "bodyBytecodeHash": "ab3c7a579eb2599fd1bceb39af6e1126b6515df9d5450d34fc6a64b34cfa4cbf",
-      "localBytecodeHash": "c63d671bea0acbfcb3ae152f2ca503510a170b01db4977f830aac47637556166",
-      "deployedBytecodeHash": "c63d671bea0acbfcb3ae152f2ca503510a170b01db4977f830aac47637556166",
+      "address": "0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A",
+      "constructorCode": "608060405234801561001057600080fd5b50615e9380620000216000396000f3fe",
+      "bodyBytecodeHash": "5bb2743e521347994660ec020cb56c8b1189728d902a09ec554592cc3dadc24c",
+      "localBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
+      "deployedBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
       "types": {
         "t_address": {
           "id": "t_address",
@@ -40,41 +40,41 @@
           "contract": "MasterCopy",
           "path": "contracts/common/MasterCopy.sol",
           "label": "masterCopy",
-          "astId": 1846,
+          "astId": 1760,
           "type": "t_address",
-          "src": "465:18:9"
+          "src": "465:18:8"
         },
         {
           "contract": "ModuleManager",
           "path": "contracts/base/ModuleManager.sol",
           "label": "modules",
-          "astId": 1076,
+          "astId": 990,
           "type": "t_mapping<t_address>",
-          "src": "550:45:5"
+          "src": "550:45:4"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "owners",
-          "astId": 1385,
+          "astId": 1299,
           "type": "t_mapping<t_address>",
-          "src": "480:43:6"
+          "src": "480:43:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "ownerCount",
-          "astId": 1387,
+          "astId": 1301,
           "type": "t_uint256",
-          "src": "529:18:6"
+          "src": "529:18:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "threshold",
-          "astId": 1389,
+          "astId": 1303,
           "type": "t_uint256",
-          "src": "553:26:6"
+          "src": "553:26:5"
         },
         {
           "contract": "GnosisSafe",
@@ -134,11 +134,11 @@
       }
     },
     "MultiSend": {
-      "address": "0xC8653794F28d5109C0F3c4C1e89E54679F264563",
-      "constructorCode": "608060405234801561001057600080fd5b506101ab806100206000396000f3fe",
-      "bodyBytecodeHash": "b2375c1f0e6bffe6547adb42a665a2e3f264f60bff64f1c9009b3270dc93be64",
-      "localBytecodeHash": "786db825a2c9e9bcdd94b4f775bec85a0a0917c30c19376ab4250cc6c22d7ad0",
-      "deployedBytecodeHash": "786db825a2c9e9bcdd94b4f775bec85a0a0917c30c19376ab4250cc6c22d7ad0",
+      "address": "0xD4B7B161E4779629C2717385114Bf78D612aEa72",
+      "constructorCode": "608060405234801561001057600080fd5b506101c8806100206000396000f3fe",
+      "bodyBytecodeHash": "58eba12a004b48496cb944b7b298706b494b8be2860cd3dfe09680782f137695",
+      "localBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
+      "deployedBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
       "types": {},
       "storage": [],
       "warnings": {
@@ -150,11 +150,11 @@
       }
     },
     "CreateAndAddModules": {
-      "address": "0x696822d99bBA1d96656e236F844D559f93b0fdCC",
-      "constructorCode": "608060405234801561001057600080fd5b506102a9806100206000396000f3fe",
-      "bodyBytecodeHash": "70ae2e3b7ce4a10f6ff0f47074c8ca3bfb0f6c5d0040d56cd25a4cf159b1d608",
-      "localBytecodeHash": "fc11ed8531e2dfeeed69908e3ceffca23966dba48e5ddf74fbaf6480c5f848d7",
-      "deployedBytecodeHash": "fc11ed8531e2dfeeed69908e3ceffca23966dba48e5ddf74fbaf6480c5f848d7",
+      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
+      "constructorCode": "608060405234801561001057600080fd5b506102e2806100206000396000f3fe",
+      "bodyBytecodeHash": "3f1bef8e42a5176d17fd5ee15e86baed6de4d458520547043900628174ab7011",
+      "localBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
+      "deployedBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
       "types": {},
       "storage": [],
       "warnings": {
