@@ -84,8 +84,9 @@ Documentation
 -------------
 http://gnosis-safe.readthedocs.io/en/latest/
 
-Audits
+Audits/ Formal Verification
 ---------
+- [by Runtime Verification](docs/rv_1_0_0.md)
 - [by Alexey Akhunov](docs/alexey_audit.md)
 
 Security and Liability
