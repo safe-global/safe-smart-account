@@ -12,11 +12,13 @@ npm install
 ### Run all tests (requires Node version >=7 for `async/await`):
 
 ```bash
-truffle compile
-truffle test
+npx truffle compile
+npx truffle test
 ```
 
 ### Deploy
+
+Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
 Preparation:
 ```bash
@@ -30,13 +32,13 @@ zOS:
 ```bash
 virtualenv env -p python3
 . env/bin/activate
-python ./scripts/deploy_safe.py
+python ./scripts/deploy_safe_contracts_zos.py
 ```
 
 Truffle:
 
 ```bash
-truffle deploy
+npx truffle deploy
 ```
 
 Verify Contracts:
@@ -47,12 +49,12 @@ virtualenv env -p python3
 pip install solidity-flattener
 mkdir build/flattened_contracts
 solidity_flattener contracts/GnosisSafe.sol --output build/flattened_contracts/GnosisSafe.sol
-solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="="
-solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="="
-solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="="
-solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="="
-solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="="
-solidity_flattener contracts/modules/WhitelistModule.sol --output build/flattened_contracts/WhitelistModule.sol --solc-paths="="
+solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="/=/"
+solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="/=/"
+solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="/=/"
+solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="/=/"
+solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="/=/"
+solidity_flattener contracts/modules/WhitelistModule.sol --output build/flattened_contracts/WhitelistModule.sol --solc-paths="/=/"
 solidity_flattener contracts/proxies/ProxyFactory.sol --output build/flattened_contracts/ProxyFactory.sol
 find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity ^0.5.0;/g' {} \;
 ```
@@ -82,8 +84,9 @@ Documentation
 -------------
 http://gnosis-safe.readthedocs.io/en/latest/
 
-Audits
+Audits/ Formal Verification
 ---------
+- [by Runtime Verification](docs/rv_1_0_0.md)
 - [by Alexey Akhunov](docs/alexey_audit.md)
 
 Security and Liability

@@ -17,8 +17,8 @@
     "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'",
     "preversion": "npm run restore",
     "truffle-zos-merge": "node scripts/merge_zos.js",
-    "restore": "rm -rf build && truffle compile && npm run truffle-zos-merge && npx tnt cB",
-    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.3"
+    "restore": "rm -rf build && npx truffle compile && npm run truffle-zos-merge && npx tnt cB",
+    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.7"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,8 @@
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",
     "truffle": "^4.1.14",
-    "web3": "0.20.6"
+    "web3": "0.20.6",
+    "zos": "^2.2.2"
   },
   "dependencies": {
     "openzeppelin-solidity": "^2.0.0",

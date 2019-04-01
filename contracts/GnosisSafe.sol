@@ -57,14 +57,9 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         setupSafe(_owners, _threshold, to, data);
         
         if (payment > 0) {
-            // solium-disable-next-line security/no-tx-origin
-            address payable receiver = paymentReceiver == address(0) ? tx.origin : paymentReceiver;
-            if (paymentToken == address(0)) {
-                 // solium-disable-next-line security/no-send
-                require(receiver.send(payment), "Could not pay safe creation with ether");
-            } else {
-                require(transferToken(paymentToken, receiver, payment), "Could not pay safe creation with token");
-            }
+            // To avoid running into issues with EIP-170 we reuse the handlePayment function (to avoid adjusting code of that has been verified we do not adjust the method itself)
+            // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
+            handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
         } 
     }
 
