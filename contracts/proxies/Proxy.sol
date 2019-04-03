@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 
 
 /// @title Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
@@ -6,14 +6,15 @@ pragma solidity 0.4.24;
 contract Proxy {
 
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
-    address masterCopy;
+    // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
+    address internal masterCopy;
 
     /// @dev Constructor function sets address of master copy contract.
     /// @param _masterCopy Master copy address.
     constructor(address _masterCopy)
         public
     {
-        require(_masterCopy != 0, "Invalid master copy address provided");
+        require(_masterCopy != address(0), "Invalid master copy address provided");
         masterCopy = _masterCopy;
     }
 
@@ -31,21 +32,5 @@ contract Proxy {
             if eq(success, 0) { revert(0, returndatasize()) }
             return(0, returndatasize())
         }
-    }
-
-    function implementation()
-        public
-        view
-        returns (address)
-    {
-        return masterCopy;
-    }
-
-    function proxyType()
-        public
-        pure
-        returns (uint256)
-    {
-        return 2;
     }
 }

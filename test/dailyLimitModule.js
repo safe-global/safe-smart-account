@@ -1,10 +1,11 @@
-const utils = require('./utils')
-const solc = require('solc')
+const utils = require('./utils/general')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
+const MockContract = artifacts.require('./MockContract.sol');
+const MockToken = artifacts.require('./Token.sol');
 
 
 contract('DailyLimitModule', function(accounts) {
@@ -21,9 +22,9 @@ contract('DailyLimitModule', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let createAndAddModules = await CreateAndAddModules.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0)
         let dailyLimitModuleMasterCopy = await DailyLimitModule.new()
         // Initialize module master copy
         dailyLimitModuleMasterCopy.setup([], [])
@@ -32,7 +33,7 @@ contract('DailyLimitModule', function(accounts) {
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, moduleData)
         let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
@@ -85,13 +86,13 @@ contract('DailyLimitModule', function(accounts) {
         let data = await dailyLimitModule.contract.changeDailyLimit.getData(0, 200)
 
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
 
         utils.logGasUsage(
-            'execTransactionAndPaySubmitter change daily limit',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, sigs
+            'execTransaction change daily limit',
+            await gnosisSafe.execTransaction(
+                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, sigs
             )
         )
         dailyLimit = await dailyLimitModule.dailyLimits(0)
@@ -105,7 +106,7 @@ contract('DailyLimitModule', function(accounts) {
         let source = `
         contract TestToken {
             mapping (address => uint) public balances;
-            function TestToken() {
+            constructor() public {
                 balances[msg.sender] = 100;
             }
             function transfer(address to, uint value) public returns (bool) {
@@ -114,10 +115,10 @@ contract('DailyLimitModule', function(accounts) {
                 balances[to] += value;
             }
         }`
-        let output = await solc.compile(source, 0);
+        let output = await utils.compile(source);
         // Create test token contract
-        let contractInterface = JSON.parse(output.contracts[':TestToken']['interface'])
-        let contractBytecode = '0x' + output.contracts[':TestToken']['bytecode']
+        let contractInterface = output.interface
+        let contractBytecode = output.data
         let transactionHash = await web3.eth.sendTransaction({from: accounts[0], data: contractBytecode, gas: 4000000})
         let receipt = web3.eth.getTransactionReceipt(transactionHash);
         const TestToken = web3.eth.contract(contractInterface)
@@ -125,9 +126,9 @@ contract('DailyLimitModule', function(accounts) {
         // Add test token to daily limit module
         let data = await dailyLimitModule.contract.changeDailyLimit.getData(testToken.address, 20)
         let nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        await gnosisSafe.execTransactionAndPaySubmitter(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs)
+        await gnosisSafe.execTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, 0, sigs)
 
         // Withdrawal should fail as there are no tokens
         assert.equal(await testToken.balances(gnosisSafe.address), 0);
@@ -158,13 +159,39 @@ contract('DailyLimitModule', function(accounts) {
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
 
+
         // Third withdrawal will fail
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
             "Daily limit exceeded for ERC20 token"
         )
+
         // Balances didn't change
         assert.equal(await testToken.balances(gnosisSafe.address), 80);
         assert.equal(await testToken.balances(accounts[0]), 20);
-    })
+
+        // Withdrawal should  fail because of ERC20 transfer revert
+        let mockContract = await MockContract.new();
+        let mockToken = MockToken.at(mockContract.address);
+        await mockContract.givenAnyRevert()
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "Transaction should fail if the ERC20 token transfer method reverts"
+        );
+
+
+        // Withdrawal should fail because of ERC20 transfer out of gas
+        await mockContract.givenAnyRunOutOfGas();
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "Transaction should fail if the ERC20 token transfer method is out of gas"
+        );
+
+        // Withdrawal should fail because of ERC20 transfer returns false
+        await mockContract.givenAnyReturnBool(false);
+        await utils.assertRejects(
+            dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
+            "Transaction should fail if the ERC20 token transfer method returns false"
+        );
+    });
 });

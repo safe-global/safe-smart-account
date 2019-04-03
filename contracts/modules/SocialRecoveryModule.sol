@@ -1,8 +1,8 @@
-pragma solidity 0.4.24;
-import "../Enum.sol";
-import "../Module.sol";
-import "../ModuleManager.sol";
-import "../OwnerManager.sol";
+pragma solidity ^0.5.0;
+import "../base/Module.sol";
+import "../base/ModuleManager.sol";
+import "../base/OwnerManager.sol";
+import "../common/Enum.sol";
 
 
 /// @title Social Recovery Module - Allows to replace an owner without Safe confirmations if friends approve the replacement.
@@ -10,7 +10,7 @@ import "../OwnerManager.sol";
 contract SocialRecoveryModule is Module {
 
     string public constant NAME = "Social Recovery Module";
-    string public constant VERSION = "0.0.1";
+    string public constant VERSION = "0.1.0";
 
     uint256 public threshold;
     address[] public friends;
@@ -30,7 +30,7 @@ contract SocialRecoveryModule is Module {
     /// @dev Setup function sets initial storage of contract.
     /// @param _friends List of friends' addresses.
     /// @param _threshold Required number of friends to confirm replacement.
-    function setup(address[] _friends, uint256 _threshold)
+    function setup(address[] memory _friends, uint256 _threshold)
         public
     {
         require(_threshold <= _friends.length, "Threshold cannot exceed friends count");
@@ -39,7 +39,7 @@ contract SocialRecoveryModule is Module {
         // Set allowed friends.
         for (uint256 i = 0; i < _friends.length; i++) {
             address friend = _friends[i];
-            require(friend != 0, "Invalid friend address provided");
+            require(friend != address(0), "Invalid friend address provided");
             require(!isFriend[friend], "Duplicate friend address provided");
             isFriend[friend] = true;
         }
@@ -95,7 +95,7 @@ contract SocialRecoveryModule is Module {
     /// @dev Returns hash of data encoding owner replacement.
     /// @param data Data payload.
     /// @return Data hash.
-    function getDataHash(bytes data)
+    function getDataHash(bytes memory data)
         public
         pure
         returns (bytes32)

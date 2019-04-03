@@ -1,6 +1,6 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const Proxy = artifacts.require("./Proxy.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")
@@ -24,8 +24,8 @@ contract('MultiSend', function(accounts) {
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
-        gnosisSafe = await GnosisSafe.new()
-        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0)
+        gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0)
         multiSend = await MultiSend.new()
         createAndAddModules = await CreateAndAddModules.new()
 
@@ -62,19 +62,19 @@ contract('MultiSend', function(accounts) {
             tw.send.getData(0, accounts[1], web3.toWei(0.5, 'ether'), '0x').substr(10) +
             tw.send.getData(0, accounts[2], web3.toWei(1, 'ether'), '0x').substr(10)
         let data = await multiSend.contract.multiSend.getData(nestedTransactionData)
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.logGasUsage(
             'execTransaction send multiple transactions',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             )
         )
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
         assert.equal(await gnosisSafe.getThreshold(), 2)
         let modules = await gnosisSafe.getModules()
         assert.equal(modules.length, 1)
-        assert.equal(await Proxy.at(modules[0]).implementation.call(), stateChannelModuleMasterCopy.address)
+        assert.equal(await web3.eth.getStorageAt(modules[0], 0), stateChannelModuleMasterCopy.address)
     })
 
     it('invalid operation should fail', async () => {
@@ -85,11 +85,11 @@ contract('MultiSend', function(accounts) {
             tw.send.getData(2, gnosisSafe.address, 0, '0x' + '0'.repeat(64)).substr(10)
 
         let data = await multiSend.contract.multiSend.getData(nestedTransactionData)
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )
@@ -109,11 +109,11 @@ contract('MultiSend', function(accounts) {
             tw.send.getData(0, gnosisSafe.address, 0, '0x' + '0'.repeat(64)).substr(10)
 
         let data = await multiSend.contract.multiSend.getData(nestedTransactionData)
-        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         utils.checkTxEvent(
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                multiSend.address, 0, data, DELEGATECALL, 1000000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
             'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )

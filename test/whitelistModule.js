@@ -1,8 +1,8 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
-const GnosisSafe = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const WhitelistModule = artifacts.require("./WhitelistModule.sol");
 
 
@@ -20,16 +20,16 @@ contract('WhitelistModule', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let createAndAddModules = await CreateAndAddModules.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x")
+        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x", 0, 0, 0)
         let whitelistModuleMasterCopy = await WhitelistModule.new([])
         // Create Gnosis Safe and Whitelist Module in one transactions
         let moduleData = await whitelistModuleMasterCopy.contract.setup.getData([accounts[3]])
         let proxyFactoryData = await proxyFactory.contract.createProxy.getData(whitelistModuleMasterCopy.address, moduleData)
         let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[1]], 2, createAndAddModules.address, createAndAddModulesData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[1]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Whitelist Module',
@@ -65,24 +65,24 @@ contract('WhitelistModule', function(accounts) {
         // Add account 3 to whitelist
         let data = await whitelistModule.contract.addToWhitelist.getData(accounts[1])
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction add account to whitelist',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), true)
         // Remove account 3 from whitelist
         data = await whitelistModule.contract.removeFromWhitelist.getData(accounts[1])
         nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, nonce)
         sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
         utils.logGasUsage(
             'execTransaction remove account from whitelist',
-            await gnosisSafe.execTransactionAndPaySubmitter(
-                whitelistModule.address, 0, data, CALL, 100000, 0, 0, 0, sigs
+            await gnosisSafe.execTransaction(
+                whitelistModule.address, 0, data, CALL, 0, 0, 0, 0, 0, sigs
             )
         )
         assert.equal(await whitelistModule.isWhitelisted(accounts[1]), false)

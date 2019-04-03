@@ -1,5 +1,5 @@
-pragma solidity 0.4.24;
-import "../Module.sol";
+pragma solidity ^0.5.0;
+import "../base/Module.sol";
 
 
 /// @title Create and Add Modules - Allows to create and add multiple module in one transaction.
@@ -18,7 +18,7 @@ contract CreateAndAddModules {
     /// @dev Allows to create and add multiple module in one transaction.
     /// @param proxyFactory Module proxy factory contract.
     /// @param data Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)
-    function createAndAddModules(address proxyFactory, bytes data)
+    function createAndAddModules(address proxyFactory, bytes memory data)
         public
     {
         uint256 length = data.length;

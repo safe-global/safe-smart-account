@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 import "./Proxy.sol";
 
 
@@ -10,7 +10,7 @@ contract DelegateConstructorProxy is Proxy {
     /// @dev Constructor function sets address of master copy contract.
     /// @param _masterCopy Master copy address.
     /// @param initializer Data used for a delegate call to initialize the contract.
-    constructor(address _masterCopy, bytes initializer) Proxy(_masterCopy)
+    constructor(address _masterCopy, bytes memory initializer) Proxy(_masterCopy)
         public
     {
         if (initializer.length > 0) {

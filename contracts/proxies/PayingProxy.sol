@@ -1,6 +1,6 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
+import "../common/SecuredTokenTransfer.sol";
 import "./DelegateConstructorProxy.sol";
-import "./SecuredTokenTransfer.sol";
 
 /// @title Paying Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract. It is possible to send along initialization data with the constructor. And sends funds after creation to a specified account.
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -13,7 +13,7 @@ contract PayingProxy is DelegateConstructorProxy, SecuredTokenTransfer {
     /// @param funder Address that should be paid for the execution of this call
     /// @param paymentToken Token that should be used for the payment (0 is ETH)
     /// @param payment Value that should be paid
-    constructor(address _masterCopy, bytes initializer, address funder, address paymentToken, uint256 payment) 
+    constructor(address _masterCopy, bytes memory initializer, address payable funder, address paymentToken, uint256 payment) 
         DelegateConstructorProxy(_masterCopy, initializer)
         public
     {

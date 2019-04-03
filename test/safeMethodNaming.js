@@ -1,11 +1,9 @@
-const utils = require('./utils')
+const utils = require('./utils/general')
 const solc = require('solc')
 
-const StateChannelModule = artifacts.require("./StateChannelModule.sol");
-const GnosisSafeTeam = artifacts.require("./GnosisSafeTeamEdition.sol");
-const GnosisSafePersonal = artifacts.require("./GnosisSafePersonalEdition.sol");
+const GnosisSafePersonal = artifacts.require("./GnosisSafe.sol");
 
-contract('GnosisSafeEditions', function(accounts) {
+contract('GnosisSafe Method Signatures', function(accounts) {
 
     let getSortedFunctions = function(abi) {
         return abi.filter((e) => e.type === 'function')
@@ -30,6 +28,5 @@ contract('GnosisSafeEditions', function(accounts) {
     it('check method naming of personal safe', async () => {
         let functions = getSortedFunctions(GnosisSafePersonal.abi)
         console.log(functions)
-        assert.equal('execTransactionAndPaySubmitter', functions[0].name)
     })
 });

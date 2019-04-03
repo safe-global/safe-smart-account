@@ -1,5 +1,5 @@
-pragma solidity 0.4.24;
-import "./MasterCopy.sol";
+pragma solidity ^0.5.0;
+import "../common/MasterCopy.sol";
 import "./ModuleManager.sol";
 
 
@@ -20,7 +20,7 @@ contract Module is MasterCopy {
     {
         // manager can only be 0 at initalization of contract.
         // Check ensures that setup function can only be called once.
-        require(address(manager) == 0, "Manager has already been set");
+        require(address(manager) == address(0), "Manager has already been set");
         manager = ModuleManager(msg.sender);
     }
 }

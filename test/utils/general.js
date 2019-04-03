@@ -1,7 +1,9 @@
 const util = require('util');
+const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi");
-const ModuleDataWrapper = web3.eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
+const Web3 = require('web3')
+const ModuleDataWrapper = (new Web3()).eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
    
 function createAndAddModulesData(dataArray) {
     let mw = ModuleDataWrapper.at(1)
@@ -12,20 +14,6 @@ function createAndAddModulesData(dataArray) {
 function currentTimeNs() {
     const hrTime=process.hrtime();
     return hrTime[0] * 1000000000 + hrTime[1]
-}
-
-function dataGasValue(hexValue) {
-   switch(hexValue) {
-    case "0x": return 0
-    case "00": return 4
-    default: return 68
-  };
-}
-
-function estimateDataGasCosts(dataString) {
-  const reducer = (accumulator, currentValue) => accumulator += dataGasValue(currentValue)
-
-  return dataString.match(/.{2}/g).reduce(reducer, 0)
 }
 
 function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
@@ -55,7 +43,7 @@ function getParamFromTxEvent(transaction, eventName, paramName, contract, contra
 
 function checkTxEvent(transaction, eventName, contract, exists, subject) {
   assert.isObject(transaction)
-  if (subject != null) {
+  if (subject && subject != null) {
       logGasUsage(subject, transaction)
   }
   let logs = transaction.logs
@@ -63,12 +51,19 @@ function checkTxEvent(transaction, eventName, contract, exists, subject) {
       logs = logs.filter((l) => l.event === eventName && l.address === contract)
   }
   assert.equal(logs.length, exists ? 1 : 0, exists ? 'event was not present' : 'event should not be present')
-  return logs
+  return exists ? logs[0] : null
 }
 
 function logGasUsage(subject, transactionOrReceipt) {
     let receipt = transactionOrReceipt.receipt || transactionOrReceipt
     console.log("    Gas costs for " + subject + ": " + receipt.gasUsed)
+}
+
+async function deployContract(subject, contract) {
+    let deployed = await contract.new()
+    let receipt = await web3.eth.getTransactionReceipt(deployed.transactionHash)
+    logGasUsage(subject, receipt)
+    return deployed
 }
 
 async function createLightwallet() {
@@ -118,9 +113,39 @@ async function getErrorMessage(to, value, data, from) {
     return abi.rawDecode(["string"], returnBuffer.slice(4))[0];
 }
 
+async function compile(source) {
+    var input = JSON.stringify({
+        'language': 'Solidity',
+        'settings': {
+            'outputSelection': {
+            '*': {
+                '*': [ 'abi', 'evm.bytecode' ]
+            }
+            }
+        },
+        'sources': {
+            'tmp.sol': {
+                'content': source
+            }
+        }
+    });
+    let solcData = await solc.compile(input)
+    let output = JSON.parse(solcData);
+    let fileOutput = output['contracts']['tmp.sol']
+    let contractOutput = fileOutput[Object.keys(fileOutput)[0]]
+    let interface = contractOutput['abi']
+    let data = '0x' + contractOutput['evm']['bytecode']['object']
+    return {
+        "data": data,
+        "interface": interface
+    }
+}
+
 Object.assign(exports, {
     createAndAddModulesData,
     currentTimeNs,
+    compile,
+    deployContract,
     getParamFromTxEvent,
     getParamFromTxEventWithAdditionalDefinitions,
     checkTxEvent,
@@ -128,6 +153,5 @@ Object.assign(exports, {
     createLightwallet,
     signTransaction,
     assertRejects,
-    estimateDataGasCosts,
     getErrorMessage
 })

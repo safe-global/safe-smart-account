@@ -1,5 +1,4 @@
-const utils = require('./utils')
-const solc = require('solc')
+const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
@@ -51,8 +50,8 @@ contract('StateChannelModule', function(accounts) {
         let createAndAddModules = await CreateAndAddModules.new()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x")
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
         let stateChannelModuleMasterCopy = await StateChannelModule.new()
 
         // State channel module setup
@@ -63,10 +62,10 @@ contract('StateChannelModule', function(accounts) {
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, createAndAddModules.address, createAndAddModulesData)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
         let modules = await gnosisSafe.getModules()
         stateChannelModule = StateChannelModule.at(modules[0])
@@ -113,18 +112,16 @@ contract('StateChannelModule', function(accounts) {
         // Create test contract
         let source = `
         contract Test {
-            function x() pure returns (uint) {
+            function x() public pure returns (uint) {
                 return 21;
             }
         }`
-        let output = await solc.compile(source, 0);
-        let interface = JSON.parse(output.contracts[':Test']['interface'])
-        let data = '0x' + output.contracts[':Test']['bytecode']
-        const TestContract = web3.eth.contract(interface);
+        let output = await utils.compile(source);
+        const TestContract = web3.eth.contract(output.interface);
         let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
             // We need to tell web3 how to parse the ContractCreation event from the module manager
             gnosisSafe.contract.allEvents(),
-            await executeTransaction('create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, data, CREATE),
+            await executeTransaction('create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, output.data, CREATE),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)

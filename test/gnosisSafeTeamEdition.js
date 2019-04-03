@@ -1,51 +1,58 @@
-const utils = require('./utils')
-const solc = require('solc')
+const utils = require('./utils/general')
 
-const GnosisSafe = artifacts.require("./GnosisSafeTeamEdition.sol")
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafeTeamEdition', function(accounts) {
+contract('GnosisSafe Without Refund', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]
 
-    const MAX_GAS_PRICE = web3.toWei(100, 'gwei')
-
     const CALL = 0
     const CREATE = 2
 
-    let executeTransaction = async function(subject, accounts, to, value, data, operation, sender) {
-        let txSender = sender || executor 
-        let nonce = utils.currentTimeNs()
-        
-        let executeData = gnosisSafe.contract.execTransactionIfApproved.getData(to, value, data, operation, nonce)
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeData), "Not enough confirmations")
+    let executeTransaction = async function(subject, accounts, to, value, data, operation, opts) {
+        let options = opts || {}
+        let txSender = options.sender || executor 
+        let nonce = await gnosisSafe.nonce()
+        let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, 0, 0, 0, 0, 0, nonce)
+        let executeDataWithoutSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, "0x")
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeDataWithoutSignatures), "Signatures data too short")
 
-        let approveData = gnosisSafe.contract.approveTransactionWithParameters.getData(to, value, data, operation, nonce)
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, "0x0000000000000000000000000000000000000002"), "Sender is not an owner")
-        for (let account of (accounts.filter(a => a != txSender))) {
-            utils.logGasUsage("confirm " + subject + " with " + account, await gnosisSafe.approveTransactionWithParameters(to, value, data, operation, nonce, {from: account}))
+        let approveData = gnosisSafe.contract.approveHash.getData(txHash)
+        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, executor), "Only owners can approve a hash")
+
+        let sigs = "0x"
+        for (let account of (accounts.sort())) {
+            if (account != txSender) {
+                utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveHash(txHash, {from: account}))
+            }
+            sigs += "000000000000000000000000" + account.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
         }
 
-        let tx = await gnosisSafe.execTransactionIfApproved(to, value, data, operation, nonce, {from: txSender})
+        let tx = await gnosisSafe.execTransaction(to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: txSender})
         utils.logGasUsage(subject, tx)
 
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, accounts[0]), "Safe transaction already executed")
-        assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, executeData), "Safe transaction already executed")
+        let executeDataUsedSignatures = gnosisSafe.contract.execTransaction.getData(to, value, data, operation, 0, 0, 0, 0, 0, sigs)
+        let errorMsg = await utils.getErrorMessage(gnosisSafe.address, 0, executeDataUsedSignatures)
+        assert.ok(
+            errorMsg == "Hash has not been approved" || errorMsg == "Signatures data too short", 
+            "Expected a signature error: " + errorMsg
+        )
         return tx
     }
 
     beforeEach(async function () {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await GnosisSafe.new()
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x")
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x")
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
 
@@ -70,9 +77,9 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
 
         // Withdraw 1 ETH
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[2])
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
 
-        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[2])
+        await executeTransaction('executeTransaction withdraw 0.5 ETH', [accounts[0], accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, { sender: accounts[2] })
 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
     })
@@ -100,16 +107,14 @@ contract('GnosisSafeTeamEdition', function(accounts) {
         // Create test contract
         let source = `
         contract Test {
-            function x() pure returns (uint) {
+            function x() public pure returns (uint) {
                 return 21;
             }
         }`
-        let output = await solc.compile(source, 0);
-        let interface = JSON.parse(output.contracts[':Test']['interface'])
-        let data = '0x' + output.contracts[':Test']['bytecode']
-        const TestContract = web3.eth.contract(interface);
+        let output = await utils.compile(source);
+        const TestContract = web3.eth.contract(output.interface);
         let testContract = utils.getParamFromTxEvent(
-            await executeTransaction('create test contract', [accounts[0], accounts[1]], 0, 0, data, CREATE),
+            await executeTransaction('create test contract', [accounts[0], accounts[1]], 0, 0, output.data, CREATE),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )
         assert.equal(await testContract.x(), 21)

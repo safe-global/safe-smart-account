@@ -1,16 +1,16 @@
-pragma solidity 0.4.24;
-import "../Module.sol";
-import "../OwnerManager.sol";
-import "../SignatureValidator.sol";
+pragma solidity ^0.5.0;
+import "../base/Module.sol";
+import "../base/OwnerManager.sol";
+import "../common/SignatureDecoder.sol";
 
 
 /// @title Gnosis Safe State Module - A module that allows interaction with statechannels.
 /// @author Stefan George - <stefan@gnosis.pm>
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract StateChannelModule is Module, SignatureValidator {
+contract StateChannelModule is Module, SignatureDecoder {
 
     string public constant NAME = "State Channel Module";
-    string public constant VERSION = "0.0.1";
+    string public constant VERSION = "0.1.0";
 
     // isExecuted mapping allows to check if a transaction (by hash) was already executed.
     mapping (bytes32 => uint256) public isExecuted;
@@ -32,10 +32,10 @@ contract StateChannelModule is Module, SignatureValidator {
     function execTransaction(
         address to, 
         uint256 value, 
-        bytes data, 
+        bytes memory data, 
         Enum.Operation operation, 
         uint256 nonce,
-        bytes signatures
+        bytes memory signatures
     )
         public
     {
@@ -47,7 +47,7 @@ contract StateChannelModule is Module, SignatureValidator {
         require(manager.execTransactionFromModule(to, value, data, operation), "Could not execute transaction");
     }
 
-    function checkHash(bytes32 transactionHash, bytes signatures)
+    function checkHash(bytes32 transactionHash, bytes memory signatures)
         internal
         view
     {
@@ -55,11 +55,11 @@ contract StateChannelModule is Module, SignatureValidator {
         address lastOwner = address(0);
         address currentOwner;
         uint256 i;
-        uint256 threshold = OwnerManager(manager).getThreshold();
+        uint256 threshold = OwnerManager(address(manager)).getThreshold();
         // Validate threshold is reached.
         for (i = 0; i < threshold; i++) {
             currentOwner = recoverKey(transactionHash, signatures, i);
-            require(OwnerManager(manager).isOwner(currentOwner), "Signature not provided by owner");
+            require(OwnerManager(address(manager)).isOwner(currentOwner), "Signature not provided by owner");
             require(currentOwner > lastOwner, "Signatures are not ordered by owner address");
             lastOwner = currentOwner;
         }
@@ -75,7 +75,7 @@ contract StateChannelModule is Module, SignatureValidator {
     function getTransactionHash(
         address to, 
         uint256 value, 
-        bytes data, 
+        bytes memory data, 
         Enum.Operation operation, 
         uint256 nonce
     )

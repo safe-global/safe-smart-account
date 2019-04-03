@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.5.0;
 import "./SelfAuthorized.sol";
 
 
@@ -16,7 +16,7 @@ contract MasterCopy is SelfAuthorized {
         authorized
     {
         // Master copy address cannot be null.
-        require(_masterCopy != 0, "Invalid master copy address provided");
+        require(_masterCopy != address(0), "Invalid master copy address provided");
         masterCopy = _masterCopy;
     }
 }
