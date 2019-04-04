@@ -18,6 +18,10 @@ zosFiles = [
   {
     networkID: 42,
     fileName: path.join(__dirname, "../zos.kovan.json")
+  },
+  {
+    networkID: 5,
+    fileName: path.join(__dirname, "../zos.goerli.json")
   }
 ]
 
