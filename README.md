@@ -1,6 +1,9 @@
 Gnosis Safe Contracts
 =====================
 
+[![npm version](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts)
+[![Build Status](https://travis-ci.org/gnosis/safe-contracts.svg?branch=development)](https://travis-ci.org/gnosis/safe-contracts)
+
 Install
 -------
 ### Install requirements with npm:
