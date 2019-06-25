@@ -30,7 +30,7 @@ module.exports = function(callback) {
     });
     var zos = JSON.parse(fs.readFileSync('./zos.' + network + '.json'));  
     Promise.all([
-        ignoreErrors(GnosisSafe.at(zos.contracts['GnosisSafe'].address).setup([notOwnedAddress, notOwnedAddress2], 2, 0, 0, 0, 0, 0)),
+        ignoreErrors(GnosisSafe.at(zos.contracts['GnosisSafe'].address).setup([notOwnedAddress, notOwnedAddress2], 2, 0, 0, 0, 0, 0, 0)),
         //ignoreErrors(StateChannelModule.at(zos.contracts['StateChannelModule'].address).setup()),
         //ignoreErrors(DailyLimitModule.at(zos.contracts['DailyLimitModule'].address).setup([],[])),
         //ignoreErrors(SocialRecoveryModule.at(zos.contracts['SocialRecoveryModule'].address).setup([notOwnedAddress, notOwnedAddress2], 2)),
