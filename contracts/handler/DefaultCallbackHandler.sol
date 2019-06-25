@@ -5,7 +5,7 @@ import "../interfaces/ERC721TokenReceiver.sol";
 import "../interfaces/ERC777TokensRecipient.sol";
 
 /// @title Default Callback Handler - returns true for known token callbacks
-/// @author Richard Meissner - <stefan@gnosis.pm>
+/// @author Richard Meissner - <richard@gnosis.pm>
 contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver {
 
     string public constant NAME = "Default Callback Handler";
