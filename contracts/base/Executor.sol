@@ -1,11 +1,10 @@
 pragma solidity ^0.5.0;
 import "../common/Enum.sol";
-import "../common/EtherPaymentFallback.sol";
 
 
 /// @title Executor - A contract that can execute transactions
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract Executor is EtherPaymentFallback {
+contract Executor {
 
     event ContractCreation(address newContract);
 

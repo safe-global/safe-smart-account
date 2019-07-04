@@ -85,7 +85,8 @@ It is suggested to [use a non-default address](https://docs.zeppelinos.org/docs/
 
 Documentation
 -------------
-http://gnosis-safe.readthedocs.io/en/latest/
+- [ReadTheDocs](http://gnosis-safe.readthedocs.io/en/latest/)
+- [Coding guidlines](docs/guidelines.md)
 
 Audits/ Formal Verification
 ---------
