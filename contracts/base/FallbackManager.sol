@@ -6,10 +6,8 @@ import "../common/SelfAuthorized.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract FallbackManager is SelfAuthorized {
 
-    // TO BE DISCUSSED: Using this with assembly storage access costs about 100 gas more for a read, and 50 for a write,
-    // but is future proof for variable order changes in the future
-    // TODO: set hash to keccak("gnosis_safe_fallback_handler")
-    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
+    // keccak256("fallback_manager.handler.address")
+    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
 
     function internalSetFallbackHandler(address handler) internal {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
