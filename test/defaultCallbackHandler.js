@@ -40,7 +40,7 @@ contract('DefaultCallbackHandler', function(accounts) {
         // Setup Safe
         await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, handler.address, 0, 0, 0)
         // Check fallback handler
-        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749"), handler.address)
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"), handler.address)
         // Check that Safe is setup
         assert.equal(await gnosisSafe.getThreshold(), 1)
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1]])
@@ -74,7 +74,7 @@ contract('DefaultCallbackHandler', function(accounts) {
         let sigs = await utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
         await gnosisSafe.execTransaction(gnosisSafe.address, 0, setFallbackHandlerData, CALL, 0, 0, 0, 0, 0, sigs, {from: executor})
         // Check fallback handler
-        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749"), handler.address)
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"), handler.address)
         // Check callbacks
         assert.equal(await safeHandler.onERC1155Received.call(0, 0, 0, 0, 0), "0xf23a6e61")
         assert.equal(await safeHandler.onERC1155BatchReceived.call(0, 0, [], [], 0), "0xbc197c81")
@@ -88,7 +88,7 @@ contract('DefaultCallbackHandler', function(accounts) {
         // Setup Safe
         await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, handler.address, 0, 0, 0)
         // Check fallback handler
-        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749"), handler.address)
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"), handler.address)
         // Check minting tokens to contract
         await token.mint(gnosisSafe.address, 23, 1337, 0)
         assert.equal(await token.balanceOf.call(gnosisSafe.address, 23), 1337)
@@ -108,7 +108,7 @@ contract('DefaultCallbackHandler', function(accounts) {
         // Setup Safe
         await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0, 0)
         // Check fallback handler
-        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749"), 0)
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"), 0)
 
         await utils.assertRejects(
             token.mint(gnosisSafe.address, 23, 1337, 0),
