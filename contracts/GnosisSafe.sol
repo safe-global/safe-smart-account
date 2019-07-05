@@ -138,14 +138,14 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     )
         private
     {
-        uint256 amount = gasUsed.add(baseGas).mul(gasPrice);
         // solium-disable-next-line security/no-tx-origin
         address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
+            // For ETH we will only adjust the gas price to not be higher than the actual used gas price
             // solium-disable-next-line security/no-send
-            require(receiver.send(amount), "Could not pay gas costs with ether");
+            require(receiver.send(gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice)), "Could not pay gas costs with ether");
         } else {
-            require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");
+            require(transferToken(gasToken, receiver, gasUsed.add(baseGas).mul(gasPrice)), "Could not pay gas costs with token");
         }
     }
 

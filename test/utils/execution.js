@@ -69,20 +69,22 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let estimate = null
     try {
         estimate = await safe.execTransaction.estimateGas(
-            to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
-        )
+            to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {
+                from: executor, 
+                gasPrice: options.txGasPrice || gasPrice
+        })
     } catch (e) {
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
-        assert.equal(("VM Exception while processing transaction: revert " + opts.revertMessage).trim(), e.message)
+        assert.equal(e.message, ("VM Exception while processing transaction: revert " + opts.revertMessage).trim())
         return null
     }
 
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
     let tx = await safe.execTransaction(
-        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + txGasEstimate + 10000, gasPrice: gasPrice}
+        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + txGasEstimate + 10000, gasPrice: options.txGasPrice || gasPrice}
     )
     let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
     if (txFailed) {
@@ -106,8 +108,14 @@ let deployToken = async function(deployer) {
     contract TestToken {
         mapping (address => uint) public balances;
         constructor() public {
-            balances[msg.sender] = 10000000;
+            balances[msg.sender] = 1000000000000;
         }
+
+        function mint(address to, uint value) public returns (bool) {
+            balances[to] += value;
+            return true;
+        }
+
         function transfer(address to, uint value) public returns (bool) {
             if (balances[msg.sender] < value) {
                 return false;
