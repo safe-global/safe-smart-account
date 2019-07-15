@@ -26,7 +26,7 @@ contract('GnosisSafe via create2', function(accounts) {
         let proxyCreationCode = await proxyFactory.proxyCreationCode()
         assert.equal(proxyCreationCode, Proxy.bytecode)
         let constructorData = abi.rawEncode(
-            ['address'], 
+            ['address'],
             [ gnosisSafeMasterCopy.address ]
         ).toString('hex')
         let encodedNonce = abi.rawEncode(['uint256'], [creationNonce]).toString('hex')
@@ -44,15 +44,21 @@ contract('GnosisSafe via create2', function(accounts) {
     }
 
     let deployWithCreationData = async function(creationData) {
-        let tx = proxyFactory.createProxyWithNonce(
-            gnosisSafeMasterCopy.address, creationData.data, creationData.creationNonce, 
+      let estimatedAddressData = proxyFactory.contract.calculateCreateProxyWithNonceAddress.getData(gnosisSafeMasterCopy.address, creationData.data, creationData.creationNonce)
+      let estimatedAddressResponse = await web3.eth.call({to: proxyFactory.address, from: funder, data: estimatedAddressData, gasPrice: 0})
+      let estimatedAddress = '0x' + estimatedAddressResponse.substring(138, 138 + 40)
+      let tx = proxyFactory.createProxyWithNonce(
+            gnosisSafeMasterCopy.address, creationData.data, creationData.creationNonce,
             {from: funder, gasPrice: gasPrice}
         )
 
-        console.log("    Deployed safe address: " + utils.getParamFromTxEvent(
-            await tx,
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
-        ).address)
+      let safeAddress = utils.getParamFromTxEvent(
+          await tx,
+          'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+      ).address
+
+      console.log("    Deployed safe address: " + safeAddress)
+      assert.equal(estimatedAddress, safeAddress)
     }
 
     beforeEach(async function () {
@@ -68,7 +74,6 @@ contract('GnosisSafe via create2', function(accounts) {
 
         // Estimate safe creation costs
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
-        
         let creationNonce = new Date().getTime()
         let estimate = (await proxyFactory.createProxyWithNonce.estimateGas(gnosisSafeMasterCopy.address, gnosisSafeData, creationNonce)) + 9000
         let creationData = await getCreationData(0, estimate * gasPrice, creationNonce)
