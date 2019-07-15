@@ -316,12 +316,12 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
@@ -350,12 +350,12 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
