@@ -1,5 +1,5 @@
 const utils = require('./utils/general')
-var util = require("ethereumjs-util")
+const util = require("ethereumjs-util")
 const abi = require("ethereumjs-abi")
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
