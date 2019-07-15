@@ -66,7 +66,6 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     {
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
-
         setupOwners(_owners, _threshold);
         // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
         setupModules(to, data);
@@ -213,7 +212,10 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "Invalid owner provided");
+            require (
+                currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,
+                "Invalid owner provided"
+            );
             lastOwner = currentOwner;
         }
     }
@@ -270,7 +272,7 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
-    */ 
+    */
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         external
         returns (bytes4)
@@ -316,12 +318,12 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
@@ -350,12 +352,12 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,

@@ -8,9 +8,9 @@ pragma solidity ^0.5.0;
 contract MultiSend {
 
     /// @dev Sends multiple transactions and reverts all if one fails.
-    /// @param transactions Encoded transactions. Each transaction is encoded as a 
-    ///                     tuple(operation,address,uint256,bytes), where operation 
-    ///                     can be 0 for a call or 1 for a delegatecall. The bytes 
+    /// @param transactions Encoded transactions. Each transaction is encoded as a
+    ///                     tuple(operation,address,uint256,bytes), where operation
+    ///                     can be 0 for a call or 1 for a delegatecall. The bytes
     ///                     of all encoded transactions are concatenated to form the input.
     function multiSend(bytes memory transactions)
         public
@@ -26,7 +26,7 @@ contract MultiSend {
                 let dataLength := mload(add(transactions, add(i, 0x80)))
                 let data := add(transactions, add(i, 0xa0))
                 let success := 0
-                switch operation 
+                switch operation
                 case 0 { success := call(gas, to, value, data, dataLength, 0, 0) }
                 case 1 { success := delegatecall(gas, to, data, dataLength, 0, 0) }
                 if eq(success, 0) { revert(0, 0) }

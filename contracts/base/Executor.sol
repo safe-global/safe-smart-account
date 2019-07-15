@@ -16,11 +16,8 @@ contract Executor {
             success = executeCall(to, value, data, txGas);
         else if (operation == Enum.Operation.DelegateCall)
             success = executeDelegateCall(to, data, txGas);
-        else {
-            address newContract = executeCreate(data);
-            success = newContract != address(0);
-            emit ContractCreation(newContract);
-        }
+        else
+            success = false;
     }
 
     function executeCall(address to, uint256 value, bytes memory data, uint256 txGas)
@@ -40,16 +37,6 @@ contract Executor {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-        }
-    }
-
-    function executeCreate(bytes memory data)
-        internal
-        returns (address newContract)
-    {
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            newContract := create(0, add(data, 0x20), mload(data))
         }
     }
 }
