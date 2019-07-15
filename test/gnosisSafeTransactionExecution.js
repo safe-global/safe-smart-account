@@ -14,7 +14,6 @@ contract('GnosisSafe', function(accounts) {
     let executor = accounts[8]
 
     const CALL = 0
-    const CREATE = 2
 
     beforeEach(async function () {
         // Create lightwallet
@@ -191,29 +190,4 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(web3.fromWei(await web3.eth.getBalance(gnosisSafe.address), 'ether').toString(), '0.5');
 
     });
-
-    it('should do a CREATE transaction', async () => {
-        // Fund account for execution 
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
-
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
-        // Create test contract
-        let source = `
-        contract Test {
-            function x() public pure returns (uint) {
-                return 21;
-            }
-        }`
-        let output = await utils.compile(source);
-        const TestContract = web3.eth.contract(output.interface);
-        let testContract = utils.getParamFromTxEvent(
-            await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, output.data, CREATE, executor),
-            'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
-        )
-        assert.equal(await testContract.x(), 21)
-
-        let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        assert.ok(executorDiff > 0)
-    })
 })

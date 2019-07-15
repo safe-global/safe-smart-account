@@ -10,7 +10,6 @@ contract('GnosisSafe Without Refund', function(accounts) {
     let executor = accounts[8]
 
     const CALL = 0
-    const CREATE = 2
 
     let executeTransaction = async function(subject, accounts, to, value, data, operation, opts) {
         let options = opts || {}
@@ -101,22 +100,5 @@ contract('GnosisSafe Without Refund', function(accounts) {
         data = await gnosisSafe.contract.removeOwner.getData(accounts[1], accounts[3], 2)
         await executeTransaction('remove owner and reduce threshold to 2', [accounts[0], accounts[1], accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[5], accounts[0], accounts[1]])
-    })
-
-    it('should do a CREATE transaction', async () => {
-        // Create test contract
-        let source = `
-        contract Test {
-            function x() public pure returns (uint) {
-                return 21;
-            }
-        }`
-        let output = await utils.compile(source);
-        const TestContract = web3.eth.contract(output.interface);
-        let testContract = utils.getParamFromTxEvent(
-            await executeTransaction('create test contract', [accounts[0], accounts[1]], 0, 0, output.data, CREATE),
-            'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
-        )
-        assert.equal(await testContract.x(), 21)
     })
 })
