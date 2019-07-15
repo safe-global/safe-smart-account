@@ -219,7 +219,7 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     }
 
     /// @dev Allows to estimate a Safe transaction.
-    ///      This method is only meant for estimation purpose, therfore two different protection mechanism against execution in a transaction have been made:
+    ///      This method is only meant for estimation purpose, therefore two different protection mechanism against execution in a transaction have been made:
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
     ///      When estimating set `from` to the address of the safe.
