@@ -9,10 +9,11 @@ import "./interfaces/ISignatureValidator.sol";
 import "./external/SafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
-/// @author Stefan George - <stefan@gnosis.pm>
-/// @author Richard Meissner - <richard@gnosis.pm>
+/// @author Stefan George - <stefan@gnosis.io>
+/// @author Richard Meissner - <richard@gnosis.io>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator, FallbackManager {
+contract GnosisSafe
+    is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager {
 
     using SafeMath for uint256;
 
@@ -213,7 +214,10 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "Invalid owner provided");
+            require (
+                currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,
+                "Invalid owner provided"
+            );
             lastOwner = currentOwner;
         }
     }
@@ -266,11 +270,14 @@ contract GnosisSafe is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder
     }
 
     /**
-    * @dev Should return whether the signature provided is valid for the provided data
+    * Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
+    * @dev Should return whether the signature provided is valid for the provided data.
+    *       The save does not implement the interface since `checkSignatures` is not a view method.
+    *       The method will not perform any state changes (see parameters of `checkSignatures`)
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
-    */ 
+    */
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         external
         returns (bytes4)
