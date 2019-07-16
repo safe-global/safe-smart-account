@@ -43,5 +43,8 @@ module.exports = {
     optimizer: {
       enabled: false
     },
+    settings: {
+      evmVersion: "petersburg"
+    }
   },
 };
