@@ -104,8 +104,7 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
 }
 
 let deployToken = async function(deployer) {
-    let tokenSource = `
-    contract TestToken {
+    return deployContract(deployer, `contract TestToken {
         mapping (address => uint) public balances;
         constructor() public {
             balances[msg.sender] = 1000000000000;
@@ -124,19 +123,23 @@ let deployToken = async function(deployer) {
             balances[to] += value;
             return true;
         }
-    }`
-    let output = await utils.compile(tokenSource);
-    let tokenInterface = output.interface
-    let tokenBytecode = output.data
-    let transactionHash = await web3.eth.sendTransaction({from: deployer, data: tokenBytecode, gas: 4000000})
+    }`)
+}
+
+let deployContract = async function(deployer, source) {
+    let output = await utils.compile(source);
+    let contractInterface = output.interface
+    let contractBytecode = output.data
+    let transactionHash = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
     let receipt = web3.eth.getTransactionReceipt(transactionHash);
-    const TestToken = web3.eth.contract(tokenInterface)
-    return TestToken.at(receipt.contractAddress)
+    const TestContract = web3.eth.contract(contractInterface)
+    return TestContract.at(receipt.contractAddress)
 }
 
 Object.assign(exports, {
     estimateBaseGas,
     executeTransaction,
     executeTransactionWithSigner,
-    deployToken
+    deployToken,
+    deployContract
 })
