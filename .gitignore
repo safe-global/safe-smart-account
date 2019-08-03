@@ -4,3 +4,4 @@ node_modules/
 .openzeppelin/.session
 .vscode/
 env/
+.env
