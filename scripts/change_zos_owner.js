@@ -9,52 +9,58 @@ Deployment steps:
 
 // Truffle 5 script
 
-const fs = require('fs');
+const fs = require('fs')
 
-const transferOwner = async function(address, newOwner) {
-    const ownableJson = JSON.parse(fs.readFileSync('node_modules/zos-lib/build/contracts/ZOSLibOwnable.json'))
-    let contract = new web3.eth.Contract(ownableJson["abi"], address)
-    let currentOwner = await contract.methods.owner().call()
-    console.log("Change owner from", currentOwner, "to", newOwner)
-    return await contract.methods.transferOwnership(newOwner).send({from:currentOwner})
-} 
+const transferOwner = async function (address, newOwner) {
+  const ownableJson = JSON.parse(
+    fs.readFileSync(
+      'node_modules/@openzeppelin/upgrades/build/contracts/OpenZeppelinUpgradesOwnable'
+    )
+  )
+  let contract = new web3.eth.Contract(ownableJson['abi'], address)
+  let currentOwner = await contract.methods.owner().call()
+  console.log('Change owner from', currentOwner, 'to', newOwner)
+  return await contract.methods
+    .transferOwnership(newOwner)
+    .send({ from: currentOwner })
+}
 
-module.exports = async function(callback) {
-    var network = undefined
-    var newOwner = undefined
-    process.argv.forEach(function(arg) {
-        if (arg.startsWith("--network=")) {
-            network = arg.slice(10)
-        }
-        if (arg.startsWith("--newOwner=")) {
-            newOwner = arg.slice(11)
-        }
-    });
-    if (!network) {
-        console.log("Please explicitely provide the network")
-        callback()
-        return
+module.exports = async function (callback) {
+  var network = undefined
+  var newOwner = undefined
+  process.argv.forEach(function (arg) {
+    if (arg.startsWith('--network=')) {
+      network = arg.slice(10)
     }
-    if (!newOwner) {
-        console.log("Please provide the new owner")
-        callback()
-        return
-    } 
-    console.log(newOwner)  
-    var zos = JSON.parse(fs.readFileSync('./zos.' + network + '.json'));
-
-    try {
-        console.log("Change owner of App at", zos["app"].address)  
-        console.log(await transferOwner(zos["app"].address, newOwner))
-        console.log("Change owner of Package at", zos["package"].address)  
-        console.log(await transferOwner(zos["package"].address, newOwner))
-        console.log("Change owner of Provider at", zos["provider"].address)  
-        console.log(await transferOwner(zos["provider"].address, newOwner))
-    } catch (e) {
-        callback(e)
-        return
+    if (arg.startsWith('--newOwner=')) {
+      newOwner = arg.slice(11)
     }
+  })
+  if (!network) {
+    console.log('Please explicitely provide the network')
     callback()
+    return
+  }
+  if (!newOwner) {
+    console.log('Please provide the new owner')
+    callback()
+    return
+  }
+  console.log(newOwner)
+  var oz = JSON.parse(fs.readFileSync('./.openzeppelin/' + network + '.json'))
+
+  try {
+    console.log('Change owner of App at', oz['app'].address)
+    console.log(await transferOwner(oz['app'].address, newOwner))
+    console.log('Change owner of Package at', oz['package'].address)
+    console.log(await transferOwner(oz['package'].address, newOwner))
+    console.log('Change owner of Provider at', oz['provider'].address)
+    console.log(await transferOwner(oz['provider'].address, newOwner))
+  } catch (e) {
+    callback(e)
+    return
+  }
+  callback()
 }
 
 /*

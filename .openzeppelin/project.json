@@ -1,11 +1,12 @@
 {
-  "zosversion": "2.2",
-  "name": "@gnosis.pm/safe-contracts",
-  "version": "1.0.0",
+  "manifestVersion": "2.2",
   "contracts": {
     "GnosisSafe": "GnosisSafe",
     "ProxyFactory": "ProxyFactory",
     "MultiSend": "MultiSend",
     "CreateAndAddModules": "CreateAndAddModules"
-  }
+  },
+  "dependencies": {},
+  "name": "@gnosis.pm/safe-contracts",
+  "version": "1.0.0"
 }

@@ -1,11 +1,11 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A",
-      "constructorCode": "608060405234801561001057600080fd5b50615e9380620000216000396000f3fe",
-      "bodyBytecodeHash": "5bb2743e521347994660ec020cb56c8b1189728d902a09ec554592cc3dadc24c",
-      "localBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
-      "deployedBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
+      "address": "0x7143aAD22eb079b4063E782111A87c257822543D",
+      "constructorCode": "608060405234801561001057600080fd5b50615aa580620000216000396000f3fe",
+      "bodyBytecodeHash": "f436ac602adbf3ee3c52d7b16e1e24c58f5dab5345c14ee1067635650fc29c12",
+      "localBytecodeHash": "dfdaf7af08ac2a697902f1d501a612fb5d9a13b8e8f763f5aa45e13af11733df",
+      "deployedBytecodeHash": "dfdaf7af08ac2a697902f1d501a612fb5d9a13b8e8f763f5aa45e13af11733df",
       "types": {
         "t_address": {
           "id": "t_address",
@@ -40,73 +40,73 @@
           "contract": "MasterCopy",
           "path": "contracts/common/MasterCopy.sol",
           "label": "masterCopy",
-          "astId": 1760,
+          "astId": 1850,
           "type": "t_address",
-          "src": "465:18:8"
+          "src": "558:18:9"
         },
         {
           "contract": "ModuleManager",
           "path": "contracts/base/ModuleManager.sol",
           "label": "modules",
-          "astId": 990,
+          "astId": 1081,
           "type": "t_mapping<t_address>",
-          "src": "550:45:4"
+          "src": "550:45:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "owners",
-          "astId": 1299,
+          "astId": 1390,
           "type": "t_mapping<t_address>",
-          "src": "480:43:5"
+          "src": "480:43:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "ownerCount",
-          "astId": 1301,
+          "astId": 1392,
           "type": "t_uint256",
-          "src": "529:18:5"
+          "src": "529:18:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "threshold",
-          "astId": 1303,
+          "astId": 1394,
           "type": "t_uint256",
-          "src": "553:26:5"
+          "src": "553:26:6"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "nonce",
-          "astId": 41,
+          "astId": 47,
           "type": "t_uint256",
-          "src": "1557:20:0"
+          "src": "1682:20:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "domainSeparator",
-          "astId": 43,
+          "astId": 49,
           "type": "t_bytes32",
-          "src": "1583:30:0"
+          "src": "1708:30:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "signedMessages",
-          "astId": 47,
+          "astId": 53,
           "type": "t_mapping<t_uint256>",
-          "src": "1716:49:0"
+          "src": "1841:49:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "approvedHashes",
-          "astId": 53,
+          "astId": 59,
           "type": "t_mapping<t_uint256>",
-          "src": "1876:69:0"
+          "src": "2001:69:0"
         }
       ],
       "warnings": {
@@ -118,11 +118,11 @@
       }
     },
     "ProxyFactory": {
-      "address": "0x12302fE9c02ff50939BaAaaf415fc226C078613C",
-      "constructorCode": "608060405234801561001057600080fd5b506108c4806100206000396000f3fe",
-      "bodyBytecodeHash": "032bd258d3d8422922b15844fb7a1e00c1bc6a43129b35e11800f47d5393bfb4",
-      "localBytecodeHash": "e46cea57f8a9112825fe7e52fd61c95aa8f3a6aa7a7d912271413a9bcbc16d66",
-      "deployedBytecodeHash": "e46cea57f8a9112825fe7e52fd61c95aa8f3a6aa7a7d912271413a9bcbc16d66",
+      "address": "0xb75FA4c7888335d74695aC966292d1CA72dB15C3",
+      "constructorCode": "608060405234801561001057600080fd5b50610b0b806100206000396000f3fe",
+      "bodyBytecodeHash": "c7c72522e0eb2fe7d9d09822d68f065d7f430d8ab87014193b28dbf51fa96a67",
+      "localBytecodeHash": "befe09808aa6cccba8e0d6973f9ee3934bbc1a8f3af4e3c4ff53f1b03a5a2397",
+      "deployedBytecodeHash": "befe09808aa6cccba8e0d6973f9ee3934bbc1a8f3af4e3c4ff53f1b03a5a2397",
       "types": {},
       "storage": [],
       "warnings": {
@@ -134,11 +134,11 @@
       }
     },
     "MultiSend": {
-      "address": "0xD4B7B161E4779629C2717385114Bf78D612aEa72",
-      "constructorCode": "608060405234801561001057600080fd5b506101c8806100206000396000f3fe",
-      "bodyBytecodeHash": "58eba12a004b48496cb944b7b298706b494b8be2860cd3dfe09680782f137695",
-      "localBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
-      "deployedBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
+      "address": "0xB1FBfCcBDCd2E5958420c62F133a17a996Ac6c62",
+      "constructorCode": "608060405234801561001057600080fd5b506101a3806100206000396000f3fe",
+      "bodyBytecodeHash": "61000d9792cd23d299f2c5bdbf174c4c30abee279c17a636bf62ffd0f3c7b209",
+      "localBytecodeHash": "9676c2e6d1b806bebb1c156e6016452af1c21ce0caa4b6580c7a4467679fa281",
+      "deployedBytecodeHash": "9676c2e6d1b806bebb1c156e6016452af1c21ce0caa4b6580c7a4467679fa281",
       "types": {},
       "storage": [],
       "warnings": {
@@ -150,11 +150,11 @@
       }
     },
     "CreateAndAddModules": {
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "constructorCode": "608060405234801561001057600080fd5b506102e2806100206000396000f3fe",
-      "bodyBytecodeHash": "3f1bef8e42a5176d17fd5ee15e86baed6de4d458520547043900628174ab7011",
-      "localBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
-      "deployedBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
+      "address": "0xfD3a74E159BCb57aDC9012C1a6602b386cf59a02",
+      "constructorCode": "608060405234801561001057600080fd5b50610296806100206000396000f3fe",
+      "bodyBytecodeHash": "7bf47ddf97182d5c8d389b472859f170d6ebf8136a54d0e7dd2d2ede97c115e7",
+      "localBytecodeHash": "75859dfb0be52cad74ba70deb552218034c5c1e93fc592547d64f07937cb5dac",
+      "deployedBytecodeHash": "75859dfb0be52cad74ba70deb552218034c5c1e93fc592547d64f07937cb5dac",
       "types": {},
       "storage": [],
       "warnings": {
@@ -168,16 +168,15 @@
   },
   "solidityLibs": {},
   "proxies": {},
-  "zosversion": "2.2",
+  "manifestVersion": "2.2",
   "version": "1.0.0",
   "app": {
-    "address": "0x61cBcc8Dd29e1e5abd0dD821E382FCe225CdA0b2"
+    "address": "0x468cD59F42AE4E4F28FDeA65e0278F84B9F4116F"
   },
   "package": {
-    "address": "0x94395138cAE52ff99F7c53533e784277c6641738"
+    "address": "0x36bEde04Da0De5975EF7FD0D5dF5c822a672fffb"
   },
   "provider": {
-    "address": "0x473F8b49F273e34F992c0B6259740f84D71b8D00"
-  },
-  "frozen": false
+    "address": "0x3b6Bab469eB89D10b81F58F623923BfeF752d545"
+  }
 }
