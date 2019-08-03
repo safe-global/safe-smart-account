@@ -1,6 +1,8 @@
 const shell = require('shelljs')
 const fs = require('fs')
 
+require('dotenv').config()
+
 const network = process.env.NETWORK
 
 if (!network) {
@@ -33,8 +35,8 @@ shell.exec(`npx oz add CreateAndAddModules --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
 // Init master copies
-
 shell.exec(`npx truffle --network ${network} exec scripts/init_contracts.js`)
+
 // Publish zos package
 shell.exec(`npx oz publish --network ${network}`)
 
