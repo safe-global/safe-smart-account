@@ -53,7 +53,7 @@ contract('GnosisSafe', function(accounts) {
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[3]])
 
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[1], lw.accounts[3], 2)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(lw.accounts[1], lw.accounts[3], 2)
         let removeTx = await safeUtils.executeTransaction(lw, gnosisSafe, 'remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL, executor)
         assert.equal(utils.checkTxEvent(removeTx, 'RemovedOwner', gnosisSafe.address, true).args.owner, lw.accounts[3])
         assert.equal(utils.checkTxEvent(removeTx, 'ChangedThreshold', gnosisSafe.address, true).args.threshold.toNumber(), 2)
@@ -94,13 +94,13 @@ contract('GnosisSafe', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'replace with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         // Invalid owner removals
-        data = await gnosisSafe.contract.removeOwner.getData(sentinel, accounts[0], 1)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(sentinel, accounts[0], 1)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove non-owner', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
-        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[2], sentinel, 1)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(lw.accounts[2], sentinel, 1)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
-        data = await gnosisSafe.contract.removeOwner.getData(accounts[1], zeroAcc, 1)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(accounts[1], zeroAcc, 1)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance

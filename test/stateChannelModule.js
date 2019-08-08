@@ -101,7 +101,7 @@ contract('StateChannelModule', function(accounts) {
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1], lw.accounts[3]])
 
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(lw.accounts[1], lw.accounts[3], 2)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(lw.accounts[1], lw.accounts[3], 2)
         await executeTransaction('remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1]])
         assert.equal(await gnosisSafe.getThreshold(), 2)

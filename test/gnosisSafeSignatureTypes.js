@@ -97,7 +97,7 @@ contract('GnosisSafe Without Refund', function(accounts) {
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[5], accounts[0], accounts[1], accounts[3]])
 
         // Remove owner and reduce threshold to 2
-        data = await gnosisSafe.contract.removeOwner.getData(accounts[1], accounts[3], 2)
+        data = await gnosisSafe.contract.removeOwnerWithThreshold.getData(accounts[1], accounts[3], 2)
         await executeTransaction('remove owner and reduce threshold to 2', [accounts[0], accounts[1], accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[5], accounts[0], accounts[1]])
     })

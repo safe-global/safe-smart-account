@@ -71,7 +71,7 @@ contract OwnerManager is SelfAuthorized {
     /// @param prevOwner Owner that pointed to the owner to be removed in the linked list
     /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
-    function removeOwner(address prevOwner, address owner, uint256 _threshold)
+    function removeOwnerWithThreshold(address prevOwner, address owner, uint256 _threshold)
         public
         authorized
     {
