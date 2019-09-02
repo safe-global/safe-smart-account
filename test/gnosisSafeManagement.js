@@ -1,15 +1,16 @@
 const utils = require('./utils/general')
 const safeUtils = require('./utils/execution')
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const MockContract = artifacts.require('./MockContract.sol');
-const MockToken = artifacts.require('./Token.sol');
+const MockContract = artifacts.require('./MockContract.sol')
+const MockToken = artifacts.require('./Token.sol')
 
 contract('GnosisSafe', function(accounts) {
 
     let gnosisSafe
+    let gnosisSafeMasterCopy
     let lw
     let executor = accounts[8]
 
@@ -21,7 +22,7 @@ contract('GnosisSafe', function(accounts) {
         lw = await utils.createLightwallet()
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
-        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
@@ -64,6 +65,24 @@ contract('GnosisSafe', function(accounts) {
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
+
+    it('should update the master copy and emit events', async () => {
+        // Fund account for execution
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+
+        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+	// Check that the current address is pointing to the master copy
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, 0), gnosisSafeMasterCopy.address)
+
+	// We deploy a new master copy
+	let newMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+
+        let data = await gnosisSafe.contract.changeMasterCopy.getData(newMasterCopy.address)
+        let updateTx = await safeUtils.executeTransaction(lw, gnosisSafe, 'update master copy', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor)
+        assert.equal(utils.checkTxEvent(updateTx, 'ChangedMasterCopy', gnosisSafe.address, true).args.masterCopy, newMasterCopy.address)
+        assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, 0), newMasterCopy.address)
+    })
+
 
     it('should not be able to add/remove/replace invalid owners', async () => {
         let zeroAcc = "0x0000000000000000000000000000000000000000"
@@ -116,7 +135,7 @@ contract('GnosisSafe', function(accounts) {
         let zeroAcc = "0x0000000000000000000000000000000000000000"
         let sentinel = "0x0000000000000000000000000000000000000001"
 
-        // Fund account for execution 
+        // Fund account for execution
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
@@ -142,7 +161,7 @@ contract('GnosisSafe', function(accounts) {
 
         data = await gnosisSafe.contract.disableModule.getData(randomModule, sentinel)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove sentinel', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
-        
+
         data = await gnosisSafe.contract.disableModule.getData(accounts[1], zeroAcc)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
@@ -157,7 +176,7 @@ contract('GnosisSafe', function(accounts) {
     it('should emit events for modules', async () => {
         let sentinel = "0x0000000000000000000000000000000000000001"
 
-        // Fund account for execution 
+        // Fund account for execution
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
@@ -184,7 +203,7 @@ contract('GnosisSafe', function(accounts) {
     })
 
     it('sentinels should not be owners or modules', async () => {
-        
+
         assert.equal(await gnosisSafe.isOwner("0x1"), false)
 
         let sig = "0x" + "0000000000000000000000000000000000000000000000000000000000000001" + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
@@ -197,5 +216,5 @@ contract('GnosisSafe', function(accounts) {
             gnosisSafe.execTransactionFromModule.estimateGas("0x1", 0, "0x", 0, { from: "0x0000000000000000000000000000000000000001"} ),
             "Should not be able to execute transaction from sentinel as module"
         )
-    });
+    })
 })
