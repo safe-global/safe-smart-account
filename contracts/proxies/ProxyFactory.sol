@@ -50,6 +50,7 @@ contract ProxyFactory {
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
         }
+	require(address(proxy) != address(0), "Create2 call failed");
     }
 
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.

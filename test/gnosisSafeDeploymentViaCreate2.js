@@ -6,8 +6,8 @@ const abi = require('ethereumjs-abi')
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const Proxy = artifacts.require("./Proxy.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const MockContract = artifacts.require('./MockContract.sol');
-const MockToken = artifacts.require('./Token.sol');
+const MockContract = artifacts.require('./MockContract.sol')
+const MockToken = artifacts.require('./Token.sol')
 
 contract('GnosisSafe via create2', function(accounts) {
 
@@ -108,7 +108,7 @@ contract('GnosisSafe via create2', function(accounts) {
 
         // User funds safe
         token.transfer(creationData.safe, creationData.userCosts, {from: accounts[0]})
-        assert.equal(await token.balances(creationData.safe), creationData.userCosts);
+        assert.equal(await token.balances(creationData.safe), creationData.userCosts)
         assert.equal(await token.balances(funder), 0)
 
         await deployWithCreationData(creationData)
@@ -144,31 +144,55 @@ contract('GnosisSafe via create2', function(accounts) {
         utils.assertRejects(deployWithCreationData(creationData), "Deployment without enough tokens should fail")
         assert.equal(await web3.eth.getCode(creationData.safe), '0x')
 
-        let mockContract = await MockContract.new();
-        let mockToken = MockToken.at(mockContract.address);
+        let mockContract = await MockContract.new()
+        let mockToken = MockToken.at(mockContract.address)
 
-        await mockContract.givenAnyRunOutOfGas();
+        await mockContract.givenAnyRunOutOfGas()
         creationData = await getCreationData(mockToken.address, 1337, nonce)
         utils.assertRejects(deployWithCreationData(creationData), "Deployment without enough gas should fail")
-        assert.equal(await web3.eth.getCode(creationData.safe), '0x');
+        assert.equal(await web3.eth.getCode(creationData.safe), '0x')
 
 
-        await mockContract.givenAnyRevert();
-        creationData = await getCreationData(mockToken.address, 1337, nonce);
+        await mockContract.givenAnyRevert()
+        creationData = await getCreationData(mockToken.address, 1337, nonce)
         utils.assertRejects(deployWithCreationData(creationData), "Deployment when payment fails should fail")
-        assert.equal(await web3.eth.getCode(creationData.safe), '0x');
+        assert.equal(await web3.eth.getCode(creationData.safe), '0x')
 
 
-        await mockContract.givenAnyReturnBool(false);
-        creationData = await getCreationData(mockToken.address, 1337, nonce);
+        await mockContract.givenAnyReturnBool(false)
+        creationData = await getCreationData(mockToken.address, 1337, nonce)
         utils.assertRejects(deployWithCreationData(creationData), "Deployment when payment transfer returns false should fail")
-        assert.equal(await web3.eth.getCode(creationData.safe), '0x');
+        assert.equal(await web3.eth.getCode(creationData.safe), '0x')
 
         // We deploy a proxy to the same predicted address to make sure that even after a failure we could deploy a successfull one
-        await mockContract.givenAnyReturnBool(true);
-        creationData = await getCreationData(mockToken.address, 1337, nonce);
+        await mockContract.givenAnyReturnBool(true)
+        creationData = await getCreationData(mockToken.address, 1337, nonce)
         await deployWithCreationData(creationData)
         assert.equal(await web3.eth.getCode(creationData.safe), await proxyFactory.proxyRuntimeCode())
 
-    });
+    })
+
+    it('should fail when creating the same proxy twice', async () => {
+	// Estimate safe creation costs
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
+        let creationNonce = new Date().getTime()
+        let estimate = (await proxyFactory.createProxyWithNonce.estimateGas(gnosisSafeMasterCopy.address, gnosisSafeData, creationNonce)) + 9000
+        let creationData = await getCreationData(0, estimate * gasPrice, creationNonce)
+
+        // User funds safe
+        await web3.eth.sendTransaction({from: accounts[1], to: creationData.safe, value: creationData.userCosts})
+        assert.equal(await web3.eth.getBalance(creationData.safe).toNumber(), creationData.userCosts)
+        let funderBalance = await web3.eth.getBalance(funder).toNumber()
+
+        await deployWithCreationData(creationData)
+        assert.equal(await web3.eth.getCode(creationData.safe), await proxyFactory.proxyRuntimeCode())
+
+        utils.assertRejects(deployWithCreationData(creationData), "Deployment fails as same proxy with same params (and address) was already deployed")
+
+        let estimatedAddressData = proxyFactory.contract.calculateCreateProxyWithNonceAddress.getData(gnosisSafeMasterCopy.address, creationData.data, creationData.creationNonce)
+        let estimatedAddressResponse = await web3.eth.call({to: proxyFactory.address, from: funder, data: estimatedAddressData, gasPrice: 0})
+        let errorMessage = await utils.getErrorMessage(proxyFactory.address, 0, estimatedAddressData, funder)
+	assert.equal(errorMessage, 'Create2 call failed')
+    })
+
 })
