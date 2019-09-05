@@ -82,7 +82,7 @@ contract('GnosisSafe', function(accounts) {
         assert.ok(executorDiff > 0);
     }); 
 
-    it.only('should only pay for gasprice used, up to specified for ETH', async () => {
+    it('should only pay for gasprice used, up to specified for ETH', async () => {
         // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
