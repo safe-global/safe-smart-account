@@ -70,12 +70,11 @@ contract('GnosisSafe', function(accounts) {
         // Fund account for execution
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
 
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
-	// Check that the current address is pointing to the master copy
+	    // Check that the current address is pointing to the master copy
         assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, 0), gnosisSafeMasterCopy.address)
 
-	// We deploy a new master copy
-	let newMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        // We deploy a new master copy
+        let newMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
 
         let data = await gnosisSafe.contract.changeMasterCopy.getData(newMasterCopy.address)
         let updateTx = await safeUtils.executeTransaction(lw, gnosisSafe, 'update master copy', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor)
@@ -84,7 +83,7 @@ contract('GnosisSafe', function(accounts) {
     })
 
 
-    it('should not be able to add/remove/replace invalid owners', async () => {
+    it.only('should not be able to add/remove/replace invalid owners', async () => {
         let zeroAcc = "0x0000000000000000000000000000000000000000"
         let sentinel = "0x0000000000000000000000000000000000000001"
         // Fund account for execution
