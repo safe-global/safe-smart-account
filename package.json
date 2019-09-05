@@ -18,7 +18,7 @@
     "preversion": "npm run restore",
     "truffle-zos-merge": "node scripts/merge_zos.js",
     "restore": "rm -rf build && npx truffle compile && npm run truffle-zos-merge && npx tnt cB",
-    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.7"
+    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.11"
   },
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^6.0.0",
-    "ganache-cli": "^6.3.0",
+    "ganache-cli": "^6.6.0",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",

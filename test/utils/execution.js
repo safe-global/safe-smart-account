@@ -11,8 +11,8 @@ let baseGasValue = function(hexValue) {
    };
  }
  
- let estimatebaseGasCosts = function(dataString) {
-   const reducer = (accumulator, currentValue) => accumulator += baseGasValue(currentValue)
+ let estimateBaseGasCosts = function(dataString) {
+    const reducer = (accumulator, currentValue) => accumulator += baseGasValue(currentValue)
  
    return dataString.match(/.{2}/g).reduce(reducer, 0)
  }
@@ -25,7 +25,7 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
-    let baseGasEstimate = estimatebaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000) + 1500 // 1500 -> hash generation costs
+    let baseGasEstimate = estimateBaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000) + 1500 // 1500 -> hash generation costs
     return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
 }
 
@@ -63,7 +63,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
-    console.log("    Data costs: " + estimatebaseGasCosts(payload))
+    console.log("    Data costs: " + estimateBaseGasCosts(payload))
 
     // Estimate gas of paying transaction
     let estimate = null

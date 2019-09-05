@@ -80,9 +80,9 @@ contract('GnosisSafe', function(accounts) {
         let executorDiff = (await token.balances(executor)).toNumber() - executorBalance;
         console.log("    Executor earned " + executorDiff + " Tokens")
         assert.ok(executorDiff > 0);
-    });
+    }); 
 
-    it('should only pay for gasprice used, up to specified for ETH', async () => {
+    it.only('should only pay for gasprice used, up to specified for ETH', async () => {
         // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
@@ -92,21 +92,23 @@ contract('GnosisSafe', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'increase nonce', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor)
 
         // Benchmark fees
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'benchmark fee', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor, {
+        let benchmarkExecutor = accounts[7]
+        let executorBalance = await web3.eth.getBalance(benchmarkExecutor).toNumber()
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'benchmark fee', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, benchmarkExecutor, {
             gasPrice: 10, // Signed gas price
         })
-        let benchmarkedFee = await web3.eth.getBalance(executor) - executorBalance
+        let benchmarkedFee = await web3.eth.getBalance(benchmarkExecutor) - executorBalance
         console.log("    Benchmarked transaction fee " + web3.fromWei(benchmarkedFee, 'ether') + " ETH")
 
         // Perform with higher signed gas price
-        executorBalance = await web3.eth.getBalance(executor).toNumber()
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'execute with lower gas price', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor, {
+        let testExecutor = accounts[6]
+        executorBalance = await web3.eth.getBalance(testExecutor).toNumber()
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'execute with lower gas price', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, testExecutor, {
             gasPrice: 100, // Signed gas price
             txGasPrice: 10, // Ethereum tx gas price
         })
 
-        let expectedFee = await web3.eth.getBalance(executor) - executorBalance
+        let expectedFee = await web3.eth.getBalance(testExecutor) - executorBalance
         console.log("    Final fee with higher signed price " + web3.fromWei(expectedFee, 'ether') + " ETH")
         assert.equal(benchmarkedFee, expectedFee)
     });
