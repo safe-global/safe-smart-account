@@ -83,7 +83,7 @@ contract('GnosisSafe', function(accounts) {
     })
 
 
-    it.only('should not be able to add/remove/replace invalid owners', async () => {
+    it('should not be able to add/remove/replace invalid owners', async () => {
         let zeroAcc = "0x0000000000000000000000000000000000000000"
         let sentinel = "0x0000000000000000000000000000000000000001"
         // Fund account for execution
