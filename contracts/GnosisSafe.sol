@@ -209,6 +209,9 @@ contract GnosisSafe
                 if (consumeHash && msg.sender != currentOwner) {
                     approvedHashes[currentOwner][dataHash] = 0;
                 }
+            } else if (v > 30) {
+                // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
+                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
             } else {
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
