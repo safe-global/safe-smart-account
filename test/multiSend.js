@@ -6,8 +6,8 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol")
-const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol");
-        
+const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
+
 
 contract('MultiSend', function(accounts) {
 
@@ -48,7 +48,7 @@ contract('MultiSend', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
         // Withdraw 2 ETH and change threshold
         let nonce = await gnosisSafe.nonce()
-        
+
         let changeData = await gnosisSafe.contract.changeThreshold.getData(2)
 
         let stateChannelSetupData = await stateChannelModuleMasterCopy.contract.setup.getData()
@@ -122,9 +122,9 @@ contract('MultiSend', function(accounts) {
     })
 
     it('invalid operation should fail', async () => {
-    
+
         let nonce = await gnosisSafe.nonce()
-        
+
         let nestedTransactionData = '0x' +
             encodeData(2, gnosisSafe.address, 0, '0x' + '0'.repeat(64))
 
@@ -141,11 +141,11 @@ contract('MultiSend', function(accounts) {
 
     it('single fail should fail all', async () => {
         assert.equal(await gnosisSafe.getThreshold(), 1)
-    
+
         let nonce = await gnosisSafe.nonce()
 
         let changeData = await gnosisSafe.contract.changeThreshold.getData(2)
-        
+
         let nestedTransactionData = '0x' +
             encodeData(0, gnosisSafe.address, 0, '0x' + '0'.repeat(64)) +
             encodeData(0, gnosisSafe.address, 0, changeData) +

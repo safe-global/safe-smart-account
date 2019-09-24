@@ -1,9 +1,9 @@
-const fs = require('fs');
-const GnosisSafe = artifacts.require("./GnosisSafe.sol");
-const StateChannelModule = artifacts.require("./StateChannelModule.sol");
+const fs = require('fs')
+const GnosisSafe = artifacts.require("./GnosisSafe.sol")
+const StateChannelModule = artifacts.require("./StateChannelModule.sol")
 const DailyLimitModule = artifacts.require("./DailyLimitModule.sol")
-const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
-const WhitelistModule = artifacts.require("./WhitelistModule.sol");
+const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol")
+const WhitelistModule = artifacts.require("./WhitelistModule.sol")
 
 const notOwnedAddress = "0x0000000000000000000000000000000000000002"
 const notOwnedAddress2 = "0x0000000000000000000000000000000000000003"
@@ -12,7 +12,7 @@ const ignoreErrors = function(promise) {
     return promise.catch(function(error){
         console.log("Failed:", error.tx || error.message)
     })
-} 
+}
 
 let getMasterCopy = async function(safe) {
     return new Promise(function (resolve, reject) {
@@ -20,7 +20,7 @@ let getMasterCopy = async function(safe) {
             if (err) return reject(err)
             resolve("0x" + resp.slice(26))
         })
-    });
+    })
 }
 
 module.exports = function(callback) {
@@ -38,7 +38,7 @@ module.exports = function(callback) {
                 console.log(masterCopy)
                 if (masterCopy == newMasterCopy) {
                     callback("no downgrade required")
-                    return;
+                    return
                 }
                 return safe.getOwners()
             })

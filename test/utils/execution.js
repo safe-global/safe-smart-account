@@ -1,19 +1,19 @@
 const utils = require('./general')
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js')
 
 const GAS_PRICE = web3.toWei(100, 'gwei')
 
 let baseGasValue = function(hexValue) {
     switch(hexValue) {
-     case "0x": return 0
-     case "00": return 4
-     default: return 68
-   };
- }
- 
+        case "0x": return 0
+        case "00": return 4
+        default: return 68
+    }
+}
+
  let estimateBaseGasCosts = function(dataString) {
     const reducer = (accumulator, currentValue) => accumulator += baseGasValue(currentValue)
- 
+
    return dataString.match(/.{2}/g).reduce(reducer, 0)
  }
 
@@ -26,7 +26,7 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
     let baseGasEstimate = estimateBaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000) + 1500 // 1500 -> hash generation costs
-    return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
+    return baseGasEstimate + 32000 // Add aditional gas costs (e.g. base tx costs, transfer costs)
 }
 
 let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, opts) {
@@ -59,7 +59,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     gasPrice = options.gasPrice || gasPrice
 
     let sigs = await signer(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
-    
+
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
@@ -70,7 +70,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     try {
         estimate = await safe.execTransaction.estimateGas(
             to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {
-                from: executor, 
+                from: executor,
                 gasPrice: options.txGasPrice || gasPrice
         })
     } catch (e) {
@@ -127,11 +127,11 @@ let deployToken = async function(deployer) {
 }
 
 let deployContract = async function(deployer, source) {
-    let output = await utils.compile(source);
+    let output = await utils.compile(source)
     let contractInterface = output.interface
     let contractBytecode = output.data
     let transactionHash = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
-    let receipt = web3.eth.getTransactionReceipt(transactionHash);
+    let receipt = web3.eth.getTransactionReceipt(transactionHash)
     const TestContract = web3.eth.contract(contractInterface)
     return TestContract.at(receipt.contractAddress)
 }
