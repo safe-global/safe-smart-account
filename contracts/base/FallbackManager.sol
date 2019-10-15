@@ -6,6 +6,10 @@ import "../common/SelfAuthorized.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract FallbackManager is SelfAuthorized {
 
+    event IncomingTransaction(
+        address from, uint256 value, bool hasData
+    );
+
     // keccak256("fallback_manager.handler.address")
     bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
 
@@ -32,6 +36,7 @@ contract FallbackManager is SelfAuthorized {
         external
         payable
     {
+        emit IncomingTransaction(msg.sender, msg.value, msg.data.length != 0);
         // Only calls without value and with data will be forwarded
         if (msg.value > 0 || msg.data.length == 0) return;
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;

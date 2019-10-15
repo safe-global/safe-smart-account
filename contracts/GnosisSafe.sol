@@ -35,7 +35,21 @@ contract GnosisSafe
     //);
     bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
-    event ExecutionFailed(bytes32 txHash);
+    // TODO: what should be indexed (8 gas per data on non-indexed => 256 gas per word VS 375 gas indexed word)
+    event ApproveHash(
+        bytes32 indexed approvedHash,
+        address indexed owner
+    );
+    event SignMsg(
+        bytes32 indexed msgHash
+    );
+    event Execution(
+        bytes32 indexed txHash, bool indexed success, address indexed to, // topics
+        uint256 value, bytes data, Enum.Operation operation
+    );
+    event ExecutionPayment(
+        address token, uint256 value
+    );
 
     uint256 public nonce;
     bytes32 public domainSeparator;
@@ -104,8 +118,32 @@ contract GnosisSafe
         bytes calldata signatures
     )
         external
-        returns (bool success)
+        returns (bool)
     {
+        bytes32 txHash = checkTransaction(
+            to, value, data, operation, // Transaction info
+            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
+            signatures
+        );
+        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        return executeTransaction(
+            txHash, to, value, data, operation, // Transaction info
+            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver // Payment info
+        );
+    }
+
+    function checkTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver,
+        bytes memory signatures
+    ) private returns (bytes32 txHash) {
         bytes memory txHashData = encodeTransactionData(
             to, value, data, operation, // Transaction info
             safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
@@ -113,16 +151,27 @@ contract GnosisSafe
         );
         // Increase nonce and execute transaction.
         nonce++;
-        checkSignatures(keccak256(txHashData), txHashData, signatures, true);
-        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        txHash = keccak256(txHashData);
+        checkSignatures(txHash, txHashData, signatures, true);
+    }
+
+    function executeTransaction(
+        bytes32 txHash,
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver
+    ) private returns (bool success) {
         uint256 gasUsed = gasleft();
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
         success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
         gasUsed = gasUsed.sub(gasleft());
-        if (!success) {
-            emit ExecutionFailed(keccak256(txHashData));
-        }
-
+        emit Execution(txHash, success, to, value, data, operation);
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
         if (gasPrice > 0) {
             handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
@@ -142,10 +191,14 @@ contract GnosisSafe
         address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
             // For ETH we will only adjust the gas price to not be higher than the actual used gas price
+            uint256 payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
             // solium-disable-next-line security/no-send
-            require(receiver.send(gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice)), "Could not pay gas costs with ether");
+            require(receiver.send(payment), "Could not pay gas costs with ether");
+            emit ExecutionPayment(gasToken, payment);
         } else {
-            require(transferToken(gasToken, receiver, gasUsed.add(baseGas).mul(gasPrice)), "Could not pay gas costs with token");
+            uint256 payment = gasUsed.add(baseGas).mul(gasPrice);
+            require(transferToken(gasToken, receiver, payment), "Could not pay gas costs with token");
+            emit ExecutionPayment(gasToken, payment);
         }
     }
 
@@ -258,6 +311,7 @@ contract GnosisSafe
     {
         require(owners[msg.sender] != address(0), "Only owners can approve a hash");
         approvedHashes[msg.sender][hashToApprove] = 1;
+        emit ApproveHash(hashToApprove, msg.sender);
     }
 
     /**
@@ -268,7 +322,9 @@ contract GnosisSafe
         external
         authorized
     {
-        signedMessages[getMessageHash(_data)] = 1;
+        bytes32 msgHash = getMessageHash(_data);
+        signedMessages[msgHash] = 1;
+        emit SignMsg(msgHash);
     }
 
     /**

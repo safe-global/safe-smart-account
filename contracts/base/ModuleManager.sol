@@ -12,6 +12,11 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     event EnabledModule(Module module);
     event DisabledModule(Module module);
+    // TODO: what should be indexed
+    event ExecutionFromModule(
+        bool indexed success, address indexed module, address indexed to, // topics
+        uint256 value, bytes data, Enum.Operation operation
+    );
 
     address public constant SENTINEL_MODULES = address(0x1);
 
@@ -72,6 +77,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
+        emit ExecutionFromModule(success, msg.sender, to, value, data, operation);
     }
 
     /// @dev Returns array of modules.
