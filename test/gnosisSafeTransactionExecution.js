@@ -1,11 +1,11 @@
 const utils = require('./utils/general')
 const safeUtils = require('./utils/execution')
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const MockContract = artifacts.require('./MockContract.sol');
-const MockToken = artifacts.require('./Token.sol');
+const MockContract = artifacts.require('./MockContract.sol')
+const MockToken = artifacts.require('./Token.sol')
 
 contract('GnosisSafe', function(accounts) {
 
@@ -43,27 +43,27 @@ contract('GnosisSafe', function(accounts) {
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        // We check executor balance here, since we should not execute failing transactions 
+        // We check executor balance here, since we should not execute failing transactions
         assert.ok(executorDiff > 0)
 
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
 
         executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
-        // We check executor balance here, since we should not execute failing transactions 
+        // We check executor balance here, since we should not execute failing transactions
         assert.ok(executorDiff > 0)
 
         // Should fail as it is over the balance (payment should still happen)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true})
 
-    });
+    })
 
     it('should deposit and withdraw 1 ETH paying with token', async () => {
-        let token = await safeUtils.deployToken(accounts[0]);
-        let executorBalance = (await token.balances(executor)).toNumber();
-        await token.transfer(gnosisSafe.address, 10000000, {from: accounts[0]});
+        let token = await safeUtils.deployToken(accounts[0])
+        let executorBalance = (await token.balances(executor)).toNumber()
+        await token.transfer(gnosisSafe.address, 10000000, {from: accounts[0]})
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, {
           gasToken: token.address
         })
@@ -76,11 +76,11 @@ contract('GnosisSafe', function(accounts) {
           gasToken: token.address, fails: true
         })
 
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0);
-        let executorDiff = (await token.balances(executor)).toNumber() - executorBalance;
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), 0)
+        let executorDiff = (await token.balances(executor)).toNumber() - executorBalance
         console.log("    Executor earned " + executorDiff + " Tokens")
-        assert.ok(executorDiff > 0);
-    });
+        assert.ok(executorDiff > 0)
+    })
 
     it('should only pay for gasprice used, up to specified for ETH', async () => {
         // Deposit 1 ETH + some spare money for execution
@@ -92,28 +92,30 @@ contract('GnosisSafe', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'increase nonce', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor)
 
         // Benchmark fees
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'benchmark fee', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor, {
+        let benchmarkExecutor = accounts[7]
+        let executorBalance = await web3.eth.getBalance(benchmarkExecutor).toNumber()
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'benchmark fee', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, benchmarkExecutor, {
             gasPrice: 10, // Signed gas price
         })
-        let benchmarkedFee = await web3.eth.getBalance(executor) - executorBalance
+        let benchmarkedFee = await web3.eth.getBalance(benchmarkExecutor) - executorBalance
         console.log("    Benchmarked transaction fee " + web3.fromWei(benchmarkedFee, 'ether') + " ETH")
 
         // Perform with higher signed gas price
-        executorBalance = await web3.eth.getBalance(executor).toNumber()
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'execute with lower gas price', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, executor, {
+        let testExecutor = accounts[6]
+        executorBalance = await web3.eth.getBalance(testExecutor).toNumber()
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'execute with lower gas price', [lw.accounts[0], lw.accounts[2]], accounts[0], 0, "0x", CALL, testExecutor, {
             gasPrice: 100, // Signed gas price
             txGasPrice: 10, // Ethereum tx gas price
         })
 
-        let expectedFee = await web3.eth.getBalance(executor) - executorBalance
+        let expectedFee = await web3.eth.getBalance(testExecutor) - executorBalance
         console.log("    Final fee with higher signed price " + web3.fromWei(expectedFee, 'ether') + " ETH")
         assert.equal(benchmarkedFee, expectedFee)
-    });
+    })
 
     it('tx.gasprice should not influence token gas price', async () => {
-        let token = await safeUtils.deployToken(accounts[0]);
-        await token.mint(gnosisSafe.address, 1000000000000, {from: accounts[0]});
+        let token = await safeUtils.deployToken(accounts[0])
+        await token.mint(gnosisSafe.address, 1000000000000, {from: accounts[0]})
 
         // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
@@ -145,7 +147,7 @@ contract('GnosisSafe', function(accounts) {
         let expectedFee = (await token.balances(executor)).toNumber() - executorBalance
         console.log("    Final fee with higher signed price " + expectedFee + " Tokens")
         assert.equal(benchmarkedFee, expectedFee)
-    });
+    })
 
     it('should fail if overflow in payment', async () => {
         // Deposit 1 ETH + some spare money for execution
@@ -154,7 +156,7 @@ contract('GnosisSafe', function(accounts) {
         assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0.6, 'ether'))
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
-        
+
         let gasPrice = (new BigNumber('2')).pow(256).div(80000).toNumber()
 
         // Should revert as we have an overflow (no message, as SafeMath doesn't support messages yet)
@@ -163,31 +165,31 @@ contract('GnosisSafe', function(accounts) {
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
         assert.ok(executorDiff == 0)
-    });
+    })
 
     it('should fail when depositing 0.5 ETH paying with token due to token transfer fail', async () => {
-        let mockContract = await MockContract.new();
-        let mockToken = MockToken.at(mockContract.address);
-        await mockContract.givenAnyRevert();
+        let mockContract = await MockContract.new()
+        let mockToken = MockToken.at(mockContract.address)
+        await mockContract.givenAnyRevert()
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.5, 'ether')})
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer is reverted"
-        );
+        )
 
-        await mockContract.givenAnyRunOutOfGas();
+        await mockContract.givenAnyRunOutOfGas()
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer is out of gas"
-        );
+        )
 
-        await mockContract.givenAnyReturnBool(false);
+        await mockContract.givenAnyReturnBool(false)
         await utils.assertRejects(
             safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { gasToken: mockToken.address }),
             "Transaction should fail if the ERC20 token transfer returns false"
-        );
+        )
         //check if the safe's balance is still 0.5 ETH
-        assert.equal(web3.fromWei(await web3.eth.getBalance(gnosisSafe.address), 'ether').toString(), '0.5');
+        assert.equal(web3.fromWei(await web3.eth.getBalance(gnosisSafe.address), 'ether').toString(), '0.5')
 
-    });
+    })
 })
