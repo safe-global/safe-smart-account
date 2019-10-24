@@ -5,7 +5,6 @@ const GAS_PRICE = web3.toWei(100, 'gwei')
 
 let baseGasValue = function(hexValue) {
     // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
-    // TODO: this should include the event costs
     switch(hexValue) {
         case "0x": return 0
         case "00": return 4
