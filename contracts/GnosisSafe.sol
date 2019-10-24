@@ -35,7 +35,6 @@ contract GnosisSafe
     //);
     bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
-    // TODO: what should be indexed (8 gas per data on non-indexed => 256 gas per word VS 375 gas indexed word)
     event ApproveHash(
         bytes32 indexed approvedHash,
         address indexed owner
