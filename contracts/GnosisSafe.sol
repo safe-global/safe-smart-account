@@ -18,7 +18,7 @@ contract GnosisSafe
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
@@ -43,12 +43,11 @@ contract GnosisSafe
     event SignMsg(
         bytes32 indexed msgHash
     );
-    event Execution(
-        bytes32 indexed txHash, bool indexed success, address indexed to, // topics
-        uint256 value, bytes data, Enum.Operation operation
+    event ExecutionFailure(
+        bytes32 txHash, uint256 payment
     );
-    event ExecutionPayment(
-        address token, uint256 value
+    event ExecutionSuccess(
+        bytes32 txHash, uint256 payment
     );
 
     uint256 public nonce;
@@ -171,11 +170,13 @@ contract GnosisSafe
         // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
         success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
         gasUsed = gasUsed.sub(gasleft());
-        emit Execution(txHash, success, to, value, data, operation);
         // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
+        uint256 payment = 0;
         if (gasPrice > 0) {
-            handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+            payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
         }
+        if (success) emit ExecutionSuccess(txHash, payment);
+        else emit ExecutionFailure(txHash, payment);
     }
 
     function handlePayment(
@@ -186,19 +187,18 @@ contract GnosisSafe
         address payable refundReceiver
     )
         private
+        returns (uint256 payment)
     {
         // solium-disable-next-line security/no-tx-origin
         address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
             // For ETH we will only adjust the gas price to not be higher than the actual used gas price
-            uint256 payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
+            payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
             // solium-disable-next-line security/no-send
             require(receiver.send(payment), "Could not pay gas costs with ether");
-            emit ExecutionPayment(gasToken, payment);
         } else {
-            uint256 payment = gasUsed.add(baseGas).mul(gasPrice);
+            payment = gasUsed.add(baseGas).mul(gasPrice);
             require(transferToken(gasToken, receiver, payment), "Could not pay gas costs with token");
-            emit ExecutionPayment(gasToken, payment);
         }
     }
 
