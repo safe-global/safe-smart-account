@@ -7,7 +7,7 @@ const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
 
-contract('GnosisSafe', function(accounts) {
+contract('GnosisSafe owner and module management', function(accounts) {
 
     let gnosisSafe
     let gnosisSafeMasterCopy

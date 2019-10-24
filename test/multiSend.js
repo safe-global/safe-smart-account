@@ -135,9 +135,9 @@ contract('MultiSend', function(accounts) {
             await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
-            'Execution', gnosisSafe.address, true, 'execTransaction send multiple transactions'
+            'ExecutionFailure', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )
-        assert.equal(false, event.args.success)
+        assert.equal(0, event.args.payment)
     })
 
     it('single fail should fail all', async () => {
@@ -160,9 +160,9 @@ contract('MultiSend', function(accounts) {
             await gnosisSafe.execTransaction(
                 multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, sigs
             ),
-            'Execution', gnosisSafe.address, true, 'execTransaction send multiple transactions'
+            'ExecutionFailure', gnosisSafe.address, true, 'execTransaction send multiple transactions'
         )
-        assert.equal(false, event.args.success)
+        assert.equal(0, event.args.payment)
         assert.equal(await gnosisSafe.getThreshold(), 1)
     })
 })
