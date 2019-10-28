@@ -23,7 +23,7 @@ contract('GnosisSafe', function(accounts) {
         gnosisSafe.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
     })
 
-    it.only('Check that correct data is returned', async () => {
+    it('Check that correct data is returned', async () => {
         // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})

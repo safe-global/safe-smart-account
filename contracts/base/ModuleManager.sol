@@ -87,12 +87,10 @@ contract ModuleManager is SelfAuthorized, Executor {
         public
         returns (bool success, bytes memory returnData)
     {
-        // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
-        // Execute transaction without further confirmations.
-        success = execute(to, value, data, operation, gasleft());
+        success = execTransactionFromModule(to, value, data, operation);
         // solium-disable-next-line security/no-inline-assembly
         assembly {
+            // Load free memory location
             let ptr := mload(0x40)
             // We need to memory to store the data + the size
             mstore(0x40, add(ptr, add(returndatasize(), 0x20)))
