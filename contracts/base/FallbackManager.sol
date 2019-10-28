@@ -6,6 +6,8 @@ import "../common/SelfAuthorized.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract FallbackManager is SelfAuthorized {
 
+    event IncomingTransaction(address from, uint256 value);
+
     // keccak256("fallback_manager.handler.address")
     bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
 
@@ -33,7 +35,10 @@ contract FallbackManager is SelfAuthorized {
         payable
     {
         // Only calls without value and with data will be forwarded
-        if (msg.value > 0 || msg.data.length == 0) return;
+        if (msg.value > 0 || msg.data.length == 0) {
+            emit IncomingTransaction(msg.sender, msg.value);
+            return;
+        }
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         address handler;
         // solium-disable-next-line security/no-inline-assembly
