@@ -78,6 +78,33 @@ contract ModuleManager is SelfAuthorized, Executor {
         else emit ExecutionFromModuleFailure(msg.sender);
     }
 
+    /// @dev Allows a Module to execute a Safe transaction without any further confirmations and return data
+    /// @param to Destination address of module transaction.
+    /// @param value Ether value of module transaction.
+    /// @param data Data payload of module transaction.
+    /// @param operation Operation type of module transaction.
+    function execTransactionFromModuleReturnData(address to, uint256 value, bytes memory data, Enum.Operation operation)
+        public
+        returns (bool success, bytes memory returnData)
+    {
+        // Only whitelisted modules are allowed.
+        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
+        // Execute transaction without further confirmations.
+        success = execute(to, value, data, operation, gasleft());
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            let ptr := mload(0x40)
+            // We need to memory to store the data + the size
+            mstore(0x40, add(ptr, add(returndatasize(), 0x20)))
+            // Store the size
+            mstore(ptr, returndatasize())
+            // Store the data
+            returndatacopy(add(ptr, 0x20), 0, returndatasize())
+            // Point the return data to the correct memory location
+            returnData := ptr
+        }
+    }
+
     /// @dev Returns array of modules.
     /// @return Array of modules.
     function getModules()
