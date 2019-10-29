@@ -84,7 +84,7 @@
     "yargs": "^16.1.1"
   },
   "peerDependencies": {
-    "ethers": "^5.1.4"
+    "ethers": "^5.1.4"},
   "dependencies": {
     "openzeppelin-solidity": "^2.0.0",
     "solc": "^0.5.9",
