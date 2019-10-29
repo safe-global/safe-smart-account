@@ -1,8 +1,8 @@
 {
-  "name": "@gnosis.pm/safe-contracts",
-  "version": "1.1.1",
-  "description": "Ethereum multisig contract",
-  "homepage": "https://github.com/gnosis/safe-contracts/",
+  "name": "@circles/safe-contracts",
+  "version": "1.0.1",
+  "description": "Circles UBI fork of Gnosis Safe Ethereum multisig contract",
+  "homepage": "https://github.com/circlesUBI/safe-contracts/",
   "license": "GPL-3.0",
   "main": "index.js",
   "files": [
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gnosis/gnosis-safe.git"
+    "url": "git+https://github.com/circlesUBI/safe-contracts.git"
   },
   "keywords": [
     "Ethereum",
@@ -31,8 +31,11 @@
   ],
   "author": "stefan@gnosis.pm",
   "bugs": {
-    "url": "https://github.com/gnosis/gnosis-safe/issues"
+    "url": "https://github.com/CirclesUBI/safe-contracts/issues"
   },
+  "contributors": [
+    "Sarah Friend (https://github.com/ana0)"
+  ],
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
     "@gnosis.pm/mock-contract": "github:gnosis/mock-contract#sol_0_5_0",

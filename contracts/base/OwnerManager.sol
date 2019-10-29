@@ -39,6 +39,7 @@ contract OwnerManager is SelfAuthorized {
             require(owners[owner] == address(0), "Duplicate owner address provided");
             owners[currentOwner] = owner;
             currentOwner = owner;
+            emit AddedOwner(owner);
         }
         owners[currentOwner] = SENTINEL_OWNERS;
         ownerCount = _owners.length;
