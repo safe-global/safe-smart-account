@@ -1,8 +1,8 @@
 {
-  "name": "@gnosis.pm/safe-contracts",
+  "name": "@circles/safe-contracts",
   "version": "1.3.0",
-  "description": "Ethereum multisig contract",
-  "homepage": "https://github.com/gnosis/safe-contracts/",
+  "description": "Circles UBI fork of Gnosis Safe Ethereum multisig contract",
+  "homepage": "https://github.com/circlesUBI/safe-contracts/",
   "license": "GPL-3.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gnosis/gnosis-safe.git"
+    "url": "git+https://github.com/circlesUBI/safe-contracts.git"
   },
   "keywords": [
     "Ethereum",
@@ -41,8 +41,11 @@
   ],
   "author": "stefan@gnosis.pm",
   "bugs": {
-    "url": "https://github.com/gnosis/gnosis-safe/issues"
+    "url": "https://github.com/CirclesUBI/safe-contracts/issues"
   },
+  "contributors": [
+    "Sarah Friend (https://github.com/ana0)"
+  ],
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^4.0.0",
     "@gnosis.pm/safe-singleton-factory": "^1.0.3",
@@ -82,5 +85,9 @@
   },
   "peerDependencies": {
     "ethers": "^5.1.4"
+  "dependencies": {
+    "openzeppelin-solidity": "^2.0.0",
+    "solc": "^0.5.9",
+    "truffle-hdwallet-provider": "0.0.7-beta.1"
   }
 }
