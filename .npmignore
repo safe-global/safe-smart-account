@@ -1,0 +1,6 @@
+.git*
+.eslint*
+node_modules/
+*.yml
+*.txt
+*.swp
