@@ -10,7 +10,7 @@ const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
 
-contract('GnosisSafe via create2', function(accounts) {
+contract('GnosisSafe deployment via create2', function(accounts) {
 
     const CALL = 0
 
@@ -78,7 +78,7 @@ contract('GnosisSafe via create2', function(accounts) {
         // Estimate safe creation costs
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         let creationNonce = new Date().getTime()
-        let estimate = (await proxyFactory.createProxyWithNonce.estimateGas(gnosisSafeMasterCopy.address, gnosisSafeData, creationNonce)) + 9000
+        let estimate = (await proxyFactory.createProxyWithNonce.estimateGas(gnosisSafeMasterCopy.address, gnosisSafeData, creationNonce)) + 14000
         let creationData = await getCreationData(0, estimate * gasPrice, creationNonce)
 
         // User funds safe

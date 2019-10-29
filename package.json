@@ -18,7 +18,7 @@
     "preversion": "npm run restore",
     "truffle-zos-merge": "node scripts/merge_zos.js",
     "restore": "rm -rf build && npx truffle compile && npm run truffle-zos-merge && npx tnt cB",
-    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.7"
+    "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.11"
   },
   "repository": {
     "type": "git",
