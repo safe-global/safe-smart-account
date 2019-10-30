@@ -92,8 +92,8 @@ contract ModuleManager is SelfAuthorized, Executor {
         assembly {
             // Load free memory location
             let ptr := mload(0x40)
-            // We allocate memory for the return data by setting the free memory lacation to
-            // current free memory position + data size + 32 bytes for data size value
+            // We allocate memory for the return data by setting the free memory location to
+            // current free memory location + data size + 32 bytes for data size value
             mstore(0x40, add(ptr, add(returndatasize(), 0x20)))
             // Store the size
             mstore(ptr, returndatasize())
