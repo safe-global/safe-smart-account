@@ -5,6 +5,7 @@ const abi = require('ethereumjs-abi')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const Proxy = artifacts.require("./Proxy.sol")
+const ProxyInterface = artifacts.require("./IProxy.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
@@ -59,6 +60,8 @@ contract('GnosisSafe deployment via create2', function(accounts) {
 
       console.log("    Deployed safe address: " + safeAddress)
       assert.equal(estimatedAddress, safeAddress)
+      let proxy = ProxyInterface.at(safeAddress)
+      assert.equal(await proxy.masterCopy(), gnosisSafeMasterCopy.address)
     }
 
     beforeEach(async function () {

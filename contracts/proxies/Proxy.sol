@@ -1,5 +1,10 @@
 pragma solidity >=0.5.0 <0.7.0;
 
+/// @title IProxy - Helper interface to access masterCopy of the Proxy on-chain
+/// @author Richard Meissner - <richard@gnosis.io>
+interface IProxy {
+    function masterCopy() external view returns (address);
+}
 
 /// @title Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
 /// @author Stefan George - <stefan@gnosis.io>
@@ -27,6 +32,11 @@ contract Proxy {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
+            // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
+            if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
+                mstore(0, masterCopy)
+                return(0, 0x20)
+            }
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas, masterCopy, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
