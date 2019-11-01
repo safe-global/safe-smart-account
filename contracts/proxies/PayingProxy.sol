@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 import "../common/SecuredTokenTransfer.sol";
 import "./DelegateConstructorProxy.sol";
 
