@@ -4,7 +4,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafe Without Refund', function(accounts) {
+contract('GnosisSafe without refund', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]

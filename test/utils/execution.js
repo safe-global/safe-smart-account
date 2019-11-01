@@ -4,6 +4,7 @@ const BigNumber = require('bignumber.js')
 const GAS_PRICE = web3.toWei(100, 'gwei')
 
 let baseGasValue = function(hexValue) {
+    // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
     switch(hexValue) {
         case "0x": return 0
         case "00": return 4
@@ -18,6 +19,7 @@ let baseGasValue = function(hexValue) {
  }
 
 let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, gasToken, refundReceiver, signatureCount, nonce) {
+    // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
     // numbers < 256 are 192 -> 31 * 4 + 68
     // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and baseGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
@@ -25,8 +27,10 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
-    let baseGasEstimate = estimateBaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000) + 1500 // 1500 -> hash generation costs
-    return baseGasEstimate + 32000 // Add aditional gas costs (e.g. base tx costs, transfer costs)
+    let baseGasEstimate = estimateBaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
+    baseGasEstimate += 1500 // 1500 -> hash generation costs
+    baseGasEstimate += 1000 // 1000 -> Event emission
+    return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
 }
 
 let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, opts) {
@@ -34,6 +38,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let txFailed = options.fails || false
     let txGasToken = options.gasToken || 0
     let refundReceiver = options.refundReceiver || 0
+    let extraGas = options.extraGas || 0
 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
@@ -49,7 +54,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     }
     let nonce = await safe.nonce()
 
-    let baseGasEstimate = estimateBaseGas(safe, to, value, data, operation, txGasEstimate, txGasToken, refundReceiver, accounts.length, nonce)
+    let baseGasEstimate = estimateBaseGas(safe, to, value, data, operation, txGasEstimate, txGasToken, refundReceiver, accounts.length, nonce) + extraGas
     console.log("    Base Gas estimate: " + baseGasEstimate)
 
     let gasPrice = GAS_PRICE
@@ -86,10 +91,16 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let tx = await safe.execTransaction(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + txGasEstimate + 10000, gasPrice: options.txGasPrice || gasPrice}
     )
-    let events = utils.checkTxEvent(tx, 'ExecutionFailed', safe.address, txFailed, subject)
-    if (txFailed) {
-        let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
-        assert.equal(transactionHash, events.args.txHash)
+    let eventName = (txFailed) ? 'ExecutionFailure' : 'ExecutionSuccess'
+    let event = utils.checkTxEvent(tx, eventName, safe.address, true, subject)
+    let transactionHash = await safe.getTransactionHash(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
+    assert.equal(transactionHash, event.args.txHash)
+    if (txGasEstimate > 0) {
+        let maxPayment = (baseGasEstimate + txGasEstimate) * gasPrice
+        console.log("    User paid", event.args.payment.toNumber(), "after signing a maximum of", maxPayment)
+        assert.ok(maxPayment >= event.args.payment, "Should not pay more than signed")
+    } else {
+        console.log("    User paid", event.args.payment.toNumber())
     }
     return tx
 }
