@@ -22,8 +22,9 @@ contract SecuredTokenTransfer {
         assembly {
             let success := call(sub(gas, 10000), token, 0, add(data, 0x20), mload(data), 0, 0)
             let ptr := mload(0x40)
-            returndatacopy(ptr, 0, returndatasize)
-            switch returndatasize
+            mstore(0x40, add(ptr, returndatasize()))
+            returndatacopy(ptr, 0, returndatasize())
+            switch returndatasize()
             case 0 { transferred := success }
             case 0x20 { transferred := iszero(or(iszero(success), iszero(mload(ptr)))) }
             default { transferred := 0 }
