@@ -116,66 +116,34 @@ contract GnosisSafe
         bytes calldata signatures
     )
         external
-        returns (bool)
+        returns (bool success)
     {
-        bytes32 txHash = checkTransaction(
-            to, value, data, operation, // Transaction info
-            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
-            signatures
-        );
-        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
-        return executeTransaction(
-            txHash, to, value, data, operation, // Transaction info
-            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver // Payment info
-        );
-    }
-
-    function checkTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address payable refundReceiver,
-        bytes memory signatures
-    ) private returns (bytes32 txHash) {
-        bytes memory txHashData = encodeTransactionData(
-            to, value, data, operation, // Transaction info
-            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
-            nonce
-        );
-        // Increase nonce and execute transaction.
-        nonce++;
-        txHash = keccak256(txHashData);
-        checkSignatures(txHash, txHashData, signatures, true);
-    }
-
-    function executeTransaction(
-        bytes32 txHash,
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address payable refundReceiver
-    ) private returns (bool success) {
-        uint256 gasUsed = gasleft();
-        // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
-        success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
-        gasUsed = gasUsed.sub(gasleft());
-        // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
-        uint256 payment = 0;
-        if (gasPrice > 0) {
-            payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+        bytes32 txHash;
+        {
+            bytes memory txHashData = encodeTransactionData(
+                to, value, data, operation, // Transaction info
+                safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
+                nonce
+            );
+            // Increase nonce and execute transaction.
+            nonce++;
+            txHash = keccak256(txHashData);
+            checkSignatures(txHash, txHashData, signatures, true);
         }
-        if (success) emit ExecutionSuccess(txHash, payment);
-        else emit ExecutionFailure(txHash, payment);
+        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        {
+            uint256 gasUsed = gasleft();
+            // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
+            success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
+            gasUsed = gasUsed.sub(gasleft());
+            // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
+            uint256 payment = 0;
+            if (gasPrice > 0) {
+                payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+            }
+            if (success) emit ExecutionSuccess(txHash, payment);
+            else emit ExecutionFailure(txHash, payment);
+        }
     }
 
     function handlePayment(
