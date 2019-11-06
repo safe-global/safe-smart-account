@@ -168,7 +168,7 @@
   },
   "solidityLibs": {},
   "proxies": {},
-  "zosversion": "2.2",
+  "manifestVersion": "2.2",
   "version": "1.0.0",
   "app": {
     "address": "0x61cBcc8Dd29e1e5abd0dD821E382FCe225CdA0b2"

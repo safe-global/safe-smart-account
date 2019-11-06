@@ -1,5 +1,7 @@
 const HDWalletProvider = require('truffle-hdwallet-provider')
 
+require('dotenv').config()
+
 const mnemonic = process.env.MNEMONIC
 const token = process.env.INFURA_TOKEN
 

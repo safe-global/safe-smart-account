@@ -6,34 +6,34 @@ const path = require('path')
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
-zosFiles = [
+ozFiles = [
   {
     networkID: 1,
-    fileName: path.join(__dirname, "../zos.mainnet.json")
+    fileName: path.join(__dirname, "../.openzeppelin/mainnet.json")
   },
   {
     networkID: 4,
-    fileName: path.join(__dirname, "../zos.rinkeby.json")
+    fileName: path.join(__dirname, "../.openzeppelin/rinkeby.json")
   },
   {
     networkID: 42,
-    fileName: path.join(__dirname, "../zos.kovan.json")
+    fileName: path.join(__dirname, "../.openzeppelin/kovan.json")
   },
   {
     networkID: 5,
-    fileName: path.join(__dirname, "../zos.goerli.json")
+    fileName: path.join(__dirname, "../.openzeppelin/goerli.json")
   }
 ]
 
 async function processAll(){
-  for (let zosFile of zosFiles){
-    const zosNetworkFileJson = JSON.parse(fs.readFileSync(zosFile.fileName))
+  for (let ozFile of ozFiles){
+    const ozNetworkFileJson = JSON.parse(fs.readFileSync(ozFile.fileName))
   
     
-    for (let name of Object.keys(zosNetworkFileJson.contracts)){
-      var contract = zosNetworkFileJson.contracts[name]
+    for (let name of Object.keys(ozNetworkFileJson.contracts)){
+      var contract = ozNetworkFileJson.contracts[name]
       var contractName = name
-      await injectNetwork(contractName, zosFile.networkID, contract.address)
+      await injectNetwork(contractName, ozFile.networkID, contract.address)
     }
   }
 }
