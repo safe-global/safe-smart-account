@@ -92,6 +92,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
+- [by G0 Group](docs/audit_1_1_0.md)
 - [by Runtime Verification](docs/rv_1_0_0.md)
 - [by Alexey Akhunov](docs/alexey_audit.md)
 
