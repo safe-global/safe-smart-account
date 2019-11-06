@@ -1,11 +1,11 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A",
-      "constructorCode": "608060405234801561001057600080fd5b50615e9380620000216000396000f3fe",
-      "bodyBytecodeHash": "5bb2743e521347994660ec020cb56c8b1189728d902a09ec554592cc3dadc24c",
-      "localBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
-      "deployedBytecodeHash": "1482584f53f473bd5e19825603457415145df0240984cd22209da6f04450efa8",
+      "address": "0xacF5Efe28B6a2A48459e7970B8754Cf26FB265C5",
+      "constructorCode": "608060405234801561001057600080fd5b50615f7980620000216000396000f3fe",
+      "bodyBytecodeHash": "a96dc0a35132f4714dff546b3ff4393c54d744f9ac95198de358f4ef4a82f8b7",
+      "localBytecodeHash": "c7ff033f2d591a46cd468c51930c868d7e9f10b90782f7a62bbeb379f536e374",
+      "deployedBytecodeHash": "c7ff033f2d591a46cd468c51930c868d7e9f10b90782f7a62bbeb379f536e374",
       "types": {
         "t_address": {
           "id": "t_address",
@@ -40,73 +40,73 @@
           "contract": "MasterCopy",
           "path": "contracts/common/MasterCopy.sol",
           "label": "masterCopy",
-          "astId": 1760,
+          "astId": 1995,
           "type": "t_address",
-          "src": "465:18:8"
+          "src": "617:18:9"
         },
         {
           "contract": "ModuleManager",
           "path": "contracts/base/ModuleManager.sol",
           "label": "modules",
-          "astId": 990,
+          "astId": 1184,
           "type": "t_mapping<t_address>",
-          "src": "550:45:4"
+          "src": "682:45:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "owners",
-          "astId": 1299,
+          "astId": 1531,
           "type": "t_mapping<t_address>",
-          "src": "480:43:5"
+          "src": "488:43:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "ownerCount",
-          "astId": 1301,
+          "astId": 1533,
           "type": "t_uint256",
-          "src": "529:18:5"
+          "src": "537:18:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "threshold",
-          "astId": 1303,
+          "astId": 1535,
           "type": "t_uint256",
-          "src": "553:26:5"
+          "src": "561:26:6"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "nonce",
-          "astId": 41,
+          "astId": 65,
           "type": "t_uint256",
-          "src": "1557:20:0"
+          "src": "1953:20:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "domainSeparator",
-          "astId": 43,
+          "astId": 67,
           "type": "t_bytes32",
-          "src": "1583:30:0"
+          "src": "1979:30:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "signedMessages",
-          "astId": 47,
+          "astId": 71,
           "type": "t_mapping<t_uint256>",
-          "src": "1716:49:0"
+          "src": "2112:49:0"
         },
         {
           "contract": "GnosisSafe",
           "path": "contracts/GnosisSafe.sol",
           "label": "approvedHashes",
-          "astId": 53,
+          "astId": 77,
           "type": "t_mapping<t_uint256>",
-          "src": "1876:69:0"
+          "src": "2272:69:0"
         }
       ],
       "warnings": {
@@ -114,15 +114,17 @@
         "hasSelfDestruct": false,
         "hasDelegateCall": false,
         "hasInitialValuesInDeclarations": false,
-        "uninitializedBaseContracts": []
+        "uninitializedBaseContracts": [],
+        "storageUncheckedVars": [],
+        "storageDiff": []
       }
     },
     "ProxyFactory": {
-      "address": "0x12302fE9c02ff50939BaAaaf415fc226C078613C",
-      "constructorCode": "608060405234801561001057600080fd5b506108c4806100206000396000f3fe",
-      "bodyBytecodeHash": "032bd258d3d8422922b15844fb7a1e00c1bc6a43129b35e11800f47d5393bfb4",
-      "localBytecodeHash": "e46cea57f8a9112825fe7e52fd61c95aa8f3a6aa7a7d912271413a9bcbc16d66",
-      "deployedBytecodeHash": "e46cea57f8a9112825fe7e52fd61c95aa8f3a6aa7a7d912271413a9bcbc16d66",
+      "address": "0xD08f094C9628143e8923d50b8548ff874e1c5E19",
+      "constructorCode": "608060405234801561001057600080fd5b50610c32806100206000396000f3fe",
+      "bodyBytecodeHash": "8bd934867fb25fb87f24d35efc1a2e5bce7057816188a2debbd17738f3fb6a7c",
+      "localBytecodeHash": "104443e30cf4d697e4347eea9edb4e3c554556f6d896c24a9a07283b2d1d0bb6",
+      "deployedBytecodeHash": "104443e30cf4d697e4347eea9edb4e3c554556f6d896c24a9a07283b2d1d0bb6",
       "types": {},
       "storage": [],
       "warnings": {
@@ -134,11 +136,11 @@
       }
     },
     "MultiSend": {
-      "address": "0xD4B7B161E4779629C2717385114Bf78D612aEa72",
-      "constructorCode": "608060405234801561001057600080fd5b506101c8806100206000396000f3fe",
-      "bodyBytecodeHash": "58eba12a004b48496cb944b7b298706b494b8be2860cd3dfe09680782f137695",
-      "localBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
-      "deployedBytecodeHash": "6d7ca04270952b10d6bfedd61779fd066ebe62137c396bba5520b774cef03ae4",
+      "address": "0xF29429c734c296B63862B8D48e1A5F85FcE23DCA",
+      "constructorCode": "608060405234801561001057600080fd5b506101ac806100206000396000f3fe",
+      "bodyBytecodeHash": "61000d9792cd23d299f2c5bdbf174c4c30abee279c17a636bf62ffd0f3c7b209",
+      "localBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
+      "deployedBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
       "types": {},
       "storage": [],
       "warnings": {
@@ -150,11 +152,27 @@
       }
     },
     "CreateAndAddModules": {
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "constructorCode": "608060405234801561001057600080fd5b506102e2806100206000396000f3fe",
-      "bodyBytecodeHash": "3f1bef8e42a5176d17fd5ee15e86baed6de4d458520547043900628174ab7011",
-      "localBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
-      "deployedBytecodeHash": "c7d3d295d98039fc0b0401490d4e3a131ca6004645161018f5780f6e62ce54d3",
+      "address": "0x4c3D29293DAF5D91aC9207e221B0B1Efda0151D2",
+      "constructorCode": "608060405234801561001057600080fd5b5061029f806100206000396000f3fe",
+      "bodyBytecodeHash": "7bf47ddf97182d5c8d389b472859f170d6ebf8136a54d0e7dd2d2ede97c115e7",
+      "localBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
+      "deployedBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "CreateCall": {
+      "address": "0xD4ec54Ced8d68B3f09c3622883891994e9c94E46",
+      "constructorCode": "608060405234801561001057600080fd5b506104b6806100206000396000f3fe",
+      "bodyBytecodeHash": "a7bb8a89f35728244168946e103641d68e35bcf13fb76c11f0e61d1e7e3310fe",
+      "localBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
+      "deployedBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
       "types": {},
       "storage": [],
       "warnings": {
@@ -169,7 +187,7 @@
   "solidityLibs": {},
   "proxies": {},
   "manifestVersion": "2.2",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "app": {
     "address": "0x3c47F9098F9e7C6ea942f8A8D8ba8bcCA03a958d"
   },
@@ -177,7 +195,7 @@
     "address": "0x304ee2F5077593b052c5F3A1266e87E029686EF2"
   },
   "provider": {
-    "address": "0x2840e535bd6e3182CFEE7b2bc1633473F46858Cd"
+    "address": "0xe824293bbb563F4Cd79dec40e1119EEf3D3348af"
   },
   "frozen": false
 }

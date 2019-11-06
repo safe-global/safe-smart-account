@@ -33,12 +33,14 @@ Preparation:
 OpenZeppelin SDK:
 - Make sure that @openzeppelin/cli is version 2.5 (`npx oz --version`)
 - Make sure that all dependencies use solcjs >0.5.0
+- Set correct version in `package.json`
 - Set `MNEMONIC` in `.env` to current oz package owner (last deployer normally)
 - Optional: if a new deployer account is used
   - Check that a gloabl versionb of truffle 5 is installed (`truffle version`)
   - Run `truffle exec scripts/change_oz_owner.js --network=<network> --newOwner="<address>"` to enable new deployer
   - Set `MNEMONIC` in `.env` to new oz package owner
 - Run `npm run deploy-oz`
+- Once deployed on all networks run `npx oz --freeze <network>` for each network
 
 Truffle:
 - Set `MNEMONIC` in `.env`
