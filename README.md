@@ -60,6 +60,7 @@ solidity_flattener contracts/GnosisSafe.sol --output build/flattened_contracts/G
 solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="/=/"
 solidity_flattener contracts/libraries/CreateCall.sol --output build/flattened_contracts/CreateCall.sol --solc-paths="/=/"
 solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="/=/"
+solidity_flattener contracts/handler/DefaultCallbackHandler.sol --output build/flattened_contracts/DefaultCallbackHandler.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="/=/"

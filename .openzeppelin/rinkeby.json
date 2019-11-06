@@ -180,6 +180,22 @@
         "hasInitialValuesInDeclarations": false,
         "uninitializedBaseContracts": []
       }
+    },
+    "DefaultCallbackHandler": {
+      "address": "0xbf49b56C42D6Ec25A5e29C43D9D1E9219a9e6A34",
+      "constructorCode": "608060405234801561001057600080fd5b50610781806100206000396000f3fe",
+      "bodyBytecodeHash": "8ab569ad44853b3521b650f817e533a66b341c014294b2bcf1fc575cf8c3529d",
+      "localBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",
+      "deployedBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
     }
   },
   "solidityLibs": {},

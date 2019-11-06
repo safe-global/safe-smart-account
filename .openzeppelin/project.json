@@ -5,7 +5,8 @@
     "ProxyFactory": "ProxyFactory",
     "MultiSend": "MultiSend",
     "CreateAndAddModules": "CreateAndAddModules",
-    "CreateCall": "CreateCall"
+    "CreateCall": "CreateCall",
+    "DefaultCallbackHandler": "DefaultCallbackHandler"
   },
   "dependencies": {},
   "name": "@gnosis.pm/safe-contracts",
