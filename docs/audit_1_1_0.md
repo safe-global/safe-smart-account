@@ -2,7 +2,7 @@
 
 ##### Auditor
 * Adam Kolar (@adamkolar)
-* Nick Errant (@NickErrant)
+* Nick Munoz-McDonald (@NickErrant)
 
 ##### Notes
 The audit report was based on commit [b13ae529861edf57003e238065f6d553ed595dd7](https://github.com/gnosis/safe-contracts/commit/b13ae529861edf57003e238065f6d553ed595dd7)
