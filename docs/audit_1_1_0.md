@@ -1,7 +1,7 @@
 ### Audit Results
 
 ##### Auditor
-* Adam Kolar (@adamkolar)
+* Adam Kolář (@adamkolar)
 * Nick Munoz-McDonald (@NickErrant)
 
 ##### Notes
