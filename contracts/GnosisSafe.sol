@@ -119,6 +119,7 @@ contract GnosisSafe
         returns (bool success)
     {
         bytes32 txHash;
+        // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             bytes memory txHashData = encodeTransactionData(
                 to, value, data, operation, // Transaction info
@@ -131,6 +132,7 @@ contract GnosisSafe
             checkSignatures(txHash, txHashData, signatures, true);
         }
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
             // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
