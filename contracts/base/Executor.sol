@@ -6,8 +6,6 @@ import "../common/Enum.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract Executor {
 
-    event ContractCreation(address newContract);
-
     function execute(address to, uint256 value, bytes memory data, Enum.Operation operation, uint256 txGas)
         internal
         returns (bool success)
