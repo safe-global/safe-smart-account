@@ -181,8 +181,12 @@ contract GnosisSafe
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
     {
+        // Load threshold to avoid multiple storage loads
+        uint256 _threshold = threshold;
+        // Check that a threshold is set
+        require(_threshold > 0, "Threshold needs to be defined!");
         // Check that the provided signature data is not too short
-        require(signatures.length >= threshold.mul(65), "Signatures data too short");
+        require(signatures.length >= _threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -190,7 +194,7 @@ contract GnosisSafe
         bytes32 r;
         bytes32 s;
         uint256 i;
-        for (i = 0; i < threshold; i++) {
+        for (i = 0; i < _threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             // If v is 0 then it is a contract signature
             if (v == 0) {
@@ -200,7 +204,7 @@ contract GnosisSafe
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
+                require(uint256(s) >= _threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
                 require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
