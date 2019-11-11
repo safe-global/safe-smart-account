@@ -1,13 +1,10 @@
 const utils = require('./utils/general')
-const safeUtils = require('./utils/execution')
-const BigNumber = require('bignumber.js')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 
-contract('GnosisSafe owner and module management', function(accounts) {
+contract('GnosisSafe setup', function(accounts) {
 
     let gnosisSafe
-    let lw
     let executor = accounts[8]
 
     const CALL = 0
