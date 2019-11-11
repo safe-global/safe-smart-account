@@ -1,11 +1,18 @@
 ### Audit Results
 
 ##### Auditor
-* Adam Kolář (@adamkolar)
-* Nick Munoz-McDonald (@NickErrant)
+* G0 Group (https://github.com/g0-group)
+  * Adam Kolář (@adamkolar)
+  * Nick Munoz-McDonald (@NickErrant)
 
 ##### Notes
-The audit report was based on commit [0941fef007c2d9cb6a37e4b9fca5b7e65a486a44](https://github.com/gnosis/safe-contracts/commit/0941fef007c2d9cb6a37e4b9fca5b7e65a486a44)
+All changes until commit [78494bcdbc61b3db52308a25f0556c42cf6
+56ab1​](https://github.com/gnosis/safe-contracts/commit/78494bcdbc61b3db52308a25f0556c42cf6
+56ab1​) have been audited.
+
+The audit was initially performed on commit [1a9e5ce768e134c556770ea50e114fd836
+66b8a8​](https://github.com/gnosis/safe-contracts/commit/1a9e5ce768e134c556770ea50e114fd836
+66b8a8​)
 
 ##### Files
 * [Audit Report](Gnosis_Safe_Audit_Report_1_1_0.pdf)

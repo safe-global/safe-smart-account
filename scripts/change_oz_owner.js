@@ -23,6 +23,7 @@ const transferOwner = async function (address, newOwner) {
   return await contract.methods
     .transferOwnership(newOwner)
     .send({ from: currentOwner })
+    .on('transactionHash', function(hash){ console.log('Transaction hash:', hash); })
 }
 
 module.exports = async function (callback) {

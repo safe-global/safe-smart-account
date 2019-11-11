@@ -1,11 +1,11 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0xacF5Efe28B6a2A48459e7970B8754Cf26FB265C5",
-      "constructorCode": "608060405234801561001057600080fd5b50615f7980620000216000396000f3fe",
-      "bodyBytecodeHash": "a96dc0a35132f4714dff546b3ff4393c54d744f9ac95198de358f4ef4a82f8b7",
-      "localBytecodeHash": "c7ff033f2d591a46cd468c51930c868d7e9f10b90782f7a62bbeb379f536e374",
-      "deployedBytecodeHash": "c7ff033f2d591a46cd468c51930c868d7e9f10b90782f7a62bbeb379f536e374",
+      "address": "0xaE32496491b53841efb51829d6f886387708F99B",
+      "constructorCode": "608060405234801561001057600080fd5b50615ff180620000216000396000f3fe",
+      "bodyBytecodeHash": "bc0b6b9f237fe51fbbb2da787f3e63e54aa3c0b654b9382636c83f7081e78aec",
+      "localBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
+      "deployedBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
       "types": {
         "t_address": {
           "id": "t_address",
@@ -40,41 +40,41 @@
           "contract": "MasterCopy",
           "path": "contracts/common/MasterCopy.sol",
           "label": "masterCopy",
-          "astId": 1995,
+          "astId": 1942,
           "type": "t_address",
-          "src": "617:18:9"
+          "src": "617:18:7"
         },
         {
           "contract": "ModuleManager",
           "path": "contracts/base/ModuleManager.sol",
           "label": "modules",
-          "astId": 1184,
+          "astId": 1138,
           "type": "t_mapping<t_address>",
-          "src": "682:45:5"
+          "src": "682:45:4"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "owners",
-          "astId": 1531,
+          "astId": 1485,
           "type": "t_mapping<t_address>",
-          "src": "488:43:6"
+          "src": "488:43:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "ownerCount",
-          "astId": 1533,
+          "astId": 1487,
           "type": "t_uint256",
-          "src": "537:18:6"
+          "src": "537:18:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "threshold",
-          "astId": 1535,
+          "astId": 1489,
           "type": "t_uint256",
-          "src": "561:26:6"
+          "src": "561:26:5"
         },
         {
           "contract": "GnosisSafe",
@@ -118,11 +118,11 @@
       }
     },
     "ProxyFactory": {
-      "address": "0xD08f094C9628143e8923d50b8548ff874e1c5E19",
+      "address": "0x50e55Af101C777bA7A1d560a774A82eF002ced9F",
       "constructorCode": "608060405234801561001057600080fd5b50610c32806100206000396000f3fe",
-      "bodyBytecodeHash": "8bd934867fb25fb87f24d35efc1a2e5bce7057816188a2debbd17738f3fb6a7c",
-      "localBytecodeHash": "104443e30cf4d697e4347eea9edb4e3c554556f6d896c24a9a07283b2d1d0bb6",
-      "deployedBytecodeHash": "104443e30cf4d697e4347eea9edb4e3c554556f6d896c24a9a07283b2d1d0bb6",
+      "bodyBytecodeHash": "c52fe9a30ebdf71c5a02e570a8978e5407800c0e36865f4c3514bd663f6075c2",
+      "localBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
+      "deployedBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
       "types": {},
       "storage": [],
       "warnings": {
@@ -134,7 +134,7 @@
       }
     },
     "MultiSend": {
-      "address": "0xF29429c734c296B63862B8D48e1A5F85FcE23DCA",
+      "address": "0xB522a9f781924eD250A11C54105E51840B138AdD",
       "constructorCode": "608060405234801561001057600080fd5b506101ac806100206000396000f3fe",
       "bodyBytecodeHash": "61000d9792cd23d299f2c5bdbf174c4c30abee279c17a636bf62ffd0f3c7b209",
       "localBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
@@ -150,7 +150,7 @@
       }
     },
     "CreateAndAddModules": {
-      "address": "0x4c3D29293DAF5D91aC9207e221B0B1Efda0151D2",
+      "address": "0x5Fb29eEa20B764b8908fd7477a91314397Cd3b9d",
       "constructorCode": "608060405234801561001057600080fd5b5061029f806100206000396000f3fe",
       "bodyBytecodeHash": "7bf47ddf97182d5c8d389b472859f170d6ebf8136a54d0e7dd2d2ede97c115e7",
       "localBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
@@ -166,7 +166,7 @@
       }
     },
     "CreateCall": {
-      "address": "0xD4ec54Ced8d68B3f09c3622883891994e9c94E46",
+      "address": "0x293EBbB6983CF50bdC3E0E4c363ab3e8bFC0F2d3",
       "constructorCode": "608060405234801561001057600080fd5b506104b6806100206000396000f3fe",
       "bodyBytecodeHash": "a7bb8a89f35728244168946e103641d68e35bcf13fb76c11f0e61d1e7e3310fe",
       "localBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
@@ -182,7 +182,7 @@
       }
     },
     "DefaultCallbackHandler": {
-      "address": "0xbf49b56C42D6Ec25A5e29C43D9D1E9219a9e6A34",
+      "address": "0x40A930851BD2e590Bd5A5C981b436de25742E980",
       "constructorCode": "608060405234801561001057600080fd5b50610781806100206000396000f3fe",
       "bodyBytecodeHash": "8ab569ad44853b3521b650f817e533a66b341c014294b2bcf1fc575cf8c3529d",
       "localBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",

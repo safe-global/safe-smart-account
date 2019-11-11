@@ -25,9 +25,11 @@ shell.exec(`npx truffle compile`)
 shell.exec(`npx oz add GnosisSafe --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
+// Add factories
 shell.exec(`npx oz add ProxyFactory --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
+// Add libraries
 shell.exec(`npx oz add MultiSend --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
@@ -37,12 +39,12 @@ shell.exec(`npx oz push --network ${network} --skip-compile`)
 shell.exec(`npx oz add CreateCall --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
-// Init master copies
-shell.exec(`npx truffle --network ${network} exec scripts/init_contracts.js`)
-
-// Add callback handler
+// Add callback handlers
 shell.exec(`npx oz add DefaultCallbackHandler --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
+
+// Init master copies
+shell.exec(`npx truffle --network ${network} exec scripts/init_contracts.js`)
 
 // Publish zos package
 shell.exec(`npx oz publish --network ${network}`)
