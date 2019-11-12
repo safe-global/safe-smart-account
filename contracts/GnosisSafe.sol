@@ -1,5 +1,7 @@
-pragma solidity ^0.5.0;
-import "./base/BaseSafe.sol";
+pragma solidity >=0.5.0 <0.7.0;
+import "./base/ModuleManager.sol";
+import "./base/OwnerManager.sol";
+import "./base/FallbackManager.sol";
 import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
@@ -7,15 +9,16 @@ import "./interfaces/ISignatureValidator.sol";
 import "./external/SafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
-/// @author Stefan George - <stefan@gnosis.pm>
-/// @author Richard Meissner - <richard@gnosis.pm>
+/// @author Stefan George - <stefan@gnosis.io>
+/// @author Richard Meissner - <richard@gnosis.io>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
-contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTransfer, ISignatureValidator {
+contract GnosisSafe
+    is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager {
 
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
@@ -32,7 +35,19 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     //);
     bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
-    event ExecutionFailed(bytes32 txHash);
+    event ApproveHash(
+        bytes32 indexed approvedHash,
+        address indexed owner
+    );
+    event SignMsg(
+        bytes32 indexed msgHash
+    );
+    event ExecutionFailure(
+        bytes32 txHash, uint256 payment
+    );
+    event ExecutionSuccess(
+        bytes32 txHash, uint256 payment
+    );
 
     uint256 public nonce;
     bytes32 public domainSeparator;
@@ -46,21 +61,34 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _threshold Number of required confirmations for a Safe transaction.
     /// @param to Contract address for optional delegate call.
     /// @param data Data payload for optional delegate call.
+    /// @param fallbackHandler Handler for fallback calls to this contract
     /// @param paymentToken Token that should be used for the payment (0 is ETH)
     /// @param payment Value that should be paid
     /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
-    function setup(address[] calldata _owners, uint256 _threshold, address to, bytes calldata data, address paymentToken, uint256 payment, address payable paymentReceiver)
+    function setup(
+        address[] calldata _owners,
+        uint256 _threshold,
+        address to,
+        bytes calldata data,
+        address fallbackHandler,
+        address paymentToken,
+        uint256 payment,
+        address payable paymentReceiver
+    )
         external
     {
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
-        setupSafe(_owners, _threshold, to, data);
-        
+        setupOwners(_owners, _threshold);
+        // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
+        setupModules(to, data);
+        if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
+
         if (payment > 0) {
             // To avoid running into issues with EIP-170 we reuse the handlePayment function (to avoid adjusting code of that has been verified we do not adjust the method itself)
             // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
             handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
-        } 
+        }
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
@@ -90,26 +118,33 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         external
         returns (bool success)
     {
-        bytes memory txHashData = encodeTransactionData(
-            to, value, data, operation, // Transaction info
-            safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
-            nonce
-        );
-        // Increase nonce and execute transaction.
-        nonce++;
-        checkSignatures(keccak256(txHashData), txHashData, signatures, true);
-        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
-        uint256 gasUsed = gasleft();
-        // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
-        success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
-        gasUsed = gasUsed.sub(gasleft());
-        if (!success) {
-            emit ExecutionFailed(keccak256(txHashData));
+        bytes32 txHash;
+        // Use scope here to limit variable lifetime and prevent `stack too deep` errors
+        {
+            bytes memory txHashData = encodeTransactionData(
+                to, value, data, operation, // Transaction info
+                safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
+                nonce
+            );
+            // Increase nonce and execute transaction.
+            nonce++;
+            txHash = keccak256(txHashData);
+            checkSignatures(txHash, txHashData, signatures, true);
         }
-
-        // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
-        if (gasPrice > 0) {
-            handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        // Use scope here to limit variable lifetime and prevent `stack too deep` errors
+        {
+            uint256 gasUsed = gasleft();
+            // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
+            success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
+            gasUsed = gasUsed.sub(gasleft());
+            // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
+            uint256 payment = 0;
+            if (gasPrice > 0) {
+                payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+            }
+            if (success) emit ExecutionSuccess(txHash, payment);
+            else emit ExecutionFailure(txHash, payment);
         }
     }
 
@@ -121,15 +156,18 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         address payable refundReceiver
     )
         private
+        returns (uint256 payment)
     {
-        uint256 amount = gasUsed.add(baseGas).mul(gasPrice);
         // solium-disable-next-line security/no-tx-origin
         address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
         if (gasToken == address(0)) {
+            // For ETH we will only adjust the gas price to not be higher than the actual used gas price
+            payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
             // solium-disable-next-line security/no-send
-            require(receiver.send(amount), "Could not pay gas costs with ether");
+            require(receiver.send(payment), "Could not pay gas costs with ether");
         } else {
-            require(transferToken(gasToken, receiver, amount), "Could not pay gas costs with token");
+            payment = gasUsed.add(baseGas).mul(gasPrice);
+            require(transferToken(gasToken, receiver, payment), "Could not pay gas costs with token");
         }
     }
 
@@ -143,8 +181,12 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
     {
+        // Load threshold to avoid multiple storage loads
+        uint256 _threshold = threshold;
+        // Check that a threshold is set
+        require(_threshold > 0, "Threshold needs to be defined!");
         // Check that the provided signature data is not too short
-        require(signatures.length >= threshold.mul(65), "Signatures data too short");
+        require(signatures.length >= _threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -152,7 +194,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
         bytes32 r;
         bytes32 s;
         uint256 i;
-        for (i = 0; i < threshold; i++) {
+        for (i = 0; i < _threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             // If v is 0 then it is a contract signature
             if (v == 0) {
@@ -162,7 +204,7 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
+                require(uint256(s) >= _threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
                 require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
@@ -193,17 +235,23 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
                 if (consumeHash && msg.sender != currentOwner) {
                     approvedHashes[currentOwner][dataHash] = 0;
                 }
+            } else if (v > 30) {
+                // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
+                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
             } else {
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "Invalid owner provided");
+            require (
+                currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,
+                "Invalid owner provided"
+            );
             lastOwner = currentOwner;
         }
     }
 
     /// @dev Allows to estimate a Safe transaction.
-    ///      This method is only meant for estimation purpose, therfore two different protection mechanism against execution in a transaction have been made:
+    ///      This method is only meant for estimation purpose, therefore two different protection mechanism against execution in a transaction have been made:
     ///      1.) The method can only be called from the safe itself
     ///      2.) The response is returned with a revert
     ///      When estimating set `from` to the address of the safe.
@@ -236,25 +284,31 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     {
         require(owners[msg.sender] != address(0), "Only owners can approve a hash");
         approvedHashes[msg.sender][hashToApprove] = 1;
+        emit ApproveHash(hashToApprove, msg.sender);
     }
 
     /**
     * @dev Marks a message as signed
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
-    */ 
-    function signMessage(bytes calldata _data) 
+    */
+    function signMessage(bytes calldata _data)
         external
         authorized
     {
-        signedMessages[getMessageHash(_data)] = 1;
+        bytes32 msgHash = getMessageHash(_data);
+        signedMessages[msgHash] = 1;
+        emit SignMsg(msgHash);
     }
 
     /**
-    * @dev Should return whether the signature provided is valid for the provided data
+    * Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
+    * @dev Should return whether the signature provided is valid for the provided data.
+    *       The save does not implement the interface since `checkSignatures` is not a view method.
+    *       The method will not perform any state changes (see parameters of `checkSignatures`)
     * @param _data Arbitrary length data signed on the behalf of address(this)
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
-    */ 
+    */
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         external
         returns (bytes4)
@@ -300,12 +354,12 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash bytes.
     function encodeTransactionData(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,
@@ -334,12 +388,12 @@ contract GnosisSafe is MasterCopy, BaseSafe, SignatureDecoder, SecuredTokenTrans
     /// @param _nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
-        uint256 safeTxGas, 
-        uint256 baseGas, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address refundReceiver,

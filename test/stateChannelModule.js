@@ -13,7 +13,6 @@ contract('StateChannelModule', function(accounts) {
     let executor = accounts[8]
 
     const CALL = 0
-    const CREATE = 2
 
     let executeTransaction = async function(subject, accounts, to, value, data, operation, failing) {
         failing = failing || false
@@ -51,7 +50,7 @@ contract('StateChannelModule', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
+        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         let stateChannelModuleMasterCopy = await StateChannelModule.new()
 
         // State channel module setup
@@ -62,7 +61,7 @@ contract('StateChannelModule', function(accounts) {
         let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
 
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
@@ -106,24 +105,5 @@ contract('StateChannelModule', function(accounts) {
         await executeTransaction('remove owner and reduce threshold to 2', [lw.accounts[0], lw.accounts[1], lw.accounts[3]], gnosisSafe.address, 0, data, CALL)
         assert.deepEqual(await gnosisSafe.getOwners(), [accounts[1], lw.accounts[0], lw.accounts[1]])
         assert.equal(await gnosisSafe.getThreshold(), 2)
-    })
-
-    it('should do a CREATE transaction', async () => {
-        // Create test contract
-        let source = `
-        contract Test {
-            function x() public pure returns (uint) {
-                return 21;
-            }
-        }`
-        let output = await utils.compile(source);
-        const TestContract = web3.eth.contract(output.interface);
-        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
-            // We need to tell web3 how to parse the ContractCreation event from the module manager
-            gnosisSafe.contract.allEvents(),
-            await executeTransaction('create test contract', [lw.accounts[0], lw.accounts[1]], 0, 0, output.data, CREATE),
-            'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
-        )
-        assert.equal(await testContract.x(), 21)
     })
 })

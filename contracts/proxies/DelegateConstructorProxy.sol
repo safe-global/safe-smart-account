@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 import "./Proxy.sol";
 
 
@@ -19,8 +19,8 @@ contract DelegateConstructorProxy is Proxy {
                 let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
                 let success := delegatecall(sub(gas, 10000), masterCopy, add(initializer, 0x20), mload(initializer), 0, 0)
                 let ptr := mload(0x40)
-                returndatacopy(ptr, 0, returndatasize)
-                if eq(success, 0) { revert(ptr, returndatasize) }
+                returndatacopy(ptr, 0, returndatasize())
+                if eq(success, 0) { revert(ptr, returndatasize()) }
             }
         }
     }

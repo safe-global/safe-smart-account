@@ -6,7 +6,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 
 
-contract('GnosisSafe using eth_signTypedData', function(accounts) {
+contract('GnosisSafe using eth_sign', function(accounts) {
 
     let gnosisSafe
     let executor = accounts[8]
@@ -14,12 +14,12 @@ contract('GnosisSafe using eth_signTypedData', function(accounts) {
     const CALL = 0
     const CREATE = 2
 
-    let signTypedData = async function(account, data) {
+    let ethSign = async function(account, hash) {
         return new Promise(function (resolve, reject) {
             web3.currentProvider.sendAsync({
                 jsonrpc: "2.0", 
-                method: "eth_signTypedData",
-                params: [account, data],
+                method: "eth_sign",
+                params: [account, hash],
                 id: new Date().getTime()
             }, function(err, response) {
                 if (err) { 
@@ -34,9 +34,9 @@ contract('GnosisSafe using eth_signTypedData', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
@@ -53,46 +53,13 @@ contract('GnosisSafe using eth_signTypedData', function(accounts) {
 
         let confirmingAccounts = [accounts[0], accounts[2]]
         let signer = async function(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce) {
-            let typedData = {
-                types: {
-                    EIP712Domain: [
-                        { type: "address", name: "verifyingContract" }
-                    ],
-                    // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
-                    SafeTx: [
-                        { type: "address", name: "to" },
-                        { type: "uint256", name: "value" },
-                        { type: "bytes", name: "data" },
-                        { type: "uint8", name: "operation" },
-                        { type: "uint256", name: "safeTxGas" },
-                        { type: "uint256", name: "baseGas" },
-                        { type: "uint256", name: "gasPrice" },
-                        { type: "address", name: "gasToken" },
-                        { type: "address", name: "refundReceiver" },
-                        { type: "uint256", name: "nonce" },
-                    ]
-                },
-                domain: {
-                    verifyingContract: gnosisSafe.address
-                },
-                primaryType: "SafeTx",
-                message: {
-                    to: to,
-                    value: value,
-                    data: data,
-                    operation: operation,
-                    safeTxGas: txGasEstimate,
-                    baseGas: baseGasEstimate,
-                    gasPrice: gasPrice,
-                    gasToken: txGasToken,
-                    refundReceiver: refundReceiver,
-                    nonce: nonce.toNumber()
-                }
-            }
+            let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
             let signatureBytes = "0x"
             confirmingAccounts.sort()
             for (var i=0; i<confirmingAccounts.length; i++) {
-                signatureBytes += (await signTypedData(confirmingAccounts[i], typedData)).replace('0x', '')
+                // Adjust v (it is + 27 => EIP-155 and + 4 to differentiate them from typed data signatures in the Safe)
+                let signature = (await ethSign(confirmingAccounts[i], txHash)).replace('0x', '').replace(/00$/,"1f").replace(/01$/,"20")
+                signatureBytes += (signature)
             }
             return signatureBytes
         }

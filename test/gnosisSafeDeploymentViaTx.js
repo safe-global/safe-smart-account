@@ -9,7 +9,7 @@ const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const MockContract = artifacts.require('./MockContract.sol');
 const MockToken = artifacts.require('./Token.sol');
 
-contract('GnosisSafe Trustless Deployment', function(accounts) {
+contract('GnosisSafe trustless deployment', function(accounts) {
 
     const CALL = 0
 
@@ -47,7 +47,7 @@ contract('GnosisSafe Trustless Deployment', function(accounts) {
     }
 
     let getCreationData = async function(gasToken, userCosts, gasLimit) {
-        gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
+        gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
 
         let rawTx = {
             value: 0,
@@ -87,13 +87,13 @@ contract('GnosisSafe Trustless Deployment', function(accounts) {
         // Create lightwallet
         lw = await utils.createLightwallet()
         gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0)
+        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0, 0)
     })
 
     it('should create safe from random account and pay in ETH', async () => {
 
         // Estimate safe creation costs
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
 
         let rawTx = {
             value: 0,

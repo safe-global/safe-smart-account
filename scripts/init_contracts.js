@@ -28,13 +28,13 @@ module.exports = function(callback) {
             processNext = true
         }
     });
-    var zos = JSON.parse(fs.readFileSync('./zos.' + network + '.json'));  
+    var oz = JSON.parse(fs.readFileSync('./.openzeppelin/' + network + '.json'));  
     Promise.all([
-        ignoreErrors(GnosisSafe.at(zos.contracts['GnosisSafe'].address).setup([notOwnedAddress, notOwnedAddress2], 2, 0, 0, 0, 0, 0)),
-        //ignoreErrors(StateChannelModule.at(zos.contracts['StateChannelModule'].address).setup()),
-        //ignoreErrors(DailyLimitModule.at(zos.contracts['DailyLimitModule'].address).setup([],[])),
-        //ignoreErrors(SocialRecoveryModule.at(zos.contracts['SocialRecoveryModule'].address).setup([notOwnedAddress, notOwnedAddress2], 2)),
-        //ignoreErrors(WhitelistModule.at(zos.contracts['WhitelistModule'].address).setup([])),
+        ignoreErrors(GnosisSafe.at(oz.contracts['GnosisSafe'].address).setup([notOwnedAddress, notOwnedAddress2], 2, 0, 0, 0, 0, 0, 0)),
+        //ignoreErrors(StateChannelModule.at(oz.contracts['StateChannelModule'].address).setup()),
+        //ignoreErrors(DailyLimitModule.at(oz.contracts['DailyLimitModule'].address).setup([],[])),
+        //ignoreErrors(SocialRecoveryModule.at(oz.contracts['SocialRecoveryModule'].address).setup([notOwnedAddress, notOwnedAddress2], 2)),
+        //ignoreErrors(WhitelistModule.at(oz.contracts['WhitelistModule'].address).setup([])),
     ])
         .then(function(values) {
             values.forEach(function(resp) {
