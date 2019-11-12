@@ -26,21 +26,24 @@ Some contracts require that the Solidity compile target is `petersburg` (e.g. Pr
 Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
 Preparation:
-```bash
-export MNEMONIC="<mnemonic>"
-```
+- Set `INFURA_TOKEN` in `.env`
+- Set `NETWORK` in `.env`
+- Run `npx truffle compile`
 
-zOS:
-- Make sure that zos is version 2
+OpenZeppelin SDK:
+- Make sure that @openzeppelin/cli is version 2.5 (`npx oz --version`)
 - Make sure that all dependencies use solcjs >0.5.0
-- Add `txParams['from'] = txParams['from'] || web3.currentProvider.getAddress(0)` in `Transactions.js` of the `zos-lib` module
-```bash
-virtualenv env -p python3
-. env/bin/activate
-python ./scripts/deploy_safe_contracts_zos.py
-```
+- Set correct version in `package.json`
+- Set `MNEMONIC` in `.env` to current oz package owner (last deployer normally)
+- Optional: if a new deployer account is used
+  - Check that a gloabl versionb of truffle 5 is installed (`truffle version`)
+  - Run `truffle exec scripts/change_oz_owner.js --network=<network> --newOwner="<address>"` to enable new deployer
+  - Set `MNEMONIC` in `.env` to new oz package owner
+- Run `npm run deploy-oz`
+- Once deployed on all networks run `npx oz --freeze <network>` for each network
 
 Truffle:
+- Set `MNEMONIC` in `.env`
 
 ```bash
 npx truffle deploy
@@ -55,7 +58,9 @@ pip install solidity-flattener
 mkdir build/flattened_contracts
 solidity_flattener contracts/GnosisSafe.sol --output build/flattened_contracts/GnosisSafe.sol
 solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="/=/"
+solidity_flattener contracts/libraries/CreateCall.sol --output build/flattened_contracts/CreateCall.sol --solc-paths="/=/"
 solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="/=/"
+solidity_flattener contracts/handler/DefaultCallbackHandler.sol --output build/flattened_contracts/DefaultCallbackHandler.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="/=/"
 solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="/=/"
@@ -64,20 +69,20 @@ solidity_flattener contracts/proxies/ProxyFactory.sol --output build/flattened_c
 find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity >=0.5.0 <0.7.0;/g' {} \;
 ```
 
-Using with ZeppelinOS
----------------------
+Using with OpenZeppelin SDK
+---------------------------
 
-You can create a gnosis safe upgradeable instance using [ZeppelinOS](http://zeppelinos.org/) by linking to the provided [EVM package](https://docs.zeppelinos.org/docs/linking.html). This will use the master copy already deployed to mainnet, kovan, or rinkeby, reducing gas deployment costs. 
+You can create a gnosis safe upgradeable instance using [OpenZeppelin SDK](https://docs.openzeppelin.com/sdk/2.5) by linking to the provided [EVM package](https://docs.openzeppelin.com/sdk/2.5/linking). This will use the master copy already deployed to mainnet, kovan, or rinkeby, reducing gas deployment costs.
 
-To create an instance using ZeppelinOS:
+To create an instance using OpenZeppelin SDK:
 
 ```bash
-$ npm install -g zos
-$ zos init YourProject
-$ zos link gnosis-safe
-$ zos push --network rinkeby
-> Connecting to dependency gnosis-safe 0.1.0
-$ zos create gnosis-safe/GnosisSafe --init setup --args "[$ADDRESS1,$ADDRESS2,$ADDRESS3],2,0x0000000000000000000000000000000000000000,\"\"" --network rinkeby --from $SENDER
+$ npm install -g @openzeppelin/sdk
+$ oz init YourProject
+$ oz link @gnosis.pm/safe-contracts
+$ oz push --network rinkeby
+> Connecting to dependency @gnosis.pm/safe-contracts 1.0.0
+$ oz create @gnosis.pm//GnosisSafe --init setup --args "[$ADDRESS1,$ADDRESS2,$ADDRESS3],2,0x0000000000000000000000000000000000000000,\"\"" --network rinkeby --from $SENDER
 > Instance created at SAFE_ADDRESS
 ```
 
@@ -92,6 +97,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
+- [by G0 Group](docs/audit_1_1_0.md)
 - [by Runtime Verification](docs/rv_1_0_0.md)
 - [by Alexey Akhunov](docs/alexey_audit.md)
 
