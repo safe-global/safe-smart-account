@@ -1,6 +1,6 @@
 {
   "name": "@gnosis.pm/safe-contracts",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "Ethereum multisig contract",
   "homepage": "https://github.com/gnosis/safe-contracts/",
   "license": "GPL-3.0",
@@ -17,7 +17,7 @@
     "preversion": "npm run restore",
     "truffle-oz-merge": "node scripts/merge_oz.js",
     "deploy-oz": "node scripts/deploy_safe_contracts_oz.js",
-    "restore": "rm -rf build && npx truffle compile && npm run truffle-zos-merge && npx tnt cB",
+    "restore": "rm -rf build && npx truffle compile && npm run truffle-oz-merge && npx tnt cB",
     "install": "cd $INIT_CWD && npm explore truffle -- npm install solc@0.5.11"
   },
   "repository": {
