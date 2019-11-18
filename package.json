@@ -14,21 +14,11 @@
     "build"
   ],
   "scripts": {
-    "build": "hardhat compile",
-    "build:ts": "yarn rimraf dist && tsc",
-    "test": "hardhat test",
-    "coverage": "hardhat coverage",
-    "benchmark": "yarn test benchmark/*.ts",
-    "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
-    "deploy-all": "hardhat deploy-contracts --network",
-    "deploy": "hardhat deploy --network",
-    "lint": "yarn lint:sol && yarn lint:ts",
-    "lint:sol": "solhint 'contracts/**/*.sol'",
-    "lint:ts": "eslint --max-warnings 0 .",
-    "fmt:sol": "prettier 'contracts/**/*.sol' -w",
-    "prepack": "yarn build",
-    "prepare": "husky install",
-    "prepublish": "yarn rimraf build && yarn build && yarn build:ts"
+    "test-norpc": "truffle test",
+    "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse true 'truffle test'",
+    "preversion": "npm run restore",
+    "truffle-zos-merge": "node scripts/merge_zos.js",
+    "restore": "rm -rf build && npx truffle compile && npm run truffle-zos-merge && npx tnt cB"
   },
   "repository": {
     "type": "git",
