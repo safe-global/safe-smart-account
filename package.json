@@ -38,6 +38,7 @@
     "do": "run(){ truffle exec --network=$@; }; run",
     "prepare": "yarn truffle compile && yarn tnt iN",
     "preversion": "node scripts/clean_build.js && yarn tnt cB"
+    "test-norpc": "truffle test",
   },
   "repository": {
     "type": "git",
