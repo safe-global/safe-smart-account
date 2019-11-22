@@ -36,7 +36,9 @@ contract FallbackManager is SelfAuthorized {
     {
         // Only calls without value and with data will be forwarded
         if (msg.value > 0 || msg.data.length == 0) {
-            emit IncomingTransaction(msg.sender, msg.value);
+            if (gasleft() > 2000) {
+                emit IncomingTransaction(msg.sender, msg.value);
+            }
             return;
         }
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;

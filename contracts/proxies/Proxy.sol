@@ -11,6 +11,8 @@ interface IProxy {
 /// @author Richard Meissner - <richard@gnosis.io>
 contract Proxy {
 
+    event IncomingTransaction(address from, uint256 value);
+
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
     address internal masterCopy;
@@ -29,6 +31,11 @@ contract Proxy {
         external
         payable
     {
+        // Only calls without value and with data will be forwarded
+        if (msg.value > 0 || msg.data.length == 0) {
+            emit IncomingTransaction(msg.sender, msg.value);
+            return;
+        }
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
