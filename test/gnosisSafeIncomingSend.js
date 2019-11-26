@@ -29,7 +29,7 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
         )
     })
 
-    it.only('should be able to receive ETH via send', async () => {
+    it('should be able to receive ETH via transfer', async () => {
         // Notes: It is not possible to load storage + a call + emit event with 2300 gas
         // Test Validator
         let source = `
@@ -40,11 +40,20 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
         }`
         let testCaller = await safeUtils.deployContract(accounts[0], source);
         let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.toWei(1, 'ether')})
-        let receipt = await web3.eth.getTransactionReceipt(txHash)
-        console.log(receipt)
-        assert.equal(receipt.status, '0x1')
-        let balance = await web3.eth.getBalance(gnosisSafe.address)
-        console.log(balance.toNumber())
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))
+    })
+
+    it('should be able to receive ETH via send', async () => {
+        // Notes: It is not possible to load storage + a call + emit event with 2300 gas
+        // Test Validator
+        let source = `
+        contract Test {
+            function sendEth(address payable safe) public payable returns (bool success) {
+                require(safe.send(msg.value));
+            }
+        }`
+        let testCaller = await safeUtils.deployContract(accounts[0], source);
+        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.toWei(1, 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))
     })
 })

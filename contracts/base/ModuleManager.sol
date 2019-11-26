@@ -15,7 +15,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     event ExecutionFromModuleSuccess(address indexed module);
     event ExecutionFromModuleFailure(address indexed module);
 
-    address public constant SENTINEL_MODULES = address(0x1);
+    address internal constant SENTINEL_MODULES = address(0x1);
 
     mapping (address => address) internal modules;
 
@@ -104,30 +104,42 @@ contract ModuleManager is SelfAuthorized, Executor {
         }
     }
 
-    /// @dev Returns array of modules.
+    /// @dev Returns array of first 10 modules.
     /// @return Array of modules.
     function getModules()
         public
         view
         returns (address[] memory)
     {
-        // Calculate module count
-        uint256 moduleCount = 0;
-        address currentModule = modules[SENTINEL_MODULES];
-        while(currentModule != SENTINEL_MODULES) {
-            currentModule = modules[currentModule];
-            moduleCount ++;
-        }
-        address[] memory array = new address[](moduleCount);
+        (address[] memory array,) = getModulesPaginated(SENTINEL_MODULES, 10);
+        return array;
+    }
 
-        // populate return array
-        moduleCount = 0;
-        currentModule = modules[SENTINEL_MODULES];
-        while(currentModule != SENTINEL_MODULES) {
+    /// @dev Returns array of modules.
+    /// @param start Start of the page.
+    /// @param pageSize Maximum number of modules that should be returned.
+    /// @return Array of modules.
+    function getModulesPaginated(address start, uint256 pageSize)
+        public
+        view
+        returns (address[] memory array, address next)
+    {
+        // Init array with max page size
+        array = new address[](pageSize);
+
+        // Populate return array
+        uint256 moduleCount = 0;
+        address currentModule = modules[start];
+        while(currentModule != address(0x0) && currentModule != SENTINEL_MODULES && moduleCount < pageSize) {
             array[moduleCount] = currentModule;
             currentModule = modules[currentModule];
-            moduleCount ++;
+            moduleCount++;
         }
-        return array;
+        next = currentModule;
+        // Set correct size of returned array
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            mstore(array, moduleCount)
+        }
     }
 }

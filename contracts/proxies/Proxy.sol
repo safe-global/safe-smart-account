@@ -31,8 +31,8 @@ contract Proxy {
         external
         payable
     {
-        // Only calls without value and with data will be forwarded
-        if (msg.value > 0 || msg.data.length == 0) {
+        // If the transaction is an incoming transfer than emit the event and don't call mastercopy
+        if (msg.value > 0 && msg.data.length == 0) {
             emit IncomingTransaction(msg.sender, msg.value);
             return;
         }
