@@ -31,11 +31,6 @@ contract Proxy {
         external
         payable
     {
-        // If the transaction is an incoming transfer than emit the event and don't call mastercopy
-        if (msg.value > 0 && msg.data.length == 0) {
-            emit IncomingTransaction(msg.sender, msg.value);
-            return;
-        }
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)

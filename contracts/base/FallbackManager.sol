@@ -39,7 +39,7 @@ contract FallbackManager is SelfAuthorized {
             // If this was called from an EOA or we have enough gas, then we should emit an event
             // Note: we check the origin to avoid that EOA transactions are estimated to low to emit the event
             // solium-disable-next-line security/no-tx-origin
-            if (msg.sender == tx.origin || gasleft() > 2000) {
+            if (msg.sender == tx.origin || gasleft() > 1500) {
                 emit IncomingTransaction(msg.sender, msg.value);
             }
             return;
