@@ -18,7 +18,7 @@ contract GnosisSafe
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "1.1.0";
+    string public constant VERSION = "1.1.1";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
