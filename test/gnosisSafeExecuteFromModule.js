@@ -1,11 +1,6 @@
 const utils = require('./utils/general')
 const safeUtils = require('./utils/execution')
-const BigNumber = require('bignumber.js')
-
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const MockContract = artifacts.require('./MockContract.sol')
-const MockToken = artifacts.require('./Token.sol')
 
 contract('GnosisSafe', function(accounts) {
 
