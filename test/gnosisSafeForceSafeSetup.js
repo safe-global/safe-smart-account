@@ -9,7 +9,7 @@ contract('GnosisSafe setup', function(accounts) {
 
     const CALL = 0
 
-    it.only('should not be able to call execTransaction before setup', async () => {
+    it('should not be able to call execTransaction before setup', async () => {
 
         // Create lightwallet
         gnosisSafe = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
