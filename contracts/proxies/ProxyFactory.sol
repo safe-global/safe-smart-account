@@ -1,6 +1,10 @@
 pragma solidity ^0.5.3;
 import "./Proxy.sol";
 
+interface ProxyCreationCallback {
+    function proxyCreated(Proxy proxy, address _mastercopy, bytes calldata initializer, uint256 saltNonce) external;
+}
+
 
 /// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -50,7 +54,7 @@ contract ProxyFactory {
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
         }
-	require(address(proxy) != address(0), "Create2 call failed");
+	    require(address(proxy) != address(0), "Create2 call failed");
     }
 
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
@@ -68,6 +72,20 @@ contract ProxyFactory {
                 if eq(call(gas, proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) { revert(0,0) }
             }
         emit ProxyCreation(proxy);
+    }
+
+    /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction and calls the callback
+    /// @param _mastercopy Address of master copy.
+    /// @param initializer Payload for message call sent to new proxy contract.
+    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    /// @param callback Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    function createProxyWithCallback(address _mastercopy, bytes memory initializer, uint256 saltNonce, ProxyCreationCallback callback)
+        public
+        returns (Proxy proxy)
+    {
+        uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
+        proxy = createProxyWithNonce(_mastercopy, initializer, saltNonceWithCallback);
+        callback.proxyCreated(proxy, _mastercopy, initializer, saltNonce);
     }
 
     /// @dev Allows to get the address for a new proxy contact created via `createProxyWithNonce`
