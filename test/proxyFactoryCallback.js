@@ -12,7 +12,7 @@ contract('ProxyFactory', function(accounts) {
         proxyFactory = await ProxyFactory.new()
     })
 
-    it.only('Check callback is invoked', async () => {
+    it('Check callback is invoked', async () => {
         let mock = await MockContract.new()
         let callback = await ProxyCreationCallback.at(mock.address)
         let proxy = utils.getParamFromTxEvent(
@@ -29,7 +29,7 @@ contract('ProxyFactory', function(accounts) {
 
     })
 
-    it.only('Check callback error cancels deployment', async () => {
+    it('Check callback error cancels deployment', async () => {
         let mock = await MockContract.new()
         await mock.givenAnyRevert()
         await utils.assertRejects(
@@ -40,5 +40,9 @@ contract('ProxyFactory', function(accounts) {
         await mock.reset()
         // Should be successfull now
         await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, mock.address)
+    })
+
+    it('Should work without callback', async () => {
+        await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, 0)
     })
 })

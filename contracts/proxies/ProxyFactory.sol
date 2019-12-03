@@ -74,18 +74,19 @@ contract ProxyFactory {
         emit ProxyCreation(proxy);
     }
 
-    /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction and calls the callback
+    /// @dev Allows to create new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
     /// @param _mastercopy Address of master copy.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    /// @param callback Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    /// @param callback Callback that will be invoced after the new proxy contract has been successfully deployed and initialized.
     function createProxyWithCallback(address _mastercopy, bytes memory initializer, uint256 saltNonce, ProxyCreationCallback callback)
         public
         returns (Proxy proxy)
     {
         uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
         proxy = createProxyWithNonce(_mastercopy, initializer, saltNonceWithCallback);
-        callback.proxyCreated(proxy, _mastercopy, initializer, saltNonce);
+        if (address(callback) != address(0))
+            callback.proxyCreated(proxy, _mastercopy, initializer, saltNonce);
     }
 
     /// @dev Allows to get the address for a new proxy contact created via `createProxyWithNonce`
