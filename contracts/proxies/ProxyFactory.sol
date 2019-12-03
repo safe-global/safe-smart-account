@@ -1,10 +1,6 @@
 pragma solidity ^0.5.3;
 import "./Proxy.sol";
-
-interface ProxyCreationCallback {
-    function proxyCreated(Proxy proxy, address _mastercopy, bytes calldata initializer, uint256 saltNonce) external;
-}
-
+import "./IProxyCreationCallback.sol";
 
 /// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -79,7 +75,7 @@ contract ProxyFactory {
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
     /// @param callback Callback that will be invoced after the new proxy contract has been successfully deployed and initialized.
-    function createProxyWithCallback(address _mastercopy, bytes memory initializer, uint256 saltNonce, ProxyCreationCallback callback)
+    function createProxyWithCallback(address _mastercopy, bytes memory initializer, uint256 saltNonce, IProxyCreationCallback callback)
         public
         returns (Proxy proxy)
     {

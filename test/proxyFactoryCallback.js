@@ -1,7 +1,7 @@
 const utils = require('./utils/general')
 
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const ProxyCreationCallback = artifacts.require("./ProxyCreationCallback.sol")
+const IProxyCreationCallback = artifacts.require("./IProxyCreationCallback.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 
 contract('ProxyFactory', function(accounts) {
@@ -14,7 +14,7 @@ contract('ProxyFactory', function(accounts) {
 
     it('Check callback is invoked', async () => {
         let mock = await MockContract.new()
-        let callback = await ProxyCreationCallback.at(mock.address)
+        let callback = await IProxyCreationCallback.at(mock.address)
         let proxy = utils.getParamFromTxEvent(
             await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, callback.address),
             'ProxyCreation', 'proxy', proxyFactory.address, null, 'create proxy',
