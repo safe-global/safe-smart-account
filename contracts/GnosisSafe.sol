@@ -18,22 +18,22 @@ contract GnosisSafe
     using SafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "1.1.0";
+    string public constant VERSION = "1.1.1";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
     //);
-    bytes32 public constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
+    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     //keccak256(
     //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     //);
-    bytes32 public constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
+    bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
     //keccak256(
     //    "SafeMessage(bytes message)"
     //);
-    bytes32 public constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
+    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
     event ApproveHash(
         bytes32 indexed approvedHash,
@@ -80,9 +80,9 @@ contract GnosisSafe
         require(domainSeparator == 0, "Domain Separator already set!");
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         setupOwners(_owners, _threshold);
+        if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
         // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
         setupModules(to, data);
-        if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
 
         if (payment > 0) {
             // To avoid running into issues with EIP-170 we reuse the handlePayment function (to avoid adjusting code of that has been verified we do not adjust the method itself)
@@ -181,8 +181,12 @@ contract GnosisSafe
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
         internal
     {
+        // Load threshold to avoid multiple storage loads
+        uint256 _threshold = threshold;
+        // Check that a threshold is set
+        require(_threshold > 0, "Threshold needs to be defined!");
         // Check that the provided signature data is not too short
-        require(signatures.length >= threshold.mul(65), "Signatures data too short");
+        require(signatures.length >= _threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -190,7 +194,7 @@ contract GnosisSafe
         bytes32 r;
         bytes32 s;
         uint256 i;
-        for (i = 0; i < threshold; i++) {
+        for (i = 0; i < _threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             // If v is 0 then it is a contract signature
             if (v == 0) {
@@ -200,7 +204,7 @@ contract GnosisSafe
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= threshold.mul(65), "Invalid contract signature location: inside static part");
+                require(uint256(s) >= _threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
                 require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");

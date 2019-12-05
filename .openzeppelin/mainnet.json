@@ -1,0 +1,215 @@
+{
+  "contracts": {
+    "GnosisSafe": {
+      "address": "0xaE32496491b53841efb51829d6f886387708F99B",
+      "constructorCode": "608060405234801561001057600080fd5b50615ff180620000216000396000f3fe",
+      "bodyBytecodeHash": "bc0b6b9f237fe51fbbb2da787f3e63e54aa3c0b654b9382636c83f7081e78aec",
+      "localBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
+      "deployedBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
+      "types": {
+        "t_address": {
+          "id": "t_address",
+          "kind": "elementary",
+          "label": "address"
+        },
+        "t_mapping<t_address>": {
+          "id": "t_mapping<t_address>",
+          "valueType": "t_address",
+          "label": "mapping(key => address)",
+          "kind": "mapping"
+        },
+        "t_uint256": {
+          "id": "t_uint256",
+          "kind": "elementary",
+          "label": "uint256"
+        },
+        "t_bytes32": {
+          "id": "t_bytes32",
+          "kind": "elementary",
+          "label": "bytes32"
+        },
+        "t_mapping<t_uint256>": {
+          "id": "t_mapping<t_uint256>",
+          "valueType": "t_uint256",
+          "label": "mapping(key => uint256)",
+          "kind": "mapping"
+        }
+      },
+      "storage": [
+        {
+          "contract": "MasterCopy",
+          "path": "contracts/common/MasterCopy.sol",
+          "label": "masterCopy",
+          "astId": 1942,
+          "type": "t_address",
+          "src": "617:18:7"
+        },
+        {
+          "contract": "ModuleManager",
+          "path": "contracts/base/ModuleManager.sol",
+          "label": "modules",
+          "astId": 1138,
+          "type": "t_mapping<t_address>",
+          "src": "682:45:4"
+        },
+        {
+          "contract": "OwnerManager",
+          "path": "contracts/base/OwnerManager.sol",
+          "label": "owners",
+          "astId": 1485,
+          "type": "t_mapping<t_address>",
+          "src": "488:43:5"
+        },
+        {
+          "contract": "OwnerManager",
+          "path": "contracts/base/OwnerManager.sol",
+          "label": "ownerCount",
+          "astId": 1487,
+          "type": "t_uint256",
+          "src": "537:18:5"
+        },
+        {
+          "contract": "OwnerManager",
+          "path": "contracts/base/OwnerManager.sol",
+          "label": "threshold",
+          "astId": 1489,
+          "type": "t_uint256",
+          "src": "561:26:5"
+        },
+        {
+          "contract": "GnosisSafe",
+          "path": "contracts/GnosisSafe.sol",
+          "label": "nonce",
+          "astId": 65,
+          "type": "t_uint256",
+          "src": "1953:20:0"
+        },
+        {
+          "contract": "GnosisSafe",
+          "path": "contracts/GnosisSafe.sol",
+          "label": "domainSeparator",
+          "astId": 67,
+          "type": "t_bytes32",
+          "src": "1979:30:0"
+        },
+        {
+          "contract": "GnosisSafe",
+          "path": "contracts/GnosisSafe.sol",
+          "label": "signedMessages",
+          "astId": 71,
+          "type": "t_mapping<t_uint256>",
+          "src": "2112:49:0"
+        },
+        {
+          "contract": "GnosisSafe",
+          "path": "contracts/GnosisSafe.sol",
+          "label": "approvedHashes",
+          "astId": 77,
+          "type": "t_mapping<t_uint256>",
+          "src": "2272:69:0"
+        }
+      ],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "ProxyFactory": {
+      "address": "0x50e55Af101C777bA7A1d560a774A82eF002ced9F",
+      "constructorCode": "608060405234801561001057600080fd5b50610c32806100206000396000f3fe",
+      "bodyBytecodeHash": "c52fe9a30ebdf71c5a02e570a8978e5407800c0e36865f4c3514bd663f6075c2",
+      "localBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
+      "deployedBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "MultiSend": {
+      "address": "0xB522a9f781924eD250A11C54105E51840B138AdD",
+      "constructorCode": "608060405234801561001057600080fd5b506101ac806100206000396000f3fe",
+      "bodyBytecodeHash": "61000d9792cd23d299f2c5bdbf174c4c30abee279c17a636bf62ffd0f3c7b209",
+      "localBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
+      "deployedBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "CreateAndAddModules": {
+      "address": "0x5Fb29eEa20B764b8908fd7477a91314397Cd3b9d",
+      "constructorCode": "608060405234801561001057600080fd5b5061029f806100206000396000f3fe",
+      "bodyBytecodeHash": "7bf47ddf97182d5c8d389b472859f170d6ebf8136a54d0e7dd2d2ede97c115e7",
+      "localBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
+      "deployedBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "CreateCall": {
+      "address": "0x293EBbB6983CF50bdC3E0E4c363ab3e8bFC0F2d3",
+      "constructorCode": "608060405234801561001057600080fd5b506104b6806100206000396000f3fe",
+      "bodyBytecodeHash": "a7bb8a89f35728244168946e103641d68e35bcf13fb76c11f0e61d1e7e3310fe",
+      "localBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
+      "deployedBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "DefaultCallbackHandler": {
+      "address": "0x40A930851BD2e590Bd5A5C981b436de25742E980",
+      "constructorCode": "608060405234801561001057600080fd5b50610781806100206000396000f3fe",
+      "bodyBytecodeHash": "8ab569ad44853b3521b650f817e533a66b341c014294b2bcf1fc575cf8c3529d",
+      "localBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",
+      "deployedBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",
+      "types": {},
+      "storage": [],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    }
+  },
+  "solidityLibs": {},
+  "proxies": {},
+  "manifestVersion": "2.2",
+  "version": "1.1.0",
+  "app": {
+    "address": "0x3c47F9098F9e7C6ea942f8A8D8ba8bcCA03a958d"
+  },
+  "package": {
+    "address": "0x304ee2F5077593b052c5F3A1266e87E029686EF2"
+  },
+  "provider": {
+    "address": "0xe824293bbb563F4Cd79dec40e1119EEf3D3348af"
+  },
+  "frozen": false
+}
