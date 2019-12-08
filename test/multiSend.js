@@ -38,7 +38,7 @@ contract('MultiSend', function(accounts) {
         stateChannelModuleMasterCopy = await StateChannelModule.new()
     })
 
-    it.only('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
+    it('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
         // Threshold is 1 after deployment
         assert.equal(await gnosisSafe.getThreshold(), 1)
         // No modules present after deployment
@@ -167,7 +167,7 @@ contract('MultiSend', function(accounts) {
         assert.equal(await gnosisSafe.getThreshold(), 1)
     })
 
-    it.only('should enforce delegatecall to MultiSend', async () => {
+    it('should enforce delegatecall to MultiSend', async () => {
         let source = `
         contract Test {
             function killme() public {
