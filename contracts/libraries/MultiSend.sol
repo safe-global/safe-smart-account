@@ -8,7 +8,13 @@ pragma solidity >=0.5.0 <0.7.0;
 /// @author Richard Meissner - <richard@gnosis.io>
 contract MultiSend {
 
-    uint256 constant private EXPECTED_CODE_SIZE = 574;
+    bytes32 constant private GUARD_VALUE = keccak256("multisend.guard.bytes32");
+
+    bytes32 guard;
+
+    constructor() public {
+        guard = GUARD_VALUE;
+    }
 
     /// @dev Sends multiple transactions and reverts all if one fails.
     /// @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of
@@ -21,12 +27,7 @@ contract MultiSend {
     function multiSend(bytes memory transactions)
         public
     {
-        uint256 codeSize;
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            codeSize := extcodesize(address())
-        }
-        require(codeSize != EXPECTED_CODE_SIZE, "MultiSend should only be called via delegatecall");
+        require(guard != GUARD_VALUE, "MultiSend should only be called via delegatecall");
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let length := mload(transactions)
