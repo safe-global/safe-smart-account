@@ -21,8 +21,6 @@ contract('WhitelistModule', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x", 0, 0, 0, 0)
         let whitelistModuleMasterCopy = await WhitelistModule.new([])
         // Create Gnosis Safe and Whitelist Module in one transactions
         let moduleData = await whitelistModuleMasterCopy.contract.setup.getData([accounts[3]])
