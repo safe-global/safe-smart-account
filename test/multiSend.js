@@ -38,7 +38,7 @@ contract('MultiSend', function(accounts) {
         stateChannelModuleMasterCopy = await StateChannelModule.new()
     })
 
-    it('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
+    it.only('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
         // Threshold is 1 after deployment
         assert.equal(await gnosisSafe.getThreshold(), 1)
         // No modules present after deployment
@@ -179,7 +179,7 @@ contract('MultiSend', function(accounts) {
         let nestedTransactionData = '0x' + encodeData(1, killLib.address, 0, await killLib.killme.getData())
         
         let multiSendCode = await web3.eth.getCode(multiSend.address)
-        utils.assertRejects(
+        await utils.assertRejects(
             multiSend.multiSend(nestedTransactionData),
             "Call to MultiSend should fail"
         )
