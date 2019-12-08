@@ -1,4 +1,5 @@
 const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const util = require("ethereumjs-util")
 const abi = require("ethereumjs-abi")
 
@@ -164,5 +165,24 @@ contract('MultiSend', function(accounts) {
         )
         assert.equal(0, event.args.payment)
         assert.equal(await gnosisSafe.getThreshold(), 1)
+    })
+
+    it.only('should enforce delegatecall to MultiSend', async () => {
+        let source = `
+        contract Test {
+            function killme() public {
+                selfdestruct(msg.sender);
+            }
+        }`
+        let killLib = await safeUtils.deployContract(accounts[0], source);
+
+        let nestedTransactionData = '0x' + encodeData(1, killLib.address, 0, await killLib.killme.getData())
+        
+        let multiSendCode = await web3.eth.getCode(multiSend.address)
+        utils.assertRejects(
+            multiSend.multiSend(nestedTransactionData),
+            "Call to MultiSend should fail"
+        )
+        assert.equal(multiSendCode, await web3.eth.getCode(multiSend.address))
     })
 })
