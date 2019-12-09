@@ -3,6 +3,7 @@ const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi")
 const Web3 = require('web3')
+const SolidityEvent = require("web3/lib/web3/event.js");
 const ModuleDataWrapper = (new Web3()).eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
    
 function createAndAddModulesData(dataArray) {
@@ -17,7 +18,13 @@ function currentTimeNs() {
 }
 
 function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
-    transaction.logs = transaction.logs.concat(transaction.receipt.logs.map(event => definitions.formatter(event)))
+    transaction.receipt.logs.forEach(event => {
+        const definition = definitions[event.topics[0]]
+        if (definition) {
+            const eventDef = new SolidityEvent(null, definition, null)
+            transaction.logs.push(eventDef.decode(event))
+        }
+    });
     return getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject)
 }
 
