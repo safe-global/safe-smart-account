@@ -3,6 +3,5 @@ node_modules/
 .DS_Store
 .zos.session
 .openzeppelin/.session
-.vscode/
 env/
 .env
