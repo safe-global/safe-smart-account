@@ -1,5 +1,4 @@
 const fs = require('fs');
-const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const StateChannelModule = artifacts.require("./StateChannelModule.sol");
 const DailyLimitModule = artifacts.require("./DailyLimitModule.sol")
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
@@ -30,7 +29,6 @@ module.exports = function(callback) {
     });
     var oz = JSON.parse(fs.readFileSync('./.openzeppelin/' + network + '.json'));  
     Promise.all([
-        ignoreErrors(GnosisSafe.at(oz.contracts['GnosisSafe'].address).setup([notOwnedAddress, notOwnedAddress2], 2, 0, 0, 0, 0, 0, 0)),
         //ignoreErrors(StateChannelModule.at(oz.contracts['StateChannelModule'].address).setup()),
         //ignoreErrors(DailyLimitModule.at(oz.contracts['DailyLimitModule'].address).setup([],[])),
         //ignoreErrors(SocialRecoveryModule.at(oz.contracts['SocialRecoveryModule'].address).setup([notOwnedAddress, notOwnedAddress2], 2)),

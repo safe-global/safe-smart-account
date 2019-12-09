@@ -18,8 +18,6 @@ contract('SocialRecoveryModule', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let createAndAddModules = await CreateAndAddModules.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        // Initialize safe master copy
-        gnosisSafeMasterCopy.setup([accounts[0], accounts[1]], 2, 0, "0x", 0, 0, 0, 0)
         let socialRecoveryModuleMasterCopy = await SocialRecoveryModule.new()
         // Initialize module master copy
         socialRecoveryModuleMasterCopy.setup([accounts[0], accounts[1]], 2)

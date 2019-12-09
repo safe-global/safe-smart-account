@@ -1,5 +1,6 @@
 const utils = require('./utils/general')
 
+const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const DefaultCallbackHandler = artifacts.require("./handler/DefaultCallbackHandler.sol")
 const MockToken = artifacts.require('./mocks/ERC1155Token.sol');
@@ -17,7 +18,12 @@ contract('DefaultCallbackHandler', function(accounts) {
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
-        gnosisSafe = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
+        let proxyFactory = await ProxyFactory.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, ""),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
+        )
         handler = await DefaultCallbackHandler.new()
     })
 

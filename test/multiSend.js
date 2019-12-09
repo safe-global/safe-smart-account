@@ -13,6 +13,7 @@ const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
 contract('MultiSend', function(accounts) {
 
     let gnosisSafe
+    let gnosisSafeMasterCopy
     let multiSend
     let createAndAddModules
     let proxyFactory
@@ -29,12 +30,17 @@ contract('MultiSend', function(accounts) {
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
-        gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0, 0)
+        proxyFactory = await ProxyFactory.new()
+        gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        // Create Gnosis Safe
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0, 0)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
+        )
         multiSend = await MultiSend.new()
         createAndAddModules = await CreateAndAddModules.new()
 
-        proxyFactory = await ProxyFactory.new()
         stateChannelModuleMasterCopy = await StateChannelModule.new()
     })
 
@@ -108,7 +114,7 @@ contract('MultiSend', function(accounts) {
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafe.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 1, multiSend.address, multiSendData, 0, 0, 0, 0)
         let newSafe = utils.getParamFromTxEvent(
-            await proxyFactory.createProxy(gnosisSafe.address, gnosisSafeData),
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
 

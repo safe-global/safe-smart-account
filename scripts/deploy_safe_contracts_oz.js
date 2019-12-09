@@ -43,9 +43,6 @@ shell.exec(`npx oz push --network ${network} --skip-compile`)
 shell.exec(`npx oz add DefaultCallbackHandler --skip-compile`)
 shell.exec(`npx oz push --network ${network} --skip-compile`)
 
-// Init master copies
-shell.exec(`npx truffle --network ${network} exec scripts/init_contracts.js`)
-
 // Publish zos package
 shell.exec(`npx oz publish --network ${network}`)
 
