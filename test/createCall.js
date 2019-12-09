@@ -37,7 +37,6 @@ contract('CreateCall', function(accounts) {
         // Create Master Copies
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafeMasterCopy.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
         gnosisSafe = utils.getParamFromTxEvent(
@@ -59,7 +58,8 @@ contract('CreateCall', function(accounts) {
         let expectedAddress = "0x" + ethUtil.generateAddress(gnosisSafe.address, await web3.eth.getTransactionCount(gnosisSafe.address)).toString("hex")
 
         let creationData = createCall.contract.performCreate.getData(0, compileContract.data)
-        let testContract = utils.getParamFromTxEvent(
+        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
+            CreateCall.events,
             await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], createCall.address, 0, creationData, DELEGATECALL, executor, { extraGas: 15000 }),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE with value'
         )
@@ -81,7 +81,8 @@ contract('CreateCall', function(accounts) {
         let expectedAddress = "0x" + ethUtil.generateAddress(gnosisSafe.address, await web3.eth.getTransactionCount(gnosisSafe.address)).toString("hex")
 
         let creationData = createCall.contract.performCreate.getData(web3.toWei(1, 'ether'), compileContract.data)
-        let testContract = utils.getParamFromTxEvent(
+        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
+            CreateCall.events,
             await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], createCall.address, 0, creationData, DELEGATECALL, executor, { extraGas: 15000 }),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE'
         )
@@ -105,7 +106,8 @@ contract('CreateCall', function(accounts) {
         let expectedAddress = "0x" + ethUtil.generateAddress2(gnosisSafe.address, salt, compileContract.data).toString("hex")
 
         let creationData = createCall.contract.performCreate2.getData(0, compileContract.data, salt)
-        let testContract = utils.getParamFromTxEvent(
+        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
+            CreateCall.events,
             await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], createCall.address, 0, creationData, DELEGATECALL, executor, { extraGas: 15000 }),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE2'
         )
@@ -128,7 +130,8 @@ contract('CreateCall', function(accounts) {
         let expectedAddress = "0x" + ethUtil.generateAddress2(gnosisSafe.address, salt, compileContract.data).toString("hex")
 
         let creationData = createCall.contract.performCreate2.getData(web3.toWei(1, 'ether'), compileContract.data, salt)
-        let testContract = utils.getParamFromTxEvent(
+        let testContract = utils.getParamFromTxEventWithAdditionalDefinitions(
+            CreateCall.events,
             await safeUtils.executeTransaction(lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], createCall.address, 0, creationData, DELEGATECALL, executor, { extraGas: 15000 }),
             'ContractCreation', 'newContract', gnosisSafe.address, TestContract, 'executeTransaction CREATE2 with value'
         )

@@ -56,6 +56,14 @@ contract GnosisSafe
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
+    // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
+    constructor() public {
+        // By setting the threshold it is not possible to call setup anymore,
+        // so we create a Safe with 0 owners and threshold 1.
+        // This is an unusable Safe, perfect for the mastercopy
+        threshold = 1;
+    }
+
     /// @dev Setup function sets initial storage of contract.
     /// @param _owners List of Safe owners.
     /// @param _threshold Number of required confirmations for a Safe transaction.
