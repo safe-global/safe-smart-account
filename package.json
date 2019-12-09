@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test-norpc": "truffle test",
-    "test": "run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse 'truffle test'",
+    "test": "run(){ run-with-testrpc -l 20000000 --noVMErrorsOnRPCResponse \"truffle test $@\"; }; run",
     "preversion": "npm run restore",
     "truffle-oz-merge": "node scripts/merge_oz.js",
     "deploy-oz": "node scripts/deploy_safe_contracts_oz.js",

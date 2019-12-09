@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "truffle test (ganache running)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/truffle/build/cli.bundled.js",
+            "args": [
+                "test"
+            ],
+            "cwd": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/test/**/*"
+            ],
+        },
+    ]
+}
