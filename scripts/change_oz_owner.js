@@ -47,6 +47,7 @@ module.exports = async function (callback) {
     callback()
     return
   }
+  console.log("Network:", network)
   console.log("New owner:", newOwner)
   var oz = JSON.parse(fs.readFileSync('./.openzeppelin/' + network + '.json'))
 

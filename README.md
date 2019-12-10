@@ -21,7 +21,7 @@ npx truffle test
 
 ### Deploy
 
-Some contracts require that the Solidity compile target is `petersburg` (e.g. ProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
+Some contracts require that the Solidity compile target is at least `petersburg` (e.g. ProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
 
 Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
