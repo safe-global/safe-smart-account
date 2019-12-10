@@ -97,9 +97,9 @@ Documentation
 
 Audits/ Formal Verification
 ---------
-- [by G0 Group](docs/audit_1_1_0.md)
-- [by Runtime Verification](docs/rv_1_0_0.md)
-- [by Alexey Akhunov](docs/alexey_audit.md)
+- [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
+- [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
+- [for Version 0.2.0 by Alexey Akhunov](docs/alexey_audit.md)
 
 Security and Liability
 ----------------------
