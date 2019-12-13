@@ -1,11 +1,11 @@
 {
   "contracts": {
     "GnosisSafe": {
-      "address": "0xaE32496491b53841efb51829d6f886387708F99B",
-      "constructorCode": "608060405234801561001057600080fd5b50615ff180620000216000396000f3fe",
-      "bodyBytecodeHash": "bc0b6b9f237fe51fbbb2da787f3e63e54aa3c0b654b9382636c83f7081e78aec",
-      "localBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
-      "deployedBytecodeHash": "19fbb8d083f381f9d12e5fac0ad78b42520a76cfbd5deb626d0de57567e3ac36",
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
+      "constructorCode": "608060405234801561001057600080fd5b506001600481905550615de880620000296000396000f3fe",
+      "bodyBytecodeHash": "d65f696c271f3d4c6ea0ce7c999aef7eee4b88925734e94d9c7b99dd04846e39",
+      "localBytecodeHash": "62533ba97a869b4d8a107493ef5ed3e790f1d43990916b4b3f6254a60b5e8643",
+      "deployedBytecodeHash": "62533ba97a869b4d8a107493ef5ed3e790f1d43990916b4b3f6254a60b5e8643",
       "types": {
         "t_address": {
           "id": "t_address",
@@ -40,41 +40,41 @@
           "contract": "MasterCopy",
           "path": "contracts/common/MasterCopy.sol",
           "label": "masterCopy",
-          "astId": 1942,
+          "astId": 2008,
           "type": "t_address",
-          "src": "617:18:7"
+          "src": "621:26:9"
         },
         {
           "contract": "ModuleManager",
           "path": "contracts/base/ModuleManager.sol",
           "label": "modules",
-          "astId": 1138,
+          "astId": 1186,
           "type": "t_mapping<t_address>",
-          "src": "682:45:4"
+          "src": "684:45:5"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "owners",
-          "astId": 1485,
+          "astId": 1544,
           "type": "t_mapping<t_address>",
-          "src": "488:43:5"
+          "src": "490:43:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "ownerCount",
-          "astId": 1487,
+          "astId": 1546,
           "type": "t_uint256",
-          "src": "537:18:5"
+          "src": "539:18:6"
         },
         {
           "contract": "OwnerManager",
           "path": "contracts/base/OwnerManager.sol",
           "label": "threshold",
-          "astId": 1489,
+          "astId": 1548,
           "type": "t_uint256",
-          "src": "561:26:5"
+          "src": "563:26:6"
         },
         {
           "contract": "GnosisSafe",
@@ -82,7 +82,7 @@
           "label": "nonce",
           "astId": 65,
           "type": "t_uint256",
-          "src": "1953:20:0"
+          "src": "1956:20:0"
         },
         {
           "contract": "GnosisSafe",
@@ -90,7 +90,7 @@
           "label": "domainSeparator",
           "astId": 67,
           "type": "t_bytes32",
-          "src": "1979:30:0"
+          "src": "1982:30:0"
         },
         {
           "contract": "GnosisSafe",
@@ -98,7 +98,7 @@
           "label": "signedMessages",
           "astId": 71,
           "type": "t_mapping<t_uint256>",
-          "src": "2112:49:0"
+          "src": "2115:49:0"
         },
         {
           "contract": "GnosisSafe",
@@ -106,11 +106,11 @@
           "label": "approvedHashes",
           "astId": 77,
           "type": "t_mapping<t_uint256>",
-          "src": "2272:69:0"
+          "src": "2275:69:0"
         }
       ],
       "warnings": {
-        "hasConstructor": false,
+        "hasConstructor": true,
         "hasSelfDestruct": false,
         "hasDelegateCall": false,
         "hasInitialValuesInDeclarations": false,
@@ -118,11 +118,11 @@
       }
     },
     "ProxyFactory": {
-      "address": "0x50e55Af101C777bA7A1d560a774A82eF002ced9F",
-      "constructorCode": "608060405234801561001057600080fd5b50610c32806100206000396000f3fe",
-      "bodyBytecodeHash": "c52fe9a30ebdf71c5a02e570a8978e5407800c0e36865f4c3514bd663f6075c2",
-      "localBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
-      "deployedBytecodeHash": "b01ad22902072478675ae8dbedaca95f0257d67359db0f718c302882ed8f5e27",
+      "address": "0x76E2cFc1F5Fa8F6a5b3fC4c8F4788F0116861F9B",
+      "constructorCode": "608060405234801561001057600080fd5b50610f73806100206000396000f3fe",
+      "bodyBytecodeHash": "7e47705e552d4727b6802eef2203e9448fcb65f06bf456b394f3912fa769097b",
+      "localBytecodeHash": "51dc134f508f1307e9e61a7a9a786038ebb6d71aae11eaad7c2d71049efb540b",
+      "deployedBytecodeHash": "51dc134f508f1307e9e61a7a9a786038ebb6d71aae11eaad7c2d71049efb540b",
       "types": {},
       "storage": [],
       "warnings": {
@@ -134,15 +134,30 @@
       }
     },
     "MultiSend": {
-      "address": "0xB522a9f781924eD250A11C54105E51840B138AdD",
-      "constructorCode": "608060405234801561001057600080fd5b506101ac806100206000396000f3fe",
-      "bodyBytecodeHash": "61000d9792cd23d299f2c5bdbf174c4c30abee279c17a636bf62ffd0f3c7b209",
-      "localBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
-      "deployedBytecodeHash": "964d63a3ac80b3b1a52387b90e9607a2848398c02d981191b7b9fa8d321f3744",
-      "types": {},
-      "storage": [],
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "constructorCode": "608060405234801561001057600080fd5b5060405180807f6d756c746973656e642e67756172642e627974657333320000000000000000008152506017019050604051809103902060008190555061026c8061005c6000396000f3fe",
+      "bodyBytecodeHash": "86a64eef88a50def979045c1c75505826808643e91f152bfb644f48b36d47cf0",
+      "localBytecodeHash": "fdba32061dae3b905a3d414d02814f6c299d1550777e5e70ec380d6817e4968b",
+      "deployedBytecodeHash": "fdba32061dae3b905a3d414d02814f6c299d1550777e5e70ec380d6817e4968b",
+      "types": {
+        "t_bytes32": {
+          "id": "t_bytes32",
+          "kind": "elementary",
+          "label": "bytes32"
+        }
+      },
+      "storage": [
+        {
+          "contract": "MultiSend",
+          "path": "contracts/libraries/MultiSend.sol",
+          "label": "guard",
+          "astId": 2546,
+          "type": "t_bytes32",
+          "src": "420:13:21"
+        }
+      ],
       "warnings": {
-        "hasConstructor": false,
+        "hasConstructor": true,
         "hasSelfDestruct": false,
         "hasDelegateCall": false,
         "hasInitialValuesInDeclarations": false,
@@ -150,7 +165,7 @@
       }
     },
     "CreateAndAddModules": {
-      "address": "0x5Fb29eEa20B764b8908fd7477a91314397Cd3b9d",
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
       "constructorCode": "608060405234801561001057600080fd5b5061029f806100206000396000f3fe",
       "bodyBytecodeHash": "7bf47ddf97182d5c8d389b472859f170d6ebf8136a54d0e7dd2d2ede97c115e7",
       "localBytecodeHash": "5ca4087768a1cb4f0f24fbff8d715105b59448a880cff9e84d270e72f776fc30",
@@ -166,7 +181,7 @@
       }
     },
     "CreateCall": {
-      "address": "0x293EBbB6983CF50bdC3E0E4c363ab3e8bFC0F2d3",
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
       "constructorCode": "608060405234801561001057600080fd5b506104b6806100206000396000f3fe",
       "bodyBytecodeHash": "a7bb8a89f35728244168946e103641d68e35bcf13fb76c11f0e61d1e7e3310fe",
       "localBytecodeHash": "110bf4b88cbb5d32c232729179754d61d8d6faf77409489d6ccd1f099c166b0c",
@@ -182,7 +197,7 @@
       }
     },
     "DefaultCallbackHandler": {
-      "address": "0x40A930851BD2e590Bd5A5C981b436de25742E980",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
       "constructorCode": "608060405234801561001057600080fd5b50610781806100206000396000f3fe",
       "bodyBytecodeHash": "8ab569ad44853b3521b650f817e533a66b341c014294b2bcf1fc575cf8c3529d",
       "localBytecodeHash": "6c5f005cc8baecd15612d2f6865dfb0e42d00427b36b8f716cebe0e7416b89f1",
@@ -201,7 +216,7 @@
   "solidityLibs": {},
   "proxies": {},
   "manifestVersion": "2.2",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "app": {
     "address": "0x3c47F9098F9e7C6ea942f8A8D8ba8bcCA03a958d"
   },
@@ -209,7 +224,7 @@
     "address": "0x304ee2F5077593b052c5F3A1266e87E029686EF2"
   },
   "provider": {
-    "address": "0xe824293bbb563F4Cd79dec40e1119EEf3D3348af"
+    "address": "0x34F5c67D50d7539B69B743F45B7e24ebBE7202cA"
   },
   "frozen": false
 }
