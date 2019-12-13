@@ -87,7 +87,6 @@ contract('GnosisSafe trustless deployment', function(accounts) {
         // Create lightwallet
         lw = await utils.createLightwallet()
         gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafeMasterCopy.setup([accounts[0]], 1, 0, "0x", 0, 0, 0, 0)
     })
 
     it('should create safe from random account and pay in ETH', async () => {

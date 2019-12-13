@@ -1,5 +1,6 @@
 const utils = require('./utils/general')
 
+const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 
 contract('GnosisSafe setup', function(accounts) {
@@ -9,10 +10,13 @@ contract('GnosisSafe setup', function(accounts) {
 
     const CALL = 0
 
-    it.only('should not be able to call execTransaction before setup', async () => {
-
-        // Create lightwallet
-        gnosisSafe = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
+    it('should not be able to call execTransaction before setup', async () => {
+        let proxyFactory = await ProxyFactory.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, "0x"),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+        )
 
         // Fund Safe
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})

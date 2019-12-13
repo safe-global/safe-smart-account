@@ -1,11 +1,7 @@
 const utils = require('./utils/general')
 const safeUtils = require('./utils/execution')
-const BigNumber = require('bignumber.js')
-
+const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
-const MockContract = artifacts.require('./MockContract.sol')
-const MockToken = artifacts.require('./Token.sol')
 
 contract('GnosisSafe', function(accounts) {
 
@@ -19,8 +15,13 @@ contract('GnosisSafe', function(accounts) {
         // Create lightwallet
         lw = await utils.createLightwallet()
         // Create Master Copies
-        gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        gnosisSafe.setup([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
+        let proxyFactory = await ProxyFactory.new()
+        let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
+        )
     })
 
     it('Check that correct data is returned', async () => {

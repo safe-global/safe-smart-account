@@ -1,4 +1,5 @@
 const utils = require('./utils/general')
+const safeUtils = require('./utils/execution')
 const util = require("ethereumjs-util")
 const abi = require("ethereumjs-abi")
 
@@ -12,6 +13,7 @@ const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
 contract('MultiSend', function(accounts) {
 
     let gnosisSafe
+    let gnosisSafeMasterCopy
     let multiSend
     let createAndAddModules
     let proxyFactory
@@ -28,12 +30,17 @@ contract('MultiSend', function(accounts) {
     beforeEach(async function () {
         // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
-        gnosisSafe = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-        await gnosisSafe.setup([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0, 0)
+        proxyFactory = await ProxyFactory.new()
+        gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
+        // Create Gnosis Safe
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 1, 0, 0, 0, 0, 0, 0)
+        gnosisSafe = utils.getParamFromTxEvent(
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
+        )
         multiSend = await MultiSend.new()
         createAndAddModules = await CreateAndAddModules.new()
 
-        proxyFactory = await ProxyFactory.new()
         stateChannelModuleMasterCopy = await StateChannelModule.new()
     })
 
@@ -107,7 +114,7 @@ contract('MultiSend', function(accounts) {
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafe.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 1, multiSend.address, multiSendData, 0, 0, 0, 0)
         let newSafe = utils.getParamFromTxEvent(
-            await proxyFactory.createProxy(gnosisSafe.address, gnosisSafeData),
+            await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
 
@@ -164,5 +171,24 @@ contract('MultiSend', function(accounts) {
         )
         assert.equal(0, event.args.payment)
         assert.equal(await gnosisSafe.getThreshold(), 1)
+    })
+
+    it('should enforce delegatecall to MultiSend', async () => {
+        let source = `
+        contract Test {
+            function killme() public {
+                selfdestruct(msg.sender);
+            }
+        }`
+        let killLib = await safeUtils.deployContract(accounts[0], source);
+
+        let nestedTransactionData = '0x' + encodeData(1, killLib.address, 0, await killLib.killme.getData())
+        
+        let multiSendCode = await web3.eth.getCode(multiSend.address)
+        await utils.assertRejects(
+            multiSend.multiSend(nestedTransactionData),
+            "Call to MultiSend should fail"
+        )
+        assert.equal(multiSendCode, await web3.eth.getCode(multiSend.address))
     })
 })
