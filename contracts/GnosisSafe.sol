@@ -106,7 +106,7 @@ contract GnosisSafe
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param baseGas Gas costs for that are indipendent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+    /// @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
