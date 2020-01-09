@@ -54,7 +54,7 @@ contract GnosisSafe
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
     mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
-    mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
+    mapping(bytes32 => address[]) public approvedHashes;
 
     // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
     constructor() public {
@@ -137,7 +137,8 @@ contract GnosisSafe
             // Increase nonce and execute transaction.
             nonce++;
             txHash = keccak256(txHashData);
-            checkSignatures(txHash, txHashData, signatures, true);
+            checkSignatures(txHash, txHashData, signatures);
+            delete approvedHashes[txHash];
         }
         require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
@@ -184,13 +185,14 @@ contract GnosisSafe
     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
     * @param data That should be signed (this is passed to an external validator contract)
     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
-    * @param consumeHash Indicates that in case of an approved hash the storage can be freed to save gas
     */
-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, bool consumeHash)
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures)
         internal
+        view
     {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
+
         // Check that a threshold is set
         require(_threshold > 0, "Threshold needs to be defined!");
         // Check that the provided signature data is not too short
@@ -235,14 +237,16 @@ contract GnosisSafe
                 require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "Invalid contract signature provided");
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
-                // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint256(r));
-                // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "Hash has not been approved");
-                // Hash has been marked for consumption. If this hash was pre-approved free storage
-                if (consumeHash && msg.sender != currentOwner) {
-                    approvedHashes[currentOwner][dataHash] = 0;
-                }
+                // Hashes cah be approved by the sender of the message;
+                require(msg.sender == currentOwner, "Hash has not been approved");
+            } else if (v == 2) {
+                // When handling approved hashes the address position on approvedHashes array of the approver is encoded into r
+                uint256 pos = uint256(r);
+                uint256 len = approvedHashes[dataHash].length;
+                // Hashes are automatically approved when they have been pre-approved via a separate transaction
+                require(pos > 0 && len >= pos, "Hash has not been approved");
+                currentOwner = approvedHashes[dataHash][pos-1];
             } else if (v > 30) {
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
                 currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
@@ -291,7 +295,7 @@ contract GnosisSafe
         external
     {
         require(owners[msg.sender] != address(0), "Only owners can approve a hash");
-        approvedHashes[msg.sender][hashToApprove] = 1;
+        approvedHashes[hashToApprove].push(msg.sender);
         emit ApproveHash(hashToApprove, msg.sender);
     }
 
@@ -317,16 +321,16 @@ contract GnosisSafe
     * @param _signature Signature byte array associated with _data
     * @return a bool upon valid or invalid signature with corresponding _data
     */
-    function isValidSignature(bytes calldata _data, bytes calldata _signature)
-        external
+    function isValidSignature(bytes memory _data, bytes memory _signature)
+        public
+        view
         returns (bytes4)
     {
         bytes32 messageHash = getMessageHash(_data);
         if (_signature.length == 0) {
             require(signedMessages[messageHash] != 0, "Hash not approved");
         } else {
-            // consumeHash needs to be false, as the state should not be changed
-            checkSignatures(messageHash, _data, _signature, false);
+            checkSignatures(messageHash, _data, _signature);
         }
         return EIP1271_MAGIC_VALUE;
     }

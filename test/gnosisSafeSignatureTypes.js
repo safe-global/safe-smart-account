@@ -23,11 +23,16 @@ contract('GnosisSafe without refund', function(accounts) {
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, executor), "Only owners can approve a hash")
 
         let sigs = "0x"
+        var i = 0;
         for (let account of (accounts.sort())) {
             if (account != txSender) {
+                i++;
                 utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveHash(txHash, {from: account}))
+                sigs += "00000000000000000000000000000000000000000000000000000000000000" + ("0" + (i).toString('16')).slice(-2) + "0000000000000000000000000000000000000000000000000000000000000000" + "02"
+            } else {
+                sigs += "000000000000000000000000" + account.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
             }
-            sigs += "000000000000000000000000" + account.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
+            
         }
 
         let tx = await gnosisSafe.execTransaction(to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: txSender})
