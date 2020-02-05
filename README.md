@@ -16,8 +16,10 @@ npm install
 
 ```bash
 npx truffle compile
-npx truffle test
+npx test
 ```
+
+`npx test` will start a ganache-cli with the correct configuration. If you want to run `npx truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
 
 ### Deploy
 
