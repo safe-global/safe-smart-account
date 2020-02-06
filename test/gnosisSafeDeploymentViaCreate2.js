@@ -4,9 +4,9 @@ const ethUtil = require('ethereumjs-util')
 const abi = require('ethereumjs-abi')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const Proxy = artifacts.require("./Proxy.sol")
+const Proxy = artifacts.require("./GnosisSafeProxy.sol")
 const ProxyInterface = artifacts.require("./IProxy.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 const MockToken = artifacts.require('./Token.sol')
 
