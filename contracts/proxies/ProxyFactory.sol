@@ -1,21 +1,21 @@
 pragma solidity ^0.5.3;
-import "./Proxy.sol";
+import "./GnosisSafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
 /// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract ProxyFactory {
 
-    event ProxyCreation(Proxy proxy);
+    event ProxyCreation(GnosisSafeProxy proxy);
 
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
     /// @param masterCopy Address of master copy.
     /// @param data Payload for message call sent to new proxy contract.
     function createProxy(address masterCopy, bytes memory data)
         public
-        returns (Proxy proxy)
+        returns (GnosisSafeProxy proxy)
     {
-        proxy = new Proxy(masterCopy);
+        proxy = new GnosisSafeProxy(masterCopy);
         if (data.length > 0)
             // solium-disable-next-line security/no-inline-assembly
             assembly {
