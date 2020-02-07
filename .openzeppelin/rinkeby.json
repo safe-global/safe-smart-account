@@ -117,7 +117,7 @@
         "uninitializedBaseContracts": []
       }
     },
-    "ProxyFactory": {
+    "GnosisSafeProxyFactory": {
       "address": "0x76E2cFc1F5Fa8F6a5b3fC4c8F4788F0116861F9B",
       "constructorCode": "608060405234801561001057600080fd5b50610f73806100206000396000f3fe",
       "bodyBytecodeHash": "7e47705e552d4727b6802eef2203e9448fcb65f06bf456b394f3912fa769097b",

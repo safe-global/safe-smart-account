@@ -3,7 +3,7 @@ const safeUtils = require('./utils/execution')
 
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 
 
 contract('GnosisSafe using eth_sign', function(accounts) {

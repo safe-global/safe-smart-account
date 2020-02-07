@@ -1,6 +1,6 @@
 const utils = require('./utils/general')
 
-const ProxyFactory = artifacts.require("./ProxyFactory.sol");
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const DefaultCallbackHandler = artifacts.require("./handler/DefaultCallbackHandler.sol")
 const MockToken = artifacts.require('./mocks/ERC1155Token.sol');

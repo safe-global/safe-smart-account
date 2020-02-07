@@ -1,6 +1,6 @@
 const utils = require('./utils/general')
 
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 const IProxyCreationCallback = artifacts.require("./IProxyCreationCallback.sol")
 const MockContract = artifacts.require('./MockContract.sol')
 

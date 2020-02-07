@@ -3,7 +3,7 @@ const utils = require('./utils/general')
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol") 
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol") 
 
 contract('StateChannelModule', function(accounts) {
 
