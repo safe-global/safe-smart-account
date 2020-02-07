@@ -6,7 +6,7 @@ import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
-import "./external/SafeMath.sol";
+import "./external/GnosisSafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
@@ -15,7 +15,7 @@ import "./external/SafeMath.sol";
 contract GnosisSafe
     is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager {
 
-    using SafeMath for uint256;
+    using GnosisSafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "1.1.1";

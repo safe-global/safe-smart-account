@@ -158,7 +158,7 @@ contract('GnosisSafe with refunds', function(accounts) {
 
         let gasPrice = (new BigNumber('2')).pow(256).div(80000).toNumber()
 
-        // Should revert as we have an overflow (no message, as SafeMath doesn't support messages yet)
+        // Should revert as we have an overflow (no message, as GnosisSafeMath doesn't support messages yet)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { revertMessage: "", gasPrice: gasPrice})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
