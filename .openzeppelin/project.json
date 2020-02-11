@@ -2,7 +2,7 @@
   "manifestVersion": "2.2",
   "contracts": {
     "GnosisSafe": "GnosisSafe",
-    "ProxyFactory": "ProxyFactory",
+    "GnosisSafeProxyFactory": "GnosisSafeProxyFactory",
     "MultiSend": "MultiSend",
     "CreateAndAddModules": "CreateAndAddModules",
     "CreateCall": "CreateCall",

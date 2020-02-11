@@ -1,7 +1,7 @@
 const utils = require('./utils/general')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 
 
 contract('GnosisSafe without refund', function(accounts) {

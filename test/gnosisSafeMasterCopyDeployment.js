@@ -4,7 +4,7 @@ const abi = require('ethereumjs-abi')
 
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 
 contract('GnosisSafe master copy deployment', function(accounts) {
 

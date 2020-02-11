@@ -4,7 +4,7 @@ const util = require("ethereumjs-util")
 const abi = require("ethereumjs-abi")
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 const MultiSend = artifacts.require("./libraries/MultiSend.sol")
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol")
 const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")

@@ -2,7 +2,7 @@ const utils = require('./utils/general')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
-const ProxyFactory = artifacts.require("./ProxyFactory.sol");
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol");
 const DailyLimitModule = artifacts.require("./modules/DailyLimitModule.sol");
 const MockContract = artifacts.require('./MockContract.sol');
 const MockToken = artifacts.require('./Token.sol');

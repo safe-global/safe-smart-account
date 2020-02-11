@@ -4,7 +4,7 @@ const ethUtil = require('ethereumjs-util')
 const abi = require('ethereumjs-abi')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 const CreateCall = artifacts.require("./CreateCall.sol")
 
 contract('CreateCall', function(accounts) {
