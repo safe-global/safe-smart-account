@@ -6,6 +6,9 @@ Gnosis Safe Contracts
 
 Install
 -------
+### The repository requires Node 10
+- As this repository uses an [old version of web3js](https://github.com/ethereum/web3.js/releases/tag/v0.20.6) it is required to use Node 10 else `npm install` will fail.
+
 ### Install requirements with npm:
 
 ```bash
