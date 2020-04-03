@@ -35,8 +35,8 @@ contract('Gas Estimation', function(accounts) {
         }
 
         function useGas(uint256 count) public {
-            this.nested(4, count);
-            this.nested(4, count);
+            this.nested(6, count);
+            this.nested(8, count);
         }
     }`
 
@@ -63,7 +63,7 @@ contract('Gas Estimation', function(accounts) {
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
-        let data = await gasUserContact.useGas.getData(50)
+        let data = await gasUserContact.useGas.getData(80)
         await safeUtils.executeTransaction(
             lw, gnosisSafe, 'create test contract', [lw.accounts[0], lw.accounts[1]], 
             gasUserContact.address, 0, data, CALL, 
@@ -73,6 +73,5 @@ contract('Gas Estimation', function(accounts) {
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
         assert.ok(executorDiff > 0)
-        assert.ok(false) // See events in console
     })
 })

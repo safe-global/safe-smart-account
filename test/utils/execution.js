@@ -57,6 +57,26 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let baseGasEstimate = estimateBaseGas(safe, to, value, data, operation, txGasEstimate, txGasToken, refundReceiver, accounts.length, nonce) + extraGas
     console.log("    Base Gas estimate: " + baseGasEstimate)
 
+    let additionalGas = 10000
+    for (let i = 0; i < 100; i++) {
+        try {
+            let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
+            let estimateResponse = await web3.eth.call({
+                to: safe.address, 
+                from: safe.address, 
+                data: estimateData, 
+                gasPrice: 0, 
+                gasLimit: txGasEstimate + baseGasEstimate + 32000
+            })
+            console.log("    Simulate: " + estimateResponse)
+            if (estimateResponse != "0x") break
+        } catch(e) {
+            console.log("    Could simulate " + subject + "; cause: " + e)
+        }
+        txGasEstimate += additionalGas
+        additionalGas *= 2
+    }
+
     let gasPrice = GAS_PRICE
     if (txGasToken != 0) {
         gasPrice = 1
