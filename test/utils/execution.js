@@ -79,6 +79,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
                 gasPrice: options.txGasPrice || gasPrice
         })
     } catch (e) {
+        console.log("    Estimation error")
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
@@ -86,10 +87,11 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         return null
     }
 
+    console.log("    GasLimit estimation:", (estimate + 10000))
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
     let tx = await safe.execTransaction(
-        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + txGasEstimate + 10000, gasPrice: options.txGasPrice || gasPrice}
+        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + 10000, gasPrice: options.txGasPrice || gasPrice}
     )
     let eventName = (txFailed) ? 'ExecutionFailure' : 'ExecutionSuccess'
     let event = utils.checkTxEvent(tx, eventName, safe.address, true, subject)

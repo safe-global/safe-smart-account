@@ -56,5 +56,8 @@
     "shelljs": "^0.8.3",
     "solc": "^0.5.9",
     "truffle-hdwallet-provider": "0.0.7-beta.1"
+  },
+  "resolutions": {
+    "bitcore-lib": "^0.16.0"
   }
 }
