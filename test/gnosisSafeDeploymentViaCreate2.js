@@ -14,7 +14,7 @@ contract('GnosisSafe deployment via create2', function(accounts) {
 
     const CALL = 0
 
-    const gasPrice = web3.toWei('20', 'gwei')
+    const gasPrice = web3.utils.toWei('20', 'gwei')
 
     let funder
     let proxyFactory
@@ -91,12 +91,12 @@ contract('GnosisSafe deployment via create2', function(accounts) {
         let gnosisSafe = GnosisSafe.at(creationData.safe)
         assert.deepEqual(await gnosisSafe.getOwners(), [lw.accounts[0], lw.accounts[1], lw.accounts[2]])
         let funderDiff = await web3.eth.getBalance(funder) - funderBalance
-        console.log("    Executor earned " + web3.fromWei(funderDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("funderDiff", 'ether') + " ETH")
         assert.ok(funderDiff > 0)
 
-        await web3.eth.sendTransaction({from: accounts[1], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[8])
-        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.toWei(0.5, 'ether'), "0x", CALL, accounts[8])
+        await web3.eth.sendTransaction({from: accounts[1], to: gnosisSafe.address, value: web3.utils.toWei("1.1", 'ether')})
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.utils.toWei("0.5", 'ether'), "0x", CALL, accounts[8])
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.utils.toWei("0.5", 'ether'), "0x", CALL, accounts[8])
     })
 
     it('should create safe from random account and pay with token', async () => {

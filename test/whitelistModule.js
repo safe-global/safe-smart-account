@@ -46,8 +46,8 @@ contract('WhitelistModule', function(accounts) {
             "Not enough funds"
         )
         // Deposit 1 eth
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'));
         // Withdraw to whitelisted account
         utils.logGasUsage(
             'execTransactionFromModule withdraw to whitelisted account',
@@ -55,7 +55,7 @@ contract('WhitelistModule', function(accounts) {
                 accounts[3], 300, "0x", {from: accounts[1]}
             )
         )
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 300);
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether') - 300);
     })
 
     it('should add and remove an account from the whitelist', async () => {

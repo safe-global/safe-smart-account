@@ -50,8 +50,8 @@ contract('DailyLimitModule', function(accounts) {
             "Not enough funds"
         )
         // Deposit 1 eth
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'));
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'));
         // Withdraw daily limit
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit',
@@ -65,7 +65,7 @@ contract('DailyLimitModule', function(accounts) {
                 0, accounts[0], 50, {from: accounts[0]}
             )
         )
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether') - 100);
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether') - 100);
         // Third withdrawal will fail
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(
@@ -77,20 +77,20 @@ contract('DailyLimitModule', function(accounts) {
 
     it('should change daily limit', async () => {
         // Funds for paying execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
         // Change daily limit
         let dailyLimit = await dailyLimitModule.dailyLimits(0)
         assert.equal(dailyLimit[0], 100);
         let data = await dailyLimitModule.contract.changeDailyLimit.getData(0, 200)
 
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
 
         utils.logGasUsage(
             'execTransaction change daily limit',
             await gnosisSafe.execTransaction(
-                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.toWei(100, 'gwei'), 0, 0, sigs
+                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), 0, 0, sigs
             )
         )
         dailyLimit = await dailyLimitModule.dailyLimits(0)
@@ -99,7 +99,7 @@ contract('DailyLimitModule', function(accounts) {
 
     it('should withdraw daily limit for an ERC20 token', async () => {
         // deposit money for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
         // Create fake token
         let source = `
         contract TestToken {

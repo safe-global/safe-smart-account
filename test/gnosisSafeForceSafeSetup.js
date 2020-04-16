@@ -19,31 +19,31 @@ contract('GnosisSafe setup', function(accounts) {
         )
 
         // Fund Safe
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
 
         let sigs = "0x000000000000000000000000" + executor.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
 
         await utils.assertRejects(
             gnosisSafe.execTransaction(
-                accounts[0], web3.toWei(1, 'ether'), "0x", CALL, 0, 0, 0, 0, 0, sigs, {from: executor}
+                accounts[0], web3.utils.toWei("1", 'ether'), "0x", CALL, 0, 0, 0, 0, 0, sigs, {from: executor}
             ),
             "Should not be able to execute transaction before setup"
         )
 
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
 
         let setup = await gnosisSafe.setup([executor], 1, 0, "0x", 0, 0, 0, 0)
         utils.logGasUsage("setup", setup)
 
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
 
         let tx = await gnosisSafe.execTransaction(
-            executor, web3.toWei(1, 'ether'), "0x", CALL, 0, 0, 0, 0, 0, sigs, {from: executor}
+            executor, web3.utils.toWei("1", 'ether'), "0x", CALL, 0, 0, 0, 0, 0, sigs, {from: executor}
         )
         utils.logGasUsage("execTransaction after setup", tx)
 
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(0, 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("0", 'ether'))
 
     })
 })

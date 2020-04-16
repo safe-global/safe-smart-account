@@ -43,21 +43,21 @@ contract('GnosisSafe using nested safes', function(accounts) {
     it('should use EIP-1271 (contract signatures)', async () => {
         // Deposit some spare money for execution to owner safes
         assert.equal(await web3.eth.getBalance(owner1Safe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: owner1Safe.address, value: web3.toWei(0.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(owner1Safe.address).toNumber(), web3.toWei(0.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: owner1Safe.address, value: web3.utils.toWei("0.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(owner1Safe.address).toNumber(), web3.utils.toWei("0.1", 'ether'))
 
         assert.equal(await web3.eth.getBalance(owner2Safe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: owner2Safe.address, value: web3.toWei(0.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(owner2Safe.address).toNumber(), web3.toWei(0.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: owner2Safe.address, value: web3.utils.toWei("0.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(owner2Safe.address).toNumber(), web3.utils.toWei("0.1", 'ether'))
         
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
 
         // Withdraw 1 ETH
         let to = accounts[9]
-        let value = web3.toWei(1, 'ether')
+        let value = web3.utils.toWei("1", 'ether')
         let data = "0x"
         let operation = CALL
         

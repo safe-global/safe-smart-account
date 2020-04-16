@@ -45,8 +45,8 @@ contract('GnosisSafe using eth_signTypedData', function(accounts) {
     it('should deposit and withdraw 1 ETH', async () => {
         // Deposit 1 ETH + some spare money for execution 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[9], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[9], to: gnosisSafe.address, value: web3.utils.toWei("1.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1.1", 'ether'))
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
@@ -97,15 +97,15 @@ contract('GnosisSafe using eth_signTypedData', function(accounts) {
         }
 
         // Withdraw 1 ETH
-        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
+        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.utils.toWei("0.5", 'ether'), "0x", CALL, executor)
 
-        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor)
+        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.utils.toWei("0.5", 'ether'), "0x", CALL, executor)
 
         // Should fail as it is over the balance (payment should still happen)
-        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.toWei(0.5, 'ether'), "0x", CALL, executor, { fails: true })
+        await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.utils.toWei("0.5", 'ether'), "0x", CALL, executor, { fails: true })
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
 })

@@ -51,8 +51,8 @@ contract('MultiSend', function(accounts) {
         assert.deepEqual(await gnosisSafe.getModules(), [])
         // Deposit 2 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(2, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(2, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("2", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("2", 'ether'))
         // Withdraw 2 ETH and change threshold
         let nonce = await gnosisSafe.nonce()
 
@@ -68,10 +68,10 @@ contract('MultiSend', function(accounts) {
         let nestedTransactionData = '0x' +
             encodeData(0, gnosisSafe.address, 0, '0x' + '0'.repeat(64)) +
             encodeData(0, gnosisSafe.address, 0, changeData) +
-            encodeData(0, accounts[0], web3.toWei(0.5, 'ether'), '0x') +
+            encodeData(0, accounts[0], web3.utils.toWei("0.5", 'ether'), '0x') +
             encodeData(1, createAndAddModules.address, 0, createAndAddModulesData) +
-            encodeData(0, accounts[1], web3.toWei(0.5, 'ether'), '0x') +
-            encodeData(0, accounts[2], web3.toWei(1, 'ether'), '0x')
+            encodeData(0, accounts[1], web3.utils.toWei("0.5", 'ether'), '0x') +
+            encodeData(0, accounts[2], web3.utils.toWei("1", 'ether'), '0x')
         let data = await multiSend.contract.multiSend.getData(nestedTransactionData)
         let transactionHash = await gnosisSafe.getTransactionHash(multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, 0, 0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0]], transactionHash)
@@ -100,15 +100,15 @@ contract('MultiSend', function(accounts) {
 
         let newSafeAddress = "0x" + util.generateAddress(proxyFactory.address, await web3.eth.getTransactionCount(proxyFactory.address)).toString("hex")
         assert.equal(await web3.eth.getBalance(newSafeAddress), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: newSafeAddress, value: web3.toWei(2, 'ether')})
-        assert.equal(await web3.eth.getBalance(newSafeAddress), web3.toWei(2, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: newSafeAddress, value: web3.utils.toWei("2", 'ether')})
+        assert.equal(await web3.eth.getBalance(newSafeAddress), web3.utils.toWei("2", 'ether'))
         let nestedTransactionData = '0x' +
             encodeData(0, newSafeAddress, 0, '0x' + '0'.repeat(64)) +
             encodeData(0, newSafeAddress, 0, changeData) +
-            encodeData(0, accounts[0], web3.toWei(0.5, 'ether'), '0x') +
+            encodeData(0, accounts[0], web3.utils.toWei("0.5", 'ether'), '0x') +
             encodeData(1, createAndAddModules.address, 0, createAndAddModulesData) +
-            encodeData(0, accounts[1], web3.toWei(0.5, 'ether'), '0x') +
-            encodeData(0, accounts[2], web3.toWei(1, 'ether'), '0x')
+            encodeData(0, accounts[1], web3.utils.toWei("0.5", 'ether'), '0x') +
+            encodeData(0, accounts[2], web3.utils.toWei("1", 'ether'), '0x')
         let multiSendData = await multiSend.contract.multiSend.getData(nestedTransactionData)
 
         // Create Gnosis Safe

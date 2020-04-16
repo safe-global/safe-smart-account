@@ -38,8 +38,8 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
             }
         }`
         let testCaller = await safeUtils.deployContract(accounts[0], source);
-        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))
+        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
     })
 
     it('should be able to receive ETH via send', async () => {
@@ -52,7 +52,7 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
             }
         }`
         let testCaller = await safeUtils.deployContract(accounts[0], source);
-        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))
+        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
     })
 })

@@ -27,8 +27,8 @@ contract('GnosisSafe', function(accounts) {
     it('Check that correct data is returned', async () => {
         // Deposit 1 ETH + some spare money for execution
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1.1", 'ether'))
 
         let enableModuleData = gnosisSafe.contract.enableModule.getData(accounts[0])
         await safeUtils.executeTransaction(lw, gnosisSafe, 'enable account as module', [lw.accounts[0], lw.accounts[2]], gnosisSafe.address, 0, enableModuleData, CALL, executor)

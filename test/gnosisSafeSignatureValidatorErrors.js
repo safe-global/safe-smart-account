@@ -47,13 +47,13 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
 
         let tx
         // Withdraw 1 ETH
         let to = accounts[9]
-        let value = web3.toWei(1, 'ether')
+        let value = web3.utils.toWei("1", 'ether')
         let data = "0x"
         let operation = CALL
 
@@ -78,7 +78,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         await simulateSignatureFailure(to, value, data, operation, invalidLengthSig, "Invalid contract signature location: data not complete")
 
         // Safe should be empty again
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.toWei(1, 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
     })
 
     

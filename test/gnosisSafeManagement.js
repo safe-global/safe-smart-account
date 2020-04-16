@@ -33,7 +33,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
 
     it('should add, remove and replace an owner and update the threshold and emit events', async () => {
         // Fund account for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
         // Add owner and set threshold to 3
@@ -61,13 +61,13 @@ contract('GnosisSafe owner and module management', function(accounts) {
         assert.equal(await gnosisSafe.getThreshold(), 2)
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
 
     it('should update the master copy and emit events', async () => {
         // Fund account for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
 
 	    // Check that the current address is pointing to the master copy
         assert.equal(await web3.eth.getStorageAt(gnosisSafe.address, 0), gnosisSafeMasterCopy.address)
@@ -86,7 +86,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         let zeroAcc = "0x0000000000000000000000000000000000000000"
         let sentinel = "0x0000000000000000000000000000000000000001"
         // Fund account for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
         // Check initial state
@@ -121,7 +121,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
         assert.ok(executorDiff > 0)
 
         // Check that initial state still applies
@@ -134,7 +134,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         let sentinel = "0x0000000000000000000000000000000000000001"
 
         // Fund account for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
@@ -164,7 +164,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         await safeUtils.executeTransaction(lw, gnosisSafe, 'remove with zero account', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor, { fails: true})
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
         assert.ok(executorDiff > 0)
 
         // Check that initial state still applies
@@ -175,7 +175,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         let sentinel = "0x0000000000000000000000000000000000000001"
 
         // Fund account for execution
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(0.1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
@@ -193,7 +193,7 @@ contract('GnosisSafe owner and module management', function(accounts) {
         assert.equal(utils.checkTxEvent(disableTx, 'DisabledModule', gnosisSafe.address, true).args.module, randomModule)
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
         assert.ok(executorDiff > 0)
 
         // Check final state

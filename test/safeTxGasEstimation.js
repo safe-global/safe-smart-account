@@ -60,7 +60,7 @@ contract('Gas Estimation', function(accounts) {
     // We skip this tests as it doesn't work with ganache-cli 6.3.0 but other more important test don't work with newer versions than that
     it.skip('should work with contract that uses a lot of gas', async () => {
         // Fund account for execution 
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
 
         let executorBalance = await web3.eth.getBalance(executor).toNumber()
 
@@ -72,7 +72,7 @@ contract('Gas Estimation', function(accounts) {
         )
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei(executorDiff, 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
 })
