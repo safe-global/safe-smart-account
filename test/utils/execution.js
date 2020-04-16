@@ -4,10 +4,12 @@ const BigNumber = require('bignumber.js')
 const GAS_PRICE = web3.toWei(100, 'gwei')
 
 let byteGasCosts = function(hexValue) {
+    // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
+    // Note: this is only supported with the latest ganache versions
     switch(hexValue) {
         case "0x": return 0
         case "00": return 4
-        default: return 16
+        default: return 68
     }
 }
 
@@ -18,10 +20,12 @@ let byteGasCosts = function(hexValue) {
  }
 
 let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, gasToken, refundReceiver, signatureCount, nonce) {
-    // numbers < 256 are 192 -> 31 * 4 + 16
-    // numbers < 65k are 256 -> 30 * 4 + 2 * 16
+    // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
+    // Note: this is only supported with the latest ganache versions
+    // numbers < 256 are 192 -> 31 * 4 + 68
+    // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and baseGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
-    let signatureCost = signatureCount * (16 + 2176 + 2176 + 6000) // (array count (3 -> r, s, v) + ecrecover costs) * signature count
+    let signatureCost = signatureCount * (68 + 2176 + 2176 + 6000) // (array count (3 -> r, s, v) + ecrecover costs) * signature count
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
@@ -90,6 +94,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     )
 
     console.log("    Data costs: " + calcDataGasCosts(payload))
+    console.log("    Tx Gas estimate: " + txGasEstimate)
     // Estimate gas of paying transaction
     let estimate = null
     try {
@@ -107,7 +112,12 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         return null
     }
 
+    if (estimate < txGasEstimate) {
+        const block = await web3.eth.getBlock("latest")
+        estimate = block.gasLimit - 10000
+    }
     console.log("    GasLimit estimation:", (estimate + 10000))
+
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
     let tx = await safe.execTransaction(
