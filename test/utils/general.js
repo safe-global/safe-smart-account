@@ -8,9 +8,8 @@ const ModuleDataWrapper = new web3.eth.Contract([{"constant":false,"inputs":[{"n
 const Address0 = "0x".padEnd(42, '0')
 
 function createAndAddModulesData(dataArray) {
-    let mw = ModuleDataWrapper.at(1)
     // Remove method id (10) and position of data in payload (64)
-    return dataArray.reduce((acc, data) => acc + mw.setup.getData(data).substr(74), "0x")
+    return dataArray.reduce((acc, data) => acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74), "0x")
 }
 
 function currentTimeNs() {
