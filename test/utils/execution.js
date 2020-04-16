@@ -3,7 +3,7 @@ const BigNumber = require('bignumber.js')
 
 const GAS_PRICE = web3.toWei(100, 'gwei')
 
-let baseGasValue = function(hexValue) {
+let byteGasCosts = function(hexValue) {
     switch(hexValue) {
         case "0x": return 0
         case "00": return 4
@@ -11,8 +11,8 @@ let baseGasValue = function(hexValue) {
     }
 }
 
- let estimateBaseGasCosts = function(dataString) {
-    const reducer = (accumulator, currentValue) => accumulator += baseGasValue(currentValue)
+ let calcDataGasCosts = function(dataString) {
+    const reducer = (accumulator, currentValue) => accumulator += byteGasCosts(currentValue)
 
    return dataString.match(/.{2}/g).reduce(reducer, 0)
  }
@@ -26,7 +26,7 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
-    let baseGasEstimate = estimateBaseGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
+    let baseGasEstimate = calcDataGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
     baseGasEstimate += 1500 // 1500 -> hash generation costs
     baseGasEstimate += 1000 // 1000 -> Event emission
     return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
@@ -41,8 +41,8 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
+    let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
     try {
-        let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
         let estimateResponse = await web3.eth.call({to: safe.address, from: safe.address, data: estimateData, gasPrice: 0})
         txGasEstimate = new BigNumber(estimateResponse.substring(138), 16)
         // Add 10k else we will fail in case of nested calls
@@ -56,26 +56,28 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let baseGasEstimate = estimateBaseGas(safe, to, value, data, operation, txGasEstimate, txGasToken, refundReceiver, accounts.length, nonce) + extraGas
     console.log("    Base Gas estimate: " + baseGasEstimate)
 
-    let additionalGas = 10000
-    for (let i = 0; i < 100; i++) {
-        try {
-            let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
-            let estimateResponse = await web3.eth.call({
-                to: safe.address, 
-                from: safe.address, 
-                data: estimateData, 
-                gasPrice: 0, 
-                gasLimit: txGasEstimate + baseGasEstimate + 32000
-            })
-            console.log("    Simulate: " + estimateResponse)
-            if (estimateResponse != "0x") break
-        } catch(e) {
-            console.log("    Could simulate " + subject + "; cause: " + e)
-        }
-        txGasEstimate += additionalGas
-        additionalGas *= 2
+    if (txGasEstimate > 0) {
+        let estimateDataGasCosts = calcDataGasCosts(estimateData)
+        let additionalGas = 10000
+        // To check if the transaction is successfull with the given safeTxGas we try to set a gasLimit so that only safeTxGas is available,
+        // when `execute` is triggered in `requiredTxGas`. If the response is `0x` then the inner transaction reverted and we need to increase the amount.
+        for (let i = 0; i < 100; i++) {
+            try {
+                let estimateResponse = await web3.eth.call({
+                    to: safe.address, 
+                    from: safe.address, 
+                    data: estimateData, 
+                    gasPrice: 0, 
+                    gasLimit: txGasEstimate + estimateDataGasCosts + 21000 // We add 21k for base tx costs
+                })
+                if (estimateResponse != "0x") break
+            } catch(e) {
+                console.log("    Could simulate " + subject + "; cause: " + e)
+            }
+            txGasEstimate += additionalGas
+            additionalGas *= 2
+        }    
     }
-
     let gasPrice = GAS_PRICE
     if (txGasToken != 0) {
         gasPrice = 1
@@ -87,7 +89,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
-    console.log("    Data costs: " + estimateBaseGasCosts(payload))
+    console.log("    Data costs: " + calcDataGasCosts(payload))
 
     // Estimate gas of paying transaction
     let estimate = null
