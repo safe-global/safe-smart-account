@@ -43,7 +43,7 @@
     "eth-lightwallet": "^3.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^6.0.0",
-    "ganache-cli": "^6.3.0",
+    "ganache-cli": "6.3.0",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.4.2",
@@ -58,6 +58,7 @@
     "truffle-hdwallet-provider": "0.0.7-beta.1"
   },
   "resolutions": {
-    "bitcore-lib": "^0.16.0"
+    "bitcore-lib": "0.16.0",
+    "run-with-testrpc/ganache-cli": "6.3.0"
   }
 }
