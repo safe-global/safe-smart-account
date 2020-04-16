@@ -18,11 +18,10 @@ let byteGasCosts = function(hexValue) {
  }
 
 let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, gasToken, refundReceiver, signatureCount, nonce) {
-    // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
-    // numbers < 256 are 192 -> 31 * 4 + 68
-    // numbers < 65k are 256 -> 30 * 4 + 2 * 68
+    // numbers < 256 are 192 -> 31 * 4 + 16
+    // numbers < 65k are 256 -> 30 * 4 + 2 * 16
     // For signature array length and baseGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
-    let signatureCost = signatureCount * (68 + 2176 + 2176 + 6000) // (array count (3 -> r, s, v) + ecrecover costs) * signature count
+    let signatureCost = signatureCount * (16 + 2176 + 2176 + 6000) // (array count (3 -> r, s, v) + ecrecover costs) * signature count
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
     )
@@ -89,8 +88,8 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let payload = safe.contract.execTransaction.getData(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
     )
-    console.log("    Data costs: " + calcDataGasCosts(payload))
 
+    console.log("    Data costs: " + calcDataGasCosts(payload))
     // Estimate gas of paying transaction
     let estimate = null
     try {
@@ -104,7 +103,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
-        assert.equal(e.message, ("VM Exception while processing transaction: revert " + opts.revertMessage).trim())
+        assert.equal(e.message, ("VM Exception while processing transaction: revert " + options.revertMessage).trim())
         return null
     }
 
