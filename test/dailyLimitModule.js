@@ -27,17 +27,19 @@ contract('DailyLimitModule', function(accounts) {
         // Initialize module master copy
         dailyLimitModuleMasterCopy.setup([], [])
         // Create Gnosis Safe and Daily Limit Module in one transactions
-        let moduleData = await dailyLimitModuleMasterCopy.contract.setup.getData([0], [100])
-        let proxyFactoryData = await proxyFactory.contract.createProxy.getData(dailyLimitModuleMasterCopy.address, moduleData)
+        let moduleData = await dailyLimitModuleMasterCopy.contract.methods.setup([utils.Address0], [100]).encodeABI()
+        let proxyFactoryData = await proxyFactory.contract.methods.createProxy(dailyLimitModuleMasterCopy.address, moduleData).encodeABI()
         let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
-        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        let createAndAddModulesData = createAndAddModules.contract.methods.createAndAddModules(proxyFactory.address, modulesCreationData).encodeABI()
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [lw.accounts[0], lw.accounts[1], accounts[0]], 2, createAndAddModules.address, createAndAddModulesData, utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
         )
         let modules = await gnosisSafe.getModules()
-        dailyLimitModule = DailyLimitModule.at(modules[0])
+        dailyLimitModule = await DailyLimitModule.at(modules[0])
         assert.equal(await dailyLimitModule.manager.call(), gnosisSafe.address)
     })
 
@@ -51,25 +53,25 @@ contract('DailyLimitModule', function(accounts) {
         )
         // Deposit 1 eth
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'));
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'));
         // Withdraw daily limit
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit',
             await dailyLimitModule.executeDailyLimit(
-                0, accounts[0], 50, {from: accounts[0]}
+                utils.Address0, accounts[0], 50, {from: accounts[0]}
             )
         )
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit 2nd time',
             await dailyLimitModule.executeDailyLimit(
-                0, accounts[0], 50, {from: accounts[0]}
+                utils.Address0, accounts[0], 50, {from: accounts[0]}
             )
         )
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether') - 100);
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether') - 100);
         // Third withdrawal will fail
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(
-                accounts[0], 50, "0x", {from: accounts[0]}
+                utils.Address0, accounts[0], 50, {from: accounts[0]}
             ),
             "Daily limit exceeded"
         )
@@ -79,21 +81,23 @@ contract('DailyLimitModule', function(accounts) {
         // Funds for paying execution
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("0.1", 'ether')})
         // Change daily limit
-        let dailyLimit = await dailyLimitModule.dailyLimits(0)
+        let dailyLimit = await dailyLimitModule.dailyLimits(utils.Address0)
         assert.equal(dailyLimit[0], 100);
-        let data = await dailyLimitModule.contract.changeDailyLimit.getData(0, 200)
+        let data = await dailyLimitModule.contract.methods.changeDailyLimit(utils.Address0, 200).encodeABI()
 
         let nonce = await gnosisSafe.nonce()
-        let transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), 0, 0, nonce)
+        let transactionHash = await gnosisSafe.getTransactionHash(
+            dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), utils.Address0, utils.Address0, nonce
+        )
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
 
         utils.logGasUsage(
             'execTransaction change daily limit',
             await gnosisSafe.execTransaction(
-                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), 0, 0, sigs
+                dailyLimitModule.address, 0, data, CALL, 100000, 0, web3.utils.toWei("100", 'gwei'), utils.Address0, utils.Address0, sigs
             )
         )
-        dailyLimit = await dailyLimitModule.dailyLimits(0)
+        dailyLimit = await dailyLimitModule.dailyLimits(utils.Address0)
         assert.equal(dailyLimit[0], 200);
     })
 
@@ -117,60 +121,59 @@ contract('DailyLimitModule', function(accounts) {
         // Create test token contract
         let contractInterface = output.interface
         let contractBytecode = output.data
-        let transactionHash = await web3.eth.sendTransaction({from: accounts[0], data: contractBytecode, gas: 4000000})
-        let receipt = web3.eth.getTransactionReceipt(transactionHash);
-        const TestToken = web3.eth.contract(contractInterface)
-        let testToken = TestToken.at(receipt.contractAddress)
+        let tx = await web3.eth.sendTransaction({from: accounts[0], data: contractBytecode, gas: 4000000})
+        let receipt = await web3.eth.getTransactionReceipt(tx.transactionHash)
+        let testToken = new web3.eth.Contract(contractInterface, receipt.contractAddress)
         // Add test token to daily limit module
-        let data = await dailyLimitModule.contract.changeDailyLimit.getData(testToken.address, 20)
+        let data = await dailyLimitModule.contract.methods.changeDailyLimit(testToken.options.address, 20).encodeABI()
         let nonce = await gnosisSafe.nonce()
-        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, 0, nonce)
+        transactionHash = await gnosisSafe.getTransactionHash(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, utils.Address0, utils.Address0, nonce)
         let sigs = utils.signTransaction(lw, [lw.accounts[0], lw.accounts[1]], transactionHash)
-        await gnosisSafe.execTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, 0, 0, sigs)
+        await gnosisSafe.execTransaction(dailyLimitModule.address, 0, data, CALL, 100000, 0, 0, utils.Address0, utils.Address0, sigs)
 
         // Withdrawal should fail as there are no tokens
-        assert.equal(await testToken.balances(gnosisSafe.address), 0);
+        assert.equal(await testToken.methods.balances(gnosisSafe.address).call(), 0);
         await utils.assertRejects(
-            dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
+            dailyLimitModule.executeDailyLimit(testToken.options.address, accounts[0], 10, {from: accounts[0]}),
             "Not enough funds"
         )
 
         // Transfer 100 tokens to Safe
-        await testToken.transfer(gnosisSafe.address, 100, {from: accounts[0]})
-        assert.equal(await testToken.balances(gnosisSafe.address), 100);
+        await testToken.methods.transfer(gnosisSafe.address, 100).send({ from: accounts[0] })
+        assert.equal(await testToken.methods.balances(gnosisSafe.address).call(), 100)
 
         // Withdraw daily limit
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit for ERC20 token',
             await dailyLimitModule.executeDailyLimit(
-                testToken.address, accounts[0], 10, {from: accounts[0]}
+                testToken.options.address, accounts[0], 10, {from: accounts[0]}
             )
         )
-        assert.equal(await testToken.balances(gnosisSafe.address), 90);
-        assert.equal(await testToken.balances(accounts[0]), 10);
+        assert.equal(await testToken.methods.balances(gnosisSafe.address).call(), 90)
+        assert.equal(await testToken.methods.balances(accounts[0]).call(), 10)
         utils.logGasUsage(
             'execTransactionFromModule withdraw daily limit for ERC20 token 2nd time',
             await dailyLimitModule.executeDailyLimit(
-                testToken.address, accounts[0], 10, {from: accounts[0]}
+                testToken.options.address, accounts[0], 10, {from: accounts[0]}
             )
         )
-        assert.equal(await testToken.balances(gnosisSafe.address), 80);
-        assert.equal(await testToken.balances(accounts[0]), 20);
+        assert.equal(await testToken.methods.balances(gnosisSafe.address).call(), 80)
+        assert.equal(await testToken.methods.balances(accounts[0]).call(), 20)
 
 
         // Third withdrawal will fail
         await utils.assertRejects(
-            dailyLimitModule.executeDailyLimit(testToken.address, accounts[0], 10, {from: accounts[0]}),
+            dailyLimitModule.executeDailyLimit(testToken.options.address, accounts[0], 10, {from: accounts[0]}),
             "Daily limit exceeded for ERC20 token"
         )
 
         // Balances didn't change
-        assert.equal(await testToken.balances(gnosisSafe.address), 80);
-        assert.equal(await testToken.balances(accounts[0]), 20);
+        assert.equal(await testToken.methods.balances(gnosisSafe.address).call(), 80)
+        assert.equal(await testToken.methods.balances(accounts[0]).call(), 20)
 
         // Withdrawal should  fail because of ERC20 transfer revert
         let mockContract = await MockContract.new();
-        let mockToken = MockToken.at(mockContract.address);
+        let mockToken = await MockToken.at(mockContract.address);
         await mockContract.givenAnyRevert()
         await utils.assertRejects(
             dailyLimitModule.executeDailyLimit(mockContract.address, accounts[0], 10, {from: accounts[0]}),
