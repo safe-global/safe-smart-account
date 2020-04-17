@@ -37,7 +37,7 @@ contract('GnosisSafe using eth_sign', function(accounts) {
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
             [accounts[0], accounts[1], accounts[2]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
-            ).encodeABI()
+        ).encodeABI()
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
