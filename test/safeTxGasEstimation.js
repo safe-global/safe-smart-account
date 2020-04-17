@@ -47,7 +47,9 @@ contract('Gas Estimation', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
@@ -62,17 +64,17 @@ contract('Gas Estimation', function(accounts) {
         // Fund account for execution 
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
 
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        let executorBalance = await web3.eth.getBalance(executor)
 
-        let data = await gasUserContract.useGas.getData(80)
+        let data = await gasUserContract.useGas(80).encodeABI()
         await safeUtils.executeTransaction(
             lw, gnosisSafe, 'call nested contract', [lw.accounts[0], lw.accounts[1]], 
-            gasUserContract.address, 0, data, CALL, 
+            gasUserContract.options.address, 0, data, CALL, 
             executor
         )
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.utils.fromWei(executorDiff, 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei(executorDiff.toString(), 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
 })
