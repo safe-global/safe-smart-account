@@ -69,8 +69,8 @@ module.exports = async function (callback) {
 // How to deploy contracts with correct compiler (Safe with 0.5.0 -> formally verified, ProxyFactory with 0.5.7 -> create2)
 // Rename GnosisSafeProxyFactory.sol to GnosisSafeProxyFactory.sol_temp
 npm explore truffle -- npm install solc@0.5.0
-npx truffle compile
+yarn truffle compile
 // Rename GnosisSafeProxyFactory.sol_temp to GnosisSafeProxyFactory.sol
 npm explore truffle -- npm install solc@0.5.7
-npx truffle compile
+yarn truffle compile
 */

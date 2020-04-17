@@ -25,46 +25,46 @@ if (fs.existsSync('.openzeppelin/project.json')) {
   shell.rm('-rf', '.openzeppelin/project.json')
 }
 
-exec(`npx oz init ${package.name} ${package.version}`)
+exec(`yarn oz init ${package.name} ${package.version}`)
 
-exec(`npx truffle compile`)
+exec(`yarn truffle compile`)
 
-exec(`npx oz add GnosisSafe --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile --force`) // --force since GnosisSafe has a constructor
+exec(`yarn oz add GnosisSafe --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile --force`) // --force since GnosisSafe has a constructor
 
 // Add factories
-exec(`npx oz add ProxyFactory --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add ProxyFactory --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 
 // Add libraries
-exec(`npx oz add MultiSend --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile --force`) // --force since MultiSend has a constructor
+exec(`yarn oz add MultiSend --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile --force`) // --force since MultiSend has a constructor
 
-exec(`npx oz add CreateAndAddModules --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add CreateAndAddModules --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 
-exec(`npx oz add CreateCall --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add CreateCall --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 
 // Add callback handlers
-exec(`npx oz add DefaultCallbackHandler --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add DefaultCallbackHandler --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 
 // Publish zos package
-exec(`npx oz publish --network ${network}`)
+exec(`yarn oz publish --network ${network}`)
 
 /*  
 // Modules are disabled for now
 //Add and deploy DailyLimitModule
-exec(`npx oz add DailyLimitModule --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add DailyLimitModule --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 // Add and deploy SocialRecoveryModule
-exec(`npx oz add SocialRecoveryModule --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add SocialRecoveryModule --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 // Add and deploy StateChannelModule
-exec(`npx oz add StateChannelModule --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add StateChannelModule --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 // Add and deploy WhitelistModule
-exec(`npx oz add WhitelistModule --skip-compile`)
-exec(`npx oz push --network ${network} --skip-compile`)
+exec(`yarn oz add WhitelistModule --skip-compile`)
+exec(`yarn oz push --network ${network} --skip-compile`)
 */
