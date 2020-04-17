@@ -21,7 +21,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         owner = await MockContract.new()
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([owner.address], 1, 0, "0x", 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )

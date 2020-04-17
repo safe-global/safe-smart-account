@@ -10,9 +10,6 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
 
     let lw
     let gnosisSafe
-    let executor = accounts[8]
-
-    const CALL = 0
 
     beforeEach(async function () {
         // Create lightwallet
@@ -21,8 +18,10 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 2, 0, "0x", 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [lw.accounts[0], lw.accounts[1]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
@@ -38,7 +37,7 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
             }
         }`
         let testCaller = await safeUtils.deployContract(accounts[0], source);
-        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.utils.toWei("1", 'ether')})
+        await testCaller.methods.sendEth(gnosisSafe.address).send({from: accounts[0], value: web3.utils.toWei("1", 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
     })
 
@@ -52,7 +51,7 @@ contract('GnosisSafe allow incoming funds via send/transfer', function(accounts)
             }
         }`
         let testCaller = await safeUtils.deployContract(accounts[0], source);
-        let txHash = await testCaller.sendEth(gnosisSafe.address, {from: accounts[0], value: web3.utils.toWei("1", 'ether')})
+        await testCaller.methods.sendEth(gnosisSafe.address).send({from: accounts[0], value: web3.utils.toWei("1", 'ether')})
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
     })
 })

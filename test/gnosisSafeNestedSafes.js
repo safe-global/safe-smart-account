@@ -24,17 +24,17 @@ contract('GnosisSafe using nested safes', function(accounts) {
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
         let owner1SafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 2, 0, "0x", 0, 0, 0, 0)
-        owner1Safe = utils.getParamFromTxEvent(
+        owner1Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner1SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
         let owner2SafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[2], lw.accounts[3]], 2, 0, "0x", 0, 0, 0, 0)
-        owner2Safe = utils.getParamFromTxEvent(
+        owner2Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner2SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([owner1Safe.address,owner2Safe.address], 2, 0, "0x", 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
