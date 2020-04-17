@@ -6,23 +6,20 @@ Gnosis Safe Contracts
 
 Install
 -------
-### The repository requires Node 10
-- As this repository uses an [old version of web3js](https://github.com/ethereum/web3.js/releases/tag/v0.20.6) it is required to use Node 10 else `npm install` will fail.
-
-### Install requirements with npm:
+### Install requirements with yarn:
 
 ```bash
-npm install
+yarn
 ```
 
 ### Run all tests (requires Node version >=7 for `async/await`):
 
 ```bash
-npx truffle compile
-npx test
+yarn truffle compile
+yarn test
 ```
 
-`npx test` will start a ganache-cli with the correct configuration. If you want to run `npx truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
+`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
 
 ### Deploy
 
@@ -33,10 +30,10 @@ Note: The formal verification was performed using the contract compiled with sol
 Preparation:
 - Set `INFURA_TOKEN` in `.env`
 - Set `NETWORK` in `.env`
-- Run `npx truffle compile`
+- Run `yarn truffle compile`
 
 OpenZeppelin SDK:
-- Make sure that @openzeppelin/cli is version 2.5 (`npx oz --version`)
+- Make sure that @openzeppelin/cli is version 2.5 (`yarn oz --version`)
 - Make sure that all dependencies use solcjs >0.5.0
 - Set correct version in `package.json`
 - Set `MNEMONIC` in `.env` to current oz package owner (last deployer normally)
@@ -44,14 +41,14 @@ OpenZeppelin SDK:
   - Check that a gloabl versionb of truffle 5 is installed (`truffle version`)
   - Run `truffle exec scripts/change_oz_owner.js --network=<network> --newOwner="<address>"` to enable new deployer
   - Set `MNEMONIC` in `.env` to new oz package owner
-- Run `npm run deploy-oz`
-- Once deployed on all networks run `npx oz --freeze <network>` for each network
+- Run `yarn deploy-oz`
+- Once deployed on all networks run `yarn oz --freeze <network>` for each network
 
 Truffle:
 - Set `MNEMONIC` in `.env`
 
 ```bash
-npx truffle deploy
+yarn truffle deploy
 ```
 
 Verify Contracts:
@@ -82,7 +79,7 @@ You can create a gnosis safe upgradeable instance using [OpenZeppelin SDK](https
 To create an instance using OpenZeppelin SDK:
 
 ```bash
-$ npm install -g @openzeppelin/sdk
+$ yarn global add -g @openzeppelin/sdk
 $ oz init YourProject
 $ oz link @gnosis.pm/safe-contracts
 $ oz push --network rinkeby
