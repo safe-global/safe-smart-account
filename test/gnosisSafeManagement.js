@@ -1,4 +1,6 @@
 const utils = require('./utils/general')
+const formatAddress = utils.formatAddress
+const formatAddresses = utils.formatAddresses
 const safeUtils = require('./utils/execution')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
@@ -28,10 +30,6 @@ contract('GnosisSafe owner and module management', function(accounts) {
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
     })
-
-    const formatAddress = (address) => web3.utils.toChecksumAddress(address)
-
-    const formatAddresses = (addressArray) => addressArray.map((o) => web3.utils.toChecksumAddress(o))
 
     it('should add, remove and replace an owner and update the threshold and emit events', async () => {
         // Fund account for execution

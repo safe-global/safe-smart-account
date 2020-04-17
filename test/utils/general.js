@@ -7,6 +7,10 @@ const ModuleDataWrapper = new web3.eth.Contract([{"constant":false,"inputs":[{"n
 
 const Address0 = "0x".padEnd(42, '0')
 
+const formatAddress = (address) => web3.utils.toChecksumAddress(address)
+
+const formatAddresses = (addressArray) => addressArray.map((o) => web3.utils.toChecksumAddress(o))
+
 function createAndAddModulesData(dataArray) {
     // Remove method id (10) and position of data in payload (64)
     return dataArray.reduce((acc, data) => acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74), "0x")
@@ -168,6 +172,8 @@ async function compile(source) {
 
 Object.assign(exports, {
     Address0,
+    formatAddress,
+    formatAddresses,
     web3ContactFactory,
     createAndAddModulesData,
     currentTimeNs,
