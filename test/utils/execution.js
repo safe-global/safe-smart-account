@@ -173,10 +173,9 @@ let deployContract = async function(deployer, source) {
     let output = await utils.compile(source)
     let contractInterface = output.interface
     let contractBytecode = output.data
-    let transactionHash = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
-    let receipt = web3.eth.getTransactionReceipt(transactionHash)
-    const TestContract = web3.eth.contract(contractInterface)
-    return TestContract.at(receipt.contractAddress)
+    let transaction = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
+    let receipt = await web3.eth.getTransactionReceipt(transaction.transactionHash)
+    return new web3.eth.Contract(contractInterface, receipt.contractAddress)
 }
 
 Object.assign(exports, {
