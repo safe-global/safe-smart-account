@@ -16,7 +16,7 @@ contract('GnosisSafe using eth_sign', function(accounts) {
 
     let ethSign = async function(account, hash) {
         return new Promise(function (resolve, reject) {
-            web3.currentProvider.sendAsync({
+            web3.currentProvider.send({
                 jsonrpc: "2.0", 
                 method: "eth_sign",
                 params: [account, hash],
@@ -35,8 +35,10 @@ contract('GnosisSafe using eth_sign', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1], accounts[2]], 2, 0, "0x", 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [accounts[0], accounts[1], accounts[2]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+            ).encodeABI()
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
@@ -46,9 +48,9 @@ contract('GnosisSafe using eth_sign', function(accounts) {
         // Deposit 1 ETH + some spare money for execution 
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[9], to: gnosisSafe.address, value: web3.utils.toWei("1.1", 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1.1", 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1.1", 'ether'))
 
-        let executorBalance = await web3.eth.getBalance(executor).toNumber()
+        let executorBalance = await web3.eth.getBalance(executor)
 
         let confirmingAccounts = [accounts[0], accounts[2]]
         let signer = async function(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce) {
@@ -72,7 +74,7 @@ contract('GnosisSafe using eth_sign', function(accounts) {
         await safeUtils.executeTransactionWithSigner(signer, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', confirmingAccounts, accounts[9], web3.utils.toWei("0.5", 'ether'), "0x", CALL, executor, { fails: true })
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
-        console.log("    Executor earned " + web3.utils.fromWei("executorDiff", 'ether') + " ETH")
+        console.log("    Executor earned " + web3.utils.fromWei(executorDiff.toString(), 'ether') + " ETH")
         assert.ok(executorDiff > 0)
     })
 })
