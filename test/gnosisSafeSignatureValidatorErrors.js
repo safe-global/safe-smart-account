@@ -20,7 +20,9 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         // Create Mock Owners
         owner = await MockContract.new()
         // Create Gnosis Safe
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([owner.address], 1, 0, "0x", 0, 0, 0, 0)
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [owner.address], 1, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
@@ -31,11 +33,11 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         let failed = false
         try {
             await gnosisSafe.execTransaction.estimateGas(
-                to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: executor}
+                to, value, data, operation, 0, 0, 0, utils.Address0, utils.Address0, sigs, {from: executor}
             )
         } catch (e) {
             failed = true
-            assert.equal(e.message, ("VM Exception while processing transaction: revert " + message).trim())
+            assert.equal(e.message, ("Returned error: VM Exception while processing transaction: revert " + message).trim())
         } finally {
             assert.ok(failed, "Transaction execution should fail")
         }
@@ -48,7 +50,7 @@ contract('GnosisSafe using contract signatures', function(accounts) {
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.utils.toWei("1", 'ether'))
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
 
         let tx
         // Withdraw 1 ETH
