@@ -108,7 +108,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
-        assert.equal(e.message, ("VM Exception while processing transaction: revert " + options.revertMessage).trim())
+        assert.equal(e.message, ("Returned error: VM Exception while processing transaction: revert " + options.revertMessage).trim())
         return null
     }
 
@@ -132,7 +132,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         console.log("    User paid", event.args.payment.toString(), "after signing a maximum of", maxPayment)
         assert.ok(maxPayment >= event.args.payment, "Should not pay more than signed")
     } else {
-        console.log("    User paid", event.args.payment)
+        console.log("    User paid", event.args.payment.toString())
     }
     return tx
 }
