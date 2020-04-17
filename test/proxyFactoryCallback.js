@@ -15,7 +15,7 @@ contract('ProxyFactory', function(accounts) {
     it('Check callback is invoked', async () => {
         let mock = await MockContract.new()
         let callback = await IProxyCreationCallback.at(mock.address)
-        let proxy = utils.getParamFromTxEvent(
+        let proxy = await utils.getParamFromTxEvent(
             await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, callback.address),
             'ProxyCreation', 'proxy', proxyFactory.address, null, 'create proxy',
         )
@@ -23,7 +23,7 @@ contract('ProxyFactory', function(accounts) {
         let allInvocations = await mock.invocationCount.call()
         assert.equal(1, allInvocations)
 
-        let callbackData = callback.contract.proxyCreated.getData(proxy, proxyFactory.address, "0x", 123456)
+        let callbackData = callback.contract.methods.proxyCreated(proxy, proxyFactory.address, "0x", 123456).encodeABI()
         let callbackInvocations = await mock.invocationCountForMethod.call(callbackData)
         assert.equal(1, callbackInvocations)
 
@@ -43,6 +43,6 @@ contract('ProxyFactory', function(accounts) {
     })
 
     it('Should work without callback', async () => {
-        await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, 0)
+        await proxyFactory.createProxyWithCallback(proxyFactory.address, "0x", 123456, utils.Address0)
     })
 })

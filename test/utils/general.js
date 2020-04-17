@@ -2,14 +2,18 @@ const util = require('util');
 const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi")
-const Web3 = require('web3')
-const SolidityEvent = require("web3/lib/web3/event.js");
-const ModuleDataWrapper = (new Web3()).eth.contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
-   
+//const SolidityEvent = require("web3/lib/web3/event.js");
+const ModuleDataWrapper = new web3.eth.Contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
+
+const Address0 = "0x".padEnd(42, '0')
+
+const formatAddress = (address) => web3.utils.toChecksumAddress(address)
+
+const formatAddresses = (addressArray) => addressArray.map((o) => web3.utils.toChecksumAddress(o))
+
 function createAndAddModulesData(dataArray) {
-    let mw = ModuleDataWrapper.at(1)
     // Remove method id (10) and position of data in payload (64)
-    return dataArray.reduce((acc, data) => acc + mw.setup.getData(data).substr(74), "0x")
+    return dataArray.reduce((acc, data) => acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74), "0x")
 }
 
 function currentTimeNs() {
@@ -17,18 +21,32 @@ function currentTimeNs() {
     return hrTime[0] * 1000000000 + hrTime[1]
 }
 
+function web3ContactFactory(web3Contract) {
+    return {
+        at: async (address) => {
+            assert.ok(address != null, "Address is required to create a contract instance")
+            const instance = web3Contract.clone()
+            instance.options.address = web3.utils.toChecksumAddress(address)
+            return instance
+        }
+    }
+}
+
 function getParamFromTxEventWithAdditionalDefinitions(definitions, transaction, eventName, paramName, contract, contractFactory, subject) {
-    transaction.receipt.logs.forEach(event => {
+    transaction.receipt.rawLogs.forEach(event => {
         const definition = definitions[event.topics[0]]
         if (definition) {
-            const eventDef = new SolidityEvent(null, definition, null)
-            transaction.logs.push(eventDef.decode(event))
+            transaction.logs.push({
+                ...event,
+                event: definition.name,
+                args: web3.eth.abi.decodeLog(definition.inputs, event.data, event.topics.slice(1))
+            })
         }
     });
     return getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject)
 }
 
-function getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject) {
+async function getParamFromTxEvent(transaction, eventName, paramName, contract, contractFactory, subject) {
     assert.isObject(transaction)
     if (subject != null) {
         logGasUsage(subject, transaction)
@@ -40,7 +58,7 @@ function getParamFromTxEvent(transaction, eventName, paramName, contract, contra
     assert.equal(logs.length, 1, 'too many logs found!')
     let param = logs[0].args[paramName]
     if(contractFactory != null) {
-        let contract = contractFactory.at(param)
+        let contract = await contractFactory.at(param)
         assert.isObject(contract, `getting ${paramName} failed for ${param}`)
         return contract
     } else {
@@ -153,6 +171,10 @@ async function compile(source) {
 }
 
 Object.assign(exports, {
+    Address0,
+    formatAddress,
+    formatAddresses,
+    web3ContactFactory,
     createAndAddModulesData,
     currentTimeNs,
     compile,

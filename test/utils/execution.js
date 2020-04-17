@@ -1,7 +1,7 @@
 const utils = require('./general')
 const BigNumber = require('bignumber.js')
 
-const GAS_PRICE = web3.toWei(100, 'gwei')
+const GAS_PRICE = web3.utils.toWei("100", 'gwei')
 
 let byteGasCosts = function(hexValue) {
     // TODO: adjust for Istanbul hardfork (https://eips.ethereum.org/EIPS/eip-2028)
@@ -26,9 +26,9 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     // numbers < 65k are 256 -> 30 * 4 + 2 * 68
     // For signature array length and baseGasEstimate we already calculated the 0 bytes so we just add 64 for each non-zero byte
     let signatureCost = signatureCount * (68 + 2176 + 2176 + 6000) // (array count (3 -> r, s, v) + ecrecover costs) * signature count
-    let payload = safe.contract.execTransaction.getData(
-        to, value, data, operation, txGasEstimate, 0, GAS_PRICE, gasToken, refundReceiver, "0x"
-    )
+    let payload = safe.contract.methods.execTransaction(
+        to, value, data, operation, txGasEstimate, utils.Address0, GAS_PRICE, gasToken, refundReceiver, "0x"
+    ).encodeABI()
     let baseGasEstimate = calcDataGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
     baseGasEstimate += 1500 // 1500 -> hash generation costs
     baseGasEstimate += 1000 // 1000 -> Event emission
@@ -38,13 +38,13 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
 let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, opts) {
     let options = opts || {}
     let txFailed = options.fails || false
-    let txGasToken = options.gasToken || 0
-    let refundReceiver = options.refundReceiver || 0
+    let txGasToken = options.gasToken || utils.Address0
+    let refundReceiver = options.refundReceiver || utils.Address0
     let extraGas = options.extraGas || 0
 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
-    let estimateData = safe.contract.requiredTxGas.getData(to, value, data, operation)
+    let estimateData = safe.contract.methods.requiredTxGas(to, value, data, operation).encodeABI()
     try {
         let estimateResponse = await web3.eth.call({to: safe.address, from: safe.address, data: estimateData, gasPrice: 0})
         txGasEstimate = new BigNumber(estimateResponse.substring(138), 16)
@@ -82,16 +82,16 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         }    
     }
     let gasPrice = GAS_PRICE
-    if (txGasToken != 0) {
+    if (txGasToken != utils.Address0) {
         gasPrice = 1
     }
     gasPrice = options.gasPrice || gasPrice
 
     let sigs = await signer(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
 
-    let payload = safe.contract.execTransaction.getData(
+    let payload = safe.contract.methods.execTransaction(
         to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs
-    )
+    ).encodeABI()
 
     console.log("    Data costs: " + calcDataGasCosts(payload))
     console.log("    Tx Gas estimate: " + txGasEstimate)
@@ -108,7 +108,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         if (options.revertMessage == undefined ||options.revertMessage == null) {
             throw e
         }
-        assert.equal(e.message, ("VM Exception while processing transaction: revert " + options.revertMessage).trim())
+        assert.equal(e.message, ("Returned error: VM Exception while processing transaction: revert " + options.revertMessage).trim())
         return null
     }
 
@@ -129,10 +129,10 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     assert.equal(transactionHash, event.args.txHash)
     if (txGasEstimate > 0) {
         let maxPayment = (baseGasEstimate + txGasEstimate) * gasPrice
-        console.log("    User paid", event.args.payment.toNumber(), "after signing a maximum of", maxPayment)
+        console.log("    User paid", event.args.payment.toString(), "after signing a maximum of", maxPayment)
         assert.ok(maxPayment >= event.args.payment, "Should not pay more than signed")
     } else {
-        console.log("    User paid", event.args.payment.toNumber())
+        console.log("    User paid", event.args.payment.toString())
     }
     return tx
 }
@@ -173,10 +173,9 @@ let deployContract = async function(deployer, source) {
     let output = await utils.compile(source)
     let contractInterface = output.interface
     let contractBytecode = output.data
-    let transactionHash = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
-    let receipt = web3.eth.getTransactionReceipt(transactionHash)
-    const TestContract = web3.eth.contract(contractInterface)
-    return TestContract.at(receipt.contractAddress)
+    let transaction = await web3.eth.sendTransaction({from: deployer, data: contractBytecode, gas: 6000000})
+    let receipt = await web3.eth.getTransactionReceipt(transaction.transactionHash)
+    return new web3.eth.Contract(contractInterface, receipt.contractAddress)
 }
 
 Object.assign(exports, {
