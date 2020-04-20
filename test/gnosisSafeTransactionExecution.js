@@ -56,6 +56,12 @@ contract('GnosisSafe with refunds', function(accounts) {
         // Should fail as it is over the balance (payment should still happen)
         await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction withdraw 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[0], web3.utils.toWei("0.5", 'ether'), "0x", CALL, executor, { fails: true})
 
+        // Should work if we send eth along with it
+        let receiverBalance = await web3.eth.getBalance(accounts[4])
+        let value = web3.utils.toWei("0.5", 'ether')
+        await safeUtils.executeTransaction(lw, gnosisSafe, 'executeTransaction send from executor 0.5 ETH', [lw.accounts[0], lw.accounts[2]], accounts[4], value, "0x", CALL, executor, { value })
+        assert.equal(await web3.eth.getBalance(accounts[4]) - receiverBalance, value)
+
     })
 
     it('should deposit and withdraw 1 ETH paying with token', async () => {

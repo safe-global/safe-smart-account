@@ -124,6 +124,7 @@ contract GnosisSafe
         bytes calldata signatures
     )
         external
+        payable
         returns (bool success)
     {
         bytes32 txHash;
