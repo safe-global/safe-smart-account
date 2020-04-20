@@ -41,12 +41,18 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     let txGasToken = options.gasToken || utils.Address0
     let refundReceiver = options.refundReceiver || utils.Address0
     let extraGas = options.extraGas || 0
+    let executorValue = options.value || 0
 
     // Estimate safe transaction (need to be called with from set to the safe address)
     let txGasEstimate = 0
     let estimateData = safe.contract.methods.requiredTxGas(to, value, data, operation).encodeABI()
     try {
-        let estimateResponse = await web3.eth.call({to: safe.address, from: safe.address, data: estimateData, gasPrice: 0})
+        let estimateResponse = await web3.eth.call({
+            to: safe.address, 
+            from: safe.address, 
+            data: estimateData,
+            gasPrice: 0
+        })
         txGasEstimate = new BigNumber(estimateResponse.substring(138), 16)
         // Add 10k else we will fail in case of nested calls
         txGasEstimate = txGasEstimate.toNumber() + 10000
@@ -101,6 +107,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
         estimate = await safe.execTransaction.estimateGas(
             to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {
                 from: executor,
+                value: executorValue,
                 gasPrice: options.txGasPrice || gasPrice
         })
     } catch (e) {
@@ -121,7 +128,12 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     // Execute paying transaction
     // We add the txGasEstimate and an additional 10k to the estimate to ensure that there is enough gas for the safe transaction
     let tx = await safe.execTransaction(
-        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {from: executor, gas: estimate + 10000, gasPrice: options.txGasPrice || gasPrice}
+        to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, sigs, {
+            from: executor,
+            value: executorValue,
+            gas: estimate + 10000,
+            gasPrice: options.txGasPrice || gasPrice
+        }
     )
     let eventName = (txFailed) ? 'ExecutionFailure' : 'ExecutionSuccess'
     let event = utils.checkTxEvent(tx, eventName, safe.address, true, subject)
