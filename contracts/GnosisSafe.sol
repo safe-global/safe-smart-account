@@ -140,12 +140,15 @@ contract GnosisSafe
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures, true);
         }
-        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        // We require some gas to emit the events (2500) after the execution and some to perform code until the execution (500)
+        // We also increase the amount required by 1/64 to counteract potential shortings because of EIP-150
+        require(gasleft() - 3000 >= safeTxGas * 65 / 64, "Not enough gas to execute safe transaction");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
-            // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
-            success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
+            // If the gasPrice is 0 we assume that nearly all available gas can be used (it is always more than safeTxGas)
+            // We only substract 2500 (compared to the 3000 before) to ensure that the amount passed is still higher than safeTxGas
+            success = execute(to, value, data, operation, gasPrice == 0 ? (gasleft() - 2500) : safeTxGas);
             gasUsed = gasUsed.sub(gasleft());
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;
