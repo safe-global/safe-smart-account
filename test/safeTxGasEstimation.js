@@ -48,7 +48,7 @@ contract('Gas Estimation', function(accounts) {
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
-            [lw.accounts[0], lw.accounts[1], lw.accounts[2]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+            [lw.accounts[0], accounts[2]], 1, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
         ).encodeABI()
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
@@ -66,9 +66,9 @@ contract('Gas Estimation', function(accounts) {
 
         let executorBalance = await web3.eth.getBalance(executor)
 
-        let data = await gasUserContract.useGas(80).encodeABI()
+        let data = await gasUserContract.methods.useGas(80).encodeABI()
         await safeUtils.executeTransaction(
-            lw, gnosisSafe, 'call nested contract', [lw.accounts[0], lw.accounts[1]], 
+            lw, gnosisSafe, 'call nested contract', [lw.accounts[0]], 
             gasUserContract.options.address, 0, data, CALL, 
             executor
         )
@@ -76,5 +76,31 @@ contract('Gas Estimation', function(accounts) {
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
         console.log("    Executor earned " + web3.utils.fromWei(executorDiff.toString(), 'ether') + " ETH")
         assert.ok(executorDiff > 0)
+    })
+
+    it.only('should be possible to manually increase gas', async () => {
+        // Fund account for execution 
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        
+        const to = gasUserContract.options.address
+        const data = await gasUserContract.methods.useGas(80).encodeABI()
+        const safeTxGas = 10000
+        const sigs = "0x000000000000000000000000" + accounts[2].replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000000" + "01"
+
+        let tx = await gnosisSafe.execTransaction(
+            to, 0, data, 0, safeTxGas, 0, 0, utils.Address0, utils.Address0, sigs, { from: accounts[2], gas: 70000 }
+        )
+        utils.checkTxEvent(tx, 'ExecutionFailure', gnosisSafe.address, true, "Safe transaction should fail with low gasLimit")
+
+        tx = await gnosisSafe.execTransaction(
+            to, 0, data, 0, safeTxGas, 0, 0, utils.Address0, utils.Address0, sigs, { from: accounts[2], gas: 4000000 }
+        )
+        utils.checkTxEvent(tx, 'ExecutionSuccess', gnosisSafe.address, true, "Safe transaction should succeed with high gasLimit")
+
+        // This should only work if the gasPrice is 0
+        tx = await gnosisSafe.execTransaction(
+            to, 0, data, 0, safeTxGas, 0, 1, utils.Address0, utils.Address0, sigs, { from: accounts[2], gas: 4000000 }
+        )
+        utils.checkTxEvent(tx, 'ExecutionFailure', gnosisSafe.address, true, "Safe transaction should fail with gasPrice 1 and high gasLimit")
     })
 })
