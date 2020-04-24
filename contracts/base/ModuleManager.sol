@@ -104,6 +104,16 @@ contract ModuleManager is SelfAuthorized, Executor {
         }
     }
 
+    /// @dev Returns if an module is enabled
+    /// @return True if the module is enabled
+    function isModuleEnabled(Module module)
+        public
+        view
+        returns (bool)
+    {
+        return SENTINEL_MODULES != address(module) && modules[address(module)] != address(0);
+    }
+
     /// @dev Returns array of first 10 modules.
     /// @return Array of modules.
     function getModules()
