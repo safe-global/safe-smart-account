@@ -186,10 +186,14 @@ contract('GnosisSafe owner and module management', function(accounts) {
         assert.equal(utils.checkTxEvent(enableTx, 'EnabledModule', gnosisSafe.address, true).args.module, formatAddress(randomModule))
 
         // Check state
+        assert.equal(await gnosisSafe.isModuleEnabled(sentinel), false)
+        assert.equal(await gnosisSafe.isModuleEnabled(randomModule), true)
         assert.deepEqual(await gnosisSafe.getModules(), formatAddresses([randomModule]))
 
         data = await gnosisSafe.contract.methods.disableModule(sentinel, randomModule).encodeABI()
         let disableTx = await safeUtils.executeTransaction(lw, gnosisSafe, 'disable random module', [lw.accounts[0], lw.accounts[1]], gnosisSafe.address, 0, data, CALL, executor)
+        assert.equal(await gnosisSafe.isModuleEnabled(sentinel), false)
+        assert.equal(await gnosisSafe.isModuleEnabled(randomModule), false)
         assert.equal(utils.checkTxEvent(disableTx, 'DisabledModule', gnosisSafe.address, true).args.module, formatAddress(randomModule))
 
         let executorDiff = await web3.eth.getBalance(executor) - executorBalance
