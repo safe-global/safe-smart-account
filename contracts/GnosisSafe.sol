@@ -140,9 +140,9 @@ contract GnosisSafe
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures, true);
         }
-        // We require some gas to emit the events (2500) after the execution and some to perform code until the execution (500)
-        // We also increase the amount required by 1/64 to counteract potential shortings because of EIP-150
-        require(gasleft() - 3000 >= safeTxGas * 65 / 64, "Not enough gas to execute safe transaction");
+        // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
+        // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
+        require(gasleft() >= (safeTxGas * 64 / 63).max(safeTxGas + 2500) + 500, "Not enough gas to execute safe transaction");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
