@@ -41,10 +41,15 @@ module.exports = {
       gasPrice: 25000000000, // 25 Gwei
     }
   },
-  solc: {
-    version: "0.5.14",
-    optimizer: {
-      enabled: false
+  compilers: {
+    solc: {
+      version: "0.5.17",
+      settings: {
+        optimizer: {
+          enabled: false
+        },
+        evmVersion: "petersburg"
+      }
     }
-  },
+  }
 };
