@@ -78,7 +78,7 @@ contract('Gas Estimation', function(accounts) {
         assert.ok(executorDiff > 0)
     })
 
-    it.only('should be possible to manually increase gas', async () => {
+    it('should be possible to manually increase gas', async () => {
         // Fund account for execution 
         await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
         
