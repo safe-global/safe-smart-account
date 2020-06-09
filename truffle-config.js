@@ -33,6 +33,13 @@ module.exports = {
       network_id: '42',
       gasPrice: 25000000000, // 25 Gwei
     },
+    xdai: {
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://dai.poa.network')
+      },
+      network_id: '100',
+      gasPrice: 1000000000, // 25 Gwei
+    },
     mainnet: {
       provider: () => {
         return new HDWalletProvider(mnemonic, 'https://mainnet.infura.io/v3/' + token)
