@@ -22,6 +22,10 @@ ozFiles = [
   {
     networkID: 5,
     fileName: path.join(__dirname, "../.openzeppelin/goerli.json")
+  },
+  {
+    networkID: 100,
+    fileName: path.join(__dirname, "../.openzeppelin/xdai.json")
   }
 ]
 
