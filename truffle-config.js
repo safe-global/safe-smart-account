@@ -1,7 +1,6 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider')
-
 require('dotenv').config()
-
+const package = require('./package')
 const mnemonic = process.env.MNEMONIC
 const token = process.env.INFURA_TOKEN
 
@@ -50,7 +49,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.5.17",
+      version: package.dependencies.solc,
       settings: {
         optimizer: {
           enabled: false

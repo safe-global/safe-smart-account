@@ -5962,10 +5962,10 @@ solc-wrapper@^0.6.3:
     semver "^5.5.0"
     tmp "0.0.33"
 
-solc@0.5.14:
-  version "0.5.14"
-  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.14.tgz#7c3ecb2441ac10a15cdfd39207372eb63f2bd00c"
-  integrity sha512-I/MCeOKjnLXxcD65wA+E37BxdERoAYoLeyJ5GnXFijICLmvhzt0xz59R92Zw3TPyJYnHSErKBYpMsfnZVyQJaQ==
+solc@0.5.17:
+  version "0.5.17"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.17.tgz#8a76c50e98d49ca7610cca2fdc78ff3016540c67"
+  integrity sha512-qpX+PGaU0Q3c6lh2vDzMoIbhv6bIrecI4bYsx+xUs01xsGFnY6Nr0L8y/QMyutTnrHN6Lb/Yl672ZVRqxka96w==
   dependencies:
     command-exists "^1.2.8"
     commander "3.0.2"

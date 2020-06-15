@@ -32,18 +32,6 @@ Preparation:
 - Set `NETWORK` in `.env`
 - Run `yarn truffle compile`
 
-OpenZeppelin SDK:
-- Make sure that @openzeppelin/cli is version 2.5 (`yarn oz --version`)
-- Make sure that all dependencies use solcjs >0.5.0
-- Set correct version in `package.json`
-- Set `MNEMONIC` in `.env` to current oz package owner (last deployer normally)
-- Optional: if a new deployer account is used
-  - Check that a gloabl versionb of truffle 5 is installed (`truffle version`)
-  - Run `truffle exec scripts/change_oz_owner.js --network=<network> --newOwner="<address>"` to enable new deployer
-  - Set `MNEMONIC` in `.env` to new oz package owner
-- Run `yarn deploy-oz`
-- Once deployed on all networks run `yarn oz --freeze <network>` for each network
-
 Truffle:
 - Set `MNEMONIC` in `.env`
 
@@ -70,27 +58,6 @@ solidity_flattener contracts/modules/WhitelistModule.sol --output build/flattene
 solidity_flattener contracts/proxies/GnosisSafeProxyFactory.sol --output build/flattened_contracts/GnosisSafeProxyFactory.sol
 find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity >=0.5.0 <0.7.0;/g' {} \;
 ```
-
-Using with OpenZeppelin SDK
----------------------------
-
-You can create a gnosis safe upgradeable instance using [OpenZeppelin SDK](https://docs.openzeppelin.com/sdk/2.5) by linking to the provided [EVM package](https://docs.openzeppelin.com/sdk/2.5/linking). This will use the master copy already deployed to mainnet, kovan, or rinkeby, reducing gas deployment costs.
-
-To create an instance using OpenZeppelin SDK:
-
-```bash
-$ yarn global add -g @openzeppelin/sdk
-$ oz init YourProject
-$ oz link @gnosis.pm/safe-contracts
-$ oz push --network rinkeby
-> Connecting to dependency @gnosis.pm/safe-contracts 1.0.0
-$ oz create @gnosis.pm//GnosisSafe --init setup --args "[$ADDRESS1,$ADDRESS2,$ADDRESS3],2,0x0000000000000000000000000000000000000000,\"\"" --network rinkeby --from $SENDER
-> Instance created at SAFE_ADDRESS
-```
-
-It is suggested to [use a non-default address](https://docs.zeppelinos.org/docs/pattern.html#transparent-proxies-and-function-clashes) as `$SENDER`.
-
-> Note: When using the contracts via ZeppelinOS make sure to choose an appropriate Proxy admin. An upgradable proxy enables the user to update the master copy (aka implementation). The default upgradable proxy is managed by an admin address. This admin address is independent from the owners of the Safe. Therefore it would be possible for the admin to change the master copy without the approval of any owner, thus allowing him to gain full access to the Safe.
 
 Documentation
 -------------
