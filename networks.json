@@ -1,36 +1,4 @@
 {
-  "GnosisSafe": {
-    "1": {
-      "links": {},
-      "events": {},
-      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
-      "updated_at": 1587391878775
-    },
-    "4": {
-      "links": {},
-      "events": {},
-      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
-      "updated_at": 1587391878875
-    },
-    "5": {
-      "links": {},
-      "events": {},
-      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5E",
-      "updated_at": 1587391879067
-    },
-    "42": {
-      "links": {},
-      "events": {},
-      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
-      "updated_at": 1587391878968
-    },
-    "100": {
-      "links": {},
-      "events": {},
-      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
-      "updated_at": 1587391878875
-    }
-  },
   "CreateAndAddModules": {
     "1": {
       "links": {},
@@ -95,35 +63,249 @@
       "updated_at": 1587391878875
     }
   },
-  "MultiSend": {
+  "DefaultCallbackHandler": {
     "1": {
       "links": {},
       "events": {},
-      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
       "updated_at": 1587391878775
     },
     "4": {
       "links": {},
       "events": {},
-      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
       "updated_at": 1587391878875
     },
     "5": {
       "links": {},
       "events": {},
-      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
       "updated_at": 1587391879067
     },
     "42": {
       "links": {},
       "events": {},
-      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
       "updated_at": 1587391878968
     },
     "100": {
       "links": {},
       "events": {},
-      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
+      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "updated_at": 1587391878875
+    }
+  },
+  "GnosisSafe": {
+    "1": {
+      "links": {},
+      "events": {},
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
+      "updated_at": 1587391878775
+    },
+    "4": {
+      "links": {},
+      "events": {
+        "0x9465fa0c962cc76958e6373a993326400c1c94f8be2fe3a952adfa7f60b2ea26": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "AddedOwner",
+          "type": "event"
+        },
+        "0xf2a0eb156472d1440255b0d7c1e19cc07115d1051fe605b0dce69acfec884d9c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "approvedHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "ApproveHash",
+          "type": "event"
+        },
+        "0x75e41bc35ff1bf14d81d1d2f649c0084a0f974f9289c803ec9898eeec4c8d0b8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "masterCopy",
+              "type": "address"
+            }
+          ],
+          "name": "ChangedMasterCopy",
+          "type": "event"
+        },
+        "0x610f7ff2b304ae8903c3de74c60c6ab1f7d6226b3f52c5161905bb5ad4039c93": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "threshold",
+              "type": "uint256"
+            }
+          ],
+          "name": "ChangedThreshold",
+          "type": "event"
+        },
+        "0xaab4fa2b463f581b2b32cb3b7e3b704b9ce37cc209b5fb4d77e593ace4054276": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "contract Module",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "DisabledModule",
+          "type": "event"
+        },
+        "0xecdf3a3effea5783a3c4c2140e677577666428d44ed9d474a0b3a4c9943f8440": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "contract Module",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "EnabledModule",
+          "type": "event"
+        },
+        "0x23428b18acfb3ea64b08dc0c1d296ea9c09702c09083ca5272e64d115b687d23": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "txHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "payment",
+              "type": "uint256"
+            }
+          ],
+          "name": "ExecutionFailure",
+          "type": "event"
+        },
+        "0xacd2c8702804128fdb0db2bb49f6d127dd0181c13fd45dbfe16de0930e2bd375": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "ExecutionFromModuleFailure",
+          "type": "event"
+        },
+        "0x6895c13664aa4f67288b25d7a21d7aaa34916e355fb9b6fae0a139a9085becb8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "ExecutionFromModuleSuccess",
+          "type": "event"
+        },
+        "0x442e715f626346e8c54381002da614f62bee8d27386535b2521ec8540898556e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "txHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "payment",
+              "type": "uint256"
+            }
+          ],
+          "name": "ExecutionSuccess",
+          "type": "event"
+        },
+        "0xf8d49fc529812e9a7c5c50e69c20f0dccc0db8fa95c98bc58cc9a4f1c1299eaf": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "RemovedOwner",
+          "type": "event"
+        },
+        "0xe7f4675038f4f6034dfcbbb24c4dc08e4ebf10eb9d257d3d02c0f38d122ac6e4": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "msgHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SignMsg",
+          "type": "event"
+        }
+      },
+      "address": "0x4BDdf88f5633205E650fF74c4a9ebcFeD2537D27",
+      "updated_at": 1587391878875,
+      "transactionHash": "0x04ec1cba143d53d8e3184cb4c9a072165c4d0dac0951ee416d4bda62e630cd11"
+    },
+    "5": {
+      "links": {},
+      "events": {},
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5E",
+      "updated_at": 1587391879067
+    },
+    "10": {
+      "links": {},
+      "events": {},
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
+      "updated_at": 1587391878875
+    },
+    "42": {
+      "links": {},
+      "events": {},
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
+      "updated_at": 1587391878968
+    },
+    "100": {
+      "links": {},
+      "events": {},
+      "address": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
       "updated_at": 1587391878875
     }
   },
@@ -159,35 +341,35 @@
       "updated_at": 1587391878875
     }
   },
-  "DefaultCallbackHandler": {
+  "MultiSend": {
     "1": {
       "links": {},
       "events": {},
-      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
       "updated_at": 1587391878775
     },
     "4": {
       "links": {},
       "events": {},
-      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
       "updated_at": 1587391878875
     },
     "5": {
       "links": {},
       "events": {},
-      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
       "updated_at": 1587391879067
     },
     "42": {
       "links": {},
       "events": {},
-      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
       "updated_at": 1587391878968
     },
     "100": {
       "links": {},
       "events": {},
-      "address": "0xd5D82B6aDDc9027B22dCA772Aa68D5d74cdBdF44",
+      "address": "0x8D29bE29923b68abfDD21e541b9374737B49cdAD",
       "updated_at": 1587391878875
     }
   }

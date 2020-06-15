@@ -37,7 +37,7 @@ module.exports = {
         return new HDWalletProvider(mnemonic, 'https://dai.poa.network')
       },
       network_id: '100',
-      gasPrice: 1000000000, // 25 Gwei
+      gasPrice: 1000000000, // 1 Gwei
     },
     mainnet: {
       provider: () => {
