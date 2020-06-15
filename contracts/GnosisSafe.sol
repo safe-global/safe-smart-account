@@ -300,7 +300,8 @@ contract GnosisSafe
     }
 
     /**
-    * @dev Marks a message as signed
+    * @dev Marks a message as signed, so that it can be used with EIP-1271
+    * @notice Marks a message (`_data`) as signed.
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
     */
     function signMessage(bytes calldata _data)
