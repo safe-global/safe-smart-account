@@ -54,9 +54,6 @@ module.exports = {
         optimizer: {
           enabled: false
         },
-        metadata: { 
-          useLiteralContent: true 
-        },
         evmVersion: "petersburg"
       }
     }

@@ -12,11 +12,20 @@
     "network.json"
   ],
   "ethereum": {
-    "networks": [1, 4, 42, 5, 100],
+    "networks": [
+      1,
+      4,
+      42,
+      5,
+      100
+    ],
     "contracts": [
       "GnosisSafe",
-      "CreateAndAddModules", "CreateCall", "MultiSend",
-      "GnosisSafeProxyFactory", "IProxy",
+      "CreateAndAddModules",
+      "CreateCall",
+      "MultiSend",
+      "GnosisSafeProxyFactory",
+      "IProxy",
       "DefaultCallbackHandler"
     ]
   },
@@ -49,6 +58,7 @@
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-util": "^6.2.0",
     "ganache-cli": "6.3.0",
+    "ipfs-http-client": "^44.2.0",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
     "solidity-coverage": "^0.7.4",
