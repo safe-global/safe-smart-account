@@ -41,25 +41,15 @@ yarn truffle deploy
 
 ### Verify contract
 
-#### Sourcify
-
-Note: For this it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`. Make sure the run `yarn prepare` again if the path has been changed after the inital `yarn install`.
+Note: To completely replicate the bytecode that has been deployed it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`. Make sure the run `yarn prepare` again if the path has been changed after the inital `yarn install`. If you use a different path you will only get partial matches.
 
 You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
 
-With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
+With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ and https://etherscan.io/
+
+For Etherscan only the `GnosisSafeEtherscan.json` file is required. For sourcify the `GnosisSafeMeta.json` and all the `.sol` files are required.
 
 Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
-
-#### Etherscan
-
-The easiest way to verify the contracts on Etherscan is to use the standard JSON output of the Solidity compiler with literal support. For that add the following to the solc settings in the `truffle-config.js` and recompile the contracts.
-```json
-"metadata": {
-    // Use only literal content and not URLs (false by default)
-    "useLiteralContent": true
-}
-```
 
 Documentation
 -------------

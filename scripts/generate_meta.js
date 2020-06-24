@@ -14,6 +14,7 @@ const contractDir = path.join("build", "contracts")
 const metaDir = path.join("build", "meta")
 
 async function main() {
+    const upload = process.argv.findIndex((value) => value === "--upload") >= 0
     const ipfs = IPFS({
         host: 'ipfs.infura.io',
         port: '5001',
@@ -21,32 +22,47 @@ async function main() {
     });
     const contractArtifact = require(path.join(process.cwd(), contractDir, "GnosisSafe.json"));
 
-    if (!fs.existsSync(metaDir)){
+    if (!fs.existsSync(metaDir)) {
         fs.mkdirSync(metaDir);
     }
 
-    log("Uploading sources & metadata to IPFS (Infura Gateway)...")
-    log("========================================================")
+    log("Generating metadata...")
+    log("======================")
 
     log();
     log(contractArtifact.contractName);
     log("-".repeat(contractArtifact.contractName.length));
 
+    const etherscanConfig = {
+        language: "",
+        sources: {},
+        settings: {},
+        evmVersion: ""
+    }
+
     const meta = JSON.parse(contractArtifact.metadata)
-    console.log({ meta })
+    etherscanConfig.language = meta.language
+    etherscanConfig.evmVersion = meta.evmVersion
     for (let source in meta.sources) {
-        console.log({ source })
         const pathParts = source.split("/")
         await copyFile(source, path.join(metaDir, pathParts[pathParts.length - 1]));
         const contractSource = fs.readFileSync(source)
-        console.log({contractSource})
-        for await (const res of ipfs.add(contractSource)) {
-          log(`metadata: ${res.path}`);
+        etherscanConfig.sources[source] = { content: contractSource.toString() }
+        if (upload) {
+            for await (const res of ipfs.add(contractSource)) {
+                log(`metadata: ${res.path}`);
+            }
         }
     }
 
+    log('Write GnosisSafeMeta.json');
     const contractMetaFile = path.join(process.cwd(), metaDir, "GnosisSafeMeta.json");
     await writeFile(contractMetaFile, contractArtifact.metadata)
+
+    log('Write GnosisSafeEtherscan.json');
+    const contractEtherscanFile = path.join(process.cwd(), metaDir, "GnosisSafeEtherscan.json");
+    await writeFile(contractEtherscanFile, JSON.stringify(etherscanConfig))
+
     log();
     log('Finished.');
     log();
