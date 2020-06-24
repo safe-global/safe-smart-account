@@ -39,27 +39,9 @@ Truffle:
 yarn truffle deploy
 ```
 
-Verify Contracts:
-- requires installed solc (>0.5.0)
-```bash
-virtualenv env -p python3
-. env/bin/activate
-pip install solidity-flattener
-mkdir build/flattened_contracts
-solidity_flattener contracts/GnosisSafe.sol --output build/flattened_contracts/GnosisSafe.sol
-solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="/=/"
-solidity_flattener contracts/libraries/CreateCall.sol --output build/flattened_contracts/CreateCall.sol --solc-paths="/=/"
-solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="/=/"
-solidity_flattener contracts/handler/DefaultCallbackHandler.sol --output build/flattened_contracts/DefaultCallbackHandler.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/WhitelistModule.sol --output build/flattened_contracts/WhitelistModule.sol --solc-paths="/=/"
-solidity_flattener contracts/proxies/GnosisSafeProxyFactory.sol --output build/flattened_contracts/GnosisSafeProxyFactory.sol
-find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity >=0.5.0 <0.7.0;/g' {} \;
-```
-
 ### Verify contract
+
+#### Sourcify
 
 Note: For this it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`. Make sure the run `yarn prepare` again if the path has been changed after the inital `yarn install`.
 
@@ -68,6 +50,16 @@ You can locally verify contract using the scripts `generate_meta.js` and `verify
 With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
 
 Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
+
+#### Etherscan
+
+The easiest way to verify the contracts on Etherscan is to use the standard JSON output of the Solidity compiler with literal support. For that add the following to the solc settings in the `truffle-config.js` and recompile the contracts.
+```json
+"metadata": {
+    // Use only literal content and not URLs (false by default)
+    "useLiteralContent": true
+}
+```
 
 Documentation
 -------------
