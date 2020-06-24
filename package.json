@@ -9,7 +9,7 @@
     "contracts",
     "test",
     "build",
-    "network.json"
+    "networks.json"
   ],
   "ethereum": {
     "networks": [
