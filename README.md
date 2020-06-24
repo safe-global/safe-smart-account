@@ -59,9 +59,18 @@ solidity_flattener contracts/proxies/GnosisSafeProxyFactory.sol --output build/f
 find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity >=0.5.0 <0.7.0;/g' {} \;
 ```
 
+### Verify contract
+
+You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
+
+With `node generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
+
+One the the meta data has been generated you can verify that your local compiled code corresponds to the deployed version by running `node verify_deployment.js`. 
+Note: For this it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`.
+
 Documentation
 -------------
-- [ReadTheDocs](http://gnosis-safe.readthedocs.io/en/latest/)
+- [Safe developer portal](http://docs.gnosis.io/safe)
 - [Coding guidlines](docs/guidelines.md)
 
 Audits/ Formal Verification

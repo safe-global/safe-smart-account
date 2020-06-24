@@ -21,6 +21,10 @@ async function main() {
     });
     const contractArtifact = require(path.join(process.cwd(), contractDir, "GnosisSafe.json"));
 
+    if (!fs.existsSync(metaDir)){
+        fs.mkdirSync(metaDir);
+    }
+
     log("Uploading sources & metadata to IPFS (Infura Gateway)...")
     log("========================================================")
 

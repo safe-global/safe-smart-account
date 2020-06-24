@@ -34,7 +34,8 @@
     "compile": "run(){ truffle compile $@; }; run",
     "deploy": "run(){ truffle deploy --network=$@; }; run",
     "do": "run(){ truffle exec --network=$@; }; run",
-    "preversion": "node scripts/clean_build.js && yarn tnt eN && yarn tnt cB"
+    "prepare": "yarn truffle compile && yarn tnt iN",
+    "preversion": "node scripts/clean_build.js && yarn tnt cB"
   },
   "repository": {
     "type": "git",
