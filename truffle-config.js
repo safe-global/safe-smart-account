@@ -32,6 +32,13 @@ module.exports = {
       network_id: '42',
       gasPrice: 25000000000, // 25 Gwei
     },
+    mainnet: {
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://mainnet.infura.io/v3/' + token)
+      },
+      network_id: '1',
+      gasPrice: 25000000000, // 25 Gwei
+    },
     xdai: {
       provider: () => {
         return new HDWalletProvider(mnemonic, 'https://dai.poa.network')
@@ -39,12 +46,19 @@ module.exports = {
       network_id: '100',
       gasPrice: 1000000000, // 1 Gwei
     },
-    mainnet: {
+    volta: {
       provider: () => {
-        return new HDWalletProvider(mnemonic, 'https://mainnet.infura.io/v3/' + token)
+        return new HDWalletProvider(mnemonic, 'https://volta-rpc.energyweb.org')
       },
-      network_id: '1',
-      gasPrice: 25000000000, // 25 Gwei
+      network_id: '73799',
+      gasPrice: 1
+    },
+    ewc: {
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://rpc.energyweb.org')
+      },
+      network_id: '246',
+      gasPrice: 1
     }
   },
   compilers: {
