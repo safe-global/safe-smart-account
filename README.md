@@ -61,12 +61,13 @@ find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity 
 
 ### Verify contract
 
+Note: For this it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`. Make sure the run `yarn prepare` again if the path has been changed after the inital `yarn install`.
+
 You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
 
 With `node generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
 
-Once the meta data has been generated you can verify that your local compiled code corresponds to the deployed version by running `node verify_deployment.js`. 
-Note: For this it is required that the project path is `/gnosis-safe` this can be archived using `sudo mount -B <your_repo_path> gnosis-safe`.
+Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `node verify_deployment.js`.
 
 Documentation
 -------------
