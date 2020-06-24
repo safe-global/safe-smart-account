@@ -76,6 +76,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
+- [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
 - [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
 - [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
