@@ -65,9 +65,9 @@ Note: For this it is required that the project path is `/gnosis-safe` this can b
 
 You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
 
-With `node generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
+With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ 
 
-Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `node verify_deployment.js`.
+Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
 
 Documentation
 -------------
