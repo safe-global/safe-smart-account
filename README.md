@@ -54,7 +54,7 @@ Once the meta data has been generated you can verify that your local compiled co
 Documentation
 -------------
 - [Safe developer portal](http://docs.gnosis.io/safe)
-- [Coding guidlines](docs/guidelines.md)
+- [Coding guidelines](docs/guidelines.md)
 
 Audits/ Formal Verification
 ---------
