@@ -31,6 +31,7 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     /// @dev Allows to add a module to the whitelist.
     ///      This can only be done via a Safe transaction.
+    /// @notice Enables the module `module` for the Safe.
     /// @param module Module to be whitelisted.
     function enableModule(Module module)
         public
@@ -47,6 +48,7 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     /// @dev Allows to remove a module from the whitelist.
     ///      This can only be done via a Safe transaction.
+    /// @notice Disables the module `module` for the Safe.
     /// @param prevModule Module that pointed to the module to be removed in the linked list
     /// @param module Module to be removed.
     function disableModule(Module prevModule, Module module)
