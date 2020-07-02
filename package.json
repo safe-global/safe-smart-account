@@ -1,6 +1,6 @@
 {
   "name": "@circles/safe-contracts",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Circles UBI fork of Gnosis Safe Ethereum multisig contract",
   "homepage": "https://github.com/circlesUBI/safe-contracts/",
   "license": "GPL-3.0",
