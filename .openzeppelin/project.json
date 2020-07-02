@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "2.2",
+  "contracts": {
+    "GnosisSafe": "GnosisSafe",
+    "ProxyFactory": "ProxyFactory",
+    "MultiSend": "MultiSend",
+    "CreateAndAddModules": "CreateAndAddModules",
+    "CreateCall": "CreateCall",
+    "DefaultCallbackHandler": "DefaultCallbackHandler"
+  },
+  "dependencies": {},
+  "name": "@gnosis.pm/safe-contracts",
+  "version": "1.1.1"
+}

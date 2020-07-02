@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
@@ -12,11 +12,13 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     event EnabledModule(Module module);
     event DisabledModule(Module module);
+    event ExecutionFromModuleSuccess(address indexed module);
+    event ExecutionFromModuleFailure(address indexed module);
 
-    address public constant SENTINEL_MODULES = address(0x1);
+    address internal constant SENTINEL_MODULES = address(0x1);
 
     mapping (address => address) internal modules;
-    
+
     function setupModules(address to, bytes memory data)
         internal
     {
@@ -72,32 +74,72 @@ contract ModuleManager is SelfAuthorized, Executor {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
+        if (success) emit ExecutionFromModuleSuccess(msg.sender);
+        else emit ExecutionFromModuleFailure(msg.sender);
     }
 
-    /// @dev Returns array of modules.
+    /// @dev Allows a Module to execute a Safe transaction without any further confirmations and return data
+    /// @param to Destination address of module transaction.
+    /// @param value Ether value of module transaction.
+    /// @param data Data payload of module transaction.
+    /// @param operation Operation type of module transaction.
+    function execTransactionFromModuleReturnData(address to, uint256 value, bytes memory data, Enum.Operation operation)
+        public
+        returns (bool success, bytes memory returnData)
+    {
+        success = execTransactionFromModule(to, value, data, operation);
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            // Load free memory location
+            let ptr := mload(0x40)
+            // We allocate memory for the return data by setting the free memory location to
+            // current free memory location + data size + 32 bytes for data size value
+            mstore(0x40, add(ptr, add(returndatasize(), 0x20)))
+            // Store the size
+            mstore(ptr, returndatasize())
+            // Store the data
+            returndatacopy(add(ptr, 0x20), 0, returndatasize())
+            // Point the return data to the correct memory location
+            returnData := ptr
+        }
+    }
+
+    /// @dev Returns array of first 10 modules.
     /// @return Array of modules.
     function getModules()
         public
         view
         returns (address[] memory)
     {
-        // Calculate module count
-        uint256 moduleCount = 0;
-        address currentModule = modules[SENTINEL_MODULES];
-        while(currentModule != SENTINEL_MODULES) {
-            currentModule = modules[currentModule];
-            moduleCount ++;
-        }
-        address[] memory array = new address[](moduleCount);
+        (address[] memory array,) = getModulesPaginated(SENTINEL_MODULES, 10);
+        return array;
+    }
 
-        // populate return array
-        moduleCount = 0;
-        currentModule = modules[SENTINEL_MODULES];
-        while(currentModule != SENTINEL_MODULES) {
+    /// @dev Returns array of modules.
+    /// @param start Start of the page.
+    /// @param pageSize Maximum number of modules that should be returned.
+    /// @return Array of modules.
+    function getModulesPaginated(address start, uint256 pageSize)
+        public
+        view
+        returns (address[] memory array, address next)
+    {
+        // Init array with max page size
+        array = new address[](pageSize);
+
+        // Populate return array
+        uint256 moduleCount = 0;
+        address currentModule = modules[start];
+        while(currentModule != address(0x0) && currentModule != SENTINEL_MODULES && moduleCount < pageSize) {
             array[moduleCount] = currentModule;
             currentModule = modules[currentModule];
-            moduleCount ++;
+            moduleCount++;
         }
-        return array;
+        next = currentModule;
+        // Set correct size of returned array
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            mstore(array, moduleCount)
+        }
     }
 }

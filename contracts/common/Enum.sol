@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 
 
 /// @title Enum - Collection of enums
@@ -6,7 +6,6 @@ pragma solidity ^0.5.0;
 contract Enum {
     enum Operation {
         Call,
-        DelegateCall,
-        Create
+        DelegateCall
     }
 }

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 import "../common/SelfAuthorized.sol";
 
 /// @title OwnerManager - Manages a set of owners and a threshold to perform actions.
@@ -10,7 +10,7 @@ contract OwnerManager is SelfAuthorized {
     event RemovedOwner(address owner);
     event ChangedThreshold(uint256 threshold);
 
-    address public constant SENTINEL_OWNERS = address(0x1);
+    address internal constant SENTINEL_OWNERS = address(0x1);
 
     mapping(address => address) internal owners;
     uint256 ownerCount;

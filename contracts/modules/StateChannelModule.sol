@@ -1,6 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 import "../base/Module.sol";
 import "../base/OwnerManager.sol";
+import "../common/Enum.sol";
 import "../common/SignatureDecoder.sol";
 
 
@@ -30,10 +31,10 @@ contract StateChannelModule is Module, SignatureDecoder {
     /// @param nonce Nonce used for this Safe transaction.
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     function execTransaction(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
         uint256 nonce,
         bytes memory signatures
     )
@@ -73,10 +74,10 @@ contract StateChannelModule is Module, SignatureDecoder {
     /// @param nonce Transaction nonce.
     /// @return Transaction hash.
     function getTransactionHash(
-        address to, 
-        uint256 value, 
-        bytes memory data, 
-        Enum.Operation operation, 
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
         uint256 nonce
     )
         public

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.7.0;
 
 
 /// @title SecuredTokenTransfer - Secure token transfer
@@ -10,7 +10,7 @@ contract SecuredTokenTransfer {
     /// @param receiver Receiver to whom the token should be transferred
     /// @param amount The amount of tokens that should be transferred
     function transferToken (
-        address token, 
+        address token,
         address receiver,
         uint256 amount
     )
@@ -22,8 +22,9 @@ contract SecuredTokenTransfer {
         assembly {
             let success := call(sub(gas, 10000), token, 0, add(data, 0x20), mload(data), 0, 0)
             let ptr := mload(0x40)
-            returndatacopy(ptr, 0, returndatasize)
-            switch returndatasize 
+            mstore(0x40, add(ptr, returndatasize()))
+            returndatacopy(ptr, 0, returndatasize())
+            switch returndatasize()
             case 0 { transferred := success }
             case 0x20 { transferred := iszero(or(iszero(success), iszero(mload(ptr)))) }
             default { transferred := 0 }
