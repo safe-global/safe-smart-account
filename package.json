@@ -82,9 +82,16 @@
   "peerDependencies": {
     "ethers": "^5.1.4"},
   "dependencies": {
+    "shelljs": "^0.8.3",
+    "solc": "0.5.17",
+    "truffle": "^5.1.21"
+  },
+  "resolutions": {
+    "bitcore-lib": "8.1.1",
+    "run-with-testrpc/ganache-cli": "6.3.0",
     "@truffle/hdwallet-provider": "^1.0.36",
     "dotenv": "^8.0.0",
     "openzeppelin-solidity": "^2.0.0",
-    "solc": "^0.5.9"
+    "shelljs": "^0.8.3",
   }
 }
