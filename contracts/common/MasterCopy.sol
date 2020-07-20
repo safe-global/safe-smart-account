@@ -3,7 +3,7 @@ import "./SelfAuthorized.sol";
 
 
 /// @title MasterCopy - Base for master copy contracts (should always be first super contract)
-///         This contract is tightly coupled to our proxy contract (see `proxies/Proxy.sol`)
+///         This contract is tightly coupled to our proxy contract (see `proxies/GnosisSafeProxy.sol`)
 /// @author Richard Meissner - <richard@gnosis.io>
 contract MasterCopy is SelfAuthorized {
 

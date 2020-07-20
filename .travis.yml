@@ -1,8 +1,8 @@
 language: node_js
 node_js:
-- '9'
+- '10'
 cache:
   directories:
     - node_modules
 before_script: 
-- npx truffle compile
+- yarn truffle compile

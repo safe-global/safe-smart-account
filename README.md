@@ -6,100 +6,62 @@ Gnosis Safe Contracts
 
 Install
 -------
-### Install requirements with npm:
+### Install requirements with yarn:
 
 ```bash
-npm install
+yarn
 ```
 
 ### Run all tests (requires Node version >=7 for `async/await`):
 
 ```bash
-npx truffle compile
-npx truffle test
+yarn truffle compile
+yarn test
 ```
+
+`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
 
 ### Deploy
 
-Some contracts require that the Solidity compile target is at least `petersburg` (e.g. ProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
+Some contracts require that the Solidity compile target is at least `petersburg` (e.g. GnosisSafeProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
 
 Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
 Preparation:
 - Set `INFURA_TOKEN` in `.env`
 - Set `NETWORK` in `.env`
-- Run `npx truffle compile`
-
-OpenZeppelin SDK:
-- Make sure that @openzeppelin/cli is version 2.5 (`npx oz --version`)
-- Make sure that all dependencies use solcjs >0.5.0
-- Set correct version in `package.json`
-- Set `MNEMONIC` in `.env` to current oz package owner (last deployer normally)
-- Optional: if a new deployer account is used
-  - Check that a gloabl versionb of truffle 5 is installed (`truffle version`)
-  - Run `truffle exec scripts/change_oz_owner.js --network=<network> --newOwner="<address>"` to enable new deployer
-  - Set `MNEMONIC` in `.env` to new oz package owner
-- Run `npm run deploy-oz`
-- Once deployed on all networks run `npx oz --freeze <network>` for each network
+- Run `yarn truffle compile`
 
 Truffle:
 - Set `MNEMONIC` in `.env`
 
 ```bash
-npx truffle deploy
+yarn truffle deploy
 ```
 
-Verify Contracts:
-- requires installed solc (>0.5.0)
-```bash
-virtualenv env -p python3
-. env/bin/activate
-pip install solidity-flattener
-mkdir build/flattened_contracts
-solidity_flattener contracts/GnosisSafe.sol --output build/flattened_contracts/GnosisSafe.sol
-solidity_flattener contracts/libraries/CreateAndAddModules.sol --output build/flattened_contracts/CreateAndAddModules.sol --solc-paths="/=/"
-solidity_flattener contracts/libraries/CreateCall.sol --output build/flattened_contracts/CreateCall.sol --solc-paths="/=/"
-solidity_flattener contracts/libraries/MultiSend.sol --output build/flattened_contracts/MultiSend.sol --solc-paths="/=/"
-solidity_flattener contracts/handler/DefaultCallbackHandler.sol --output build/flattened_contracts/DefaultCallbackHandler.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/DailyLimitModule.sol --output build/flattened_contracts/DailyLimitModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/SocialRecoveryModule.sol --output build/flattened_contracts/SocialRecoveryModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/StateChannelModule.sol --output build/flattened_contracts/StateChannelModule.sol --solc-paths="/=/"
-solidity_flattener contracts/modules/WhitelistModule.sol --output build/flattened_contracts/WhitelistModule.sol --solc-paths="/=/"
-solidity_flattener contracts/proxies/ProxyFactory.sol --output build/flattened_contracts/ProxyFactory.sol
-find build/flattened_contracts -name '*.sol' -exec sed -i '' 's/pragma solidity ^0.4.13;/pragma solidity >=0.5.0 <0.7.0;/g' {} \;
-```
+### Verify contract
 
-Using with OpenZeppelin SDK
----------------------------
+Note: To completely replicate the bytecode that has been deployed it is required that the project path is `/gnosis-safe` this can be archived using `sudo mkdir /gnosis-safe && sudo mount -B <your_repo_path> /gnosis-safe`. Make sure the run `yarn` again if the path has been changed after the inital `yarn install`. If you use a different path you will only get partial matches.
 
-You can create a gnosis safe upgradeable instance using [OpenZeppelin SDK](https://docs.openzeppelin.com/sdk/2.5) by linking to the provided [EVM package](https://docs.openzeppelin.com/sdk/2.5/linking). This will use the master copy already deployed to mainnet, kovan, or rinkeby, reducing gas deployment costs.
+You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
 
-To create an instance using OpenZeppelin SDK:
+With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ and https://etherscan.io/
 
-```bash
-$ npm install -g @openzeppelin/sdk
-$ oz init YourProject
-$ oz link @gnosis.pm/safe-contracts
-$ oz push --network rinkeby
-> Connecting to dependency @gnosis.pm/safe-contracts 1.0.0
-$ oz create @gnosis.pm//GnosisSafe --init setup --args "[$ADDRESS1,$ADDRESS2,$ADDRESS3],2,0x0000000000000000000000000000000000000000,\"\"" --network rinkeby --from $SENDER
-> Instance created at SAFE_ADDRESS
-```
+For Etherscan only the `GnosisSafeEtherscan.json` file is required. For sourcify the `GnosisSafeMeta.json` and all the `.sol` files are required.
 
-It is suggested to [use a non-default address](https://docs.zeppelinos.org/docs/pattern.html#transparent-proxies-and-function-clashes) as `$SENDER`.
-
-> Note: When using the contracts via ZeppelinOS make sure to choose an appropriate Proxy admin. An upgradable proxy enables the user to update the master copy (aka implementation). The default upgradable proxy is managed by an admin address. This admin address is independent from the owners of the Safe. Therefore it would be possible for the admin to change the master copy without the approval of any owner, thus allowing him to gain full access to the Safe.
+Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
 
 Documentation
 -------------
-- [ReadTheDocs](http://gnosis-safe.readthedocs.io/en/latest/)
-- [Coding guidlines](docs/guidelines.md)
+- [Safe developer portal](http://docs.gnosis.io/safe)
+- [Coding guidelines](docs/guidelines.md)
 
 Audits/ Formal Verification
 ---------
+- [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
 - [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
-- [for Version 0.2.0 by Alexey Akhunov](docs/alexey_audit.md)
+- [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
 
 Security and Liability
 ----------------------

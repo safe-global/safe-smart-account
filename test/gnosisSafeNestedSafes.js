@@ -4,7 +4,7 @@ const abi = require('ethereumjs-abi')
 
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol")
 
 contract('GnosisSafe using nested safes', function(accounts) {
 
@@ -23,18 +23,24 @@ contract('GnosisSafe using nested safes', function(accounts) {
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
-        let owner1SafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[0], lw.accounts[1]], 2, 0, "0x", 0, 0, 0, 0)
-        owner1Safe = utils.getParamFromTxEvent(
+        let owner1SafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [lw.accounts[0], lw.accounts[1]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        owner1Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner1SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
-        let owner2SafeData = await gnosisSafeMasterCopy.contract.setup.getData([lw.accounts[2], lw.accounts[3]], 2, 0, "0x", 0, 0, 0, 0)
-        owner2Safe = utils.getParamFromTxEvent(
+        let owner2SafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [lw.accounts[2], lw.accounts[3]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        owner2Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner2SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([owner1Safe.address,owner2Safe.address], 2, 0, "0x", 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [owner1Safe.address, owner2Safe.address], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
@@ -43,29 +49,29 @@ contract('GnosisSafe using nested safes', function(accounts) {
     it('should use EIP-1271 (contract signatures)', async () => {
         // Deposit some spare money for execution to owner safes
         assert.equal(await web3.eth.getBalance(owner1Safe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: owner1Safe.address, value: web3.toWei(0.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(owner1Safe.address).toNumber(), web3.toWei(0.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: owner1Safe.address, value: web3.utils.toWei("0.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(owner1Safe.address), web3.utils.toWei("0.1", 'ether'))
 
         assert.equal(await web3.eth.getBalance(owner2Safe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: owner2Safe.address, value: web3.toWei(0.1, 'ether')})
-        assert.equal(await web3.eth.getBalance(owner2Safe.address).toNumber(), web3.toWei(0.1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: owner2Safe.address, value: web3.utils.toWei("0.1", 'ether')})
+        assert.equal(await web3.eth.getBalance(owner2Safe.address), web3.utils.toWei("0.1", 'ether'))
         
         // Deposit 1 ETH
         assert.equal(await web3.eth.getBalance(gnosisSafe.address), 0)
-        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.toWei(1, 'ether')})
-        assert.equal(await web3.eth.getBalance(gnosisSafe.address).toNumber(), web3.toWei(1, 'ether'))
+        await web3.eth.sendTransaction({from: accounts[0], to: gnosisSafe.address, value: web3.utils.toWei("1", 'ether')})
+        assert.equal(await web3.eth.getBalance(gnosisSafe.address), web3.utils.toWei("1", 'ether'))
 
         // Withdraw 1 ETH
         let to = accounts[9]
-        let value = web3.toWei(1, 'ether')
+        let value = web3.utils.toWei("1", 'ether')
         let data = "0x"
         let operation = CALL
         
         let sigs = "0x"
         let nonce = await gnosisSafe.nonce()
-        let messageData = await gnosisSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, 0, 0, nonce)
+        let messageData = await gnosisSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, utils.Address0, utils.Address0, nonce)
 
-        let signMessageData = owner1Safe.contract.signMessage.getData(messageData)
+        let signMessageData = owner1Safe.contract.methods.signMessage(messageData).encodeABI()
         // Use on-chain Safe signature
         await safeUtils.executeTransaction(lw, owner1Safe, 'approve transaction signature on contract', [lw.accounts[0], lw.accounts[1]], owner1Safe.address, 0, signMessageData, CALL, executor)
 
@@ -88,7 +94,7 @@ contract('GnosisSafe using nested safes', function(accounts) {
 
         // Execute Transaction
         let tx = await gnosisSafe.execTransaction(
-            to, value, data, operation, 0, 0, 0, 0, 0, sigs, {from: executor}
+            to, value, data, operation, 0, 0, 0, utils.Address0, utils.Address0, sigs, {from: executor}
         )
         utils.checkTxEvent(tx, 'ExecutionFailed', gnosisSafe.address, false, "execute withdrawal")
 
