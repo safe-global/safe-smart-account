@@ -5,6 +5,7 @@
       "constant": false,
       "inputs": [
         {
+          "internalType": "contract Module",
           "name": "module",
           "type": "address"
         }
@@ -19,10 +20,12 @@
       "constant": false,
       "inputs": [
         {
+          "internalType": "address",
           "name": "proxyFactory",
           "type": "address"
         },
         {
+          "internalType": "bytes",
           "name": "data",
           "type": "bytes"
         }
@@ -34,41 +37,45 @@
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b50610296806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806360df7f581461003b578063610b592514610116575b600080fd5b6101146004803603604081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561008e57600080fd5b8201836020820111156100a057600080fd5b803590602001918460018302840111640100000000831117156100c257600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050919291929050505061015a565b005b6101586004803603602081101561012c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610265565b005b600081519050600080600090505b8281101561025e5780840160200151818501604001604051600060208285858c5af4141561019557600080fd5b73ffffffffffffffffffffffffffffffffffffffff8151169450602080601f85010402602001840193505050503073ffffffffffffffffffffffffffffffffffffffff1663610b5925836040518263ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001915050600060405180830381600087803b15801561024157600080fd5b505af1158015610255573d6000803e3d6000fd5b50505050610168565b5050505050565b600080fdfea165627a7a7230582092c18c1f5c7a57439073e88cc74800653b96ce79d69268607e96f9104564d71c0029",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806360df7f581461003b578063610b592514610116575b600080fd5b6101146004803603604081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561008e57600080fd5b8201836020820111156100a057600080fd5b803590602001918460018302840111640100000000831117156100c257600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050919291929050505061015a565b005b6101586004803603602081101561012c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610265565b005b600081519050600080600090505b8281101561025e5780840160200151818501604001604051600060208285858c5af4141561019557600080fd5b73ffffffffffffffffffffffffffffffffffffffff8151169450602080601f85010402602001840193505050503073ffffffffffffffffffffffffffffffffffffffff1663610b5925836040518263ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001915050600060405180830381600087803b15801561024157600080fd5b505af1158015610255573d6000803e3d6000fd5b50505050610168565b5050505050565b600080fdfea165627a7a7230582092c18c1f5c7a57439073e88cc74800653b96ce79d69268607e96f9104564d71c0029",
-  "sourceMap": "250:1464:15:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;250:1464:15;;;;;;;",
-  "deployedSourceMap": "250:1464:15:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;250:1464:15;;;;;;;;;;;;;;;;;;;;;;;;820:892;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;820:892:15;;;;;;;;;;;;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;820:892:15;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;820:892:15;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;820:892:15;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;820:892:15;;;;;;;;;;;;;;;:::i;:::-;;410:81;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;410:81:15;;;;;;;;;;;;;;;;;;;:::i;:::-;;820:892;919:14;936:4;:11;919:28;;957:13;980:9;992:1;980:13;;1003:703;1014:6;1010:1;:10;1003:703;;;1182:1;1176:4;1172:12;1166:4;1162:23;1156:30;1242:1;1236:4;1232:12;1226:4;1222:23;1283:4;1277:11;1390:1;1383:4;1375:6;1356:17;1343:11;1329:12;1324:3;1311:77;1308:84;1305:2;;;1405:1;1402;1395:12;1305:2;1455:42;1446:6;1440:13;1436:62;1426:72;;1636:4;1629;1622;1603:17;1599:28;1595:39;1591:50;1585:4;1581:61;1578:1;1574:69;1569:74;;1113:544;;;1670:4;:17;;;1688:6;1670:25;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1670:25:15;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1670:25:15;;;;1003:703;;;820:892;;;;;:::o;410:81::-;476:8;;",
-  "source": "pragma solidity ^0.5.0;\nimport \"../base/Module.sol\";\n\n\n/// @title Create and Add Modules - Allows to create and add multiple module in one transaction.\n/// @author Stefan George - <stefan@gnosis.pm>\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract CreateAndAddModules {\n\n    /// @dev Function required to compile contract. Gnosis Safe function is called instead.\n    /// @param module Not used.\n    function enableModule(Module module)\n        public\n    {\n        revert();\n    }\n\n    /// @dev Allows to create and add multiple module in one transaction.\n    /// @param proxyFactory Module proxy factory contract.\n    /// @param data Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)\n    function createAndAddModules(address proxyFactory, bytes memory data)\n        public\n    {\n        uint256 length = data.length;\n        Module module;\n        uint256 i = 0;\n        while (i < length) {\n            // solium-disable-next-line security/no-inline-assembly\n            assembly {\n                let createBytesLength := mload(add(0x20, add(data, i)))\n                let createBytes := add(0x40, add(data, i))\n\n                let output := mload(0x40)\n                if eq(delegatecall(gas, proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }\n                module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n\n                // Data is always padded to 32 bytes\n                i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n            }\n            this.enableModule(module);\n        }\n    }\n}\n",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"proxyFactory\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"createAndAddModules\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract Module\",\"name\":\"module\",\"type\":\"address\"}],\"name\":\"enableModule\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Stefan George - <stefan@gnosis.pm>Richard Meissner - <richard@gnosis.pm>\",\"methods\":{\"createAndAddModules(address,bytes)\":{\"details\":\"Allows to create and add multiple module in one transaction.\",\"params\":{\"data\":\"Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)\",\"proxyFactory\":\"Module proxy factory contract.\"}},\"enableModule(address)\":{\"details\":\"Function required to compile contract. Gnosis Safe function is called instead.\",\"params\":{\"module\":\"Not used.\"}}},\"title\":\"Create and Add Modules - Allows to create and add multiple module in one transaction.\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateAndAddModules.sol\":\"CreateAndAddModules\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/base/Executor.sol\":{\"keccak256\":\"0xd2835623a200b6f14979751aff14e48362b5db0d86fff17dfb6a982790ff6c67\",\"urls\":[\"bzz-raw://df85c3b4dc546ffd8790a155bf6190b55168a69f469624a9134f1e7a9e079880\",\"dweb:/ipfs/QmXozPPHk7KAyoihdx4FEn4dEaR2x9yDJthQcZPR3Knxpv\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/base/Module.sol\":{\"keccak256\":\"0x0d168bb2c28fe04185e992692705925d700ecc32692e1a1f997478c55722b9ad\",\"urls\":[\"bzz-raw://72b39ab237628e99e68b89269a99efbf7f4c977ce8dcda9e947e74ffffc2bf36\",\"dweb:/ipfs/QmekYYrv5X2wdg2QqaP96qhkxpwTT8nt47CHvuBxzHv9hp\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/base/ModuleManager.sol\":{\"keccak256\":\"0xb37522d525b7bc868df406e3779ff764f74d74354dc8e86ad4590afb62722117\",\"urls\":[\"bzz-raw://797f422109bdb6517916c41697cf834cafc14ce2bab8140b26847aa27fc95523\",\"dweb:/ipfs/QmNMXB1tBH9tJfmNqteUKdD8RXKXX9jNscz6Y5ijxqzGAL\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/common/Enum.sol\":{\"keccak256\":\"0x7bc6e5afb9436d9f7e376c2cdba51ca1f337e1b31c04cca5769db3a77ed40081\",\"urls\":[\"bzz-raw://88b3a68baaff962b69b040af62698034bf9c99319e4a6dce71abc2c0c88fba91\",\"dweb:/ipfs/QmTefyhXcMALQew96u7YRLQBnye9vapqkKBWxbynWpMHDM\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/common/MasterCopy.sol\":{\"keccak256\":\"0x1577fad0dc06cb3ac2c7d66816a00d3b70c053a21ab5834ec7aceace9a7803a7\",\"urls\":[\"bzz-raw://7f23c1e11ebb2fbd3b55a4074b4a9f343c0ac02b372cbbe66a90d71a88ce1885\",\"dweb:/ipfs/QmexSrdAm4DqBjGi29yQTxSGKqJ5qC8jy1b5NJH6Zy9Cvh\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/common/SelfAuthorized.sol\":{\"keccak256\":\"0x4c4f094227fc466846a97fe375c47ecdfcab050c303baeb69b5970d28db717a6\",\"urls\":[\"bzz-raw://42759fe6b2433ea24fd0fbe98a144ef55e464f87861a13aa364db8a6f4a01cf1\",\"dweb:/ipfs/QmTWPnHdfcBbddkMJxvEvoWs3CZoKB5rtz3s8K2ii9z9CG\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateAndAddModules.sol\":{\"keccak256\":\"0x14a40abb08497d3080823c9ecf6588c5776ff3b47839ffcd10c1737d71b52e91\",\"urls\":[\"bzz-raw://1965a6a354f8114a4e580e86780498dc113082456ee3d5aa26e97252e135b80d\",\"dweb:/ipfs/Qmeoc9Nzgbh822X1xCQn2a5g8va7ABFpo9VwHgy7H4ELmd\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061029f806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806360df7f581461003b578063610b592514610116575b600080fd5b6101146004803603604081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561008e57600080fd5b8201836020820111156100a057600080fd5b803590602001918460018302840111640100000000831117156100c257600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050919291929050505061015a565b005b6101586004803603602081101561012c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610265565b005b600081519050600080600090505b8281101561025e5780840160200151818501604001604051600060208285858c5af4141561019557600080fd5b73ffffffffffffffffffffffffffffffffffffffff8151169450602080601f85010402602001840193505050503073ffffffffffffffffffffffffffffffffffffffff1663610b5925836040518263ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001915050600060405180830381600087803b15801561024157600080fd5b505af1158015610255573d6000803e3d6000fd5b50505050610168565b5050505050565b600080fdfea265627a7a723158202feff99b37dac94523b6552d16bb1a9099845a1c62d445b930e38713c9f33b4864736f6c63430005100032",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806360df7f581461003b578063610b592514610116575b600080fd5b6101146004803603604081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561008e57600080fd5b8201836020820111156100a057600080fd5b803590602001918460018302840111640100000000831117156100c257600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050919291929050505061015a565b005b6101586004803603602081101561012c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610265565b005b600081519050600080600090505b8281101561025e5780840160200151818501604001604051600060208285858c5af4141561019557600080fd5b73ffffffffffffffffffffffffffffffffffffffff8151169450602080601f85010402602001840193505050503073ffffffffffffffffffffffffffffffffffffffff1663610b5925836040518263ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001915050600060405180830381600087803b15801561024157600080fd5b505af1158015610255573d6000803e3d6000fd5b50505050610168565b5050505050565b600080fdfea265627a7a723158202feff99b37dac94523b6552d16bb1a9099845a1c62d445b930e38713c9f33b4864736f6c63430005100032",
+  "sourceMap": "258:1464:19:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;258:1464:19;;;;;;;",
+  "deployedSourceMap": "258:1464:19:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;258:1464:19;;;;;;;;;;;;;;;;;;;;;;;;828:892;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;828:892:19;;;;;;;;;;;;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;828:892:19;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;828:892:19;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;828:892:19;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;828:892:19;;;;;;;;;;;;;;;:::i;:::-;;418:81;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;418:81:19;;;;;;;;;;;;;;;;;;;:::i;:::-;;828:892;927:14;944:4;:11;927:28;;965:13;988:9;1000:1;988:13;;1011:703;1022:6;1018:1;:10;1011:703;;;1190:1;1184:4;1180:12;1174:4;1170:23;1164:30;1250:1;1244:4;1240:12;1234:4;1230:23;1291:4;1285:11;1398:1;1391:4;1383:6;1364:17;1351:11;1337:12;1332:3;1319:77;1316:84;1313:2;;;1413:1;1410;1403:12;1313:2;1463:42;1454:6;1448:13;1444:62;1434:72;;1644:4;1637;1630;1611:17;1607:28;1603:39;1599:50;1593:4;1589:61;1586:1;1582:69;1577:74;;1121:544;;;1678:4;:17;;;1696:6;1678:25;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1678:25:19;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1678:25:19;;;;1011:703;;;828:892;;;;;:::o;418:81::-;484:8;;",
+  "source": "pragma solidity >=0.5.0 <0.7.0;\nimport \"../base/Module.sol\";\n\n\n/// @title Create and Add Modules - Allows to create and add multiple module in one transaction.\n/// @author Stefan George - <stefan@gnosis.pm>\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract CreateAndAddModules {\n\n    /// @dev Function required to compile contract. Gnosis Safe function is called instead.\n    /// @param module Not used.\n    function enableModule(Module module)\n        public\n    {\n        revert();\n    }\n\n    /// @dev Allows to create and add multiple module in one transaction.\n    /// @param proxyFactory Module proxy factory contract.\n    /// @param data Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)\n    function createAndAddModules(address proxyFactory, bytes memory data)\n        public\n    {\n        uint256 length = data.length;\n        Module module;\n        uint256 i = 0;\n        while (i < length) {\n            // solium-disable-next-line security/no-inline-assembly\n            assembly {\n                let createBytesLength := mload(add(0x20, add(data, i)))\n                let createBytes := add(0x40, add(data, i))\n\n                let output := mload(0x40)\n                if eq(delegatecall(gas, proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }\n                module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n\n                // Data is always padded to 32 bytes\n                i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n            }\n            this.enableModule(module);\n        }\n    }\n}\n",
   "sourcePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateAndAddModules.sol",
   "ast": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateAndAddModules.sol",
     "exportedSymbols": {
       "CreateAndAddModules": [
-        2129
+        2536
       ]
     },
-    "id": 2130,
+    "id": 2537,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2086,
+        "id": 2493,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:15"
+        "src": "0:31:19"
       },
       {
         "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/base/Module.sol",
         "file": "../base/Module.sol",
-        "id": 2087,
+        "id": 2494,
         "nodeType": "ImportDirective",
-        "scope": 2130,
-        "sourceUnit": 1021,
-        "src": "24:28:15",
+        "scope": 2537,
+        "sourceUnit": 1163,
+        "src": "32:28:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -78,18 +85,18 @@
         "contractKind": "contract",
         "documentation": "@title Create and Add Modules - Allows to create and add multiple module in one transaction.\n @author Stefan George - <stefan@gnosis.pm>\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 2129,
+        "id": 2536,
         "linearizedBaseContracts": [
-          2129
+          2536
         ],
         "name": "CreateAndAddModules",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2095,
+              "id": 2502,
               "nodeType": "Block",
-              "src": "466:25:15",
+              "src": "474:25:19",
               "statements": [
                 {
                   "expression": {
@@ -97,21 +104,21 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 2092,
+                      "id": 2499,
                       "name": "revert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4375,
-                        4376
+                        5225,
+                        5226
                       ],
-                      "referencedDeclaration": 4375,
-                      "src": "476:6:15",
+                      "referencedDeclaration": 5225,
+                      "src": "484:6:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_revert_pure$__$returns$__$",
                         "typeString": "function () pure"
                       }
                     },
-                    "id": 2093,
+                    "id": 2500,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -119,51 +126,51 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "476:8:15",
+                    "src": "484:8:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2094,
+                  "id": 2501,
                   "nodeType": "ExpressionStatement",
-                  "src": "476:8:15"
+                  "src": "484:8:19"
                 }
               ]
             },
             "documentation": "@dev Function required to compile contract. Gnosis Safe function is called instead.\n @param module Not used.",
-            "id": 2096,
+            "id": 2503,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "enableModule",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2090,
+              "id": 2497,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2089,
+                  "id": 2496,
                   "name": "module",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2096,
-                  "src": "432:13:15",
+                  "scope": 2503,
+                  "src": "440:13:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_Module_$1020",
+                    "typeIdentifier": "t_contract$_Module_$1162",
                     "typeString": "contract Module"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2088,
+                    "id": 2495,
                     "name": "Module",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1020,
-                    "src": "432:6:15",
+                    "referencedDeclaration": 1162,
+                    "src": "440:6:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_Module_$1020",
+                      "typeIdentifier": "t_contract$_Module_$1162",
                       "typeString": "contract Module"
                     }
                   },
@@ -171,38 +178,38 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "431:15:15"
+              "src": "439:15:19"
             },
             "returnParameters": {
-              "id": 2091,
+              "id": 2498,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "466:0:15"
+              "src": "474:0:19"
             },
-            "scope": 2129,
-            "src": "410:81:15",
+            "scope": 2536,
+            "src": "418:81:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 2127,
+              "id": 2534,
               "nodeType": "Block",
-              "src": "909:803:15",
+              "src": "917:803:19",
               "statements": [
                 {
                   "assignments": [
-                    2104
+                    2511
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2104,
+                      "id": 2511,
                       "name": "length",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "919:14:15",
+                      "scope": 2534,
+                      "src": "927:14:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -210,10 +217,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2103,
+                        "id": 2510,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "919:7:15",
+                        "src": "927:7:19",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -223,23 +230,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2107,
+                  "id": 2514,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 2105,
+                      "id": 2512,
                       "name": "data",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2100,
-                      "src": "936:4:15",
+                      "referencedDeclaration": 2507,
+                      "src": "944:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "id": 2106,
+                    "id": 2513,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -247,42 +254,42 @@
                     "memberName": "length",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": null,
-                    "src": "936:11:15",
+                    "src": "944:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "919:28:15"
+                  "src": "927:28:19"
                 },
                 {
                   "assignments": [
-                    2109
+                    2516
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2109,
+                      "id": 2516,
                       "name": "module",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "957:13:15",
+                      "scope": 2534,
+                      "src": "965:13:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Module_$1020",
+                        "typeIdentifier": "t_contract$_Module_$1162",
                         "typeString": "contract Module"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 2108,
+                        "id": 2515,
                         "name": "Module",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1020,
-                        "src": "957:6:15",
+                        "referencedDeclaration": 1162,
+                        "src": "965:6:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Module_$1020",
+                          "typeIdentifier": "t_contract$_Module_$1162",
                           "typeString": "contract Module"
                         }
                       },
@@ -290,23 +297,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2110,
+                  "id": 2517,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "957:13:15"
+                  "src": "965:13:19"
                 },
                 {
                   "assignments": [
-                    2112
+                    2519
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2112,
+                      "id": 2519,
                       "name": "i",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "980:9:15",
+                      "scope": 2534,
+                      "src": "988:9:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -314,10 +321,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2111,
+                        "id": 2518,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "980:7:15",
+                        "src": "988:7:19",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -327,18 +334,18 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2114,
+                  "id": 2521,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "30",
-                    "id": 2113,
+                    "id": 2520,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "number",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "992:1:15",
+                    "src": "1000:1:19",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_rational_0_by_1",
@@ -347,93 +354,93 @@
                     "value": "0"
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "980:13:15"
+                  "src": "988:13:19"
                 },
                 {
                   "body": {
-                    "id": 2125,
+                    "id": 2532,
                     "nodeType": "Block",
-                    "src": "1022:684:15",
+                    "src": "1030:684:19",
                     "statements": [
                       {
                         "externalReferences": [
                           {
-                            "i": {
-                              "declaration": 2112,
+                            "data": {
+                              "declaration": 2507,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1569:1:15",
+                              "src": "1184:4:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1190:1:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "data": {
-                              "declaration": 2100,
+                              "declaration": 2507,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1176:4:15",
+                              "src": "1244:4:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "i": {
-                              "declaration": 2112,
+                              "declaration": 2519,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1182:1:15",
+                              "src": "1250:1:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1577:1:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1586:1:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "module": {
-                              "declaration": 2109,
+                              "declaration": 2516,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1426:6:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "data": {
-                              "declaration": 2100,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1236:4:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "i": {
-                              "declaration": 2112,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1242:1:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "i": {
-                              "declaration": 2112,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1578:1:15",
+                              "src": "1434:6:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "proxyFactory": {
-                              "declaration": 2098,
+                              "declaration": 2505,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1329:12:15",
+                              "src": "1337:12:19",
                               "valueSize": 1
                             }
                           }
                         ],
-                        "id": 2118,
+                        "id": 2525,
                         "nodeType": "InlineAssembly",
-                        "operations": "{\n    let createBytesLength := mload(add(0x20, add(data, i)))\n    let createBytes := add(0x40, add(data, i))\n    let output := mload(0x40)\n    if eq(delegatecall(gas(), proxyFactory, createBytes, createBytesLength, output, 0x20), 0)\n    {\n        revert(0, 0)\n    }\n    module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n    i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n}",
-                        "src": "1104:570:15"
+                        "operations": "{\n    let createBytesLength := mload(add(0x20, add(data, i)))\n    let createBytes := add(0x40, add(data, i))\n    let output := mload(0x40)\n    if eq(delegatecall(gas(), proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }\n    module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n    i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n}",
+                        "src": "1112:553:19"
                       },
                       {
                         "expression": {
@@ -441,14 +448,14 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2122,
+                              "id": 2529,
                               "name": "module",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2109,
-                              "src": "1688:6:15",
+                              "referencedDeclaration": 2516,
+                              "src": "1696:6:19",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_Module_$1020",
+                                "typeIdentifier": "t_contract$_Module_$1162",
                                 "typeString": "contract Module"
                               }
                             }
@@ -456,38 +463,38 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_Module_$1020",
+                                "typeIdentifier": "t_contract$_Module_$1162",
                                 "typeString": "contract Module"
                               }
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2119,
+                              "id": 2526,
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 4414,
-                              "src": "1670:4:15",
+                              "referencedDeclaration": 5274,
+                              "src": "1678:4:19",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_CreateAndAddModules_$2129",
+                                "typeIdentifier": "t_contract$_CreateAndAddModules_$2536",
                                 "typeString": "contract CreateAndAddModules"
                               }
                             },
-                            "id": 2121,
+                            "id": 2528,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "enableModule",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2096,
-                            "src": "1670:17:15",
+                            "referencedDeclaration": 2503,
+                            "src": "1678:17:19",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_external_nonpayable$_t_contract$_Module_$1020_$returns$__$",
+                              "typeIdentifier": "t_function_external_nonpayable$_t_contract$_Module_$1162_$returns$__$",
                               "typeString": "function (contract Module) external"
                             }
                           },
-                          "id": 2123,
+                          "id": 2530,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -495,15 +502,15 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1670:25:15",
+                          "src": "1678:25:19",
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 2124,
+                        "id": 2531,
                         "nodeType": "ExpressionStatement",
-                        "src": "1670:25:15"
+                        "src": "1678:25:19"
                       }
                     ]
                   },
@@ -513,19 +520,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 2117,
+                    "id": 2524,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 2115,
+                      "id": 2522,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2112,
-                      "src": "1010:1:15",
+                      "referencedDeclaration": 2519,
+                      "src": "1018:1:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -535,47 +542,47 @@
                     "operator": "<",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 2116,
+                      "id": 2523,
                       "name": "length",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2104,
-                      "src": "1014:6:15",
+                      "referencedDeclaration": 2511,
+                      "src": "1022:6:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1010:10:15",
+                    "src": "1018:10:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2126,
+                  "id": 2533,
                   "nodeType": "WhileStatement",
-                  "src": "1003:703:15"
+                  "src": "1011:703:19"
                 }
               ]
             },
             "documentation": "@dev Allows to create and add multiple module in one transaction.\n @param proxyFactory Module proxy factory contract.\n @param data Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)",
-            "id": 2128,
+            "id": 2535,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "createAndAddModules",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2101,
+              "id": 2508,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2098,
+                  "id": 2505,
                   "name": "proxyFactory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2128,
-                  "src": "849:20:15",
+                  "scope": 2535,
+                  "src": "857:20:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -583,10 +590,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2097,
+                    "id": 2504,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "849:7:15",
+                    "src": "857:7:19",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -598,11 +605,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2100,
+                  "id": 2507,
                   "name": "data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2128,
-                  "src": "871:17:15",
+                  "scope": 2535,
+                  "src": "879:17:19",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -610,10 +617,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2099,
+                    "id": 2506,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "871:5:15",
+                    "src": "879:5:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -623,56 +630,59 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "848:41:15"
+              "src": "856:41:19"
             },
             "returnParameters": {
-              "id": 2102,
+              "id": 2509,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "909:0:15"
+              "src": "917:0:19"
             },
-            "scope": 2129,
-            "src": "820:892:15",
+            "scope": 2536,
+            "src": "828:892:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2130,
-        "src": "250:1464:15"
+        "scope": 2537,
+        "src": "258:1464:19"
       }
     ],
-    "src": "0:1715:15"
+    "src": "0:1723:19"
   },
   "legacyAST": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateAndAddModules.sol",
     "exportedSymbols": {
       "CreateAndAddModules": [
-        2129
+        2536
       ]
     },
-    "id": 2130,
+    "id": 2537,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2086,
+        "id": 2493,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:15"
+        "src": "0:31:19"
       },
       {
         "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/base/Module.sol",
         "file": "../base/Module.sol",
-        "id": 2087,
+        "id": 2494,
         "nodeType": "ImportDirective",
-        "scope": 2130,
-        "sourceUnit": 1021,
-        "src": "24:28:15",
+        "scope": 2537,
+        "sourceUnit": 1163,
+        "src": "32:28:19",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -682,18 +692,18 @@
         "contractKind": "contract",
         "documentation": "@title Create and Add Modules - Allows to create and add multiple module in one transaction.\n @author Stefan George - <stefan@gnosis.pm>\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 2129,
+        "id": 2536,
         "linearizedBaseContracts": [
-          2129
+          2536
         ],
         "name": "CreateAndAddModules",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2095,
+              "id": 2502,
               "nodeType": "Block",
-              "src": "466:25:15",
+              "src": "474:25:19",
               "statements": [
                 {
                   "expression": {
@@ -701,21 +711,21 @@
                     "arguments": [],
                     "expression": {
                       "argumentTypes": [],
-                      "id": 2092,
+                      "id": 2499,
                       "name": "revert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        4375,
-                        4376
+                        5225,
+                        5226
                       ],
-                      "referencedDeclaration": 4375,
-                      "src": "476:6:15",
+                      "referencedDeclaration": 5225,
+                      "src": "484:6:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_revert_pure$__$returns$__$",
                         "typeString": "function () pure"
                       }
                     },
-                    "id": 2093,
+                    "id": 2500,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -723,51 +733,51 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "476:8:15",
+                    "src": "484:8:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2094,
+                  "id": 2501,
                   "nodeType": "ExpressionStatement",
-                  "src": "476:8:15"
+                  "src": "484:8:19"
                 }
               ]
             },
             "documentation": "@dev Function required to compile contract. Gnosis Safe function is called instead.\n @param module Not used.",
-            "id": 2096,
+            "id": 2503,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "enableModule",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2090,
+              "id": 2497,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2089,
+                  "id": 2496,
                   "name": "module",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2096,
-                  "src": "432:13:15",
+                  "scope": 2503,
+                  "src": "440:13:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_contract$_Module_$1020",
+                    "typeIdentifier": "t_contract$_Module_$1162",
                     "typeString": "contract Module"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2088,
+                    "id": 2495,
                     "name": "Module",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1020,
-                    "src": "432:6:15",
+                    "referencedDeclaration": 1162,
+                    "src": "440:6:19",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_Module_$1020",
+                      "typeIdentifier": "t_contract$_Module_$1162",
                       "typeString": "contract Module"
                     }
                   },
@@ -775,38 +785,38 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "431:15:15"
+              "src": "439:15:19"
             },
             "returnParameters": {
-              "id": 2091,
+              "id": 2498,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "466:0:15"
+              "src": "474:0:19"
             },
-            "scope": 2129,
-            "src": "410:81:15",
+            "scope": 2536,
+            "src": "418:81:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 2127,
+              "id": 2534,
               "nodeType": "Block",
-              "src": "909:803:15",
+              "src": "917:803:19",
               "statements": [
                 {
                   "assignments": [
-                    2104
+                    2511
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2104,
+                      "id": 2511,
                       "name": "length",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "919:14:15",
+                      "scope": 2534,
+                      "src": "927:14:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -814,10 +824,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2103,
+                        "id": 2510,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "919:7:15",
+                        "src": "927:7:19",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -827,23 +837,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2107,
+                  "id": 2514,
                   "initialValue": {
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 2105,
+                      "id": 2512,
                       "name": "data",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2100,
-                      "src": "936:4:15",
+                      "referencedDeclaration": 2507,
+                      "src": "944:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "id": 2106,
+                    "id": 2513,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -851,42 +861,42 @@
                     "memberName": "length",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": null,
-                    "src": "936:11:15",
+                    "src": "944:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "919:28:15"
+                  "src": "927:28:19"
                 },
                 {
                   "assignments": [
-                    2109
+                    2516
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2109,
+                      "id": 2516,
                       "name": "module",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "957:13:15",
+                      "scope": 2534,
+                      "src": "965:13:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Module_$1020",
+                        "typeIdentifier": "t_contract$_Module_$1162",
                         "typeString": "contract Module"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 2108,
+                        "id": 2515,
                         "name": "Module",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1020,
-                        "src": "957:6:15",
+                        "referencedDeclaration": 1162,
+                        "src": "965:6:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Module_$1020",
+                          "typeIdentifier": "t_contract$_Module_$1162",
                           "typeString": "contract Module"
                         }
                       },
@@ -894,23 +904,23 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2110,
+                  "id": 2517,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "957:13:15"
+                  "src": "965:13:19"
                 },
                 {
                   "assignments": [
-                    2112
+                    2519
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2112,
+                      "id": 2519,
                       "name": "i",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2127,
-                      "src": "980:9:15",
+                      "scope": 2534,
+                      "src": "988:9:19",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -918,10 +928,10 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2111,
+                        "id": 2518,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "980:7:15",
+                        "src": "988:7:19",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -931,18 +941,18 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2114,
+                  "id": 2521,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "30",
-                    "id": 2113,
+                    "id": 2520,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "number",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "992:1:15",
+                    "src": "1000:1:19",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_rational_0_by_1",
@@ -951,93 +961,93 @@
                     "value": "0"
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "980:13:15"
+                  "src": "988:13:19"
                 },
                 {
                   "body": {
-                    "id": 2125,
+                    "id": 2532,
                     "nodeType": "Block",
-                    "src": "1022:684:15",
+                    "src": "1030:684:19",
                     "statements": [
                       {
                         "externalReferences": [
                           {
-                            "i": {
-                              "declaration": 2112,
+                            "data": {
+                              "declaration": 2507,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1569:1:15",
+                              "src": "1184:4:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1190:1:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "data": {
-                              "declaration": 2100,
+                              "declaration": 2507,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1176:4:15",
+                              "src": "1244:4:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "i": {
-                              "declaration": 2112,
+                              "declaration": 2519,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1182:1:15",
+                              "src": "1250:1:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1577:1:19",
+                              "valueSize": 1
+                            }
+                          },
+                          {
+                            "i": {
+                              "declaration": 2519,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1586:1:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "module": {
-                              "declaration": 2109,
+                              "declaration": 2516,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1426:6:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "data": {
-                              "declaration": 2100,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1236:4:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "i": {
-                              "declaration": 2112,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1242:1:15",
-                              "valueSize": 1
-                            }
-                          },
-                          {
-                            "i": {
-                              "declaration": 2112,
-                              "isOffset": false,
-                              "isSlot": false,
-                              "src": "1578:1:15",
+                              "src": "1434:6:19",
                               "valueSize": 1
                             }
                           },
                           {
                             "proxyFactory": {
-                              "declaration": 2098,
+                              "declaration": 2505,
                               "isOffset": false,
                               "isSlot": false,
-                              "src": "1329:12:15",
+                              "src": "1337:12:19",
                               "valueSize": 1
                             }
                           }
                         ],
-                        "id": 2118,
+                        "id": 2525,
                         "nodeType": "InlineAssembly",
-                        "operations": "{\n    let createBytesLength := mload(add(0x20, add(data, i)))\n    let createBytes := add(0x40, add(data, i))\n    let output := mload(0x40)\n    if eq(delegatecall(gas(), proxyFactory, createBytes, createBytesLength, output, 0x20), 0)\n    {\n        revert(0, 0)\n    }\n    module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n    i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n}",
-                        "src": "1104:570:15"
+                        "operations": "{\n    let createBytesLength := mload(add(0x20, add(data, i)))\n    let createBytes := add(0x40, add(data, i))\n    let output := mload(0x40)\n    if eq(delegatecall(gas(), proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }\n    module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)\n    i := add(i, add(0x20, mul(div(add(createBytesLength, 0x1f), 0x20), 0x20)))\n}",
+                        "src": "1112:553:19"
                       },
                       {
                         "expression": {
@@ -1045,14 +1055,14 @@
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2122,
+                              "id": 2529,
                               "name": "module",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2109,
-                              "src": "1688:6:15",
+                              "referencedDeclaration": 2516,
+                              "src": "1696:6:19",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_Module_$1020",
+                                "typeIdentifier": "t_contract$_Module_$1162",
                                 "typeString": "contract Module"
                               }
                             }
@@ -1060,38 +1070,38 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_contract$_Module_$1020",
+                                "typeIdentifier": "t_contract$_Module_$1162",
                                 "typeString": "contract Module"
                               }
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2119,
+                              "id": 2526,
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 4414,
-                              "src": "1670:4:15",
+                              "referencedDeclaration": 5274,
+                              "src": "1678:4:19",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_CreateAndAddModules_$2129",
+                                "typeIdentifier": "t_contract$_CreateAndAddModules_$2536",
                                 "typeString": "contract CreateAndAddModules"
                               }
                             },
-                            "id": 2121,
+                            "id": 2528,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "enableModule",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2096,
-                            "src": "1670:17:15",
+                            "referencedDeclaration": 2503,
+                            "src": "1678:17:19",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_external_nonpayable$_t_contract$_Module_$1020_$returns$__$",
+                              "typeIdentifier": "t_function_external_nonpayable$_t_contract$_Module_$1162_$returns$__$",
                               "typeString": "function (contract Module) external"
                             }
                           },
-                          "id": 2123,
+                          "id": 2530,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1099,15 +1109,15 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1670:25:15",
+                          "src": "1678:25:19",
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 2124,
+                        "id": 2531,
                         "nodeType": "ExpressionStatement",
-                        "src": "1670:25:15"
+                        "src": "1678:25:19"
                       }
                     ]
                   },
@@ -1117,19 +1127,19 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 2117,
+                    "id": 2524,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 2115,
+                      "id": 2522,
                       "name": "i",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2112,
-                      "src": "1010:1:15",
+                      "referencedDeclaration": 2519,
+                      "src": "1018:1:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1139,47 +1149,47 @@
                     "operator": "<",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 2116,
+                      "id": 2523,
                       "name": "length",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2104,
-                      "src": "1014:6:15",
+                      "referencedDeclaration": 2511,
+                      "src": "1022:6:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1010:10:15",
+                    "src": "1018:10:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2126,
+                  "id": 2533,
                   "nodeType": "WhileStatement",
-                  "src": "1003:703:15"
+                  "src": "1011:703:19"
                 }
               ]
             },
             "documentation": "@dev Allows to create and add multiple module in one transaction.\n @param proxyFactory Module proxy factory contract.\n @param data Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)",
-            "id": 2128,
+            "id": 2535,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "createAndAddModules",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2101,
+              "id": 2508,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2098,
+                  "id": 2505,
                   "name": "proxyFactory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2128,
-                  "src": "849:20:15",
+                  "scope": 2535,
+                  "src": "857:20:19",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1187,10 +1197,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2097,
+                    "id": 2504,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "849:7:15",
+                    "src": "857:7:19",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1202,11 +1212,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2100,
+                  "id": 2507,
                   "name": "data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2128,
-                  "src": "871:17:15",
+                  "scope": 2535,
+                  "src": "879:17:19",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1214,10 +1224,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2099,
+                    "id": 2506,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "871:5:15",
+                    "src": "879:5:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1227,57 +1237,97 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "848:41:15"
+              "src": "856:41:19"
             },
             "returnParameters": {
-              "id": 2102,
+              "id": 2509,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "909:0:15"
+              "src": "917:0:19"
             },
-            "scope": 2129,
-            "src": "820:892:15",
+            "scope": 2536,
+            "src": "828:892:19",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2130,
-        "src": "250:1464:15"
+        "scope": 2537,
+        "src": "258:1464:19"
       }
     ],
-    "src": "0:1715:15"
+    "src": "0:1723:19"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {
     "1": {
       "links": {},
       "events": {},
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "updated_at": 1554371714128
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1593686063271
     },
     "4": {
       "links": {},
       "events": {},
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "updated_at": 1554371714149
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1593686063323
     },
     "5": {
       "links": {},
       "events": {},
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "updated_at": 1554371714184
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1593686063446
     },
     "42": {
       "links": {},
       "events": {},
-      "address": "0x1a56aE690ab0818aF5cA349b7D21f1d7e76a3d36",
-      "updated_at": 1554371714165
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1593686063385
+    },
+    "100": {
+      "links": {},
+      "events": {},
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1593686063495
+    },
+    "246": {
+      "links": {},
+      "events": {},
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1587391878875
+    },
+    "73799": {
+      "links": {},
+      "events": {},
+      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
+      "updated_at": 1587391878875
     }
   },
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2019-11-01T16:23:27.987Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:49:59.953Z",
+  "devdoc": {
+    "author": "Stefan George - <stefan@gnosis.pm>Richard Meissner - <richard@gnosis.pm>",
+    "methods": {
+      "createAndAddModules(address,bytes)": {
+        "details": "Allows to create and add multiple module in one transaction.",
+        "params": {
+          "data": "Modules constructor payload. This is the data for each proxy factory call concatinated. (e.g. <byte_array_len_1><byte_array_data_1><byte_array_len_2><byte_array_data_2>)",
+          "proxyFactory": "Module proxy factory contract."
+        }
+      },
+      "enableModule(address)": {
+        "details": "Function required to compile contract. Gnosis Safe function is called instead.",
+        "params": {
+          "module": "Not used."
+        }
+      }
+    },
+    "title": "Create and Add Modules - Allows to create and add multiple module in one transaction."
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

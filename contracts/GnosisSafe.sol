@@ -6,7 +6,7 @@ import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
-import "./external/SafeMath.sol";
+import "./external/GnosisSafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
@@ -15,10 +15,10 @@ import "./external/SafeMath.sol";
 contract GnosisSafe
     is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager {
 
-    using SafeMath for uint256;
+    using GnosisSafeMath for uint256;
 
     string public constant NAME = "Gnosis Safe";
-    string public constant VERSION = "1.1.1";
+    string public constant VERSION = "1.2.0";
 
     //keccak256(
     //    "EIP712Domain(address verifyingContract)"
@@ -124,6 +124,7 @@ contract GnosisSafe
         bytes calldata signatures
     )
         external
+        payable
         returns (bool success)
     {
         bytes32 txHash;
@@ -139,12 +140,15 @@ contract GnosisSafe
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures, true);
         }
-        require(gasleft() >= safeTxGas, "Not enough gas to execute safe transaction");
+        // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
+        // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
+        require(gasleft() >= (safeTxGas * 64 / 63).max(safeTxGas + 2500) + 500, "Not enough gas to execute safe transaction");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
-            // If no safeTxGas has been set and the gasPrice is 0 we assume that all available gas can be used
-            success = execute(to, value, data, operation, safeTxGas == 0 && gasPrice == 0 ? gasleft() : safeTxGas);
+            // If the gasPrice is 0 we assume that nearly all available gas can be used (it is always more than safeTxGas)
+            // We only substract 2500 (compared to the 3000 before) to ensure that the amount passed is still higher than safeTxGas
+            success = execute(to, value, data, operation, gasPrice == 0 ? (gasleft() - 2500) : safeTxGas);
             gasUsed = gasUsed.sub(gasleft());
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;
@@ -296,7 +300,8 @@ contract GnosisSafe
     }
 
     /**
-    * @dev Marks a message as signed
+    * @dev Marks a message as signed, so that it can be used with EIP-1271
+    * @notice Marks a message (`_data`) as signed.
     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
     */
     function signMessage(bytes calldata _data)

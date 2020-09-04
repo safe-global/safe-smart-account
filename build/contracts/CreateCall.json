@@ -1,0 +1,1848 @@
+{
+  "contractName": "CreateCall",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newContract",
+          "type": "address"
+        }
+      ],
+      "name": "ContractCreation",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "deploymentData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "salt",
+          "type": "bytes32"
+        }
+      ],
+      "name": "performCreate2",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "newContract",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "deploymentData",
+          "type": "bytes"
+        }
+      ],
+      "name": "performCreate",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "newContract",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"name\":\"ContractCreation\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"}],\"name\":\"performCreate\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"}],\"name\":\"performCreate2\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.io>\",\"methods\":{},\"title\":\"Create Call - Allows to use the different create opcodes to deploy a contract\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateCall.sol\":\"CreateCall\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateCall.sol\":{\"keccak256\":\"0xe1e3c3ab66ee344e0943ed2ee880ea79f27d1509e5e0202952f4e60689b1e4b4\",\"urls\":[\"bzz-raw://7c57e26599e70c2d53855b5562aafc36da633ef4c072ef450bc320b249b186f0\",\"dweb:/ipfs/QmdR65xdrzmhZfSsKPeViz2LyEJmLju5meEryCH7F2GqM3\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506104b6806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80634847be6f1461003b5780634c8c9ea11461014a575b600080fd5b6101086004803603606081101561005157600080fd5b81019080803590602001909291908035906020019064010000000081111561007857600080fd5b82018360208201111561008a57600080fd5b803590602001918460018302840111640100000000831117156100ac57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505091929192908035906020019092919050505061024f565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b61020d6004803603604081101561016057600080fd5b81019080803590602001909291908035906020019064010000000081111561018757600080fd5b82018360208201111561019957600080fd5b803590602001918460018302840111640100000000831117156101bb57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290505050610369565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008183518460200186f59050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156102ff576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f436f756c64206e6f74206465706c6f7920636f6e74726163740000000000000081525060200191505060405180910390fd5b7f4db17dd5e4732fb6da34a148104a592783ca119a1e7bb8829eba6cbadef0b51181604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390a19392505050565b600081516020830184f09050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610418576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f436f756c64206e6f74206465706c6f7920636f6e74726163740000000000000081525060200191505060405180910390fd5b7f4db17dd5e4732fb6da34a148104a592783ca119a1e7bb8829eba6cbadef0b51181604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390a19291505056fea265627a7a723158208df0a55b8bed9f6d7440d3cbbf76e880136376dbf3fef4ecdd05facf1ee7af3664736f6c63430005100032",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80634847be6f1461003b5780634c8c9ea11461014a575b600080fd5b6101086004803603606081101561005157600080fd5b81019080803590602001909291908035906020019064010000000081111561007857600080fd5b82018360208201111561008a57600080fd5b803590602001918460018302840111640100000000831117156100ac57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505091929192908035906020019092919050505061024f565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b61020d6004803603604081101561016057600080fd5b81019080803590602001909291908035906020019064010000000081111561018757600080fd5b82018360208201111561019957600080fd5b803590602001918460018302840111640100000000831117156101bb57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290505050610369565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008183518460200186f59050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156102ff576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f436f756c64206e6f74206465706c6f7920636f6e74726163740000000000000081525060200191505060405180910390fd5b7f4db17dd5e4732fb6da34a148104a592783ca119a1e7bb8829eba6cbadef0b51181604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390a19392505050565b600081516020830184f09050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610418576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f436f756c64206e6f74206465706c6f7920636f6e74726163740000000000000081525060200191505060405180910390fd5b7f4db17dd5e4732fb6da34a148104a592783ca119a1e7bb8829eba6cbadef0b51181604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390a19291505056fea265627a7a723158208df0a55b8bed9f6d7440d3cbbf76e880136376dbf3fef4ecdd05facf1ee7af3664736f6c63430005100032",
+  "sourceMap": "174:928:20:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;174:928:20;;;;;;;",
+  "deployedSourceMap": "174:928:20:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;174:928:20;;;;;;;;;;;;;;;;;;;;;;;;250:433;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;250:433:20;;;;;;;;;;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;250:433:20;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;250:433:20;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;250:433:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;250:433:20;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;689:411;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;689:411:20;;;;;;;;;;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;689:411:20;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;689:411:20;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;689:411:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;689:411:20;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;250:433;347:19;545:4;528:14;522:21;505:14;499:4;495:25;488:5;480:70;465:85;;600:1;577:25;;:11;:25;;;;569:63;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;647:29;664:11;647:29;;;;;;;;;;;;;;;;;;;;;;250:433;;;;;:::o;689:411::-;771:19;951:14;945:21;938:4;922:14;918:25;911:5;904:63;889:78;;1017:1;994:25;;:11;:25;;;;986:63;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1064:29;1081:11;1064:29;;;;;;;;;;;;;;;;;;;;;;689:411;;;;:::o",
+  "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title Create Call - Allows to use the different create opcodes to deploy a contract\n/// @author Richard Meissner - <richard@gnosis.io>\ncontract CreateCall {\n    event ContractCreation(address newContract);\n\n    function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns(address newContract) {\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)\n        }\n        require(newContract != address(0), \"Could not deploy contract\");\n        emit ContractCreation(newContract);\n    }\n\n    function performCreate(uint256 value, bytes memory deploymentData) public returns(address newContract) {\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))\n        }\n        require(newContract != address(0), \"Could not deploy contract\");\n        emit ContractCreation(newContract);\n    }\n}",
+  "sourcePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateCall.sol",
+  "ast": {
+    "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateCall.sol",
+    "exportedSymbols": {
+      "CreateCall": [
+        2593
+      ]
+    },
+    "id": 2594,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2538,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0",
+          "<",
+          "0.7",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:31:20"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Create Call - Allows to use the different create opcodes to deploy a contract\n @author Richard Meissner - <richard@gnosis.io>",
+        "fullyImplemented": true,
+        "id": 2593,
+        "linearizedBaseContracts": [
+          2593
+        ],
+        "name": "CreateCall",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 2542,
+            "name": "ContractCreation",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 2541,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2540,
+                  "indexed": false,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2542,
+                  "src": "223:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2539,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "223:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "222:21:20"
+            },
+            "src": "200:44:20"
+          },
+          {
+            "body": {
+              "id": 2567,
+              "nodeType": "Block",
+              "src": "368:315:20",
+              "statements": [
+                {
+                  "externalReferences": [
+                    {
+                      "newContract": {
+                        "declaration": 2551,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "465:11:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2546,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "528:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2546,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "505:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "value": {
+                        "declaration": 2544,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "488:5:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "salt": {
+                        "declaration": 2548,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "545:4:20",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 2553,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)\n}",
+                  "src": "442:118:20"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 2559,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2555,
+                          "name": "newContract",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2551,
+                          "src": "577:11:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2557,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "600:1:20",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 2556,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "592:7:20",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": "address"
+                          },
+                          "id": 2558,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "592:10:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "src": "577:25:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "436f756c64206e6f74206465706c6f7920636f6e7472616374",
+                        "id": 2560,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "604:27:20",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        },
+                        "value": "Could not deploy contract"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        }
+                      ],
+                      "id": 2554,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5223,
+                        5224
+                      ],
+                      "referencedDeclaration": 5224,
+                      "src": "569:7:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2561,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "569:63:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2562,
+                  "nodeType": "ExpressionStatement",
+                  "src": "569:63:20"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2564,
+                        "name": "newContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2551,
+                        "src": "664:11:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 2563,
+                      "name": "ContractCreation",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2542,
+                      "src": "647:16:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 2565,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "647:29:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2566,
+                  "nodeType": "EmitStatement",
+                  "src": "642:34:20"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 2568,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "performCreate2",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2549,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2544,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "274:13:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2543,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "274:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2546,
+                  "name": "deploymentData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "289:27:20",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2545,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "289:5:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2548,
+                  "name": "salt",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "318:12:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 2547,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "318:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "273:58:20"
+            },
+            "returnParameters": {
+              "id": 2552,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2551,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "347:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2550,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "347:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "346:21:20"
+            },
+            "scope": 2593,
+            "src": "250:433:20",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 2591,
+              "nodeType": "Block",
+              "src": "792:308:20",
+              "statements": [
+                {
+                  "externalReferences": [
+                    {
+                      "newContract": {
+                        "declaration": 2575,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "889:11:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2572,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "951:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2572,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "922:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "value": {
+                        "declaration": 2570,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "911:5:20",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 2577,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))\n}",
+                  "src": "866:111:20"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 2583,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2579,
+                          "name": "newContract",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2575,
+                          "src": "994:11:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2581,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1017:1:20",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 2580,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1009:7:20",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": "address"
+                          },
+                          "id": 2582,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1009:10:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "src": "994:25:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "436f756c64206e6f74206465706c6f7920636f6e7472616374",
+                        "id": 2584,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1021:27:20",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        },
+                        "value": "Could not deploy contract"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        }
+                      ],
+                      "id": 2578,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5223,
+                        5224
+                      ],
+                      "referencedDeclaration": 5224,
+                      "src": "986:7:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2585,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "986:63:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2586,
+                  "nodeType": "ExpressionStatement",
+                  "src": "986:63:20"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2588,
+                        "name": "newContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2575,
+                        "src": "1081:11:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 2587,
+                      "name": "ContractCreation",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2542,
+                      "src": "1064:16:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 2589,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1064:29:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2590,
+                  "nodeType": "EmitStatement",
+                  "src": "1059:34:20"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 2592,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "performCreate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2573,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2570,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "712:13:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2569,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "712:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2572,
+                  "name": "deploymentData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "727:27:20",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2571,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "727:5:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "711:44:20"
+            },
+            "returnParameters": {
+              "id": 2576,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2575,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "771:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2574,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "771:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "770:21:20"
+            },
+            "scope": 2593,
+            "src": "689:411:20",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 2594,
+        "src": "174:928:20"
+      }
+    ],
+    "src": "0:1102:20"
+  },
+  "legacyAST": {
+    "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/libraries/CreateCall.sol",
+    "exportedSymbols": {
+      "CreateCall": [
+        2593
+      ]
+    },
+    "id": 2594,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2538,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0",
+          "<",
+          "0.7",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:31:20"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Create Call - Allows to use the different create opcodes to deploy a contract\n @author Richard Meissner - <richard@gnosis.io>",
+        "fullyImplemented": true,
+        "id": 2593,
+        "linearizedBaseContracts": [
+          2593
+        ],
+        "name": "CreateCall",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 2542,
+            "name": "ContractCreation",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 2541,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2540,
+                  "indexed": false,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2542,
+                  "src": "223:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2539,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "223:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "222:21:20"
+            },
+            "src": "200:44:20"
+          },
+          {
+            "body": {
+              "id": 2567,
+              "nodeType": "Block",
+              "src": "368:315:20",
+              "statements": [
+                {
+                  "externalReferences": [
+                    {
+                      "newContract": {
+                        "declaration": 2551,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "465:11:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2546,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "528:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2546,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "505:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "value": {
+                        "declaration": 2544,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "488:5:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "salt": {
+                        "declaration": 2548,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "545:4:20",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 2553,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)\n}",
+                  "src": "442:118:20"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 2559,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2555,
+                          "name": "newContract",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2551,
+                          "src": "577:11:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2557,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "600:1:20",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 2556,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "592:7:20",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": "address"
+                          },
+                          "id": 2558,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "592:10:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "src": "577:25:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "436f756c64206e6f74206465706c6f7920636f6e7472616374",
+                        "id": 2560,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "604:27:20",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        },
+                        "value": "Could not deploy contract"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        }
+                      ],
+                      "id": 2554,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5223,
+                        5224
+                      ],
+                      "referencedDeclaration": 5224,
+                      "src": "569:7:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2561,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "569:63:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2562,
+                  "nodeType": "ExpressionStatement",
+                  "src": "569:63:20"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2564,
+                        "name": "newContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2551,
+                        "src": "664:11:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 2563,
+                      "name": "ContractCreation",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2542,
+                      "src": "647:16:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 2565,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "647:29:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2566,
+                  "nodeType": "EmitStatement",
+                  "src": "642:34:20"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 2568,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "performCreate2",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2549,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2544,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "274:13:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2543,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "274:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2546,
+                  "name": "deploymentData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "289:27:20",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2545,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "289:5:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2548,
+                  "name": "salt",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "318:12:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 2547,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "318:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "273:58:20"
+            },
+            "returnParameters": {
+              "id": 2552,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2551,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2568,
+                  "src": "347:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2550,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "347:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "346:21:20"
+            },
+            "scope": 2593,
+            "src": "250:433:20",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 2591,
+              "nodeType": "Block",
+              "src": "792:308:20",
+              "statements": [
+                {
+                  "externalReferences": [
+                    {
+                      "newContract": {
+                        "declaration": 2575,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "889:11:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2572,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "951:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "deploymentData": {
+                        "declaration": 2572,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "922:14:20",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "value": {
+                        "declaration": 2570,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "911:5:20",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 2577,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))\n}",
+                  "src": "866:111:20"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 2583,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2579,
+                          "name": "newContract",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2575,
+                          "src": "994:11:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2581,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "1017:1:20",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 2580,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1009:7:20",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": "address"
+                          },
+                          "id": 2582,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1009:10:20",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "src": "994:25:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "436f756c64206e6f74206465706c6f7920636f6e7472616374",
+                        "id": 2584,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1021:27:20",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        },
+                        "value": "Could not deploy contract"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_90e12fe534b2da37f2657ea8f10036bfb8c39edcfa9d51c75e017336dd38e36e",
+                          "typeString": "literal_string \"Could not deploy contract\""
+                        }
+                      ],
+                      "id": 2578,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5223,
+                        5224
+                      ],
+                      "referencedDeclaration": 5224,
+                      "src": "986:7:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2585,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "986:63:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2586,
+                  "nodeType": "ExpressionStatement",
+                  "src": "986:63:20"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2588,
+                        "name": "newContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2575,
+                        "src": "1081:11:20",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 2587,
+                      "name": "ContractCreation",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2542,
+                      "src": "1064:16:20",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 2589,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1064:29:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2590,
+                  "nodeType": "EmitStatement",
+                  "src": "1059:34:20"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 2592,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "performCreate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2573,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2570,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "712:13:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2569,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "712:7:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2572,
+                  "name": "deploymentData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "727:27:20",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2571,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "727:5:20",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "711:44:20"
+            },
+            "returnParameters": {
+              "id": 2576,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2575,
+                  "name": "newContract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2592,
+                  "src": "771:19:20",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2574,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "771:7:20",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "770:21:20"
+            },
+            "scope": 2593,
+            "src": "689:411:20",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 2594,
+        "src": "174:928:20"
+      }
+    ],
+    "src": "0:1102:20"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+  },
+  "networks": {
+    "1": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1593686063273
+    },
+    "4": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1593686063325
+    },
+    "5": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1593686063448
+    },
+    "42": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1593686063387
+    },
+    "100": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1593686063497
+    },
+    "246": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1587391878875
+    },
+    "73799": {
+      "links": {},
+      "events": {},
+      "address": "0x8538FcBccba7f5303d2C679Fa5d7A629A8c9bf4A",
+      "updated_at": 1587391878875
+    }
+  },
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:49:59.955Z",
+  "devdoc": {
+    "author": "Richard Meissner - <richard@gnosis.io>",
+    "methods": {},
+    "title": "Create Call - Allows to use the different create opcodes to deploy a contract"
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

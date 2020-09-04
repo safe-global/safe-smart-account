@@ -6,10 +6,10 @@ interface IProxy {
     function masterCopy() external view returns (address);
 }
 
-/// @title Proxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
+/// @title GnosisSafeProxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract Proxy {
+contract GnosisSafeProxy {
 
     // masterCopy always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`

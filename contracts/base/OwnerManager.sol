@@ -48,6 +48,7 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to add a new owner to the Safe and update the threshold at the same time.
     ///      This can only be done via a Safe transaction.
+    /// @notice Adds the owner `owner` to the Safe and updates the threshold to `_threshold`.
     /// @param owner New owner address.
     /// @param _threshold New threshold.
     function addOwnerWithThreshold(address owner, uint256 _threshold)
@@ -69,6 +70,7 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to remove an owner from the Safe and update the threshold at the same time.
     ///      This can only be done via a Safe transaction.
+    /// @notice Removes the owner `owner` from the Safe and updates the threshold to `_threshold`.
     /// @param prevOwner Owner that pointed to the owner to be removed in the linked list
     /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
@@ -92,6 +94,7 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to swap/replace an owner from the Safe with another address.
     ///      This can only be done via a Safe transaction.
+    /// @notice Replaces the owner `oldOwner` in the Safe with `newOwner`.
     /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
     /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
@@ -115,6 +118,7 @@ contract OwnerManager is SelfAuthorized {
 
     /// @dev Allows to update the number of required confirmations by Safe owners.
     ///      This can only be done via a Safe transaction.
+    /// @notice Changes the threshold of the Safe to `_threshold`.
     /// @param _threshold New threshold.
     function changeThreshold(uint256 _threshold)
         public

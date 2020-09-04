@@ -4,3 +4,5 @@ node_modules/
 .openzeppelin/.session
 env/
 .env
+bin/
+solc

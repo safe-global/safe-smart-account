@@ -1,7 +1,7 @@
 const utils = require('./utils/general')
 
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");
-const ProxyFactory = artifacts.require("./ProxyFactory.sol");
+const ProxyFactory = artifacts.require("./GnosisSafeProxyFactory.sol");
 const GnosisSafe = artifacts.require("./GnosisSafe.sol");
 const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 
@@ -22,23 +22,26 @@ contract('SocialRecoveryModule', function(accounts) {
         // Initialize module master copy
         socialRecoveryModuleMasterCopy.setup([accounts[0], accounts[1]], 2)
         // Create Gnosis Safe and Social Recovery Module in one transactions
-        let moduleData = await socialRecoveryModuleMasterCopy.contract.setup.getData([accounts[2], accounts[3]], 2)
-        let proxyFactoryData = await proxyFactory.contract.createProxy.getData(socialRecoveryModuleMasterCopy.address, moduleData)
+        let moduleData = await socialRecoveryModuleMasterCopy.contract.methods.setup([accounts[2], accounts[3]], 2).encodeABI()
+        let proxyFactoryData = await proxyFactory.contract.methods.createProxy(socialRecoveryModuleMasterCopy.address, moduleData).encodeABI()
         let modulesCreationData = utils.createAndAddModulesData([proxyFactoryData])
-        let createAndAddModulesData = createAndAddModules.contract.createAndAddModules.getData(proxyFactory.address, modulesCreationData)
-        let gnosisSafeData = await gnosisSafeMasterCopy.contract.setup.getData([accounts[0], accounts[1]], 2, createAndAddModules.address, createAndAddModulesData, 0, 0, 0, 0)
-        gnosisSafe = utils.getParamFromTxEvent(
+        let createAndAddModulesData = createAndAddModules.contract.methods.createAndAddModules(proxyFactory.address, modulesCreationData).encodeABI()
+        let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
+            [accounts[0], accounts[1]], 2, createAndAddModules.address, createAndAddModulesData, utils.Address0, utils.Address0, 0, utils.Address0
+        ).encodeABI()
+        gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Social Recovery Module',
         )
         let modules = await gnosisSafe.getModules()
-        socialRecoveryModule = SocialRecoveryModule.at(modules[0])
+        socialRecoveryModule = await SocialRecoveryModule.at(modules[0])
         assert.equal(await socialRecoveryModule.manager.call(), gnosisSafe.address)
     })
 
     it('should allow to replace an owner approved by friends', async () => {
+        let sentinel = "0x0000000000000000000000000000000000000001"
         // Replace non existing owner
-        let data = await gnosisSafe.contract.swapOwner.getData("0x1", accounts[8], accounts[9])
+        let data = await gnosisSafe.contract.methods.swapOwner(sentinel, accounts[8], accounts[9]).encodeABI()
         // Confirm transaction to be executed without confirmations
         let dataHash = await socialRecoveryModule.getDataHash(data)
         await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[3]})
@@ -49,7 +52,7 @@ contract('SocialRecoveryModule', function(accounts) {
         )
         
         // Replace owner
-        data = await gnosisSafe.contract.swapOwner.getData("0x1", accounts[0], accounts[9])
+        data = await gnosisSafe.contract.methods.swapOwner(sentinel, accounts[0], accounts[9]).encodeABI()
         // Confirm transaction to be executed without confirmations
         dataHash = await socialRecoveryModule.getDataHash(data)
         await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[3]})
@@ -59,7 +62,7 @@ contract('SocialRecoveryModule', function(accounts) {
         )
         // Confirm with 2nd friend
         utils.logGasUsage("confirm recovery", await socialRecoveryModule.confirmTransaction(dataHash, {from: accounts[2]}))
-        utils.logGasUsage("recover access", await socialRecoveryModule.recoverAccess("0x1", accounts[0], accounts[9], {from: accounts[3]}))
+        utils.logGasUsage("recover access", await socialRecoveryModule.recoverAccess(sentinel, accounts[0], accounts[9], {from: accounts[3]}))
         assert.equal(await gnosisSafe.isOwner(accounts[9]), true);
     })
 });
