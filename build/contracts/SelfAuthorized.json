@@ -1,8 +1,9 @@
 {
   "contractName": "SelfAuthorized",
   "abi": [],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723158201bb2f354b64f9d4a0eacb004b37660176280b04ba8931170ec26c4bc597b6e0f64736f6c634300050e0032",
-  "deployedBytecode": "0x6080604052600080fdfea265627a7a723158201bb2f354b64f9d4a0eacb004b37660176280b04ba8931170ec26c4bc597b6e0f64736f6c634300050e0032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.pm>\",\"methods\":{},\"title\":\"SelfAuthorized - authorizes current contract to perform actions\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/SelfAuthorized.sol\":\"SelfAuthorized\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/SelfAuthorized.sol\":{\"keccak256\":\"0x4c4f094227fc466846a97fe375c47ecdfcab050c303baeb69b5970d28db717a6\",\"urls\":[\"bzz-raw://42759fe6b2433ea24fd0fbe98a144ef55e464f87861a13aa364db8a6f4a01cf1\",\"dweb:/ipfs/QmTWPnHdfcBbddkMJxvEvoWs3CZoKB5rtz3s8K2ii9z9CG\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723158208d3f5895cab80987d1c434b53d9897d12b55eab0cfa11d201e6bbe40a99666ab64736f6c63430005100032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a723158208d3f5895cab80987d1c434b53d9897d12b55eab0cfa11d201e6bbe40a99666ab64736f6c63430005100032",
   "sourceMap": "160:166:11:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;160:166:11;;;;;;;",
   "deployedSourceMap": "160:166:11:-;;;;;",
   "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title SelfAuthorized - authorizes current contract to perform actions\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract SelfAuthorized {\n    modifier authorized() {\n        require(msg.sender == address(this), \"Method can only be called from this contract\");\n        _;\n    }\n}\n",
@@ -479,9 +480,17 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.799Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.614Z",
+  "devdoc": {
+    "author": "Richard Meissner - <richard@gnosis.pm>",
+    "methods": {},
+    "title": "SelfAuthorized - authorizes current contract to perform actions"
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

@@ -1,8 +1,9 @@
 {
   "contractName": "SignatureDecoder",
   "abi": [],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72315820544ddd15c67245255acba46fec635c7ab011eb15a6ec709f0f6ad8bdc85e586864736f6c634300050e0032",
-  "deployedBytecode": "0x6080604052600080fdfea265627a7a72315820544ddd15c67245255acba46fec635c7ab011eb15a6ec709f0f6ad8bdc85e586864736f6c634300050e0032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"author\":\"Ricardo Guilherme Schmidt (Status Research & Development GmbH)Richard Meissner - <richard@gnosis.pm>\",\"methods\":{},\"title\":\"SignatureDecoder - Decodes signatures that a encoded as bytes\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/SignatureDecoder.sol\":\"SignatureDecoder\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/SignatureDecoder.sol\":{\"keccak256\":\"0x9d6196319963155fd0a1dd45e6d4992489da251e18572c2fc62084482edb37a9\",\"urls\":[\"bzz-raw://0298c7d98d2368bc99ae8d28befc8d40250fd7128f45095321d3c9e199fec74b\",\"dweb:/ipfs/QmPK4Q2mSnsEuv5ayyDAzURAksYXmbbALQ2Z5xUcfx1q4K\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72315820fd4002f64719d715c911aa265573e9fa38f777e07a9f850b83142f5aeecfe27a64736f6c63430005100032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a72315820fd4002f64719d715c911aa265573e9fa38f777e07a9f850b83142f5aeecfe27a64736f6c63430005100032",
   "sourceMap": "233:1913:12:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;233:1913:12;;;;;;;",
   "deployedSourceMap": "233:1913:12:-;;;;;",
   "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title SignatureDecoder - Decodes signatures that a encoded as bytes\n/// @author Ricardo Guilherme Schmidt (Status Research & Development GmbH)\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract SignatureDecoder {\n    \n    /// @dev Recovers address who signed the message\n    /// @param messageHash operation ethereum signed message hash\n    /// @param messageSignature message `txHash` signature\n    /// @param pos which signature to read\n    function recoverKey (\n        bytes32 messageHash,\n        bytes memory messageSignature,\n        uint256 pos\n    )\n        internal\n        pure\n        returns (address)\n    {\n        uint8 v;\n        bytes32 r;\n        bytes32 s;\n        (v, r, s) = signatureSplit(messageSignature, pos);\n        return ecrecover(messageHash, v, r, s);\n    }\n\n    /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.\n    /// @notice Make sure to peform a bounds check for @param pos, to avoid out of bounds access on @param signatures\n    /// @param pos which signature to read. A prior bounds check of this parameter should be performed, to avoid out of bounds access\n    /// @param signatures concatenated rsv signatures\n    function signatureSplit(bytes memory signatures, uint256 pos)\n        internal\n        pure\n        returns (uint8 v, bytes32 r, bytes32 s)\n    {\n        // The signature format is a compact form of:\n        //   {bytes32 r}{bytes32 s}{uint8 v}\n        // Compact means, uint8 is not padded to 32 bytes.\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            let signaturePos := mul(0x41, pos)\n            r := mload(add(signatures, add(signaturePos, 0x20)))\n            s := mload(add(signatures, add(signaturePos, 0x40)))\n            // Here we are loading the last 32 bytes, including 31 bytes\n            // of 's'. There is no 'mload8' to do this.\n            //\n            // 'byte' is not working due to the Solidity parser, so lets\n            // use the second best option, 'and'\n            v := and(mload(add(signatures, add(signaturePos, 0x41))), 0xff)\n        }\n    }\n}\n",
@@ -1567,9 +1568,17 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.808Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.615Z",
+  "devdoc": {
+    "author": "Ricardo Guilherme Schmidt (Status Research & Development GmbH)Richard Meissner - <richard@gnosis.pm>",
+    "methods": {},
+    "title": "SignatureDecoder - Decodes signatures that a encoded as bytes"
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }
