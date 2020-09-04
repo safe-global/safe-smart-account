@@ -1,1 +1,1722 @@
-{"contractName":"FallbackManager","abi":[{"payable":true,"stateMutability":"payable","type":"fallback"},{"constant":false,"inputs":[{"internalType":"address","name":"handler","type":"address"}],"name":"setFallbackHandler","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}],"bytecode":"0x608060405234801561001057600080fd5b50610239806100206000396000f3fe60806040526004361061001e5760003560e01c8063f08a0323146100c8575b60003411806100305750600080369050145b1561003a576100c6565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050600081549050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146100c357366000803760008036600080855af13d6000803e60008114156100be573d6000fd5b3d6000f35b50505b005b3480156100d457600080fd5b50610117600480360360208110156100eb57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610119565b005b3073ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161461019d576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602c8152602001806101d9602c913960400191505060405180910390fd5b6101a6816101a9565b50565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050818155505056fe4d6574686f642063616e206f6e6c792062652063616c6c65642066726f6d207468697320636f6e7472616374a265627a7a723158200a26c99a26502378d4c3f96a19d475babd9d219a6140fdecde5ddcca2f97a55464736f6c634300050e0032","deployedBytecode":"0x60806040526004361061001e5760003560e01c8063f08a0323146100c8575b60003411806100305750600080369050145b1561003a576100c6565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050600081549050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146100c357366000803760008036600080855af13d6000803e60008114156100be573d6000fd5b3d6000f35b50505b005b3480156100d457600080fd5b50610117600480360360208110156100eb57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610119565b005b3073ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161461019d576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602c8152602001806101d9602c913960400191505060405180910390fd5b6101a6816101a9565b50565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050818155505056fe4d6574686f642063616e206f6e6c792062652063616c6c65642066726f6d207468697320636f6e7472616374a265627a7a723158200a26c99a26502378d4c3f96a19d475babd9d219a6140fdecde5ddcca2f97a55464736f6c634300050e0032","sourceMap":"215:1756:3:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;215:1756:3;;;;;;;","deployedSourceMap":"215:1756:3:-;;;;;;;;;;;;;;;;;;1251:1;1239:9;:13;:37;;;;1275:1;1256:8;;:15;;:20;1239:37;1235:74;;;1292:7;;1235:74;1318:12;376:66;1333:29;;1318:44;;1372:15;1501:4;1495:11;1484:22;;1549:1;1530:21;;:7;:21;;;1526:437;;1681:14;1678:1;1675;1662:34;1772:1;1769;1753:14;1750:1;1747;1738:7;1733:3;1728:46;1812:16;1809:1;1806;1791:38;1861:1;1852:7;1849:14;1846:2;;;1876:16;1873:1;1866:27;1846:2;1922:16;1919:1;1912:27;1644:309;1108:861;;;215:1756;967:135;;8:9:-1;5:2;;;30:1;27;20:12;5:2;967:135:3;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;967:135:3;;;;;;;;;;;;;;;;;;;:::i;:::-;;;252:4:11;230:27;;:10;:27;;;222:84;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1060:35:3;1087:7;1060:26;:35::i;:::-;967:135;:::o;449:250::-;521:12;376:66;536:29;;521:44;;675:7;669:4;662:21;648:45;;:::o","source":"pragma solidity >=0.5.0 <0.7.0;\n\nimport \"../common/SelfAuthorized.sol\";\n\n/// @title Fallback Manager - A contract that manages fallback calls made to this contract\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract FallbackManager is SelfAuthorized {\n\n    // keccak256(\"fallback_manager.handler.address\")\n    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;\n\n    function internalSetFallbackHandler(address handler) internal {\n        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            sstore(slot, handler)\n        }\n    }\n\n    /// @dev Allows to add a contract to handle fallback calls.\n    ///      Only fallback calls without value and with data will be forwarded.\n    ///      This can only be done via a Safe transaction.\n    /// @param handler contract to handle fallbacks calls.\n    function setFallbackHandler(address handler)\n        public\n        authorized\n    {\n        internalSetFallbackHandler(handler);\n    }\n\n    function ()\n        external\n        payable\n    {\n        // Only calls without value and with data will be forwarded\n        if (msg.value > 0 || msg.data.length == 0) {\n            return;\n        }\n        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;\n        address handler;\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            handler := sload(slot)\n        }\n\n        if (handler != address(0)) {\n            // solium-disable-next-line security/no-inline-assembly\n            assembly {\n                calldatacopy(0, 0, calldatasize())\n                let success := call(gas, handler, 0, 0, calldatasize(), 0, 0)\n                returndatacopy(0, 0, returndatasize())\n                if eq(success, 0) { revert(0, returndatasize()) }\n                return(0, returndatasize())\n            }\n        }\n    }\n}","compiler":{"name":"solc","version":"0.5.14+commit.01f1aaa4.Emscripten.clang"},"networks":{},"schemaVersion":"2.0.3","updatedAt":"2020-07-02T10:34:22.682Z"}
+{
+  "contractName": "FallbackManager",
+  "abi": [
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "handler",
+          "type": "address"
+        }
+      ],
+      "name": "setFallbackHandler",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b50610239806100206000396000f3fe60806040526004361061001e5760003560e01c8063f08a0323146100c8575b60003411806100305750600080369050145b1561003a576100c6565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050600081549050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146100c357366000803760008036600080855af13d6000803e60008114156100be573d6000fd5b3d6000f35b50505b005b3480156100d457600080fd5b50610117600480360360208110156100eb57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610119565b005b3073ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161461019d576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602c8152602001806101d9602c913960400191505060405180910390fd5b6101a6816101a9565b50565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050818155505056fe4d6574686f642063616e206f6e6c792062652063616c6c65642066726f6d207468697320636f6e7472616374a265627a7a723158200a26c99a26502378d4c3f96a19d475babd9d219a6140fdecde5ddcca2f97a55464736f6c634300050e0032",
+  "deployedBytecode": "0x60806040526004361061001e5760003560e01c8063f08a0323146100c8575b60003411806100305750600080369050145b1561003a576100c6565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050600081549050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146100c357366000803760008036600080855af13d6000803e60008114156100be573d6000fd5b3d6000f35b50505b005b3480156100d457600080fd5b50610117600480360360208110156100eb57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610119565b005b3073ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161461019d576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602c8152602001806101d9602c913960400191505060405180910390fd5b6101a6816101a9565b50565b60007f6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d560001b9050818155505056fe4d6574686f642063616e206f6e6c792062652063616c6c65642066726f6d207468697320636f6e7472616374a265627a7a723158200a26c99a26502378d4c3f96a19d475babd9d219a6140fdecde5ddcca2f97a55464736f6c634300050e0032",
+  "sourceMap": "215:1756:3:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;215:1756:3;;;;;;;",
+  "deployedSourceMap": "215:1756:3:-;;;;;;;;;;;;;;;;;;1251:1;1239:9;:13;:37;;;;1275:1;1256:8;;:15;;:20;1239:37;1235:74;;;1292:7;;1235:74;1318:12;376:66;1333:29;;1318:44;;1372:15;1501:4;1495:11;1484:22;;1549:1;1530:21;;:7;:21;;;1526:437;;1681:14;1678:1;1675;1662:34;1772:1;1769;1753:14;1750:1;1747;1738:7;1733:3;1728:46;1812:16;1809:1;1806;1791:38;1861:1;1852:7;1849:14;1846:2;;;1876:16;1873:1;1866:27;1846:2;1922:16;1919:1;1912:27;1644:309;1108:861;;;215:1756;967:135;;8:9:-1;5:2;;;30:1;27;20:12;5:2;967:135:3;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;967:135:3;;;;;;;;;;;;;;;;;;;:::i;:::-;;;252:4:11;230:27;;:10;:27;;;222:84;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1060:35:3;1087:7;1060:26;:35::i;:::-;967:135;:::o;449:250::-;521:12;376:66;536:29;;521:44;;675:7;669:4;662:21;648:45;;:::o",
+  "source": "pragma solidity >=0.5.0 <0.7.0;\n\nimport \"../common/SelfAuthorized.sol\";\n\n/// @title Fallback Manager - A contract that manages fallback calls made to this contract\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract FallbackManager is SelfAuthorized {\n\n    // keccak256(\"fallback_manager.handler.address\")\n    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;\n\n    function internalSetFallbackHandler(address handler) internal {\n        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            sstore(slot, handler)\n        }\n    }\n\n    /// @dev Allows to add a contract to handle fallback calls.\n    ///      Only fallback calls without value and with data will be forwarded.\n    ///      This can only be done via a Safe transaction.\n    /// @param handler contract to handle fallbacks calls.\n    function setFallbackHandler(address handler)\n        public\n        authorized\n    {\n        internalSetFallbackHandler(handler);\n    }\n\n    function ()\n        external\n        payable\n    {\n        // Only calls without value and with data will be forwarded\n        if (msg.value > 0 || msg.data.length == 0) {\n            return;\n        }\n        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;\n        address handler;\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            handler := sload(slot)\n        }\n\n        if (handler != address(0)) {\n            // solium-disable-next-line security/no-inline-assembly\n            assembly {\n                calldatacopy(0, 0, calldatasize())\n                let success := call(gas, handler, 0, 0, calldatasize(), 0, 0)\n                returndatacopy(0, 0, returndatasize())\n                if eq(success, 0) { revert(0, returndatasize()) }\n                return(0, returndatasize())\n            }\n        }\n    }\n}",
+  "sourcePath": "/media/000/Documents/Circles/safe-contracts/contracts/base/FallbackManager.sol",
+  "ast": {
+    "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/base/FallbackManager.sol",
+    "exportedSymbols": {
+      "FallbackManager": [
+        1117
+      ]
+    },
+    "id": 1118,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1054,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0",
+          "<",
+          "0.7",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:31:3"
+      },
+      {
+        "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/SelfAuthorized.sol",
+        "file": "../common/SelfAuthorized.sol",
+        "id": 1055,
+        "nodeType": "ImportDirective",
+        "scope": 1118,
+        "sourceUnit": 2116,
+        "src": "33:38:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 1056,
+              "name": "SelfAuthorized",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 2115,
+              "src": "243:14:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SelfAuthorized_$2115",
+                "typeString": "contract SelfAuthorized"
+              }
+            },
+            "id": 1057,
+            "nodeType": "InheritanceSpecifier",
+            "src": "243:14:3"
+          }
+        ],
+        "contractDependencies": [
+          2115
+        ],
+        "contractKind": "contract",
+        "documentation": "@title Fallback Manager - A contract that manages fallback calls made to this contract\n @author Richard Meissner - <richard@gnosis.pm>",
+        "fullyImplemented": true,
+        "id": 1117,
+        "linearizedBaseContracts": [
+          1117,
+          2115
+        ],
+        "name": "FallbackManager",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 1060,
+            "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+            "nodeType": "VariableDeclaration",
+            "scope": 1117,
+            "src": "318:124:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 1058,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "318:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "307836633961366334613339323834653337656431636635336433333735373764313432313261343837306662393736613433363663363933623933393931386435",
+              "id": 1059,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "376:66:3",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_49122629484629529244014240937346711770925847994644146912111677022347558721749_by_1",
+                "typeString": "int_const 4912...(69 digits omitted)...1749"
+              },
+              "value": "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"
+            },
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 1070,
+              "nodeType": "Block",
+              "src": "511:188:3",
+              "statements": [
+                {
+                  "assignments": [
+                    1066
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1066,
+                      "name": "slot",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1070,
+                      "src": "521:12:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 1065,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "521:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1068,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "id": 1067,
+                    "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 1060,
+                    "src": "536:29:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "521:44:3"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "slot": {
+                        "declaration": 1066,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "669:4:3",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "handler": {
+                        "declaration": 1062,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "675:7:3",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 1069,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ sstore(slot, handler) }",
+                  "src": "639:54:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 1071,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "internalSetFallbackHandler",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1063,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1062,
+                  "name": "handler",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1071,
+                  "src": "485:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1061,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "485:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "484:17:3"
+            },
+            "returnParameters": {
+              "id": 1064,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "511:0:3"
+            },
+            "scope": 1117,
+            "src": "449:250:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 1082,
+              "nodeType": "Block",
+              "src": "1050:52:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 1079,
+                        "name": "handler",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1073,
+                        "src": "1087:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 1078,
+                      "name": "internalSetFallbackHandler",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1071,
+                      "src": "1060:26:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 1080,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1060:35:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1081,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1060:35:3"
+                }
+              ]
+            },
+            "documentation": "@dev Allows to add a contract to handle fallback calls.\n      Only fallback calls without value and with data will be forwarded.\n      This can only be done via a Safe transaction.\n @param handler contract to handle fallbacks calls.",
+            "id": 1083,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 1076,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 1075,
+                  "name": "authorized",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 2114,
+                  "src": "1035:10:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1035:10:3"
+              }
+            ],
+            "name": "setFallbackHandler",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1074,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1073,
+                  "name": "handler",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1083,
+                  "src": "995:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1072,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "995:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "994:17:3"
+            },
+            "returnParameters": {
+              "id": 1077,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1050:0:3"
+            },
+            "scope": 1117,
+            "src": "967:135:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 1115,
+              "nodeType": "Block",
+              "src": "1157:812:3",
+              "statements": [
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 1095,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "commonType": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "id": 1089,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 1086,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5220,
+                          "src": "1239:3:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 1087,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "value",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1239:9:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "argumentTypes": null,
+                        "hexValue": "30",
+                        "id": 1088,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1251:1:3",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "1239:13:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "||",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "commonType": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "id": 1094,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 1090,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5220,
+                            "src": "1256:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 1091,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "data",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "1256:8:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_calldata_ptr",
+                            "typeString": "bytes calldata"
+                          }
+                        },
+                        "id": 1092,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "length",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1256:15:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": "==",
+                      "rightExpression": {
+                        "argumentTypes": null,
+                        "hexValue": "30",
+                        "id": 1093,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1275:1:3",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "1256:20:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "1239:37:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 1098,
+                  "nodeType": "IfStatement",
+                  "src": "1235:74:3",
+                  "trueBody": {
+                    "id": 1097,
+                    "nodeType": "Block",
+                    "src": "1278:31:3",
+                    "statements": [
+                      {
+                        "expression": null,
+                        "functionReturnParameters": 1085,
+                        "id": 1096,
+                        "nodeType": "Return",
+                        "src": "1292:7:3"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    1100
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1100,
+                      "name": "slot",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1115,
+                      "src": "1318:12:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 1099,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1318:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1102,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "id": 1101,
+                    "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 1060,
+                    "src": "1333:29:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1318:44:3"
+                },
+                {
+                  "assignments": [
+                    1104
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1104,
+                      "name": "handler",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1115,
+                      "src": "1372:15:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 1103,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1372:7:3",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1105,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1372:15:3"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "handler": {
+                        "declaration": 1104,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1484:7:3",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "slot": {
+                        "declaration": 1100,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1501:4:3",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 1106,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ handler := sload(slot) }",
+                  "src": "1461:55:3"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 1111,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 1107,
+                      "name": "handler",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1104,
+                      "src": "1530:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 1109,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1549:1:3",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          }
+                        ],
+                        "id": 1108,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1541:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_address_$",
+                          "typeString": "type(address)"
+                        },
+                        "typeName": "address"
+                      },
+                      "id": 1110,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1541:10:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address_payable",
+                        "typeString": "address payable"
+                      }
+                    },
+                    "src": "1530:21:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 1114,
+                  "nodeType": "IfStatement",
+                  "src": "1526:437:3",
+                  "trueBody": {
+                    "id": 1113,
+                    "nodeType": "Block",
+                    "src": "1553:410:3",
+                    "statements": [
+                      {
+                        "externalReferences": [
+                          {
+                            "handler": {
+                              "declaration": 1104,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1738:7:3",
+                              "valueSize": 1
+                            }
+                          }
+                        ],
+                        "id": 1112,
+                        "nodeType": "InlineAssembly",
+                        "operations": "{\n    calldatacopy(0, 0, calldatasize())\n    let success := call(gas(), handler, 0, 0, calldatasize(), 0, 0)\n    returndatacopy(0, 0, returndatasize())\n    if eq(success, 0) { revert(0, returndatasize()) }\n    return(0, returndatasize())\n}",
+                        "src": "1635:318:3"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 1116,
+            "implemented": true,
+            "kind": "fallback",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1084,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1117:2:3"
+            },
+            "returnParameters": {
+              "id": 1085,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1157:0:3"
+            },
+            "scope": 1117,
+            "src": "1108:861:3",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1118,
+        "src": "215:1756:3"
+      }
+    ],
+    "src": "0:1971:3"
+  },
+  "legacyAST": {
+    "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/base/FallbackManager.sol",
+    "exportedSymbols": {
+      "FallbackManager": [
+        1117
+      ]
+    },
+    "id": 1118,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1054,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0",
+          "<",
+          "0.7",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:31:3"
+      },
+      {
+        "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/SelfAuthorized.sol",
+        "file": "../common/SelfAuthorized.sol",
+        "id": 1055,
+        "nodeType": "ImportDirective",
+        "scope": 1118,
+        "sourceUnit": 2116,
+        "src": "33:38:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 1056,
+              "name": "SelfAuthorized",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 2115,
+              "src": "243:14:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_SelfAuthorized_$2115",
+                "typeString": "contract SelfAuthorized"
+              }
+            },
+            "id": 1057,
+            "nodeType": "InheritanceSpecifier",
+            "src": "243:14:3"
+          }
+        ],
+        "contractDependencies": [
+          2115
+        ],
+        "contractKind": "contract",
+        "documentation": "@title Fallback Manager - A contract that manages fallback calls made to this contract\n @author Richard Meissner - <richard@gnosis.pm>",
+        "fullyImplemented": true,
+        "id": 1117,
+        "linearizedBaseContracts": [
+          1117,
+          2115
+        ],
+        "name": "FallbackManager",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 1060,
+            "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+            "nodeType": "VariableDeclaration",
+            "scope": 1117,
+            "src": "318:124:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 1058,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "318:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "307836633961366334613339323834653337656431636635336433333735373764313432313261343837306662393736613433363663363933623933393931386435",
+              "id": 1059,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "376:66:3",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_49122629484629529244014240937346711770925847994644146912111677022347558721749_by_1",
+                "typeString": "int_const 4912...(69 digits omitted)...1749"
+              },
+              "value": "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5"
+            },
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 1070,
+              "nodeType": "Block",
+              "src": "511:188:3",
+              "statements": [
+                {
+                  "assignments": [
+                    1066
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1066,
+                      "name": "slot",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1070,
+                      "src": "521:12:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 1065,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "521:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1068,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "id": 1067,
+                    "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 1060,
+                    "src": "536:29:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "521:44:3"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "slot": {
+                        "declaration": 1066,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "669:4:3",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "handler": {
+                        "declaration": 1062,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "675:7:3",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 1069,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ sstore(slot, handler) }",
+                  "src": "639:54:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 1071,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "internalSetFallbackHandler",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1063,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1062,
+                  "name": "handler",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1071,
+                  "src": "485:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1061,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "485:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "484:17:3"
+            },
+            "returnParameters": {
+              "id": 1064,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "511:0:3"
+            },
+            "scope": 1117,
+            "src": "449:250:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 1082,
+              "nodeType": "Block",
+              "src": "1050:52:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 1079,
+                        "name": "handler",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1073,
+                        "src": "1087:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 1078,
+                      "name": "internalSetFallbackHandler",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1071,
+                      "src": "1060:26:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 1080,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1060:35:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1081,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1060:35:3"
+                }
+              ]
+            },
+            "documentation": "@dev Allows to add a contract to handle fallback calls.\n      Only fallback calls without value and with data will be forwarded.\n      This can only be done via a Safe transaction.\n @param handler contract to handle fallbacks calls.",
+            "id": 1083,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 1076,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 1075,
+                  "name": "authorized",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 2114,
+                  "src": "1035:10:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1035:10:3"
+              }
+            ],
+            "name": "setFallbackHandler",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1074,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1073,
+                  "name": "handler",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1083,
+                  "src": "995:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1072,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "995:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "994:17:3"
+            },
+            "returnParameters": {
+              "id": 1077,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1050:0:3"
+            },
+            "scope": 1117,
+            "src": "967:135:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 1115,
+              "nodeType": "Block",
+              "src": "1157:812:3",
+              "statements": [
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 1095,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "commonType": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "id": 1089,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 1086,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5220,
+                          "src": "1239:3:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 1087,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "value",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1239:9:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "argumentTypes": null,
+                        "hexValue": "30",
+                        "id": 1088,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1251:1:3",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "1239:13:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "||",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "commonType": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "id": 1094,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 1090,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5220,
+                            "src": "1256:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 1091,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "data",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "1256:8:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_calldata_ptr",
+                            "typeString": "bytes calldata"
+                          }
+                        },
+                        "id": 1092,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "length",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1256:15:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": "==",
+                      "rightExpression": {
+                        "argumentTypes": null,
+                        "hexValue": "30",
+                        "id": 1093,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1275:1:3",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "1256:20:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "1239:37:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 1098,
+                  "nodeType": "IfStatement",
+                  "src": "1235:74:3",
+                  "trueBody": {
+                    "id": 1097,
+                    "nodeType": "Block",
+                    "src": "1278:31:3",
+                    "statements": [
+                      {
+                        "expression": null,
+                        "functionReturnParameters": 1085,
+                        "id": 1096,
+                        "nodeType": "Return",
+                        "src": "1292:7:3"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    1100
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1100,
+                      "name": "slot",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1115,
+                      "src": "1318:12:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 1099,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1318:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1102,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "id": 1101,
+                    "name": "FALLBACK_HANDLER_STORAGE_SLOT",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 1060,
+                    "src": "1333:29:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1318:44:3"
+                },
+                {
+                  "assignments": [
+                    1104
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1104,
+                      "name": "handler",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1115,
+                      "src": "1372:15:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 1103,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1372:7:3",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1105,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1372:15:3"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "handler": {
+                        "declaration": 1104,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1484:7:3",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "slot": {
+                        "declaration": 1100,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1501:4:3",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 1106,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ handler := sload(slot) }",
+                  "src": "1461:55:3"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 1111,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 1107,
+                      "name": "handler",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1104,
+                      "src": "1530:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 1109,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1549:1:3",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          }
+                        ],
+                        "id": 1108,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1541:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_address_$",
+                          "typeString": "type(address)"
+                        },
+                        "typeName": "address"
+                      },
+                      "id": 1110,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1541:10:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address_payable",
+                        "typeString": "address payable"
+                      }
+                    },
+                    "src": "1530:21:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 1114,
+                  "nodeType": "IfStatement",
+                  "src": "1526:437:3",
+                  "trueBody": {
+                    "id": 1113,
+                    "nodeType": "Block",
+                    "src": "1553:410:3",
+                    "statements": [
+                      {
+                        "externalReferences": [
+                          {
+                            "handler": {
+                              "declaration": 1104,
+                              "isOffset": false,
+                              "isSlot": false,
+                              "src": "1738:7:3",
+                              "valueSize": 1
+                            }
+                          }
+                        ],
+                        "id": 1112,
+                        "nodeType": "InlineAssembly",
+                        "operations": "{\n    calldatacopy(0, 0, calldatasize())\n    let success := call(gas(), handler, 0, 0, calldatasize(), 0, 0)\n    returndatacopy(0, 0, returndatasize())\n    if eq(success, 0) { revert(0, returndatasize()) }\n    return(0, returndatasize())\n}",
+                        "src": "1635:318:3"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 1116,
+            "implemented": true,
+            "kind": "fallback",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1084,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1117:2:3"
+            },
+            "returnParameters": {
+              "id": 1085,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1157:0:3"
+            },
+            "scope": 1117,
+            "src": "1108:861:3",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1118,
+        "src": "215:1756:3"
+      }
+    ],
+    "src": "0:1971:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.3",
+  "updatedAt": "2020-09-04T14:15:51.335Z"
+}
