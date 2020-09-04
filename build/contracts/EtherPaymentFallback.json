@@ -7,8 +7,9 @@
       "type": "fallback"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603b80601d6000396000f3fe608060405200fea265627a7a72315820d9b1788a43a5f3ec9f8f393dad263d702ec16a1fd29607adc13e96363ab99f6564736f6c634300050e0032",
-  "deployedBytecode": "0x608060405200fea265627a7a72315820d9b1788a43a5f3ec9f8f393dad263d702ec16a1fd29607adc13e96363ab99f6564736f6c634300050e0032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.pm>\",\"methods\":{},\"title\":\"EtherPaymentFallback - A contract that has a fallback to accept ether payments\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/EtherPaymentFallback.sol\":\"EtherPaymentFallback\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/common/EtherPaymentFallback.sol\":{\"keccak256\":\"0xc7c13624c8b9297a78f039ee25d15628351eef7be6e45d9425faffaa2baccecb\",\"urls\":[\"bzz-raw://3acef56d25a012666fe3800c44669965cef8f4eb13826b4b8f2e7d784450a447\",\"dweb:/ipfs/QmQtQkUDoGW8cQPNAFB8ttSfQQkmqVPPqVH2zMmKmtSDY5\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603b80601d6000396000f3fe608060405200fea265627a7a72315820eb3cdb10df8ce52c7019dcf9d13fe7f02db1e5497eaed0b1bd7878cf617b788e64736f6c63430005100032",
+  "deployedBytecode": "0x608060405200fea265627a7a72315820eb3cdb10df8ce52c7019dcf9d13fe7f02db1e5497eaed0b1bd7878cf617b788e64736f6c63430005100032",
   "sourceMap": "175:155:8:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;175:155:8;;;;;;;",
   "deployedSourceMap": "175:155:8:-;;;",
   "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title EtherPaymentFallback - A contract that has a fallback to accept ether payments\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract EtherPaymentFallback {\n\n    /// @dev Fallback function accepts Ether transactions.\n    function ()\n        external\n        payable\n    {\n\n    }\n}\n",
@@ -167,9 +168,17 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.792Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.610Z",
+  "devdoc": {
+    "author": "Richard Meissner - <richard@gnosis.pm>",
+    "methods": {},
+    "title": "EtherPaymentFallback - A contract that has a fallback to accept ether payments"
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

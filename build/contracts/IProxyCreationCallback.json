@@ -32,6 +32,7 @@
       "type": "function"
     }
   ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"contract GnosisSafeProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_mastercopy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"initializer\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"saltNonce\",\"type\":\"uint256\"}],\"name\":\"proxyCreated\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/proxies/IProxyCreationCallback.sol\":\"IProxyCreationCallback\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/proxies/GnosisSafeProxy.sol\":{\"keccak256\":\"0x8ee43b4e36cdb2798fe1ca82c6a2f5b1f5d557db07ce37862836926e0af8b931\",\"urls\":[\"bzz-raw://c2af627ea73c295292eeef084421dff9b64e014b10ffe5802af9f5cbadcd068b\",\"dweb:/ipfs/QmYvwyqXx7Qh9KtXxDSk91f4BzWetHq6Hexn3mj16FiPhu\"]},\"/media/000/Documents/Circles/safe-contracts/contracts/proxies/IProxyCreationCallback.sol\":{\"keccak256\":\"0xded06c2e562545ca79d50932e82373e00b86bf08f4e3dd24c1269e3282b9965c\",\"urls\":[\"bzz-raw://37caf5b4272a9f1d9b5cdfc66e72640a445f7da9254ded7e6840d2b45c3b2a21\",\"dweb:/ipfs/QmcoAgDuwnKWj1sMbp51AAMnupmgcQNxS9Gsxvz2ntaRSM\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
@@ -414,9 +415,15 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.788Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.680Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

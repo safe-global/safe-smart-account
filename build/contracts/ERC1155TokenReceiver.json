@@ -84,6 +84,7 @@
       "type": "function"
     }
   ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_ids\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"onERC1155BatchReceived\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"onERC1155Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\":{\"details\":\"An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.         This function MUST return `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))` (i.e. 0xbc197c81) if it accepts the transfer(s). This function MUST revert if it rejects the transfer(s). Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\",\"params\":{\"_data\":\"Additional data with no specified format\",\"_from\":\"The address which previously owned the token\",\"_ids\":\"An array containing ids of each token being transferred (order and length must match _values array)\",\"_operator\":\"The address which initiated the batch transfer (i.e. msg.sender)\",\"_values\":\"An array containing amounts of each token being transferred (order and length must match _ids array)\"},\"return\":\"`bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))`\"},\"onERC1155Received(address,address,uint256,uint256,bytes)\":{\"details\":\"An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeTransferFrom` after the balance has been updated.         This function MUST return `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))` (i.e. 0xf23a6e61) if it accepts the transfer. This function MUST revert if it rejects the transfer. Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\",\"params\":{\"_data\":\"Additional data with no specified format\",\"_from\":\"The address which previously owned the token\",\"_id\":\"The ID of the token being transferred\",\"_operator\":\"The address which initiated the transfer (i.e. msg.sender)\",\"_value\":\"The amount of tokens being transferred\"},\"return\":\"`bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))`\"}}},\"userdoc\":{\"methods\":{\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\":{\"notice\":\"Handle the receipt of multiple ERC1155 token types.\"},\"onERC1155Received(address,address,uint256,uint256,bytes)\":{\"notice\":\"Handle the receipt of a single ERC1155 token type.\"}},\"notice\":\"Note: The ERC-165 identifier for this interface is 0x4e2312e0.\"}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/interfaces/ERC1155TokenReceiver.sol\":\"ERC1155TokenReceiver\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/interfaces/ERC1155TokenReceiver.sol\":{\"keccak256\":\"0xf8ae46a798c360a8cdb4bd83f613cc4e3d85ab4112a35210afe72594b14b84a2\",\"urls\":[\"bzz-raw://bc05f8ddc89c0e8197c01b8570ee35f3a6a349a1183d021439d8bd5986b35194\",\"dweb:/ipfs/QmYVUV1yxDNQQDqxuVoac9kK5hgkVTGLFaMkFpMM5bCh5G\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
@@ -968,9 +969,46 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.786Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.625Z",
+  "devdoc": {
+    "methods": {
+      "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": {
+        "details": "An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.         This function MUST return `bytes4(keccak256(\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\"))` (i.e. 0xbc197c81) if it accepts the transfer(s). This function MUST revert if it rejects the transfer(s). Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.",
+        "params": {
+          "_data": "Additional data with no specified format",
+          "_from": "The address which previously owned the token",
+          "_ids": "An array containing ids of each token being transferred (order and length must match _values array)",
+          "_operator": "The address which initiated the batch transfer (i.e. msg.sender)",
+          "_values": "An array containing amounts of each token being transferred (order and length must match _ids array)"
+        },
+        "return": "`bytes4(keccak256(\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\"))`"
+      },
+      "onERC1155Received(address,address,uint256,uint256,bytes)": {
+        "details": "An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeTransferFrom` after the balance has been updated.         This function MUST return `bytes4(keccak256(\"onERC1155Received(address,address,uint256,uint256,bytes)\"))` (i.e. 0xf23a6e61) if it accepts the transfer. This function MUST revert if it rejects the transfer. Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.",
+        "params": {
+          "_data": "Additional data with no specified format",
+          "_from": "The address which previously owned the token",
+          "_id": "The ID of the token being transferred",
+          "_operator": "The address which initiated the transfer (i.e. msg.sender)",
+          "_value": "The amount of tokens being transferred"
+        },
+        "return": "`bytes4(keccak256(\"onERC1155Received(address,address,uint256,uint256,bytes)\"))`"
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {
+      "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": {
+        "notice": "Handle the receipt of multiple ERC1155 token types."
+      },
+      "onERC1155Received(address,address,uint256,uint256,bytes)": {
+        "notice": "Handle the receipt of a single ERC1155 token type."
+      }
+    },
+    "notice": "Note: The ERC-165 identifier for this interface is 0x4e2312e0."
+  }
 }

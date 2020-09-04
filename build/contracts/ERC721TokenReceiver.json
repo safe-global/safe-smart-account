@@ -38,6 +38,7 @@
       "type": "function"
     }
   ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Note: the ERC-165 identifier for this interface is 0x150b7a02.\",\"methods\":{\"onERC721Received(address,address,uint256,bytes)\":{\"details\":\"The ERC721 smart contract calls this function on the recipient  after a `transfer`. This function MAY throw to revert and reject the  transfer. Return of other than the magic value MUST result in the  transaction being reverted.  Note: the contract address is always the message sender.\",\"params\":{\"_data\":\"Additional data with no specified format\",\"_from\":\"The address which previously owned the token\",\"_operator\":\"The address which called `safeTransferFrom` function\",\"_tokenId\":\"The NFT identifier which is being transferred\"},\"return\":\"`bytes4(keccak256(\\\"onERC721Received(address,address,uint256,bytes)\\\"))`  unless throwing\"}}},\"userdoc\":{\"methods\":{\"onERC721Received(address,address,uint256,bytes)\":{\"notice\":\"Handle the receipt of an NFT\"}}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/safe-contracts/contracts/interfaces/ERC721TokenReceiver.sol\":\"ERC721TokenReceiver\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/safe-contracts/contracts/interfaces/ERC721TokenReceiver.sol\":{\"keccak256\":\"0xa171c2dbd8e1470f486b9e2ce88cd3f82a1b38b5e7052b49a6ae58bdd0e8d13c\",\"urls\":[\"bzz-raw://8f06f47cb955a8aaffcdf53d369ed581ea437637de162b8484d076722f13cde4\",\"dweb:/ipfs/QmbcKiU7aWsiumpKSTeMC82ndqqkGj92YudCnPjZKWV245\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
@@ -456,9 +457,31 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.786Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.626Z",
+  "devdoc": {
+    "details": "Note: the ERC-165 identifier for this interface is 0x150b7a02.",
+    "methods": {
+      "onERC721Received(address,address,uint256,bytes)": {
+        "details": "The ERC721 smart contract calls this function on the recipient  after a `transfer`. This function MAY throw to revert and reject the  transfer. Return of other than the magic value MUST result in the  transaction being reverted.  Note: the contract address is always the message sender.",
+        "params": {
+          "_data": "Additional data with no specified format",
+          "_from": "The address which previously owned the token",
+          "_operator": "The address which called `safeTransferFrom` function",
+          "_tokenId": "The NFT identifier which is being transferred"
+        },
+        "return": "`bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`  unless throwing"
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {
+      "onERC721Received(address,address,uint256,bytes)": {
+        "notice": "Handle the receipt of an NFT"
+      }
+    }
+  }
 }

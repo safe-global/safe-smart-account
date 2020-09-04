@@ -421,6 +421,7 @@
       "type": "function"
     }
   ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"}],\"name\":\"givenAnyReturn\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"response\",\"type\":\"address\"}],\"name\":\"givenAnyReturnAddress\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bool\",\"name\":\"response\",\"type\":\"bool\"}],\"name\":\"givenAnyReturnBool\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"response\",\"type\":\"uint256\"}],\"name\":\"givenAnyReturnUint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"givenAnyRevert\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"string\",\"name\":\"message\",\"type\":\"string\"}],\"name\":\"givenAnyRevertWithMessage\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"givenAnyRunOutOfGas\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"call\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"}],\"name\":\"givenCalldataReturn\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"call\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"response\",\"type\":\"address\"}],\"name\":\"givenCalldataReturnAddress\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"call\",\"type\":\"bytes\"},{\"internalType\":\"bool\",\"name\":\"response\",\"type\":\"bool\"}],\"name\":\"givenCalldataReturnBool\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"call\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"response\",\"type\":\"uint256\"}],\"name\":\"givenCalldataReturnUint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"givenCalldataRevert\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"string\",\"name\":\"message\",\"type\":\"string\"}],\"name\":\"givenCalldataRevertWithMessage\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"givenCalldataRunOutOfGas\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"}],\"name\":\"givenMethodReturn\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"response\",\"type\":\"address\"}],\"name\":\"givenMethodReturnAddress\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"},{\"internalType\":\"bool\",\"name\":\"response\",\"type\":\"bool\"}],\"name\":\"givenMethodReturnBool\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"response\",\"type\":\"uint256\"}],\"name\":\"givenMethodReturnUint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"}],\"name\":\"givenMethodRevert\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"},{\"internalType\":\"string\",\"name\":\"message\",\"type\":\"string\"}],\"name\":\"givenMethodRevertWithMessage\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"}],\"name\":\"givenMethodRunOutOfGas\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"invocationCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"call\",\"type\":\"bytes\"}],\"name\":\"invocationCountForCalldata\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"method\",\"type\":\"bytes\"}],\"name\":\"invocationCountForMethod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reset\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"givenAnyReturn(bytes)\":{\"details\":\"After calling this method, the mock will return `response` when it is called with any calldata that is not mocked more specifically below (e.g. using givenMethodReturn).\",\"params\":{\"response\":\"ABI encoded response that will be returned if method is invoked\"}},\"givenCalldataReturn(bytes,bytes)\":{\"details\":\"After calling this method, the mock will return `response` when the given methodId is called with matching arguments. These exact calldataMocks will take precedence over all other calldataMocks.\",\"params\":{\"call\":\"ABI encoded calldata (methodId and arguments)\",\"response\":\"ABI encoded response that will be returned if contract is invoked with calldata\"}},\"givenMethodReturn(bytes,bytes)\":{\"details\":\"After calling this method, the mock will return `response` when the given methodId is called regardless of arguments. If the methodId and arguments are mocked more specifically (using `givenMethodAndArguments`) the latter will take precedence.\",\"params\":{\"method\":\"ABI encoded methodId. It is valid to pass full calldata (including arguments). The mock will extract the methodId from it\",\"response\":\"ABI encoded response that will be returned if method is invoked\"}},\"invocationCount()\":{\"details\":\"Returns the number of times anything has been called on this mock since last reset\"},\"invocationCountForCalldata(bytes)\":{\"details\":\"Returns the number of times this mock has been called with the exact calldata since last reset.\",\"params\":{\"call\":\"ABI encoded calldata (methodId and arguments)\"}},\"invocationCountForMethod(bytes)\":{\"details\":\"Returns the number of times the given method has been called on this mock since last reset\",\"params\":{\"method\":\"ABI encoded methodId. It is valid to pass full calldata (including arguments). The mock will extract the methodId from it\"}},\"reset()\":{\"details\":\"Resets all mocked methods and invocation counts.\"}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"@gnosis.pm/mock-contract/contracts/MockContract.sol\":\"MockInterface\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@gnosis.pm/mock-contract/contracts/MockContract.sol\":{\"keccak256\":\"0xb487d20cc9adb93cf63003f5681f8f36ca1528068878b11f64838e82b4c61c2e\",\"urls\":[\"bzz-raw://bfb2d9a5aa75833017af0a3db08c9fb1431f5d661c43c526d6bb833f2baf3209\",\"dweb:/ipfs/QmdVKNR4jNJgDj4qkYGB4jENiwDEjFGUh3syWWAyerCWFE\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
@@ -28197,9 +28198,54 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.3",
-  "updatedAt": "2020-09-04T14:27:24.861Z"
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-04T14:30:45.701Z",
+  "devdoc": {
+    "methods": {
+      "givenAnyReturn(bytes)": {
+        "details": "After calling this method, the mock will return `response` when it is called with any calldata that is not mocked more specifically below (e.g. using givenMethodReturn).",
+        "params": {
+          "response": "ABI encoded response that will be returned if method is invoked"
+        }
+      },
+      "givenCalldataReturn(bytes,bytes)": {
+        "details": "After calling this method, the mock will return `response` when the given methodId is called with matching arguments. These exact calldataMocks will take precedence over all other calldataMocks.",
+        "params": {
+          "call": "ABI encoded calldata (methodId and arguments)",
+          "response": "ABI encoded response that will be returned if contract is invoked with calldata"
+        }
+      },
+      "givenMethodReturn(bytes,bytes)": {
+        "details": "After calling this method, the mock will return `response` when the given methodId is called regardless of arguments. If the methodId and arguments are mocked more specifically (using `givenMethodAndArguments`) the latter will take precedence.",
+        "params": {
+          "method": "ABI encoded methodId. It is valid to pass full calldata (including arguments). The mock will extract the methodId from it",
+          "response": "ABI encoded response that will be returned if method is invoked"
+        }
+      },
+      "invocationCount()": {
+        "details": "Returns the number of times anything has been called on this mock since last reset"
+      },
+      "invocationCountForCalldata(bytes)": {
+        "details": "Returns the number of times this mock has been called with the exact calldata since last reset.",
+        "params": {
+          "call": "ABI encoded calldata (methodId and arguments)"
+        }
+      },
+      "invocationCountForMethod(bytes)": {
+        "details": "Returns the number of times the given method has been called on this mock since last reset",
+        "params": {
+          "method": "ABI encoded methodId. It is valid to pass full calldata (including arguments). The mock will extract the methodId from it"
+        }
+      },
+      "reset()": {
+        "details": "Resets all mocked methods and invocation counts."
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }
