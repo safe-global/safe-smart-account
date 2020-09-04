@@ -6524,7 +6524,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.4",
-  "updatedAt": "2020-09-04T14:30:45.637Z",
+  "updatedAt": "2020-09-04T14:49:59.958Z",
   "devdoc": {
     "methods": {
       "balanceOf(address,uint256)": {
