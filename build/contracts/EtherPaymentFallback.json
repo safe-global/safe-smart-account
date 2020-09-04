@@ -7,32 +7,35 @@
       "type": "fallback"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603280601d6000396000f3fe608060405200fea165627a7a72305820307c742d66e652b26eb608c09f1385811b287bc8e11acdcaf63fc81a79f0495b0029",
-  "deployedBytecode": "0x608060405200fea165627a7a72305820307c742d66e652b26eb608c09f1385811b287bc8e11acdcaf63fc81a79f0495b0029",
-  "sourceMap": "167:155:8:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;167:155:8;;;;;;;",
-  "deployedSourceMap": "167:155:8:-;;;",
-  "source": "pragma solidity ^0.5.0;\n\n\n/// @title EtherPaymentFallback - A contract that has a fallback to accept ether payments\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract EtherPaymentFallback {\n\n    /// @dev Fallback function accepts Ether transactions.\n    function ()\n        external\n        payable\n    {\n\n    }\n}\n",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603b80601d6000396000f3fe608060405200fea265627a7a72315820d9b1788a43a5f3ec9f8f393dad263d702ec16a1fd29607adc13e96363ab99f6564736f6c634300050e0032",
+  "deployedBytecode": "0x608060405200fea265627a7a72315820d9b1788a43a5f3ec9f8f393dad263d702ec16a1fd29607adc13e96363ab99f6564736f6c634300050e0032",
+  "sourceMap": "175:155:8:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;175:155:8;;;;;;;",
+  "deployedSourceMap": "175:155:8:-;;;",
+  "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title EtherPaymentFallback - A contract that has a fallback to accept ether payments\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract EtherPaymentFallback {\n\n    /// @dev Fallback function accepts Ether transactions.\n    function ()\n        external\n        payable\n    {\n\n    }\n}\n",
   "sourcePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/EtherPaymentFallback.sol",
   "ast": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/EtherPaymentFallback.sol",
     "exportedSymbols": {
       "EtherPaymentFallback": [
-        1814
+        2036
       ]
     },
-    "id": 1815,
+    "id": 2037,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1809,
+        "id": 2031,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:8"
+        "src": "0:31:8"
       },
       {
         "baseContracts": [],
@@ -40,72 +43,75 @@
         "contractKind": "contract",
         "documentation": "@title EtherPaymentFallback - A contract that has a fallback to accept ether payments\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 1814,
+        "id": 2036,
         "linearizedBaseContracts": [
-          1814
+          2036
         ],
         "name": "EtherPaymentFallback",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 1812,
+              "id": 2034,
               "nodeType": "Block",
-              "src": "312:8:8",
+              "src": "320:8:8",
               "statements": []
             },
             "documentation": "@dev Fallback function accepts Ether transactions.",
-            "id": 1813,
+            "id": 2035,
             "implemented": true,
             "kind": "fallback",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1810,
+              "id": 2032,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "272:2:8"
+              "src": "280:2:8"
             },
             "returnParameters": {
-              "id": 1811,
+              "id": 2033,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "312:0:8"
+              "src": "320:0:8"
             },
-            "scope": 1814,
-            "src": "263:57:8",
+            "scope": 2036,
+            "src": "271:57:8",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1815,
-        "src": "167:155:8"
+        "scope": 2037,
+        "src": "175:155:8"
       }
     ],
-    "src": "0:323:8"
+    "src": "0:331:8"
   },
   "legacyAST": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/EtherPaymentFallback.sol",
     "exportedSymbols": {
       "EtherPaymentFallback": [
-        1814
+        2036
       ]
     },
-    "id": 1815,
+    "id": 2037,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1809,
+        "id": 2031,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:8"
+        "src": "0:31:8"
       },
       {
         "baseContracts": [],
@@ -113,57 +119,57 @@
         "contractKind": "contract",
         "documentation": "@title EtherPaymentFallback - A contract that has a fallback to accept ether payments\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 1814,
+        "id": 2036,
         "linearizedBaseContracts": [
-          1814
+          2036
         ],
         "name": "EtherPaymentFallback",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 1812,
+              "id": 2034,
               "nodeType": "Block",
-              "src": "312:8:8",
+              "src": "320:8:8",
               "statements": []
             },
             "documentation": "@dev Fallback function accepts Ether transactions.",
-            "id": 1813,
+            "id": 2035,
             "implemented": true,
             "kind": "fallback",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1810,
+              "id": 2032,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "272:2:8"
+              "src": "280:2:8"
             },
             "returnParameters": {
-              "id": 1811,
+              "id": 2033,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "312:0:8"
+              "src": "320:0:8"
             },
-            "scope": 1814,
-            "src": "263:57:8",
+            "scope": 2036,
+            "src": "271:57:8",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1815,
-        "src": "167:155:8"
+        "scope": 2037,
+        "src": "175:155:8"
       }
     ],
-    "src": "0:323:8"
+    "src": "0:331:8"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "2.0.3",
-  "updatedAt": "2019-11-01T16:23:27.983Z"
+  "updatedAt": "2020-09-04T14:27:24.792Z"
 }

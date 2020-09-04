@@ -1,32 +1,35 @@
 {
   "contractName": "SecuredTokenTransfer",
   "abi": [],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a723058208876e8cf1185afda99db3ff3f34b202f72ca62a8a1b2317a0545f7d7e26e22280029",
-  "deployedBytecode": "0x6080604052600080fdfea165627a7a723058208876e8cf1185afda99db3ff3f34b202f72ca62a8a1b2317a0545f7d7e26e22280029",
-  "sourceMap": "133:1051:10:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;133:1051:10;;;;;;;",
-  "deployedSourceMap": "133:1051:10:-;;;;;",
-  "source": "pragma solidity ^0.5.0;\n\n\n/// @title SecuredTokenTransfer - Secure token transfer\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract SecuredTokenTransfer {\n\n    /// @dev Transfers a token and returns if it was a success\n    /// @param token Token that should be transferred\n    /// @param receiver Receiver to whom the token should be transferred\n    /// @param amount The amount of tokens that should be transferred\n    function transferToken (\n        address token, \n        address receiver,\n        uint256 amount\n    )\n        internal\n        returns (bool transferred)\n    {\n        bytes memory data = abi.encodeWithSignature(\"transfer(address,uint256)\", receiver, amount);\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            let success := call(sub(gas, 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n            let ptr := mload(0x40)\n            returndatacopy(ptr, 0, returndatasize)\n            switch returndatasize \n            case 0 { transferred := success }\n            case 0x20 { transferred := iszero(or(iszero(success), iszero(mload(ptr)))) }\n            default { transferred := 0 }\n        }\n    }\n}\n",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723158207f76b795660c6dbfd38df9b8f5bc4209bbdcd8809f0e6dfbf1b6b8305e8ebc2064736f6c634300050e0032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a723158207f76b795660c6dbfd38df9b8f5bc4209bbdcd8809f0e6dfbf1b6b8305e8ebc2064736f6c634300050e0032",
+  "sourceMap": "141:1106:10:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;141:1106:10;;;;;;;",
+  "deployedSourceMap": "141:1106:10:-;;;;;",
+  "source": "pragma solidity >=0.5.0 <0.7.0;\n\n\n/// @title SecuredTokenTransfer - Secure token transfer\n/// @author Richard Meissner - <richard@gnosis.pm>\ncontract SecuredTokenTransfer {\n\n    /// @dev Transfers a token and returns if it was a success\n    /// @param token Token that should be transferred\n    /// @param receiver Receiver to whom the token should be transferred\n    /// @param amount The amount of tokens that should be transferred\n    function transferToken (\n        address token,\n        address receiver,\n        uint256 amount\n    )\n        internal\n        returns (bool transferred)\n    {\n        bytes memory data = abi.encodeWithSignature(\"transfer(address,uint256)\", receiver, amount);\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            let success := call(sub(gas, 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n            let ptr := mload(0x40)\n            mstore(0x40, add(ptr, returndatasize()))\n            returndatacopy(ptr, 0, returndatasize())\n            switch returndatasize()\n            case 0 { transferred := success }\n            case 0x20 { transferred := iszero(or(iszero(success), iszero(mload(ptr)))) }\n            default { transferred := 0 }\n        }\n    }\n}\n",
   "sourcePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/SecuredTokenTransfer.sol",
   "ast": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/SecuredTokenTransfer.sol",
     "exportedSymbols": {
       "SecuredTokenTransfer": [
-        1868
+        2098
       ]
     },
-    "id": 1869,
+    "id": 2099,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1845,
+        "id": 2075,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:10"
+        "src": "0:31:10"
       },
       {
         "baseContracts": [],
@@ -34,31 +37,31 @@
         "contractKind": "contract",
         "documentation": "@title SecuredTokenTransfer - Secure token transfer\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 1868,
+        "id": 2098,
         "linearizedBaseContracts": [
-          1868
+          2098
         ],
         "name": "SecuredTokenTransfer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 1866,
+              "id": 2096,
               "nodeType": "Block",
-              "src": "590:592:10",
+              "src": "597:648:10",
               "statements": [
                 {
                   "assignments": [
-                    1857
+                    2087
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1857,
+                      "id": 2087,
                       "name": "data",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1866,
-                      "src": "600:17:10",
+                      "scope": 2096,
+                      "src": "607:17:10",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -66,10 +69,10 @@
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1856,
+                        "id": 2086,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "600:5:10",
+                        "src": "607:5:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -79,21 +82,21 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1864,
+                  "id": 2094,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "7472616e7366657228616464726573732c75696e7432353629",
-                        "id": 1860,
+                        "id": 2090,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "644:27:10",
+                        "src": "651:27:10",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_a9059cbb2ab09eb219583f4a59a5d0623ade346d962bcd4e46b11da047c9049b",
@@ -103,12 +106,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1861,
+                        "id": 2091,
                         "name": "receiver",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1849,
-                        "src": "673:8:10",
+                        "referencedDeclaration": 2079,
+                        "src": "680:8:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -116,12 +119,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1862,
+                        "id": 2092,
                         "name": "amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1851,
-                        "src": "683:6:10",
+                        "referencedDeclaration": 2081,
+                        "src": "690:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -145,18 +148,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1858,
+                        "id": 2088,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4357,
-                        "src": "620:3:10",
+                        "referencedDeclaration": 5207,
+                        "src": "627:3:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 1859,
+                      "id": 2089,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -164,13 +167,13 @@
                       "memberName": "encodeWithSignature",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "620:23:10",
+                      "src": "627:23:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_abiencodewithsignature_pure$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
                         "typeString": "function (string memory) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1863,
+                    "id": 2093,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -178,97 +181,97 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "620:70:10",
+                    "src": "627:70:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "600:90:10"
+                  "src": "607:90:10"
                 },
                 {
                   "externalReferences": [
                     {
-                      "transferred": {
-                        "declaration": 1854,
+                      "data": {
+                        "declaration": 2087,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "1148:11:10",
+                        "src": "864:4:10",
                         "valueSize": 1
                       }
                     },
                     {
                       "data": {
-                        "declaration": 1857,
+                        "declaration": 2087,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "857:4:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "data": {
-                        "declaration": 1857,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "838:4:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "transferred": {
-                        "declaration": 1854,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1012:11:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "transferred": {
-                        "declaration": 1854,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1061:11:10",
+                        "src": "845:4:10",
                         "valueSize": 1
                       }
                     },
                     {
                       "token": {
-                        "declaration": 1847,
+                        "declaration": 2077,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "824:5:10",
+                        "src": "831:5:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1075:11:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1124:11:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1211:11:10",
                         "valueSize": 1
                       }
                     }
                   ],
-                  "id": 1865,
+                  "id": 2095,
                   "nodeType": "InlineAssembly",
-                  "operations": "{\n    let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n    let ptr := mload(0x40)\n    returndatacopy(ptr, 0, returndatasize())\n    switch returndatasize()\n    case 0 {\n        transferred := success\n    }\n    case 0x20 {\n        transferred := iszero(or(iszero(success), iszero(mload(ptr))))\n    }\n    default {\n        transferred := 0\n    }\n}",
-                  "src": "764:418:10"
+                  "operations": "{\n    let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n    let ptr := mload(0x40)\n    mstore(0x40, add(ptr, returndatasize()))\n    returndatacopy(ptr, 0, returndatasize())\n    switch returndatasize()\n    case 0 { transferred := success }\n    case 0x20 {\n        transferred := iszero(or(iszero(success), iszero(mload(ptr))))\n    }\n    default { transferred := 0 }\n}",
+                  "src": "771:468:10"
                 }
               ]
             },
             "documentation": "@dev Transfers a token and returns if it was a success\n @param token Token that should be transferred\n @param receiver Receiver to whom the token should be transferred\n @param amount The amount of tokens that should be transferred",
-            "id": 1867,
+            "id": 2097,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "transferToken",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1852,
+              "id": 2082,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1847,
+                  "id": 2077,
                   "name": "token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "463:13:10",
+                  "scope": 2097,
+                  "src": "471:13:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -276,10 +279,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1846,
+                    "id": 2076,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "463:7:10",
+                    "src": "471:7:10",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -291,11 +294,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 1849,
+                  "id": 2079,
                   "name": "receiver",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "487:16:10",
+                  "scope": 2097,
+                  "src": "494:16:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -303,10 +306,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1848,
+                    "id": 2078,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "487:7:10",
+                    "src": "494:7:10",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -318,11 +321,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 1851,
+                  "id": 2081,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "513:14:10",
+                  "scope": 2097,
+                  "src": "520:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -330,10 +333,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1850,
+                    "id": 2080,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "513:7:10",
+                    "src": "520:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -343,19 +346,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "453:80:10"
+              "src": "461:79:10"
             },
             "returnParameters": {
-              "id": 1855,
+              "id": 2085,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1854,
+                  "id": 2084,
                   "name": "transferred",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "568:16:10",
+                  "scope": 2097,
+                  "src": "575:16:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -363,10 +366,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 1853,
+                    "id": 2083,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "568:4:10",
+                    "src": "575:4:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -376,41 +379,44 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "567:18:10"
+              "src": "574:18:10"
             },
-            "scope": 1868,
-            "src": "430:752:10",
+            "scope": 2098,
+            "src": "438:807:10",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1869,
-        "src": "133:1051:10"
+        "scope": 2099,
+        "src": "141:1106:10"
       }
     ],
-    "src": "0:1185:10"
+    "src": "0:1248:10"
   },
   "legacyAST": {
     "absolutePath": "/media/000/Documents/Circles/safe-contracts/contracts/common/SecuredTokenTransfer.sol",
     "exportedSymbols": {
       "SecuredTokenTransfer": [
-        1868
+        2098
       ]
     },
-    "id": 1869,
+    "id": 2099,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1845,
+        "id": 2075,
         "literals": [
           "solidity",
-          "^",
+          ">=",
           "0.5",
+          ".0",
+          "<",
+          "0.7",
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:10"
+        "src": "0:31:10"
       },
       {
         "baseContracts": [],
@@ -418,31 +424,31 @@
         "contractKind": "contract",
         "documentation": "@title SecuredTokenTransfer - Secure token transfer\n @author Richard Meissner - <richard@gnosis.pm>",
         "fullyImplemented": true,
-        "id": 1868,
+        "id": 2098,
         "linearizedBaseContracts": [
-          1868
+          2098
         ],
         "name": "SecuredTokenTransfer",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 1866,
+              "id": 2096,
               "nodeType": "Block",
-              "src": "590:592:10",
+              "src": "597:648:10",
               "statements": [
                 {
                   "assignments": [
-                    1857
+                    2087
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1857,
+                      "id": 2087,
                       "name": "data",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1866,
-                      "src": "600:17:10",
+                      "scope": 2096,
+                      "src": "607:17:10",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -450,10 +456,10 @@
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1856,
+                        "id": 2086,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "600:5:10",
+                        "src": "607:5:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -463,21 +469,21 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1864,
+                  "id": 2094,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "7472616e7366657228616464726573732c75696e7432353629",
-                        "id": 1860,
+                        "id": 2090,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "string",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "644:27:10",
+                        "src": "651:27:10",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_stringliteral_a9059cbb2ab09eb219583f4a59a5d0623ade346d962bcd4e46b11da047c9049b",
@@ -487,12 +493,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1861,
+                        "id": 2091,
                         "name": "receiver",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1849,
-                        "src": "673:8:10",
+                        "referencedDeclaration": 2079,
+                        "src": "680:8:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -500,12 +506,12 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1862,
+                        "id": 2092,
                         "name": "amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1851,
-                        "src": "683:6:10",
+                        "referencedDeclaration": 2081,
+                        "src": "690:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -529,18 +535,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1858,
+                        "id": 2088,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 4357,
-                        "src": "620:3:10",
+                        "referencedDeclaration": 5207,
+                        "src": "627:3:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 1859,
+                      "id": 2089,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -548,13 +554,13 @@
                       "memberName": "encodeWithSignature",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "620:23:10",
+                      "src": "627:23:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_abiencodewithsignature_pure$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
                         "typeString": "function (string memory) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1863,
+                    "id": 2093,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -562,97 +568,97 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "620:70:10",
+                    "src": "627:70:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "600:90:10"
+                  "src": "607:90:10"
                 },
                 {
                   "externalReferences": [
                     {
-                      "transferred": {
-                        "declaration": 1854,
+                      "data": {
+                        "declaration": 2087,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "1148:11:10",
+                        "src": "864:4:10",
                         "valueSize": 1
                       }
                     },
                     {
                       "data": {
-                        "declaration": 1857,
+                        "declaration": 2087,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "857:4:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "data": {
-                        "declaration": 1857,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "838:4:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "transferred": {
-                        "declaration": 1854,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1012:11:10",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "transferred": {
-                        "declaration": 1854,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "1061:11:10",
+                        "src": "845:4:10",
                         "valueSize": 1
                       }
                     },
                     {
                       "token": {
-                        "declaration": 1847,
+                        "declaration": 2077,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "824:5:10",
+                        "src": "831:5:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1075:11:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1124:11:10",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "transferred": {
+                        "declaration": 2084,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1211:11:10",
                         "valueSize": 1
                       }
                     }
                   ],
-                  "id": 1865,
+                  "id": 2095,
                   "nodeType": "InlineAssembly",
-                  "operations": "{\n    let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n    let ptr := mload(0x40)\n    returndatacopy(ptr, 0, returndatasize())\n    switch returndatasize()\n    case 0 {\n        transferred := success\n    }\n    case 0x20 {\n        transferred := iszero(or(iszero(success), iszero(mload(ptr))))\n    }\n    default {\n        transferred := 0\n    }\n}",
-                  "src": "764:418:10"
+                  "operations": "{\n    let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)\n    let ptr := mload(0x40)\n    mstore(0x40, add(ptr, returndatasize()))\n    returndatacopy(ptr, 0, returndatasize())\n    switch returndatasize()\n    case 0 { transferred := success }\n    case 0x20 {\n        transferred := iszero(or(iszero(success), iszero(mload(ptr))))\n    }\n    default { transferred := 0 }\n}",
+                  "src": "771:468:10"
                 }
               ]
             },
             "documentation": "@dev Transfers a token and returns if it was a success\n @param token Token that should be transferred\n @param receiver Receiver to whom the token should be transferred\n @param amount The amount of tokens that should be transferred",
-            "id": 1867,
+            "id": 2097,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "transferToken",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1852,
+              "id": 2082,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1847,
+                  "id": 2077,
                   "name": "token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "463:13:10",
+                  "scope": 2097,
+                  "src": "471:13:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -660,10 +666,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1846,
+                    "id": 2076,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "463:7:10",
+                    "src": "471:7:10",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -675,11 +681,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 1849,
+                  "id": 2079,
                   "name": "receiver",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "487:16:10",
+                  "scope": 2097,
+                  "src": "494:16:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -687,10 +693,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1848,
+                    "id": 2078,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "487:7:10",
+                    "src": "494:7:10",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -702,11 +708,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 1851,
+                  "id": 2081,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "513:14:10",
+                  "scope": 2097,
+                  "src": "520:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -714,10 +720,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1850,
+                    "id": 2080,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "513:7:10",
+                    "src": "520:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -727,19 +733,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "453:80:10"
+              "src": "461:79:10"
             },
             "returnParameters": {
-              "id": 1855,
+              "id": 2085,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1854,
+                  "id": 2084,
                   "name": "transferred",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1867,
-                  "src": "568:16:10",
+                  "scope": 2097,
+                  "src": "575:16:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -747,10 +753,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 1853,
+                    "id": 2083,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "568:4:10",
+                    "src": "575:4:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -760,26 +766,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "567:18:10"
+              "src": "574:18:10"
             },
-            "scope": 1868,
-            "src": "430:752:10",
+            "scope": 2098,
+            "src": "438:807:10",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1869,
-        "src": "133:1051:10"
+        "scope": 2099,
+        "src": "141:1106:10"
       }
     ],
-    "src": "0:1185:10"
+    "src": "0:1248:10"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "2.0.3",
-  "updatedAt": "2019-11-01T16:23:27.983Z"
+  "updatedAt": "2020-09-04T14:27:24.799Z"
 }
