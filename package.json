@@ -37,7 +37,8 @@
     "deploy": "run(){ truffle deploy --network=$@; }; run",
     "do": "run(){ truffle exec --network=$@; }; run",
     "prepare": "yarn truffle compile && yarn tnt iN",
-    "preversion": "node scripts/clean_build.js && yarn tnt cB"
+    "preversion": "node scripts/clean_build.js && yarn tnt cB",
+    "merge": "sol-merger \"./contracts/modules/ConfirmedTransactionModule.sol\" ./merged"
   },
   "repository": {
     "type": "git",
@@ -64,6 +65,7 @@
     "ipfs-http-client": "^44.2.0",
     "random-buffer": "*",
     "run-with-testrpc": "^0.3.0",
+    "sol-merger": "^3.1.0",
     "solidity-coverage": "^0.7.4",
     "web3": "^1.2.6"
   },
