@@ -81,7 +81,7 @@ contract('GnosisSafe using nested safes', function(accounts) {
         let encodedOwner2Signs = abi.rawEncode(['bytes'], [ new Buffer(owner2Sigs, 'hex') ]).toString('hex').slice(64)
 
         // Pack signatures in correct order
-        if (owner1Safe.address < owner2Safe.address) {
+        if (utils.compareAddresses(owner1Safe.address, owner2Safe.address) < 0) {
             sigs += "000000000000000000000000" + owner1Safe.address.replace('0x', '') + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
             sigs += "000000000000000000000000" + owner2Safe.address.replace('0x', '') + "00000000000000000000000000000000000000000000000000000000000000a2" + "00" // r, s, v
         } else {

@@ -24,7 +24,7 @@ contract('GnosisSafe without refund', function(accounts) {
         assert.equal(await utils.getErrorMessage(gnosisSafe.address, 0, approveData, executor), "Only owners can approve a hash")
 
         let sigs = "0x"
-        for (let account of (accounts.sort())) {
+        for (let account of (accounts.sort(utils.compareAddresses))) {
             if (account != txSender) {
                 utils.logGasUsage("confirm by hash " + subject + " with " + account, await gnosisSafe.approveHash(txHash, {from: account}))
             }

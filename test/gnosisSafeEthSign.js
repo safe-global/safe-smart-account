@@ -56,7 +56,7 @@ contract('GnosisSafe using eth_sign', function(accounts) {
         let signer = async function(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce) {
             let txHash = await gnosisSafe.getTransactionHash(to, value, data, operation, txGasEstimate, baseGasEstimate, gasPrice, txGasToken, refundReceiver, nonce)
             let signatureBytes = "0x"
-            confirmingAccounts.sort()
+            confirmingAccounts.sort(utils.compareAddresses)
             for (var i=0; i<confirmingAccounts.length; i++) {
                 // Adjust v (it is + 27 => EIP-155 and + 4 to differentiate them from typed data signatures in the Safe)
                 let signature = (await ethSign(confirmingAccounts[i], txHash)).replace('0x', '').replace(/00$/,"1f").replace(/01$/,"20")

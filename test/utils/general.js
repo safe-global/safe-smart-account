@@ -11,6 +11,16 @@ const formatAddress = (address) => web3.utils.toChecksumAddress(address)
 
 const formatAddresses = (addressArray) => addressArray.map((o) => web3.utils.toChecksumAddress(o))
 
+function compareAddresses(address1, address2) {
+    const normalizedAddress1 = web3.utils.padLeft(address1.toLowerCase(), 20);
+    const normalizedAddress2 = web3.utils.padLeft(address2.toLowerCase(), 20);
+
+    if (normalizedAddress1 == normalizedAddress2)
+        return 0;
+    else
+        return (normalizedAddress1 < normalizedAddress2 ? -1 : 1);
+}
+
 function createAndAddModulesData(dataArray) {
     // Remove method id (10) and position of data in payload (64)
     return dataArray.reduce((acc, data) => acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74), "0x")
@@ -111,7 +121,7 @@ async function createLightwallet() {
 
 function signTransaction(lw, signers, transactionHash) {
     let signatureBytes = "0x"
-    signers.sort()
+    signers.sort(compareAddresses)
     for (var i=0; i<signers.length; i++) {
         let sig = lightwallet.signing.signMsgHash(lw.keystore, lw.passwords, transactionHash, signers[i])
         signatureBytes += sig.r.toString('hex') + sig.s.toString('hex') + sig.v.toString(16)
@@ -174,6 +184,7 @@ Object.assign(exports, {
     Address0,
     formatAddress,
     formatAddresses,
+    compareAddresses,
     web3ContactFactory,
     createAndAddModulesData,
     currentTimeNs,
