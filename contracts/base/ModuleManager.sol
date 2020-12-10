@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity >=0.6.0 <0.8.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
@@ -130,7 +131,8 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @dev Returns array of modules.
     /// @param start Start of the page.
     /// @param pageSize Maximum number of modules that should be returned.
-    /// @return Array of modules.
+    /// @return array Array of modules.
+    /// @return next ??.
     function getModulesPaginated(address start, uint256 pageSize)
         public
         view

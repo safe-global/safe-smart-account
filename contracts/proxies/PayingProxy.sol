@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity >=0.6.0 <0.8.0;
 import "../common/SecuredTokenTransfer.sol";
 import "./DelegateConstructorProxy.sol";
 
@@ -15,7 +16,6 @@ contract PayingProxy is DelegateConstructorProxy, SecuredTokenTransfer {
     /// @param payment Value that should be paid
     constructor(address _masterCopy, bytes memory initializer, address payable funder, address paymentToken, uint256 payment)
         DelegateConstructorProxy(_masterCopy, initializer)
-        public
     {
         if (payment > 0) {
             if (paymentToken == address(0)) {

@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity >=0.6.0 <0.8.0;
 import "../base/Module.sol";
 import "../base/ModuleManager.sol";
 import "../base/OwnerManager.sol";
@@ -61,7 +62,6 @@ contract SocialRecoveryModule is Module {
     /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
     /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
-    /// @return Returns if transaction can be executed.
     function recoverAccess(address prevOwner, address oldOwner, address newOwner)
         public
         onlyFriend

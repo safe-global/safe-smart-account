@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity >=0.6.0 <0.8.0;
 import "../base/Module.sol";
 
 
@@ -8,9 +9,8 @@ import "../base/Module.sol";
 contract CreateAndAddModules {
 
     /// @dev Function required to compile contract. Gnosis Safe function is called instead.
-    /// @param module Not used.
-    function enableModule(Module module)
-        public
+    function enableModule(Module)
+        public pure
     {
         revert();
     }
@@ -31,7 +31,7 @@ contract CreateAndAddModules {
                 let createBytes := add(0x40, add(data, i))
 
                 let output := mload(0x40)
-                if eq(delegatecall(gas, proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }
+                if eq(delegatecall(gas(), proxyFactory, createBytes, createBytesLength, output, 0x20), 0) { revert(0, 0) }
                 module := and(mload(output), 0xffffffffffffffffffffffffffffffffffffffff)
 
                 // Data is always padded to 32 bytes

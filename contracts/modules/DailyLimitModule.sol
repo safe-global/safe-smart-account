@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity >=0.6.0 <0.8.0;
 import "../base/Module.sol";
 import "../base/ModuleManager.sol";
 import "../base/OwnerManager.sol";
@@ -46,7 +47,6 @@ contract DailyLimitModule is Module {
     /// @param token Address of the token that should be transfered (0 for Ether)
     /// @param to Address to which the tokens should be transfered
     /// @param amount Amount of tokens (or Ether) that should be transfered
-    /// @return Returns if transaction can be executed.
     function executeDailyLimit(address token, address to, uint256 amount)
         public
     {
@@ -87,6 +87,6 @@ contract DailyLimitModule is Module {
         view
         returns (uint)
     {
-        return now - (now % 1 days);
+        return block.timestamp - (block.timestamp % 1 days);
     }
 }
