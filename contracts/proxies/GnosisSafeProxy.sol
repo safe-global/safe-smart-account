@@ -31,7 +31,7 @@ contract GnosisSafeProxy {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let masterCopy2 := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
-            // 0xa619486e == keccak("masterCopy2()"). The value is right padded to 32-bytes with 0s
+            // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
             if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
                 mstore(0, masterCopy2)
                 return(0, 0x20)
