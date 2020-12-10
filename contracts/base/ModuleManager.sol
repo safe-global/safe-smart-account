@@ -132,7 +132,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param start Start of the page.
     /// @param pageSize Maximum number of modules that should be returned.
     /// @return array Array of modules.
-    /// @return next ??.
+    /// @return next `start` for the next page.
     function getModulesPaginated(address start, uint256 pageSize)
         public
         view
