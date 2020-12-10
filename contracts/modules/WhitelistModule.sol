@@ -57,11 +57,12 @@ contract WhitelistModule is Module {
     /// @return Returns if transaction can be executed.
     function executeWhitelisted(address to, uint256 value, bytes memory data)
         public
-        returns (bool)
+        returns (bool) // FIXME: Is return value needed?
     {
         // Only Safe owners are allowed to execute transactions to whitelisted accounts.
         require(OwnerManager(address(manager)).isOwner(msg.sender), "Method can only be called by an owner");
         require(isWhitelisted[to], "Target account is not whitelisted");
         require(manager.execTransactionFromModule(to, value, data, Enum.Operation.Call), "Could not execute transaction");
+        return true;
     }
 }
