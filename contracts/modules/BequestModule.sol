@@ -62,7 +62,7 @@ contract DailyLimitModule is Module {
     }
 
     modifier enteredIntoInheritanceRights() {
-        require(block.timestamp >= bequestDate, "Bequest time not yet come");
+        require(msg.sender == heir && block.timestamp >= bequestDate, "No rights to take");
         _;
     }
 }
