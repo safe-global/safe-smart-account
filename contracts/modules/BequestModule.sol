@@ -7,6 +7,7 @@ import "../common/Enum.sol";
 
 /// @title Bequest Module - Allows to bequest all funds on the wallet to be withdrawn after a given time.
 /// @author Victor Porton - <porton@narod.ru>
+/// Moreover, after the given time the heir can execute any transaction on the inherited wallet.
 /// TODO: Test.
 contract DailyLimitModule is Module {
 
