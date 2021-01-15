@@ -65,4 +65,10 @@ contract('SocialRecoveryModule', function(accounts) {
         utils.logGasUsage("recover access", await socialRecoveryModule.recoverAccess(sentinel, accounts[0], accounts[9], {from: accounts[3]}))
         assert.equal(await gnosisSafe.isOwner(accounts[9]), true);
     })
+
+    // TODO: Check `reconfigure()`:
+    // - that it works
+    // - that reconfiguration removes old friends
+    // - that reconfiguration with the same friends and threshold changes nothing
+    // - that reconfiguration requires authorization
 });

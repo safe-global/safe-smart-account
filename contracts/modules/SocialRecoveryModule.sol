@@ -33,9 +33,39 @@ contract SocialRecoveryModule is Module {
     function setup(address[] memory _friends, uint256 _threshold)
         public
     {
+        _checkConfigParams(_friends, _threshold);
+        setManager();
+        _reconfigure(_friends, _threshold);
+    }
+
+    /// @dev Setup function sets initial storage of contract.
+    /// @param _friends List of friends' addresses.
+    /// @param _threshold Required number of friends to confirm replacement.
+    function reconfigure(address[] memory _friends, uint256 _threshold)
+        public
+        authorized
+    {
+        _checkConfigParams(_friends, _threshold);
+        for (uint i = 0; i < friends.length; ++i) {
+            address friend = friends[i];
+            isFriend[friend] = false;
+        }
+        _reconfigure(_friends, _threshold);
+    }
+
+    function _checkConfigParams(address[] memory _friends, uint256 _threshold)
+        pure internal
+    {
         require(_threshold <= _friends.length, "Threshold cannot exceed friends count");
         require(_threshold >= 2, "At least 2 friends required");
-        setManager();
+    }
+
+    /// @dev Setup function sets initial storage of contract.
+    /// @param _friends List of friends' addresses.
+    /// @param _threshold Required number of friends to confirm replacement.
+    function _reconfigure(address[] memory _friends, uint256 _threshold)
+        internal
+    {
         // Set allowed friends.
         for (uint256 i = 0; i < _friends.length; i++) {
             address friend = _friends[i];
