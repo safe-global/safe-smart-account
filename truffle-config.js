@@ -46,6 +46,13 @@ module.exports = {
       network_id: '100',
       gasPrice: 1000000000, // 1 Gwei
     },
+    ubiq: {
+      provider: () => {
+        return new HDWalletProvider(mnemonic, 'https://rpc.octano.dev')
+      },
+      network_id: '88',
+      gasPrice: 25000000000, // 25 Gwei
+    },
     volta: {
       provider: () => {
         return new HDWalletProvider(mnemonic, 'https://volta-rpc.energyweb.org')
