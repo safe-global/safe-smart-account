@@ -16,13 +16,12 @@ contract('DefaultCallbackHandler', function(accounts) {
     const CALL = 0
 
     beforeEach(async function () {
-        // Create Gnosis Safe and MultiSend library
         lw = await utils.createLightwallet()
         let proxyFactory = await ProxyFactory.new()
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe", GnosisSafe)
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, "0x"),
-            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe and Daily Limit Module',
+            'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe',
         )
         handler = await DefaultCallbackHandler.new()
     })

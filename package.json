@@ -23,7 +23,6 @@
     ],
     "contracts": [
       "GnosisSafe",
-      "CreateAndAddModules",
       "CreateCall",
       "MultiSend",
       "GnosisSafeProxyFactory",
@@ -77,6 +76,6 @@
   },
   "resolutions": {
     "bitcore-lib": "8.1.1",
-    "run-with-testrpc/ganache-cli": "6.3.0"
+    "run-with-testrpc/ganache-cli": "6.12.2"
   }
 }
