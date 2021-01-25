@@ -2,8 +2,6 @@ const util = require('util');
 const solc = require('solc')
 const lightwallet = require('eth-lightwallet')
 const abi = require("ethereumjs-abi")
-//const SolidityEvent = require("web3/lib/web3/event.js");
-const ModuleDataWrapper = new web3.eth.Contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
 
 const Address0 = "0x".padEnd(42, '0')
 
