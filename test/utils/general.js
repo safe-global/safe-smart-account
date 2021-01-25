@@ -11,11 +11,6 @@ const formatAddress = (address) => web3.utils.toChecksumAddress(address)
 
 const formatAddresses = (addressArray) => addressArray.map((o) => web3.utils.toChecksumAddress(o))
 
-function createAndAddModulesData(dataArray) {
-    // Remove method id (10) and position of data in payload (64)
-    return dataArray.reduce((acc, data) => acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74), "0x")
-}
-
 function currentTimeNs() {
     const hrTime=process.hrtime();
     return hrTime[0] * 1000000000 + hrTime[1]
@@ -175,7 +170,6 @@ Object.assign(exports, {
     formatAddress,
     formatAddresses,
     web3ContactFactory,
-    createAndAddModulesData,
     currentTimeNs,
     compile,
     deployContract,

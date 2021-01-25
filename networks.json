@@ -1,48 +1,4 @@
 {
-  "CreateAndAddModules": {
-    "1": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878775
-    },
-    "4": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878875
-    },
-    "5": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391879067
-    },
-    "42": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878968
-    },
-    "100": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878875
-    },
-    "246": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878875
-    },
-    "73799": {
-      "links": {},
-      "events": {},
-      "address": "0xF61A721642B0c0C8b334bA3763BA1326F53798C0",
-      "updated_at": 1587391878875
-    }
-  },
   "CreateCall": {
     "1": {
       "links": {},
