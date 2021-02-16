@@ -3,10 +3,9 @@ import hre, { deployments, waffle } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
-import { executeContractCall } from "../utils/execution";
+import { defaultCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
 
-describe.only("GnosisSafe", async () => {
+describe("GnosisSafe", async () => {
 
     const mockErc1155 = async () => {
         const Erc1155 = await hre.ethers.getContractFactory("ERC1155Token");

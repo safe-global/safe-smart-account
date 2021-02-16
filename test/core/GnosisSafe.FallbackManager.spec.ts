@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
-import { executeContractCall } from "../utils/execution";
+import { executeContractCallWithSigners } from "../utils/execution";
 
 describe("FallbackManager", async () => {
 
@@ -47,7 +47,7 @@ describe("FallbackManager", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5")
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
-            await executeContractCall(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            await executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
 
             // Check fallback handler
             await expect(
