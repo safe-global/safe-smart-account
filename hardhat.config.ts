@@ -52,6 +52,8 @@ export default {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
+      blockGasLimit: 100000000,
+      gas: 100000000
     },
     mainnet: {
       ...sharedNetworkConfig,

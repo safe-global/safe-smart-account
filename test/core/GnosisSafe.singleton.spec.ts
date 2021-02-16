@@ -3,7 +3,7 @@ import { deployments, waffle } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeSingleton } from "./utils/setup";
+import { getSafeSingleton } from "../utils/setup";
 
 describe("GnosisSafe", async () => {
     

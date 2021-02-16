@@ -8,9 +8,9 @@ const deploy: DeployFunction = async function (
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
-  await deploy("GnosisSafe", {
+  await deploy("DefaultCallbackHandler", {
     from: deployer,
-    gasLimit: 12000000,
+    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,
