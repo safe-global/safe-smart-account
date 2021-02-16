@@ -18,9 +18,6 @@ const argv = yargs
 dotenv.config();
 const { INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY, PK } = process.env;
 
-import "./src/tasks/setup";
-import "./src/tasks/proposals";
-
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 

@@ -7,6 +7,8 @@ const solc = require('solc')
 const path = require('path')
 const fs = require('fs')
 
+const metaDir = path.join("build", "meta")
+
 function reformatMetadata(
     metadata,
     sources
@@ -34,7 +36,8 @@ function reformatMetadata(
     for (const source in sources) {
         let content = sources[source].content
         if (!content) {
-            content = fs.readFileSync(source).toString()
+            const pathParts = source.split("/")
+            content = fs.readFileSync(path.join(metaDir, pathParts[pathParts.length - 1])).toString()
         }
         input.sources[source] = { content }
     }
@@ -57,32 +60,38 @@ function reformatMetadata(
     }
 }
 
-const metaDir = path.join("..", "build", "meta")
-
 process = async () => {
     const networkId = await web3.eth.net.getId()
     const network = require(path.join("..", "networks.json"));
-    const meta = require(path.join(metaDir, "GnosisSafeMeta.json"));
-    const {
-        input,
-        fileName,
-        contractName
-    } = reformatMetadata(meta, meta.sources);
-    const solcjs = await new Promise((resolve, reject) => {
-        solc.loadRemoteVersion(`v${meta.compiler.version}`, (error, soljson) => {
-            (error) ? reject(error) : resolve(soljson);
+    const pkg = require(path.join("..", "package.json"))
+    const supportedContracts = pkg.ethereum.contracts
+
+    for (const c of supportedContracts) {
+        console.log(`Verify ${c}`)
+        const meta = require(path.join("..", metaDir, `${c}Meta.json`));
+        const {
+            input,
+            fileName,
+            contractName
+        } = reformatMetadata(meta, meta.sources);
+        const solcjs = await new Promise((resolve, reject) => {
+            solc.loadRemoteVersion(`v${meta.compiler.version}`, (error, soljson) => {
+                (error) ? reject(error) : resolve(soljson);
+            });
         });
-    });
-    const compiled = solcjs.compile(JSON.stringify(input));
-    const output = JSON.parse(compiled);
-    const contract = output.contracts[fileName][contractName];
-    const onchainBytecode = await web3.eth.getCode(network["GnosisSafe"][networkId]["address"]);
-    const onchainBytecodeHash = web3.utils.sha3(onchainBytecode)
-    const localBytecodeHash = web3.utils.sha3(`0x${contract.evm.deployedBytecode.object}`)
-    console.log(`On-chain bytecode hash:  ${onchainBytecodeHash}`)
-    console.log(`Local bytecode hash:     ${localBytecodeHash}`)
-    const verifySuccess = onchainBytecodeHash === localBytecodeHash ? "was SUCCESSFUL" : "FAILED"
-    console.log(`Verification ${verifySuccess}`)
+        const compiled = solcjs.compile(JSON.stringify(input));
+        const output = JSON.parse(compiled);
+        const contract = output.contracts[fileName][contractName];
+        const address = network[c][networkId]["address"]
+        console.log(`Address: ${address}`)
+        const onchainBytecode = await web3.eth.getCode(address);
+        const onchainBytecodeHash = web3.utils.sha3(onchainBytecode)
+        const localBytecodeHash = web3.utils.sha3(`0x${contract.evm.deployedBytecode.object}`)
+        console.log(`On-chain bytecode hash:  ${onchainBytecodeHash}`)
+        console.log(`Local bytecode hash:     ${localBytecodeHash}`)
+        const verifySuccess = onchainBytecodeHash === localBytecodeHash ? "SUCCESS" : "FAILURE"
+        console.log(`Verification status for ${c}: ${verifySuccess}`)
+    }
 }
 
 module.exports = function (callback) {

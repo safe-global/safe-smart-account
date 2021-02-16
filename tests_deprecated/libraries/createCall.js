@@ -1,5 +1,5 @@
-const utils = require('./utils/general')
-const safeUtils = require('./utils/execution')
+const utils = require('../utils/general')
+const safeUtils = require('../utils/execution')
 const ethUtil = require('ethereumjs-util')
 const abi = require('ethereumjs-abi')
 
