@@ -18,7 +18,8 @@ export const executeContractCallWithSignatures = async (safe: Contract, contract
 
 export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[]) => {
     const data = contract.interface.encodeFunctionData(method, params)
-    const safeTxHash = await safe.getTransactionHash(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, 0)
+    const nonce = await safe.nonce()
+    const safeTxHash = await safe.getTransactionHash(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, nonce)
     let sigs = await multiSignDigest(signers, safeTxHash)
-    return await safe.execTransaction(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, sigs).then((tx: any) => tx.wait())
+    return safe.execTransaction(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, sigs)
 }

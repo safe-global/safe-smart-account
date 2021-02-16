@@ -23,6 +23,11 @@ export const getFactory = async () => {
     return Factory.attach(FactoryDeployment.address);
 }
 
+export const getMock = async () => {
+    const Mock = await hre.ethers.getContractFactory("MockContract");
+    return await Mock.deploy();
+}
+
 export const getSafeTemplate = async () => {
     const singleton = await getSafeSingleton()
     const factory = await getFactory()
