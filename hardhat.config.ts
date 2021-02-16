@@ -50,6 +50,9 @@ export default {
     ]
   },
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     mainnet: {
       ...sharedNetworkConfig,
       url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
