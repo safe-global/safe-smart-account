@@ -1,5 +1,6 @@
 import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
+import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
 
 export const defaultCallbackHandlerDeployment = async () => {
@@ -29,7 +30,12 @@ export const getSafeTemplate = async () => {
     await factory.createProxy(singleton.address, "0x").then((tx: any) => tx.wait())
     const Safe = await hre.ethers.getContractFactory("GnosisSafe");
     return Safe.attach(template);
+}
 
+export const getSafeWithOwners = async (owners: string[], threhsold?: number) => {
+    const template = await getSafeTemplate()
+    await template.setup(owners, threhsold || owners.length, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+    return template
 }
 
 export const getDefaultCallbackHandler = async () => {
