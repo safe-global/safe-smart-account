@@ -23,11 +23,14 @@ export const EIP712_TYPE = {
     ]
 }
 
-interface SafeTransaction {
+interface MetaTransaction {
     to: string,
     value: string | number,
     data: string,
     operation: number,
+}
+
+interface SafeTransaction extends MetaTransaction {
     safeTxGas: string | number,
     baseGas: string | number,
     gasPrice: string | number,
@@ -39,6 +42,10 @@ interface SafeTransaction {
 interface SafeSignature {
     signer: string,
     data: string
+}
+
+export const calculateSafeDomainHash = (safe: Contract): string => {
+    return utils._TypedDataEncoder.hashDomain({ verifyingContract: safe.address })
 }
 
 export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction): string => {

@@ -155,6 +155,47 @@ describe("checkSignatures", async () => {
             ).to.be.revertedWith("Hash has not been approved")
         })
 
+        it('should only be allowed for owners', async () => {
+            const { safe } = await setupTests()
+            const tx = {
+                to: safe.address,
+                value: 0,
+                data: "0x",
+                operation: 0,
+                safeTxGas: 0,
+                baseGas: 0,
+                gasPrice: 0,
+                gasToken: AddressZero,
+                refundReceiver: AddressZero,
+                nonce: await safe.nonce()
+            }
+            const txHash = calculateSafeTransactionHash(safe, tx)
+            const signerSafe = safe.connect(user2)
+            await expect(
+                signerSafe.approveHash(txHash)
+            ).to.be.revertedWith("Only owners can approve a hash")
+        })
+
+        it('should emit event', async () => {
+            const { safe } = await setupTests()
+            const tx = {
+                to: safe.address,
+                value: 0,
+                data: "0x",
+                operation: 0,
+                safeTxGas: 0,
+                baseGas: 0,
+                gasPrice: 0,
+                gasToken: AddressZero,
+                refundReceiver: AddressZero,
+                nonce: await safe.nonce()
+            }
+            const txHash = calculateSafeTransactionHash(safe, tx)
+            await expect(
+                safe.approveHash(txHash)
+            ).emit(safe, "ApproveHash").withArgs(txHash, user1.address)
+        })
+
         it('should be able to use pre approved hashes for signature generation', async () => {
             const { safe } = await setupTests()
             const tx = {
