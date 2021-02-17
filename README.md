@@ -20,7 +20,7 @@ yarn truffle compile
 yarn test
 ```
 
-`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
+`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://docs.gnosis.io/safe/docs/contracts_tx_execution/#safe-transaction-gas-limit-estimation).
 
 ### Deploy
 
