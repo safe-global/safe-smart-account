@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import { deployments, waffle } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
@@ -14,8 +14,7 @@ describe("OwnerManager", async () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         return {
-            safe: await getSafeWithOwners([user1.address]),
-            mock: await getMock()
+            safe: await getSafeWithOwners([user1.address])
         }
     })
 
@@ -278,6 +277,13 @@ describe("OwnerManager", async () => {
             await expect(await safe.getThreshold()).to.be.deep.eq(BigNumber.from(1))
             await expect(await safe.isOwner(user1.address)).to.be.false
             await expect(await safe.isOwner(user2.address)).to.be.true
+        })
+    })
+
+    describe("changeThreshold", async () => {
+        it('can only be called from Safe itself', async () => {
+            const { safe } = await setupTests()
+            await expect(safe.changeThreshold(1)).to.be.revertedWith("Method can only be called from this contract")
         })
     })
 })
