@@ -59,7 +59,28 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Domain Separator already set!")
         })
 
-        it.skip('should revert if same owner is included twice', async () => {
+        it('should revert if same owner is included twice', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user2.address, user1.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Duplicate owner address provided")
+        })
+
+        it('should revert if 0 address is used as an owner', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user2.address, AddressZero], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Invalid owner address provided")
+        })
+
+        it('should revert if sentinel is used as an owner', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user2.address, AddressOne], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Invalid owner address provided")
+        })
+
+        it.skip('should revert if same owner is included twice one after each other', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user1.address, user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
@@ -113,6 +134,21 @@ describe("GnosisSafe", async () => {
             await expect(
                 await hre.ethers.provider.getStorageAt(template.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
             ).to.be.eq("0x" + "42baddad".padEnd(64, "0"))
+        })
+
+        it('should fail if sub initializer fails', async () => {
+            const { template } = await setupTests()
+            const source = `
+            contract Initializer {
+                function init(bytes4 data) public {
+                    require(false, "Computer says nah");
+                }
+            }`
+            const testIntializer = await deployContract(user1, source);
+            const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"])
+            await expect(
+                template.setup([user1.address, user2.address, user3.address], 2, testIntializer.address, initData, AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Could not finish initialization")
         })
 
         it('should fail if ether payment fails', async () => {

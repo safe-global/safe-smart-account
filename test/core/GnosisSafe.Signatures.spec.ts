@@ -3,7 +3,7 @@ import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
-import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash } from "../utils/execution";
+import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction } from "../utils/execution";
 
 describe("GnosisSafe", async () => {
 
@@ -49,18 +49,7 @@ describe("GnosisSafe", async () => {
         
         it('should correctly calculate EIP-712 hash', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const typedDataHash = calculateSafeTransactionHash(safe, tx)
             await expect(
                 await safe.getTransactionHash(
@@ -71,18 +60,7 @@ describe("GnosisSafe", async () => {
 
         it('should be able to use EIP-712 for signature generation', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ await safeSignTypedData(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
@@ -90,18 +68,7 @@ describe("GnosisSafe", async () => {
 
         it('should be able to use Signed Ethereum Messages for signature generation', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ await safeSignMessage(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
@@ -109,18 +76,7 @@ describe("GnosisSafe", async () => {
 
         it('msg.sender does not need to approve before', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx, true) ])
             ).to.emit(safe, "ExecutionSuccess")
@@ -129,18 +85,7 @@ describe("GnosisSafe", async () => {
         it('if not msg.sender on-chain approval is required', async () => {
             const { safe } = await setupTests()
             const user2Safe = safe.connect(user2)
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(user2Safe, tx, [ await safeApproveHash(user1, safe, tx, true) ])
             ).to.be.revertedWith("Hash has not been approved")
@@ -148,18 +93,7 @@ describe("GnosisSafe", async () => {
 
         it('approving should only be allowed for owners', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const txHash = calculateSafeTransactionHash(safe, tx)
             const signerSafe = safe.connect(user2)
             await expect(
@@ -169,18 +103,7 @@ describe("GnosisSafe", async () => {
 
         it('approving should emit event', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const txHash = calculateSafeTransactionHash(safe, tx)
             await expect(
                 safe.approveHash(txHash)
@@ -189,18 +112,7 @@ describe("GnosisSafe", async () => {
 
         it('should be able to use pre approved hashes for signature generation', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
@@ -209,18 +121,7 @@ describe("GnosisSafe", async () => {
         it('should revert if threshold is not set', async () => {
             await setupTests()
             const safe = await getSafeTemplate()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ ])
             ).to.be.revertedWith("Threshold needs to be defined!")
@@ -229,18 +130,7 @@ describe("GnosisSafe", async () => {
         it('should revert if not the required amount of signature data is provided', async () => {
             await setupTests()
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address])
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ ])
             ).to.be.revertedWith("Signatures data too short")
@@ -249,18 +139,7 @@ describe("GnosisSafe", async () => {
         it('should not be able to use different signature type of same owner', async () => {
             await setupTests()
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address])
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx), await safeSignTypedData(user1, safe, tx), await safeSignTypedData(user3, safe, tx) ])
             ).to.be.revertedWith("Invalid owner provided")
@@ -269,18 +148,7 @@ describe("GnosisSafe", async () => {
         it('should be able to mix all signature types', async () => {
             await setupTests()
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [ 
                     await safeApproveHash(user1, safe, tx, true), 

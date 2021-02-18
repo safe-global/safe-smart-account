@@ -1,18 +1,38 @@
 import { expect } from "chai";
-import { deployments, waffle } from "hardhat";
+import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { AddressZero } from "@ethersproject/constants";
-import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
-import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSignatureBytes } from "../utils/execution";
+import { deployContract, getSafeWithOwners } from "../utils/setup";
+import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../utils/execution";
+import { parseEther } from "ethers/lib/utils";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2, user3, user4] = waffle.provider.getWallets();
+    const [user1, user2] = waffle.provider.getWallets();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const setterSource = `
+            contract StorageSetter {
+                function setStorage(bytes3 data) public {
+                    bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
+                    // solium-disable-next-line security/no-inline-assembly
+                    assembly {
+                        sstore(slot, data)
+                    }
+                }
+            }`
+        const storageSetter = await deployContract(user1, setterSource);
+        const reverterSource = `
+            contract Reverter {
+                function revert() public {
+                    require(false, "Shit happens");
+                }
+            }`
+        const reverter = await deployContract(user1, reverterSource);
         return {
-            safe: await getSafeWithOwners([user1.address, user2.address])
+            safe: await getSafeWithOwners([user1.address]),
+            reverter,
+            storageSetter
         }
     })
 
@@ -20,23 +40,8 @@ describe("GnosisSafe", async () => {
 
         it('should revert if too little gas is provided', async () => {
             const { safe } = await setupTests()
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 1000000,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
-
-            const signatureBytes = buildSignatureBytes([
-                await safeApproveHash(user1, safe, tx, true),
-                await safeSignTypedData(user2, safe, tx)
-            ])
+            const tx = buildSafeTransaction({ to: safe.address, safeTxGas: 1000000, nonce: await safe.nonce() })
+            const signatureBytes = buildSignatureBytes([ await safeApproveHash(user1, safe, tx, true) ])
             await expect(
                 safe.execTransaction(
                     tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, signatureBytes,
@@ -45,29 +50,103 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Not enough gas to execute safe transaction")
         })
 
-        it.skip('should be able to mix all signature types', async () => {
-            await setupTests()
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
-            const tx = {
-                to: safe.address,
-                value: 0,
-                data: "0x",
-                operation: 0,
-                safeTxGas: 0,
-                baseGas: 0,
-                gasPrice: 0,
-                gasToken: AddressZero,
-                refundReceiver: AddressZero,
-                nonce: await safe.nonce()
-            }
+        it('should emit event for successful call execution', async () => {
+            const { safe, storageSetter } = await setupTests()
+            const txHash = calculateSafeTransactionHash(safe, buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.nonce()))
             await expect(
-                executeTx(safe, tx, [
-                    await safeApproveHash(user1, safe, tx, true),
-                    await safeApproveHash(user4, safe, tx),
-                    await safeSignTypedData(user2, safe, tx),
-                    await safeSignTypedData(user3, safe, tx)
-                ])
+                executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1])
+            ).to.emit(safe, "ExecutionSuccess").withArgs(txHash, 0)
+            
+            await expect(
+                await hre.ethers.provider.getStorageAt(safe.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
+            ).to.be.eq("0x" + "".padEnd(64, "0"))
+            
+            await expect(
+                await hre.ethers.provider.getStorageAt(storageSetter.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
+            ).to.be.eq("0x" + "baddad".padEnd(64, "0"))
+        })
+
+        it('should emit event for failed call execution', async () => {
+            const { safe, reverter } = await setupTests()
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1])
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
+        it('should emit event for successful delegatecall execution', async () => {
+            const { safe, storageSetter } = await setupTests()
+            await expect(
+                executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1], true)
             ).to.emit(safe, "ExecutionSuccess")
+            
+            await expect(
+                await hre.ethers.provider.getStorageAt(safe.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
+            ).to.be.eq("0x" + "baddad".padEnd(64, "0"))
+            
+            await expect(
+                await hre.ethers.provider.getStorageAt(storageSetter.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
+            ).to.be.eq("0x" + "".padEnd(64, "0"))
+        })
+
+        it('should emit event for failed delegatecall execution', async () => {
+            const { safe, reverter } = await setupTests()
+            const txHash = calculateSafeTransactionHash(safe, buildContractCall(reverter, "revert", [], await safe.nonce(), true))
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true)
+            ).to.emit(safe, "ExecutionFailure").withArgs(txHash, 0)
+        })
+
+        it('should revert on unknown operation', async () => {
+            const { safe } = await setupTests()
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce(), operation: 2 })
+            await expect(
+                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx, true) ])
+            ).to.be.reverted
+        })
+
+        it('should emit payment in success event', async () => {
+            const { safe } = await setupTests()
+            const tx = buildSafeTransaction({ 
+                to: safe.address, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 100000, refundReceiver: user2.address 
+            })
+            
+            await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            const userBalance = await hre.ethers.provider.getBalance(user2.address)
+            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
+
+            let executedTx: any;
+            await expect(
+                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx, true) ]).then((tx) => { executedTx = tx; return tx })
+            ).to.emit(safe, "ExecutionSuccess")
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
+            const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[0].data, receipt.logs[0].topics)
+            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx))
+            // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
+            expect(successEvent.payment.toNumber()).to.be.lte(5000)
+            await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
+        })
+
+        it('should emit payment in failure event', async () => {
+            const { safe, storageSetter } = await setupTests()
+            const data = storageSetter.interface.encodeFunctionData("setStorage", [0xbaddad])
+            const tx = buildSafeTransaction({ 
+                to: storageSetter.address, data, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 3000, refundReceiver: user2.address 
+            })
+            
+            await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            const userBalance = await hre.ethers.provider.getBalance(user2.address)
+            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
+
+            let executedTx: any;
+            await expect(
+                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx, true) ]).then((tx) => { executedTx = tx; return tx })
+            ).to.emit(safe, "ExecutionFailure")
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
+            const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[0].data, receipt.logs[0].topics)
+            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx))
+            // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
+            expect(successEvent.payment.toNumber()).to.be.lte(5000)
+            await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
         })
     })
 })

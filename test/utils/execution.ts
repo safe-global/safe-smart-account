@@ -7,7 +7,7 @@ export const EIP_DOMAIN = {
     ]
 }
 
-export const EIP712_TYPE = {
+export const EIP712_SAFE_TX_TYPE = {
     // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     SafeTx: [
         { type: "address", name: "to" },
@@ -20,6 +20,13 @@ export const EIP712_TYPE = {
         { type: "address", name: "gasToken" },
         { type: "address", name: "refundReceiver" },
         { type: "uint256", name: "nonce" },
+    ]
+}
+
+export const EIP712_SAFE_MESSAGE_TYPE = {
+    // "SafeMessage(bytes message)"
+    SafeMessage: [
+        { type: "bytes", name: "message" },
     ]
 }
 
@@ -49,7 +56,11 @@ export const calculateSafeDomainHash = (safe: Contract): string => {
 }
 
 export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction): string => {
-    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address }, EIP712_TYPE, safeTx)
+    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address }, EIP712_SAFE_TX_TYPE, safeTx)
+}
+
+export const calculateSafeMessageHash = (safe: Contract, message: string): string => {
+    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address }, EIP712_SAFE_MESSAGE_TYPE, { message })
 }
 
 export const safeApproveHash = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction, skipOnChainApproval?: boolean): Promise<SafeSignature> => {
@@ -67,16 +78,21 @@ export const safeApproveHash = async (signer: Wallet, safe: Contract, safeTx: Sa
 export const safeSignTypedData = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction): Promise<SafeSignature> => {
     return {
         signer: signer.address,
-        data: await signer._signTypedData({ verifyingContract: safe.address }, EIP712_TYPE, safeTx)
+        data: await signer._signTypedData({ verifyingContract: safe.address }, EIP712_SAFE_TX_TYPE, safeTx)
     }
 }
 
-export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction): Promise<SafeSignature> => {
-    const typedDataHash = utils.arrayify(calculateSafeTransactionHash(safe, safeTx))
+
+export const signHash = async (signer: Wallet, hash: string): Promise<SafeSignature> => {
+    const typedDataHash = utils.arrayify(hash)
     return {
         signer: signer.address,
         data: (await signer.signMessage(typedDataHash)).replace(/1b$/, "1f").replace(/1c$/, "20")
     }
+}
+
+export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction): Promise<SafeSignature> => {
+    return signHash(signer, calculateSafeTransactionHash(safe, safeTx))
 }
 
 export const buildSignatureBytes = (signatures: SafeSignature[]): string => {  
@@ -88,19 +104,9 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     return signatureBytes
 }
 
-export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[]): Promise<string> => {
+export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[]): Promise<any> => {
     const signatureBytes = buildSignatureBytes(signatures)
     return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes)
-}
-
-export const multiSignDigest = async (signers: Wallet[], safeTxHash: string) => {
-    signers.sort((left, right) => left.address.toLowerCase().localeCompare(right.address.toLowerCase()))
-    let signatureBytes = "0x"
-    for (const signer of signers) {
-        let sig = signer._signingKey().signDigest(safeTxHash)
-        signatureBytes += sig.r.slice(2) + sig.s.slice(2) + sig.v.toString(16)
-    }
-    return signatureBytes
 }
 
 export const executeContractCallWithSignatures = async (safe: Contract, contract: Contract, method: string, params: any[], signatures: string) => {
@@ -108,10 +114,36 @@ export const executeContractCallWithSignatures = async (safe: Contract, contract
     return await safe.execTransaction(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, signatures).then((tx: any) => tx.wait())
 }
 
-export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[]) => {
+export const buildContractCall = (contract: Contract, method: string, params: any[], nonce: number, delegateCall?: boolean): SafeTransaction => {
     const data = contract.interface.encodeFunctionData(method, params)
-    const nonce = await safe.nonce()
-    const safeTxHash = await safe.getTransactionHash(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, nonce)
-    let sigs = await multiSignDigest(signers, safeTxHash)
-    return safe.execTransaction(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, sigs)
+    return buildSafeTransaction({ 
+        to: contract.address, 
+        data,
+        operation: delegateCall ? 1 : 0,
+        nonce
+    })
+}
+
+export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[], delegateCall?: boolean) => {
+    const tx = buildContractCall(contract, method, params, await safe.nonce(), delegateCall)
+    const sigs = await Promise.all(signers.map((signer) => safeSignTypedData(signer, safe, tx)))
+    return executeTx(safe, tx, sigs)
+}
+
+export const buildSafeTransaction = (template: {
+    to: string, value?: number | string, data?: string, operation?: number, safeTxGas?: number | string, 
+    baseGas?: number | string, gasPrice?: number | string, gasToken?: string, refundReceiver?: string, nonce: number
+}): SafeTransaction => {
+    return {
+        to: template.to,
+        value: template.value || 0,
+        data: template.data || "0x",
+        operation: template.operation || 0,
+        safeTxGas: template.safeTxGas || 0,
+        baseGas: template.baseGas || 0,
+        gasPrice: template.gasPrice || 0,
+        gasToken: template.gasToken || AddressZero,
+        refundReceiver: template.refundReceiver || AddressZero,
+        nonce: template.nonce
+    }
 }
