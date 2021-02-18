@@ -13,34 +13,38 @@ Install
 yarn
 ```
 
-### Run all tests (requires Node version >=7 for `async/await`):
+### Run all tests:
 
 ```bash
-yarn truffle compile
+yarn build
 yarn test
 ```
 
-`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://docs.gnosis.io/safe/docs/contracts_tx_execution/#safe-transaction-gas-limit-estimation).
-
-### Deploy
+### Deploy Release
 
 Some contracts require that the Solidity compile target is at least `petersburg` (e.g. GnosisSafeProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
 
 Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
 Preparation:
-- Set `INFURA_TOKEN` in `.env`
-- Set `NETWORK` in `.env`
-- Run `yarn truffle compile`
-
-Truffle:
 - Set `MNEMONIC` in `.env`
+- Set `INFURA_KEY` in `.env`
+- Set `NETWORK` in `.env`
 
 ```bash
-yarn truffle deploy
+yarn release
+```
+
+### Deploy Local
+
+```bash
+yarn build
+yarn deploy --network <network>
 ```
 
 ### Verify contract
+
+Note: This is currently not up to date and will be changed before the next release
 
 Note: To completely replicate the bytecode that has been deployed it is required that the project path is `/gnosis-safe` this can be archived using `sudo mkdir /gnosis-safe && sudo mount -B <your_repo_path> /gnosis-safe`. Make sure the run `yarn` again if the path has been changed after the inital `yarn install`. If you use a different path you will only get partial matches.
 
