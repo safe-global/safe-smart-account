@@ -3,9 +3,9 @@ import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
-import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction } from "../utils/execution";
+import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas } from "../utils/execution";
 
-describe("GnosisSafe", async () => {
+describe.only("GnosisSafe", async () => {
 
     const [user1, user2, user3, user4] = waffle.provider.getWallets();
 
@@ -20,7 +20,7 @@ describe("GnosisSafe", async () => {
         it('should fail if signature points into static part', async () => {
             const { safe } = await setupTests()
             let signatures = "0x" + "000000000000000000000000" + user1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000020" + "00" + // r, s, v  
-            "0000000000000000000000000000000000000000000000000000000000000000" // Some data to read
+                "0000000000000000000000000000000000000000000000000000000000000000" // Some data to read
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
             ).to.be.revertedWith("Invalid contract signature location: inside static part")
@@ -30,7 +30,7 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
 
             let signatures = "0x" + "000000000000000000000000" + user1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000041" + "00" // r, s, v
-            
+
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
             ).to.be.revertedWith("Invalid contract signature location: length not present")
@@ -40,13 +40,13 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
 
             let signatures = "0x" + "000000000000000000000000" + user1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000041" + "00" + // r, s, v
-            "0000000000000000000000000000000000000000000000000000000000000020" // length
-            
+                "0000000000000000000000000000000000000000000000000000000000000020" // length
+
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
             ).to.be.revertedWith("Invalid contract signature location: data not complete")
         })
-        
+
         it('should correctly calculate EIP-712 hash', async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
@@ -62,7 +62,10 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ await safeSignTypedData(user1, safe, tx) ])
+                logGas(
+                    "Execute cancel transaction with EIP-712 signature",
+                    executeTx(safe, tx, [await safeSignTypedData(user1, safe, tx)])
+                )
             ).to.emit(safe, "ExecutionSuccess")
         })
 
@@ -70,7 +73,10 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ await safeSignMessage(user1, safe, tx) ])
+                logGas(
+                    "Execute cancel transaction with signed Ethereum message",
+                    executeTx(safe, tx, [await safeSignMessage(user1, safe, tx)])
+                )
             ).to.emit(safe, "ExecutionSuccess")
         })
 
@@ -78,7 +84,10 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx, true) ])
+                logGas(
+                    "Without pre approved signature for msg.sender",
+                    executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])
+                )
             ).to.emit(safe, "ExecutionSuccess")
         })
 
@@ -87,7 +96,7 @@ describe("GnosisSafe", async () => {
             const user2Safe = safe.connect(user2)
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(user2Safe, tx, [ await safeApproveHash(user1, safe, tx, true) ])
+                executeTx(user2Safe, tx, [await safeApproveHash(user1, safe, tx, true)])
             ).to.be.revertedWith("Hash has not been approved")
         })
 
@@ -112,9 +121,13 @@ describe("GnosisSafe", async () => {
 
         it('should be able to use pre approved hashes for signature generation', async () => {
             const { safe } = await setupTests()
+            const user2Safe = safe.connect(user2)
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx) ])
+                logGas(
+                    "With pre approved signature",
+                    executeTx(user2Safe, tx, [await safeApproveHash(user1, safe, tx)])
+                )
             ).to.emit(safe, "ExecutionSuccess")
         })
 
@@ -123,7 +136,7 @@ describe("GnosisSafe", async () => {
             const safe = await getSafeTemplate()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ ])
+                executeTx(safe, tx, [])
             ).to.be.revertedWith("Threshold needs to be defined!")
         })
 
@@ -132,7 +145,7 @@ describe("GnosisSafe", async () => {
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address])
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ ])
+                executeTx(safe, tx, [])
             ).to.be.revertedWith("Signatures data too short")
         })
 
@@ -141,7 +154,7 @@ describe("GnosisSafe", async () => {
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address])
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx), await safeSignTypedData(user1, safe, tx), await safeSignTypedData(user3, safe, tx) ])
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx), await safeSignTypedData(user1, safe, tx), await safeSignTypedData(user3, safe, tx)])
             ).to.be.revertedWith("Invalid owner provided")
         })
 
@@ -150,12 +163,15 @@ describe("GnosisSafe", async () => {
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [ 
-                    await safeApproveHash(user1, safe, tx, true), 
-                    await safeApproveHash(user4, safe, tx), 
-                    await safeSignTypedData(user2, safe, tx), 
-                    await safeSignTypedData(user3, safe, tx) 
-                ])
+                logGas(
+                    "Execute cancel transaction with 4 owners",
+                    executeTx(safe, tx, [
+                        await safeApproveHash(user1, safe, tx, true),
+                        await safeApproveHash(user4, safe, tx),
+                        await safeSignTypedData(user2, safe, tx),
+                        await safeSignTypedData(user3, safe, tx)
+                    ])
+                )
             ).to.emit(safe, "ExecutionSuccess")
         })
     })

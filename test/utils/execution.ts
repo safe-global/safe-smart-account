@@ -64,9 +64,9 @@ export const calculateSafeMessageHash = (safe: Contract, message: string): strin
 }
 
 export const safeApproveHash = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction, skipOnChainApproval?: boolean): Promise<SafeSignature> => {
-    const typedDataHash = utils.arrayify(calculateSafeTransactionHash(safe, safeTx))
-    const signerSafe = safe.connect(signer)
     if (!skipOnChainApproval) {
+        const typedDataHash = utils.arrayify(calculateSafeTransactionHash(safe, safeTx))
+        const signerSafe = safe.connect(signer)
         await signerSafe.approveHash(typedDataHash)
     }
     return {
@@ -104,9 +104,17 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     return signatureBytes
 }
 
-export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[]): Promise<any> => {
+export const logGas = async (message: string, tx: Promise<any>): Promise<any> => {
+    return tx.then(async (result) => {
+        const receipt = await result.wait()
+        console.log("           Used", receipt.gasUsed.toNumber(),`gas for >${message}<`)
+        return result
+    })
+}
+
+export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[], overrides?: any): Promise<any> => {
     const signatureBytes = buildSignatureBytes(signatures)
-    return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes)
+    return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes, overrides || {})
 }
 
 export const executeContractCallWithSignatures = async (safe: Contract, contract: Contract, method: string, params: any[], signatures: string) => {
