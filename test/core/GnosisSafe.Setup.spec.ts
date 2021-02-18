@@ -59,6 +59,34 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Domain Separator already set!")
         })
 
+        it.skip('should revert if same owner is included twice', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user1.address, user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Domain Separator already set!")
+        })
+
+        it('should revert if threshold is too high', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user1.address, user2.address, user3.address], 4, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Threshold cannot exceed owner count")
+        })
+
+        it('should revert if threshold is 0', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user1.address, user2.address, user3.address], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Threshold needs to be greater than 0")
+        })
+
+        it('should revert if owners are empty', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Threshold needs to be greater than 0")
+        })
+
         it('should set fallback handler and call sub inititalizer', async () => {
             const { template } = await setupTests()
             const source = `

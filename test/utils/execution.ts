@@ -79,12 +79,17 @@ export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: Sa
     }
 }
 
-export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[]): Promise<string> => {
+export const buildSignatureBytes = (signatures: SafeSignature[]): string => {  
     signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
     let signatureBytes = "0x"
     for (const sig of signatures) {
         signatureBytes += sig.data.slice(2)
     }
+    return signatureBytes
+}
+
+export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatures: SafeSignature[]): Promise<string> => {
+    const signatureBytes = buildSignatureBytes(signatures)
     return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes)
 }
 

@@ -5,7 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash } from "../utils/execution";
 
-describe("checkSignatures", async () => {
+describe("GnosisSafe", async () => {
 
     const [user1, user2, user3, user4] = waffle.provider.getWallets();
 
@@ -16,7 +16,7 @@ describe("checkSignatures", async () => {
         }
     })
 
-    describe("Contract signature", async () => {
+    describe("checkSignatures", async () => {
         it('should fail if signature points into static part', async () => {
             const { safe } = await setupTests()
             let signatures = "0x" + "000000000000000000000000" + user1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000020" + "00" + // r, s, v  
@@ -46,9 +46,6 @@ describe("checkSignatures", async () => {
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
             ).to.be.revertedWith("Invalid contract signature location: data not complete")
         })
-    })
-
-    describe("EIP-712", async () => {
         
         it('should correctly calculate EIP-712 hash', async () => {
             const { safe } = await setupTests()
@@ -90,9 +87,6 @@ describe("checkSignatures", async () => {
                 executeTx(safe, tx, [ await safeSignTypedData(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
         })
-    })
-
-    describe("Signed Ethereum Message", async () => {
 
         it('should be able to use Signed Ethereum Messages for signature generation', async () => {
             const { safe } = await setupTests()
@@ -112,9 +106,6 @@ describe("checkSignatures", async () => {
                 executeTx(safe, tx, [ await safeSignMessage(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
         })
-    })
-
-    describe("Approve Hash", async () => {
 
         it('msg.sender does not need to approve before', async () => {
             const { safe } = await setupTests()
@@ -155,7 +146,7 @@ describe("checkSignatures", async () => {
             ).to.be.revertedWith("Hash has not been approved")
         })
 
-        it('should only be allowed for owners', async () => {
+        it('approving should only be allowed for owners', async () => {
             const { safe } = await setupTests()
             const tx = {
                 to: safe.address,
@@ -176,7 +167,7 @@ describe("checkSignatures", async () => {
             ).to.be.revertedWith("Only owners can approve a hash")
         })
 
-        it('should emit event', async () => {
+        it('approving should emit event', async () => {
             const { safe } = await setupTests()
             const tx = {
                 to: safe.address,
@@ -214,9 +205,6 @@ describe("checkSignatures", async () => {
                 executeTx(safe, tx, [ await safeApproveHash(user1, safe, tx) ])
             ).to.emit(safe, "ExecutionSuccess")
         })
-    })
-
-    describe("Combination", async () => {
 
         it('should revert if threshold is not set', async () => {
             await setupTests()
