@@ -3,9 +3,9 @@ import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { compile, getCreateCall, getSafeWithOwners } from "../utils/setup";
 import { buildContractCall, executeTx, safeApproveHash } from "../utils/execution";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther } from "@ethersproject/units";
 
-describe("MultiSend", async () => {
+describe("CreateCall", async () => {
 
     const CONTRACT_SOURCE = `
     contract Test {

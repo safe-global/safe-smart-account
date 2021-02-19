@@ -3,7 +3,7 @@ import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
 import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../utils/execution";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther } from "@ethersproject/units";
 
 describe("GnosisSafe", async () => {
 

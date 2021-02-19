@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getMock, getMultiSend, getSafeWithOwners } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../utils/multisend";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther } from "@ethersproject/units";
 
 describe("MultiSend", async () => {
 
