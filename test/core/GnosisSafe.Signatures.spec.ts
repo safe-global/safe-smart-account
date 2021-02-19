@@ -5,7 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas } from "../utils/execution";
 
-describe.only("GnosisSafe", async () => {
+describe("GnosisSafe", async () => {
 
     const [user1, user2, user3, user4] = waffle.provider.getWallets();
 

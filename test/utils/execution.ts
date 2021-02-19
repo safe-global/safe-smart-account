@@ -1,4 +1,4 @@
-import { Contract, Wallet, utils } from "ethers"
+import { Contract, Wallet, utils, BigNumber } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 
 export const EIP_DOMAIN = {
@@ -30,14 +30,14 @@ export const EIP712_SAFE_MESSAGE_TYPE = {
     ]
 }
 
-interface MetaTransaction {
+export interface MetaTransaction {
     to: string,
-    value: string | number,
+    value: string | number | BigNumber,
     data: string,
     operation: number,
 }
 
-interface SafeTransaction extends MetaTransaction {
+export interface SafeTransaction extends MetaTransaction {
     safeTxGas: string | number,
     baseGas: string | number,
     gasPrice: string | number,
@@ -46,7 +46,7 @@ interface SafeTransaction extends MetaTransaction {
     nonce: string | number
 }
 
-interface SafeSignature {
+export interface SafeSignature {
     signer: string,
     data: string
 }
@@ -139,7 +139,7 @@ export const executeContractCallWithSigners = async (safe: Contract, contract: C
 }
 
 export const buildSafeTransaction = (template: {
-    to: string, value?: number | string, data?: string, operation?: number, safeTxGas?: number | string, 
+    to: string, value?: BigNumber | number | string, data?: string, operation?: number, safeTxGas?: number | string, 
     baseGas?: number | string, gasPrice?: number | string, gasToken?: string, refundReceiver?: string, nonce: number
 }): SafeTransaction => {
     return {

@@ -23,6 +23,12 @@ export const getFactory = async () => {
     return Factory.attach(FactoryDeployment.address);
 }
 
+export const getMultiSend = async () => {
+    const MultiSendDeployment = await deployments.get("MultiSend");
+    const MultiSend = await hre.ethers.getContractFactory("MultiSend");
+    return MultiSend.attach(MultiSendDeployment.address);
+}
+
 export const getMock = async () => {
     const Mock = await hre.ethers.getContractFactory("MockContract");
     return await Mock.deploy();

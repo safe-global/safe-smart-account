@@ -4,7 +4,6 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
 import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../utils/execution";
 import { parseEther } from "ethers/lib/utils";
-import { parse } from "yargs";
 
 describe("GnosisSafe", async () => {
 
@@ -150,7 +149,7 @@ describe("GnosisSafe", async () => {
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
         })
 
-        it.only('should be possible to manually increase gas', async () => {
+        it('should be possible to manually increase gas', async () => {
             const { safe } = await setupTests()
             const gasUserSource = `
             contract GasUser {
