@@ -179,7 +179,7 @@ describe("GnosisSafe", async () => {
             const safeTxGas = 10000
             const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.nonce() })
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 70000 }),
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 170000 }),
                 "Safe transaction should fail with low gasLimit"
             ).to.emit(safe, "ExecutionFailure")
 

@@ -1,6 +1,7 @@
 module.exports = {
     skipFiles: [
-        'test/*',
+        'test/Token.sol',
+        'test/ERC1155Token.sol',
     ],
     mocha: {
         grep: "@skip-on-coverage", // Find everything with this tag
