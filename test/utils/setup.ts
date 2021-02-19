@@ -29,6 +29,12 @@ export const getMultiSend = async () => {
     return MultiSend.attach(MultiSendDeployment.address);
 }
 
+export const getCreateCall = async () => {
+    const CreateCallDeployment = await deployments.get("CreateCall");
+    const CreateCall = await hre.ethers.getContractFactory("CreateCall");
+    return CreateCall.attach(CreateCallDeployment.address);
+}
+
 export const getMock = async () => {
     const Mock = await hre.ethers.getContractFactory("MockContract");
     return await Mock.deploy();
@@ -87,9 +93,7 @@ export const compile = async (source: string) => {
 
 export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
     const output = await compile(source)
-    const contractInterface = output.interface
-    const contractBytecode = output.data
-    const transaction = await deployer.sendTransaction({ data: contractBytecode, gasLimit: 6000000 })
+    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 })
     const receipt = await transaction.wait()
-    return new Contract(receipt.contractAddress, contractInterface, deployer)
+    return new Contract(receipt.contractAddress, output.interface, deployer)
 }

@@ -53,6 +53,16 @@ describe("MultiSend", async () => {
             expect(await hre.ethers.provider.getCode(multiSend.address)).to.be.eq(multiSendCode)
         })
 
+        it('Should fail when using invalid operation', async () => {
+            const { safe, multiSend } = await setupTests()
+
+            const txs = [buildSafeTransaction({to: user2.address, operation: 2, nonce: 0})]
+            const safeTx = buildMultiSendSafeTx(multiSend, txs, await safe.nonce())
+            await expect(
+                executeTx(safe, safeTx, [ await safeApproveHash(user1, safe, safeTx, true) ])
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
         it('Can execute empty multisend', async () => {
             const { safe, multiSend } = await setupTests()
 

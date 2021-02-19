@@ -22,7 +22,10 @@ contract('CreateCall', function(accounts) {
 
     const CONTRACT_SOURCE = `
     contract Test {
-        constructor() public payable {}
+        address public creator;
+        constructor() public payable {
+            creator = msg.sender;
+        }
 
         function x() public pure returns (uint) {
             return 21;
