@@ -82,7 +82,6 @@ export const safeSignTypedData = async (signer: Wallet, safe: Contract, safeTx: 
     }
 }
 
-
 export const signHash = async (signer: Wallet, hash: string): Promise<SafeSignature> => {
     const typedDataHash = utils.arrayify(hash)
     return {
@@ -95,7 +94,7 @@ export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: Sa
     return signHash(signer, calculateSafeTransactionHash(safe, safeTx))
 }
 
-export const buildSignatureBytes = (signatures: SafeSignature[]): string => {  
+export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
     let signatureBytes = "0x"
     for (const sig of signatures) {
@@ -107,7 +106,7 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
 export const logGas = async (message: string, tx: Promise<any>): Promise<any> => {
     return tx.then(async (result) => {
         const receipt = await result.wait()
-        console.log("           Used", receipt.gasUsed.toNumber(),`gas for >${message}<`)
+        console.log("           Used", receipt.gasUsed.toNumber(), `gas for >${message}<`)
         return result
     })
 }
@@ -117,15 +116,10 @@ export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatu
     return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes, overrides || {})
 }
 
-export const executeContractCallWithSignatures = async (safe: Contract, contract: Contract, method: string, params: any[], signatures: string) => {
-    const data = contract.interface.encodeFunctionData(method, params)
-    return await safe.execTransaction(safe.address, 0, data, 0, 0, 0, 0, AddressZero, AddressZero, signatures).then((tx: any) => tx.wait())
-}
-
 export const buildContractCall = (contract: Contract, method: string, params: any[], nonce: number, delegateCall?: boolean): SafeTransaction => {
     const data = contract.interface.encodeFunctionData(method, params)
-    return buildSafeTransaction({ 
-        to: contract.address, 
+    return buildSafeTransaction({
+        to: contract.address,
         data,
         operation: delegateCall ? 1 : 0,
         nonce
@@ -139,7 +133,7 @@ export const executeContractCallWithSigners = async (safe: Contract, contract: C
 }
 
 export const buildSafeTransaction = (template: {
-    to: string, value?: BigNumber | number | string, data?: string, operation?: number, safeTxGas?: number | string, 
+    to: string, value?: BigNumber | number | string, data?: string, operation?: number, safeTxGas?: number | string,
     baseGas?: number | string, gasPrice?: number | string, gasToken?: string, refundReceiver?: string, nonce: number
 }): SafeTransaction => {
     return {
