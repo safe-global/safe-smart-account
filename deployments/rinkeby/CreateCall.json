@@ -72,22 +72,6 @@
       "type": "function"
     }
   ],
-  "transactionHash": "0x858a31ceb9a33845076e871acd58eac10c85f58a085e2df95f4357b47e6d9732",
-  "receipt": {
-    "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
-    "from": "0x05c85Ab5B09Eb8A55020d72daf6091E04e264af9",
-    "contractAddress": null,
-    "transactionIndex": 9,
-    "gasUsed": "313564",
-    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0x5150b13cc38eb11e126adf0f16882c62559bc7521450a597aafa356be902190f",
-    "transactionHash": "0x858a31ceb9a33845076e871acd58eac10c85f58a085e2df95f4357b47e6d9732",
-    "logs": [],
-    "blockNumber": 8113983,
-    "cumulativeGasUsed": "1037417",
-    "status": 1,
-    "byzantium": true
-  },
   "args": [],
   "solcInputHash": "e13af873df760e6463a87a0cc0932f40",
   "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"name\":\"ContractCreation\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"}],\"name\":\"performCreate\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"}],\"name\":\"performCreate2\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.io>\",\"methods\":{},\"title\":\"Create Call - Allows to use the different create opcodes to deploy a contract\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/CreateCall.sol\":\"CreateCall\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/libraries/CreateCall.sol\":{\"content\":\"pragma solidity >=0.5.0 <0.6.0;\\n\\n\\n/// @title Create Call - Allows to use the different create opcodes to deploy a contract\\n/// @author Richard Meissner - <richard@gnosis.io>\\ncontract CreateCall {\\n    event ContractCreation(address newContract);\\n\\n    function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns(address newContract) {\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)\\n        }\\n        require(newContract != address(0), \\\"Could not deploy contract\\\");\\n        emit ContractCreation(newContract);\\n    }\\n\\n    function performCreate(uint256 value, bytes memory deploymentData) public returns(address newContract) {\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))\\n        }\\n        require(newContract != address(0), \\\"Could not deploy contract\\\");\\n        emit ContractCreation(newContract);\\n    }\\n}\",\"keccak256\":\"0xdc96d010f96220b0476788f685dab31edf3cece07728ef37cc219e02b5e20cf7\"}},\"version\":1}",

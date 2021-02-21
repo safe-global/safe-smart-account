@@ -10,7 +10,6 @@ const deploy: DeployFunction = async function (
 
   await deploy("CreateCall", {
     from: deployer,
-    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,
@@ -18,7 +17,6 @@ const deploy: DeployFunction = async function (
 
   await deploy("MultiSend", {
     from: deployer,
-    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,

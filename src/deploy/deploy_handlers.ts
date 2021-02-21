@@ -10,7 +10,6 @@ const deploy: DeployFunction = async function (
 
   await deploy("DefaultCallbackHandler", {
     from: deployer,
-    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,

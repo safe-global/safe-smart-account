@@ -10,7 +10,6 @@ const deploy: DeployFunction = async function (
 
   await deploy("GnosisSafeProxyFactory", {
     from: deployer,
-    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,
