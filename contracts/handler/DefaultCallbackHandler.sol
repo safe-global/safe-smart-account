@@ -1,4 +1,4 @@
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "../interfaces/ERC1155TokenReceiver.sol";
 import "../interfaces/ERC721TokenReceiver.sol";

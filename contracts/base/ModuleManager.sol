@@ -1,8 +1,7 @@
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity >=0.5.0 <0.6.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
-import "./Module.sol";
 
 
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract
@@ -10,8 +9,8 @@ import "./Module.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract ModuleManager is SelfAuthorized, Executor {
 
-    event EnabledModule(Module module);
-    event DisabledModule(Module module);
+    event EnabledModule(address module);
+    event DisabledModule(address module);
     event ExecutionFromModuleSuccess(address indexed module);
     event ExecutionFromModuleFailure(address indexed module);
 
@@ -33,16 +32,16 @@ contract ModuleManager is SelfAuthorized, Executor {
     ///      This can only be done via a Safe transaction.
     /// @notice Enables the module `module` for the Safe.
     /// @param module Module to be whitelisted.
-    function enableModule(Module module)
+    function enableModule(address module)
         public
         authorized
     {
         // Module address cannot be null or sentinel.
-        require(address(module) != address(0) && address(module) != SENTINEL_MODULES, "Invalid module address provided");
+        require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
         // Module cannot be added twice.
-        require(modules[address(module)] == address(0), "Module has already been added");
-        modules[address(module)] = modules[SENTINEL_MODULES];
-        modules[SENTINEL_MODULES] = address(module);
+        require(modules[module] == address(0), "Module has already been added");
+        modules[module] = modules[SENTINEL_MODULES];
+        modules[SENTINEL_MODULES] = module;
         emit EnabledModule(module);
     }
 
@@ -51,15 +50,15 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @notice Disables the module `module` for the Safe.
     /// @param prevModule Module that pointed to the module to be removed in the linked list
     /// @param module Module to be removed.
-    function disableModule(Module prevModule, Module module)
+    function disableModule(address prevModule, address module)
         public
         authorized
     {
         // Validate module address and check that it corresponds to module index.
-        require(address(module) != address(0) && address(module) != SENTINEL_MODULES, "Invalid module address provided");
-        require(modules[address(prevModule)] == address(module), "Invalid prevModule, module pair provided");
-        modules[address(prevModule)] = modules[address(module)];
-        modules[address(module)] = address(0);
+        require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
+        require(modules[prevModule] == module, "Invalid prevModule, module pair provided");
+        modules[prevModule] = modules[module];
+        modules[module] = address(0);
         emit DisabledModule(module);
     }
 
@@ -108,12 +107,12 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     /// @dev Returns if an module is enabled
     /// @return True if the module is enabled
-    function isModuleEnabled(Module module)
+    function isModuleEnabled(address module)
         public
         view
         returns (bool)
     {
-        return SENTINEL_MODULES != address(module) && modules[address(module)] != address(0);
+        return SENTINEL_MODULES != module && modules[module] != address(0);
     }
 
     /// @dev Returns array of first 10 modules.

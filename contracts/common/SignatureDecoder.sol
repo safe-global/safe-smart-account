@@ -1,30 +1,10 @@
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 
 /// @title SignatureDecoder - Decodes signatures that a encoded as bytes
 /// @author Ricardo Guilherme Schmidt (Status Research & Development GmbH)
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SignatureDecoder {
-    
-    /// @dev Recovers address who signed the message
-    /// @param messageHash operation ethereum signed message hash
-    /// @param messageSignature message `txHash` signature
-    /// @param pos which signature to read
-    function recoverKey (
-        bytes32 messageHash,
-        bytes memory messageSignature,
-        uint256 pos
-    )
-        internal
-        pure
-        returns (address)
-    {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        (v, r, s) = signatureSplit(messageSignature, pos);
-        return ecrecover(messageHash, v, r, s);
-    }
 
     /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.
     /// @notice Make sure to peform a bounds check for @param pos, to avoid out of bounds access on @param signatures

@@ -1,4 +1,4 @@
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity >=0.5.0 <0.6.0;
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
@@ -106,7 +106,7 @@ contract GnosisSafe
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param baseGas Gas costs for that are indipendent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+    /// @param baseGas Gas costs that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
     /// @param gasPrice Gas price that should be used for the payment calculation.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
@@ -359,8 +359,8 @@ contract GnosisSafe
     /// @param value Ether value.
     /// @param data Data payload.
     /// @param operation Operation type.
-    /// @param safeTxGas Fas that should be used for the safe transaction.
-    /// @param baseGas Gas costs for data used to trigger the safe transaction.
+    /// @param safeTxGas Gas that should be used for the safe transaction.
+    /// @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
     /// @param gasPrice Maximum gas price that should be used for this transaction.
     /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
     /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
