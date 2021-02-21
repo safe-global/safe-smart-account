@@ -17,4 +17,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
+deploy.tags = ['handlers']
 export default deploy;

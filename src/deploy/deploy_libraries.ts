@@ -25,4 +25,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
+deploy.tags = ['libraries']
 export default deploy;

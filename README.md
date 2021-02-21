@@ -20,41 +20,42 @@ yarn build
 yarn test
 ```
 
-### Deploy Release
+### Deploy
 
 Some contracts require that the Solidity compile target is at least `petersburg` (e.g. GnosisSafeProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
 
 Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
 
+This will deploy the contracts deterministically and verify the contracts on etherscan.
+
 Preparation:
 - Set `MNEMONIC` in `.env`
 - Set `INFURA_KEY` in `.env`
-- Set `NETWORK` in `.env`
 
 ```bash
-yarn release
+yarn deploy-all <network>
 ```
 
-### Deploy Local
+This will perform the following steps
 
 ```bash
 yarn build
 yarn deploy --network <network>
+yarn hardhat --network <network> etherscan-verify
+yarn hardhat --network <network> local-verify
 ```
 
 ### Verify contract
 
-Note: This is currently not up to date and will be changed before the next release
+This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
+```bash
+yarn hardhat --network <network> local-verify
+```
 
-Note: To completely replicate the bytecode that has been deployed it is required that the project path is `/gnosis-safe` this can be archived using `sudo mkdir /gnosis-safe && sudo mount -B <your_repo_path> /gnosis-safe`. Make sure the run `yarn` again if the path has been changed after the inital `yarn install`. If you use a different path you will only get partial matches.
-
-You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
-
-With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ and https://etherscan.io/
-
-For Etherscan only the `GnosisSafeEtherscan.json` file is required. For sourcify the `GnosisSafeMeta.json` and all the `.sol` files are required.
-
-Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
+This command will upload the contract source to Etherescan
+```bash
+yarn hardhat --network <network> etherscan-verify
+```
 
 Documentation
 -------------
@@ -74,12 +75,4 @@ All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MER
 
 License
 -------
-All smart contracts are released under LGPL v.3.
-
-Contributors
-------------
-- Stefan George ([Georgi87](https://github.com/Georgi87))
-- Richard Meissner ([rmeissner](https://github.com/rmeissner))
-- Christian Lundkvist ([christianlundkvist](https://github.com/christianlundkvist))
-- Nick Dodson ([SilentCicero](https://github.com/SilentCicero))
-- Gonçalo Sá ([GNSPS](https://github.com/GNSPS))
+All smart contracts are released under LGPL-3.0

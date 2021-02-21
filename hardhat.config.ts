@@ -16,7 +16,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY, PK } = process.env;
+const { INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK } = process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -35,6 +35,9 @@ if (["rinkeby", "mainnet"].includes(argv.network) && INFURA_KEY === undefined) {
     `Could not find Infura key in env, unable to connect to network ${argv.network}`,
   );
 }
+
+import "./src/tasks/local_verify"
+import "./src/tasks/deploy_contracts"
 
 export default {
   paths: {
@@ -75,6 +78,6 @@ export default {
     timeout: 2000000,
   },
   etherscan: {
-    apiKey: MY_ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_API_KEY,
   },
 };

@@ -10,11 +10,12 @@ const deploy: DeployFunction = async function (
 
   await deploy("GnosisSafe", {
     from: deployer,
-    gasLimit: 12000000,
+    gasLimit: 8000000,
     args: [],
     log: true,
     deterministicDeployment: true,
   });
 };
 
+deploy.tags = ['singleton']
 export default deploy;
