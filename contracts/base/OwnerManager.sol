@@ -34,7 +34,7 @@ contract OwnerManager is SelfAuthorized {
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            require(owner != address(0) && owner != SENTINEL_OWNERS, "Invalid owner address provided");
+            require(owner != address(0) && owner != SENTINEL_OWNERS && owner != address(this), "Invalid owner address provided");
             // No duplicate owners allowed.
             require(owners[owner] == address(0), "Duplicate owner address provided");
             owners[currentOwner] = owner;
@@ -54,8 +54,8 @@ contract OwnerManager is SelfAuthorized {
         public
         authorized
     {
-        // Owner address cannot be null.
-        require(owner != address(0) && owner != SENTINEL_OWNERS, "Invalid owner address provided");
+        // Owner address cannot be null, the sentinel or the Safe itself.
+        require(owner != address(0) && owner != SENTINEL_OWNERS && owner != address(this), "Invalid owner address provided");
         // No duplicate owners allowed.
         require(owners[owner] == address(0), "Address is already an owner");
         owners[owner] = owners[SENTINEL_OWNERS];
@@ -101,8 +101,8 @@ contract OwnerManager is SelfAuthorized {
         public
         authorized
     {
-        // Owner address cannot be null.
-        require(newOwner != address(0) && newOwner != SENTINEL_OWNERS, "Invalid owner address provided");
+        // Owner address cannot be null, the sentinel or the Safe itself.
+        require(newOwner != address(0) && newOwner != SENTINEL_OWNERS && newOwner != address(this), "Invalid owner address provided");
         // No duplicate owners allowed.
         require(owners[newOwner] == address(0), "Address is already an owner");
         // Validate oldOwner address and check that it corresponds to owner index.

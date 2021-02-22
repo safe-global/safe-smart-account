@@ -73,6 +73,13 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Invalid owner address provided")
         })
 
+        it('should revert if Safe itself is used as an owner', async () => {
+            const { template } = await setupTests()
+            await expect(
+                template.setup([user2.address, template.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Invalid owner address provided")
+        })
+
         it('should revert if sentinel is used as an owner', async () => {
             const { template } = await setupTests()
             await expect(
