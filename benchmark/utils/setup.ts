@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getSafeWithOwners } from "../../test/utils/setup";
+import { getDefaultCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
 import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature } from "../../test/utils/execution";
 import { Wallet, Contract } from "ethers";
 
@@ -12,8 +12,9 @@ export interface Contracts {
     additions: any | undefined
 }
 
-const generateTarget = async (owners: Wallet[], threshold?: number) => {
-    return await getSafeWithOwners(owners.map((owner) => owner.address), threshold)
+const generateTarget = async (owners: Wallet[], threshold: number) => {
+    const fallbackHandler = await getDefaultCallbackHandler()
+    return await getSafeWithOwners(owners.map((owner) => owner.address), threshold, fallbackHandler.address)
 }
 
 export const configs = [

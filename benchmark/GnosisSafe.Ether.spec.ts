@@ -8,7 +8,7 @@ import { benchmark } from "./utils/setup"
 const testTarget = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 const [user1] = waffle.provider.getWallets();
 
-benchmark("Ether Benchmark", [{
+benchmark("Ether", [{
     name: "transfer",
     prepare: async (_, target: string) => {
         // Create account, as we don't want to test this in the benchmark
