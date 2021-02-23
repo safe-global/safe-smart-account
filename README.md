@@ -3,7 +3,7 @@ Gnosis Safe Contracts
 
 [![npm version](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts)
 [![Build Status](https://github.com/gnosis/safe-contracts/workflows/safe-contracts/badge.svg?branch=development)](https://github.com/gnosis/safe-contracts/actions)
-[![Coverage Status](https://coveralls.io/repos/github/gnosis/safe-contracts/badge.svg?branch=feature/hardhat)](https://coveralls.io/github/gnosis/safe-contracts?branch=feature/hardhat)
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/safe-contracts/badge.svg?branch=development)](https://coveralls.io/github/gnosis/safe-contracts)
 
 Install
 -------
