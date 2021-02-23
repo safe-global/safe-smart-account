@@ -24,6 +24,14 @@ describe("OwnerManager", async () => {
             await expect(safe.addOwnerWithThreshold(user2.address, 1)).to.be.revertedWith("Method can only be called from this contract")
         })
 
+        it('can not set Safe itself', async () => {
+            const { safe } = await setupTests()
+
+            await expect(
+                executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [safe.address, 1], [user1])
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
         it('can not set sentinel', async () => {
             const { safe } = await setupTests()
 
@@ -200,6 +208,14 @@ describe("OwnerManager", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
             await expect(safe.swapOwner(AddressOne, user1.address, user2.address)).to.be.revertedWith("Method can only be called from this contract")
+        })
+
+        it('can not swap in Safe itseld', async () => {
+            const { safe } = await setupTests()
+
+            await expect(
+                executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, safe.address], [user1])
+            ).to.emit(safe, "ExecutionFailure")
         })
 
         it('can not swap in sentinel', async () => {
