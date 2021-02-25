@@ -34,7 +34,7 @@ contract OwnerManager is SelfAuthorized {
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            require(owner != address(0) && owner != SENTINEL_OWNERS && owner != address(this), "Invalid owner address provided");
+            require(owner != address(0) && owner != SENTINEL_OWNERS && owner != address(this) && currentOwner != owner, "Invalid owner address provided");
             // No duplicate owners allowed.
             require(owners[owner] == address(0), "Duplicate owner address provided");
             owners[currentOwner] = owner;

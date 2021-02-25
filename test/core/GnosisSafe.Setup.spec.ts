@@ -87,11 +87,11 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Invalid owner address provided")
         })
 
-        it.skip('should revert if same owner is included twice one after each other', async () => {
+        it('should revert if same owner is included twice one after each other', async () => {
             const { template } = await setupTests()
             await expect(
-                template.setup([user1.address, user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Domain Separator already set!")
+                template.setup([user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("Invalid owner address provided")
         })
 
         it('should revert if threshold is too high', async () => {
