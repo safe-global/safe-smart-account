@@ -24,6 +24,12 @@ export const getFactory = async () => {
     return Factory.attach(FactoryDeployment.address);
 }
 
+export const getSimulateTxAccessor = async () => {
+    const SimulateTxAccessorDeployment = await deployments.get("SimulateTxAccessor");
+    const SimulateTxAccessor = await hre.ethers.getContractFactory("SimulateTxAccessor");
+    return SimulateTxAccessor.attach(SimulateTxAccessorDeployment.address);
+}
+
 export const getMultiSend = async () => {
     const MultiSendDeployment = await deployments.get("MultiSend");
     const MultiSend = await hre.ethers.getContractFactory("MultiSend");
