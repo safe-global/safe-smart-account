@@ -38,7 +38,7 @@ describe("MultiSend", async () => {
             const source = `
             contract Test {
                 function killme() public {
-                    selfdestruct(msg.sender);
+                    selfdestruct(payable(msg.sender));
                 }
             }`
             const killLib = await deployContract(user1, source);
