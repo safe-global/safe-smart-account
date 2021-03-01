@@ -50,9 +50,9 @@ export const getSafeTemplate = async () => {
     return Safe.attach(template);
 }
 
-export const getSafeWithOwners = async (owners: string[], threhsold?: number, fallbackHandler?: string) => {
+export const getSafeWithOwners = async (owners: string[], threshold?: number, fallbackHandler?: string) => {
     const template = await getSafeTemplate()
-    await template.setup(owners, threhsold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero)
+    await template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero)
     return template
 }
 
