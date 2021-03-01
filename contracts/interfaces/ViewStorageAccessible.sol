@@ -9,6 +9,6 @@ interface ViewStorageAccessible {
      */
     function simulateDelegatecall(
         address targetContract,
-        bytes memory calldataPayload
+        bytes calldata calldataPayload
     ) external view returns (bytes memory);
 }
