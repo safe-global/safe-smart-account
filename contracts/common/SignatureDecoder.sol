@@ -2,7 +2,6 @@ pragma solidity >=0.5.0 <0.6.0;
 
 
 /// @title SignatureDecoder - Decodes signatures that a encoded as bytes
-/// @author Ricardo Guilherme Schmidt (Status Research & Development GmbH)
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SignatureDecoder {
 
