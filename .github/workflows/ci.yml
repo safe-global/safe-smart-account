@@ -33,4 +33,4 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn
       - run: yarn build
-      - run: yarn test benchmark/*.ts
+      - run: yarn benchmark
