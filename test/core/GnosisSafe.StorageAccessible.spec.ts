@@ -103,7 +103,7 @@ describe("StorageAccessible", async () => {
                 killLib.address,
                 killLib.interface.encodeFunctionData("estimate", [safe.address, "0x"])
             )
-            expect(BigNumber.from(estimate).toNumber()).to.be.lte(3000)
+            expect(BigNumber.from(estimate).toNumber()).to.be.lte(5000)
         })
 
         it('should return modified state', async () => {

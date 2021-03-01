@@ -97,7 +97,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.false
             expect(
                 simulation.estimate.toNumber()
-            ).to.be.lte(10000)
+            ).to.be.lte(20000)
         })
     })
 })
