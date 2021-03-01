@@ -1,8 +1,9 @@
-import { Contract, Wallet, utils, BigNumber } from "ethers"
+import { Contract, Wallet, utils, BigNumber, BigNumberish } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 
 export const EIP_DOMAIN = {
     EIP712Domain: [
+        { type: "uint256", name: "chainId" },
         { type: "address", name: "verifyingContract" }
     ]
 }
@@ -51,21 +52,22 @@ export interface SafeSignature {
     data: string
 }
 
-export const calculateSafeDomainHash = (safe: Contract): string => {
-    return utils._TypedDataEncoder.hashDomain({ verifyingContract: safe.address })
+export const calculateSafeDomainSeparator = (safe: Contract, chainId: BigNumberish): string => {
+    return utils._TypedDataEncoder.hashDomain({ verifyingContract: safe.address, chainId })
 }
 
-export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction): string => {
-    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address }, EIP712_SAFE_TX_TYPE, safeTx)
+export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction, chainId: BigNumberish): string => {
+    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address, chainId }, EIP712_SAFE_TX_TYPE, safeTx)
 }
 
-export const calculateSafeMessageHash = (safe: Contract, message: string): string => {
-    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address }, EIP712_SAFE_MESSAGE_TYPE, { message })
+export const calculateSafeMessageHash = (safe: Contract, message: string, chainId: BigNumberish): string => {
+    return utils._TypedDataEncoder.hash({ verifyingContract: safe.address, chainId }, EIP712_SAFE_MESSAGE_TYPE, { message })
 }
 
 export const safeApproveHash = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction, skipOnChainApproval?: boolean): Promise<SafeSignature> => {
     if (!skipOnChainApproval) {
-        const typedDataHash = utils.arrayify(calculateSafeTransactionHash(safe, safeTx))
+        const chainId = (await signer.provider.getNetwork()).chainId
+        const typedDataHash = utils.arrayify(calculateSafeTransactionHash(safe, safeTx, chainId))
         const signerSafe = safe.connect(signer)
         await signerSafe.approveHash(typedDataHash)
     }
@@ -75,10 +77,11 @@ export const safeApproveHash = async (signer: Wallet, safe: Contract, safeTx: Sa
     }
 }
 
-export const safeSignTypedData = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction): Promise<SafeSignature> => {
+export const safeSignTypedData = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction, chainId?: BigNumberish): Promise<SafeSignature> => {
+    const cid = chainId || (await signer.provider.getNetwork()).chainId
     return {
         signer: signer.address,
-        data: await signer._signTypedData({ verifyingContract: safe.address }, EIP712_SAFE_TX_TYPE, safeTx)
+        data: await signer._signTypedData({ verifyingContract: safe.address, chainId: cid }, EIP712_SAFE_TX_TYPE, safeTx)
     }
 }
 
@@ -90,8 +93,9 @@ export const signHash = async (signer: Wallet, hash: string): Promise<SafeSignat
     }
 }
 
-export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction): Promise<SafeSignature> => {
-    return signHash(signer, calculateSafeTransactionHash(safe, safeTx))
+export const safeSignMessage = async (signer: Wallet, safe: Contract, safeTx: SafeTransaction, chainId?: BigNumberish): Promise<SafeSignature> => {
+    const cid = chainId || (await signer.provider.getNetwork()).chainId
+    return signHash(signer, calculateSafeTransactionHash(safe, safeTx, cid))
 }
 
 export const buildSignatureBytes = (signatures: SafeSignature[]): string => {

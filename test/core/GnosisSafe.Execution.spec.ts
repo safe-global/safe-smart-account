@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
 import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../utils/execution";
 import { parseEther } from "@ethersproject/units";
+import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
@@ -52,7 +53,7 @@ describe("GnosisSafe", async () => {
 
         it('should emit event for successful call execution', async () => {
             const { safe, storageSetter } = await setupTests()
-            const txHash = calculateSafeTransactionHash(safe, buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.nonce()))
+            const txHash = calculateSafeTransactionHash(safe, buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.nonce()), await chainId())
             await expect(
                 executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1])
             ).to.emit(safe, "ExecutionSuccess").withArgs(txHash, 0)
@@ -90,7 +91,7 @@ describe("GnosisSafe", async () => {
 
         it('should emit event for failed delegatecall execution', async () => {
             const { safe, reverter } = await setupTests()
-            const txHash = calculateSafeTransactionHash(safe, buildContractCall(reverter, "revert", [], await safe.nonce(), true))
+            const txHash = calculateSafeTransactionHash(safe, buildContractCall(reverter, "revert", [], await safe.nonce(), true), await chainId())
             await expect(
                 executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true)
             ).to.emit(safe, "ExecutionFailure").withArgs(txHash, 0)
@@ -120,7 +121,7 @@ describe("GnosisSafe", async () => {
             ).to.emit(safe, "ExecutionSuccess")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
             const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[0].data, receipt.logs[0].topics)
-            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx))
+            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
             expect(successEvent.payment.toNumber()).to.be.lte(5000)
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
@@ -143,7 +144,7 @@ describe("GnosisSafe", async () => {
             ).to.emit(safe, "ExecutionFailure")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
             const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[0].data, receipt.logs[0].topics)
-            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx))
+            expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
             expect(successEvent.payment.toNumber()).to.be.lte(5000)
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))

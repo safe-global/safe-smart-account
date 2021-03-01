@@ -1,4 +1,4 @@
-import hre, { deployments } from "hardhat"
+import hre from "hardhat"
 
 export const Erc20 = [
     "function transfer(address _receiver, uint256 _value) public returns (bool success)",
@@ -13,3 +13,5 @@ export const Erc20Interface = new hre.ethers.utils.Interface(Erc20)
 export const encodeTransfer = (target: string, amount: string | number): string => {
     return Erc20Interface.encodeFunctionData("transfer", [target, amount])
 } 
+
+export const chainId = async () => { return (await hre.ethers.provider.getNetwork()).chainId }

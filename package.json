@@ -15,6 +15,7 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
+    "benchmark": "yarn test benchmark/*.ts",
     "deploy-all": "hardhat deploy-contracts --network",
     "deploy": "hardhat deploy --network",
     "lint": "yarn lint:sol && yarn lint:ts",

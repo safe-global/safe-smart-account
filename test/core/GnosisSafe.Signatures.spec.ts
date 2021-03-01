@@ -3,11 +3,12 @@ import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
-import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas } from "../utils/execution";
+import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas, calculateSafeDomainSeparator } from "../utils/execution";
+import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2, user3, user4] = waffle.provider.getWallets();
+    const [user1, user2, user3, user4] = waffle.provider.getWallets()
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -47,10 +48,18 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Invalid contract signature location: data not complete")
         })
 
+        it('should correctly calculate EIP-712 domain separator', async () => {
+            const { safe } = await setupTests()
+            const domainSeparator = calculateSafeDomainSeparator(safe, await chainId())
+            await expect(
+                await safe.domainSeparator()
+            ).to.be.eq(domainSeparator)
+        })
+
         it('should correctly calculate EIP-712 hash', async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
-            const typedDataHash = calculateSafeTransactionHash(safe, tx)
+            const typedDataHash = calculateSafeTransactionHash(safe, tx, await chainId())
             await expect(
                 await safe.getTransactionHash(
                     tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, tx.nonce
@@ -67,6 +76,15 @@ describe("GnosisSafe", async () => {
                     executeTx(safe, tx, [await safeSignTypedData(user1, safe, tx)])
                 )
             ).to.emit(safe, "ExecutionSuccess")
+        })
+
+        it('should not be able to use different chainId for signing', async () => {
+            await setupTests()
+            const safe = await getSafeWithOwners([user1.address])
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
+            await expect(
+                executeTx(safe, tx, [await safeSignTypedData(user1, safe, tx, 1)])
+            ).to.be.revertedWith("Invalid owner provided")
         })
 
         it('should be able to use Signed Ethereum Messages for signature generation', async () => {
@@ -103,7 +121,7 @@ describe("GnosisSafe", async () => {
         it('approving should only be allowed for owners', async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
-            const txHash = calculateSafeTransactionHash(safe, tx)
+            const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
             const signerSafe = safe.connect(user2)
             await expect(
                 signerSafe.approveHash(txHash)
@@ -113,7 +131,7 @@ describe("GnosisSafe", async () => {
         it('approving should emit event', async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
-            const txHash = calculateSafeTransactionHash(safe, tx)
+            const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
             await expect(
                 safe.approveHash(txHash)
             ).emit(safe, "ApproveHash").withArgs(txHash, user1.address)

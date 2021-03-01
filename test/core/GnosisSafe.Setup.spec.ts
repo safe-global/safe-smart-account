@@ -5,9 +5,9 @@ import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { parseEther } from "@ethersproject/units";
 import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
-import { calculateSafeDomainHash } from "../utils/execution";
+import { calculateSafeDomainSeparator } from "../utils/execution";
 import { AddressOne } from "../utils/constants";
-import { encodeTransfer } from "../utils/encoding";
+import { chainId, encodeTransfer } from "../utils/encoding";
 
 
 describe("GnosisSafe", async () => {
@@ -46,7 +46,7 @@ describe("GnosisSafe", async () => {
         it('should set domain hash', async () => {
             const { template } = await setupTests()
             await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainHash(template))
+            await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(template, await chainId()))
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
             await expect(await template.getThreshold()).to.be.deep.eq(BigNumber.from(2))
         })
@@ -56,7 +56,7 @@ describe("GnosisSafe", async () => {
             await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Domain Separator already set!")
+            ).to.be.revertedWith("Owners have already been setup")
         })
 
         it('should revert if same owner is included twice', async () => {
@@ -130,7 +130,7 @@ describe("GnosisSafe", async () => {
             const testIntializer = await deployContract(user1, source);
             const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"])
             await template.setup([user1.address, user2.address, user3.address], 2, testIntializer.address, initData, AddressOne, AddressZero, 0, AddressZero)
-            await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainHash(template))
+            await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(template, await chainId()))
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
             await expect(await template.getThreshold()).to.be.deep.eq(BigNumber.from(2))
 
