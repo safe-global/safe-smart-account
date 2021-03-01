@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { utils } from "ethers"
 import { getSafeWithOwners } from "../utils/setup";
 import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../utils/execution";
+import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2, user3, user4] = waffle.provider.getWallets();
+    const [user1, user2] = waffle.provider.getWallets()
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -21,7 +21,7 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             expect(
                 await safe.getMessageHash("0xdead")
-            ).to.be.eq(calculateSafeMessageHash(safe, "0xdead"))
+            ).to.be.eq(calculateSafeMessageHash(safe, "0xdead", await chainId()))
         })
     })
 
@@ -36,7 +36,7 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "signMessage", ["0xbaddad"], [user1, user2])
-            ).to.emit(safe, "SignMsg").withArgs(calculateSafeMessageHash(safe, "0xbaddad"))
+            ).to.emit(safe, "SignMsg").withArgs(calculateSafeMessageHash(safe, "0xbaddad", await chainId()))
         })
     })
 
@@ -67,9 +67,9 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             const sig1 = {
                 signer: user1.address,
-                data: await user1._signTypedData({ verifyingContract: safe.address }, EIP712_SAFE_MESSAGE_TYPE, { message: "0xbaddad" })
+                data: await user1._signTypedData({ verifyingContract: safe.address, chainId: await chainId() }, EIP712_SAFE_MESSAGE_TYPE, { message: "0xbaddad" })
             }
-            const sig2 = await signHash(user2, calculateSafeMessageHash(safe, "0xbaddad"))
+            const sig2 = await signHash(user2, calculateSafeMessageHash(safe, "0xbaddad", await chainId()))
             expect(await safe.callStatic.isValidSignature("0xbaddad", buildSignatureBytes([sig1, sig2]))).to.be.eq("0x20c13b0b")
         })
     })

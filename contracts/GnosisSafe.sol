@@ -20,14 +20,14 @@ contract GnosisSafe
     string public constant NAME = "Gnosis Safe";
     string public constant VERSION = "1.2.0";
 
-    //keccak256(
-    //    "EIP712Domain(address verifyingContract)"
-    //);
-    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
+    // keccak256(
+    //     "EIP712Domain(uint256 chainId,address verifyingContract)"
+    // );
+    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218;
 
-    //keccak256(
-    //    "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
-    //);
+    // keccak256(
+    //     "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+    // );
     bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
     //keccak256(
@@ -50,7 +50,7 @@ contract GnosisSafe
     );
 
     uint256 public nonce;
-    bytes32 public domainSeparator;
+    bytes32 private _deprecatedDomainSeparator;
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
     mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
@@ -85,8 +85,7 @@ contract GnosisSafe
     )
         external
     {
-        require(domainSeparator == 0, "Domain Separator already set!");
-        domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
+        // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
         setupOwners(_owners, _threshold);
         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
         // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
@@ -335,6 +334,20 @@ contract GnosisSafe
         }
         return EIP1271_MAGIC_VALUE;
     }
+    
+    /// @dev Returns the chain id used by this contract.
+    function getChainId() public view returns (uint256) {
+        uint256 id;
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
+
+    function domainSeparator() public view returns (bytes32) {
+        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
+    }
 
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param message Message that should be hashed
@@ -350,7 +363,7 @@ contract GnosisSafe
             abi.encode(SAFE_MSG_TYPEHASH, keccak256(message))
         );
         return keccak256(
-            abi.encodePacked(byte(0x19), byte(0x01), domainSeparator, safeMessageHash)
+            abi.encodePacked(byte(0x19), byte(0x01), domainSeparator(), safeMessageHash)
         );
     }
 
@@ -385,7 +398,7 @@ contract GnosisSafe
         bytes32 safeTxHash = keccak256(
             abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
-        return abi.encodePacked(byte(0x19), byte(0x01), domainSeparator, safeTxHash);
+        return abi.encodePacked(byte(0x19), byte(0x01), domainSeparator(), safeTxHash);
     }
 
     /// @dev Returns hash to be signed by owners.
