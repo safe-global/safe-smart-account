@@ -262,10 +262,7 @@ contract GnosisSafe
     }
 
     /// @dev Allows to estimate a Safe transaction.
-    ///      This method is only meant for estimation purpose, therefore two different protection mechanism against execution in a transaction have been made:
-    ///      1.) The method can only be called from the safe itself
-    ///      2.) The response is returned with a revert
-    ///      When estimating set `from` to the address of the safe.
+    ///      This method is only meant for estimation purpose, therefore the call will always revert and encode the result in the revert data.
     ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransaction`
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
@@ -274,7 +271,6 @@ contract GnosisSafe
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
     function requiredTxGas(address to, uint256 value, bytes calldata data, Enum.Operation operation)
         external
-        authorized
         returns (uint256)
     {
         uint256 startGas = gasleft();
