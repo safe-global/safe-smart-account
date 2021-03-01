@@ -31,6 +31,13 @@ describe("StorageAccessible", async () => {
                     return startGas - gasleft();
                 }
 
+                address singleton;
+                uint256 public value = 0;
+                function updateAndGet() public returns (uint256) {
+                    value++;
+                    return value;
+                }
+
                 function trever() public returns (address handler) {
                     revert("Why are you doing this?");
                 }
@@ -97,6 +104,16 @@ describe("StorageAccessible", async () => {
                 killLib.interface.encodeFunctionData("estimate", [safe.address, "0x"])
             )
             expect(BigNumber.from(estimate).toNumber()).to.be.lte(3000)
+        })
+
+        it('should return modified state', async () => {
+            const { safe, killLib } = await setupTests()
+            const value = await safe.callStatic.simulateDelegatecall(
+                killLib.address,
+                killLib.interface.encodeFunctionData("updateAndGet", [])
+            )
+            expect(BigNumber.from(value).toNumber()).to.be.eq(1)
+            expect((await killLib.value()).toNumber()).to.be.eq(0)
         })
     })
 
