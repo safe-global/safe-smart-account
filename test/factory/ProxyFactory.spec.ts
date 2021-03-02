@@ -14,7 +14,7 @@ describe("ProxyFactory", async () => {
         address _singleton;
         address public creator;
         bool public isInitialized;
-        constructor() public payable {
+        constructor() payable {
             creator = msg.sender;
         }
 

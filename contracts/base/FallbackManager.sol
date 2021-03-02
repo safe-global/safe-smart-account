@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.6.0;
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.8.0 <0.9.0;
 
 import "../common/SelfAuthorized.sol";
 
@@ -28,14 +29,9 @@ contract FallbackManager is SelfAuthorized {
         internalSetFallbackHandler(handler);
     }
 
-    function ()
+    fallback()
         external
-        payable
     {
-        // Only calls without value and with data will be forwarded
-        if (msg.value > 0 || msg.data.length == 0) {
-            return;
-        }
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         address handler;
         // solium-disable-next-line security/no-inline-assembly
@@ -47,7 +43,7 @@ contract FallbackManager is SelfAuthorized {
             // solium-disable-next-line security/no-inline-assembly
             assembly {
                 calldatacopy(0, 0, calldatasize())
-                let success := call(gas, handler, 0, 0, calldatasize(), 0, 0)
+                let success := call(gas(), handler, 0, 0, calldatasize(), 0, 0)
                 returndatacopy(0, 0, returndatasize())
                 if eq(success, 0) { revert(0, returndatasize()) }
                 return(0, returndatasize())

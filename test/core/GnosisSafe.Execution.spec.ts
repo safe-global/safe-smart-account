@@ -157,7 +157,7 @@ describe("GnosisSafe", async () => {
         
                 uint256[] public data;
         
-                constructor() public payable {}
+                constructor() payable {}
         
                 function nested(uint256 level, uint256 count) external {
                     if (level == 0) {
