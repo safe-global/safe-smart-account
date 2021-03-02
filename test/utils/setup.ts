@@ -2,7 +2,6 @@ import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
-import { AddressOne } from "./constants";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");

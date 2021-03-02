@@ -47,7 +47,11 @@ contract FallbackManager is SelfAuthorized {
             // solium-disable-next-line security/no-inline-assembly
             assembly {
                 calldatacopy(0, 0, calldatasize())
-                let success := call(gas, handler, 0, 0, calldatasize(), 0, 0)
+                // The msg.sender address is shifted to the left by 12 bytes to remove the padding
+                // Then the address without padding is stored right after the calldata
+                mstore(calldatasize(), shl(96, caller()))
+                // Add 20 bytes for the address appended add the end
+                let success := call(gas, handler, 0, 0, add(calldatasize(), 20), 0, 0)
                 returndatacopy(0, 0, returndatasize())
                 if eq(success, 0) { revert(0, returndatasize()) }
                 return(0, returndatasize())
