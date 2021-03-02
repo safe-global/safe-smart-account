@@ -56,6 +56,10 @@ export const calculateSafeDomainSeparator = (safe: Contract, chainId: BigNumberi
     return utils._TypedDataEncoder.hashDomain({ verifyingContract: safe.address, chainId })
 }
 
+export const preimageSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction, chainId: BigNumberish): string => {
+    return utils._TypedDataEncoder.encode({ verifyingContract: safe.address, chainId }, EIP712_SAFE_TX_TYPE, safeTx)
+}
+
 export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransaction, chainId: BigNumberish): string => {
     return utils._TypedDataEncoder.hash({ verifyingContract: safe.address, chainId }, EIP712_SAFE_TX_TYPE, safeTx)
 }
