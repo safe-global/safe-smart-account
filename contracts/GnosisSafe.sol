@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.7.0 <0.8.0;
 
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
@@ -115,16 +115,16 @@ contract GnosisSafe
     function execTransaction(
         address to,
         uint256 value,
-        bytes memory data,
+        bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures
+        bytes calldata signatures
     )
-        public
+        external
         payable
         returns (bool success)
     {
@@ -150,7 +150,7 @@ contract GnosisSafe
             // If the gasPrice is 0 we assume that nearly all available gas can be used (it is always more than safeTxGas)
             // We only substract 2500 (compared to the 3000 before) to ensure that the amount passed is still higher than safeTxGas
             success = execute(to, value, data, operation, gasPrice == 0 ? (gasleft() - 2500) : safeTxGas);
-            gasUsed = gasUsed - gasleft();
+            gasUsed = gasUsed.sub(gasleft());
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;
             if (gasPrice > 0) {
@@ -175,11 +175,11 @@ contract GnosisSafe
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
             // For ETH we will only adjust the gas price to not be higher than the actual used gas price
-            payment = (gasUsed + baseGas) * (gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
+            payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
             // solium-disable-next-line security/no-send
             require(receiver.send(payment), "Could not pay gas costs with ether");
         } else {
-            payment = (gasUsed + baseGas) * gasPrice;
+            payment = gasUsed.add(baseGas).mul(gasPrice);
             require(transferToken(gasToken, receiver, payment), "Could not pay gas costs with token");
         }
     }
@@ -199,7 +199,7 @@ contract GnosisSafe
         // Check that a threshold is set
         require(_threshold > 0, "Threshold needs to be defined!");
         // Check that the provided signature data is not too short
-        require(signatures.length >= _threshold * 65, "Signatures data too short");
+        require(signatures.length >= _threshold.mul(65), "Signatures data too short");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -217,10 +217,10 @@ contract GnosisSafe
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= _threshold * 65, "Invalid contract signature location: inside static part");
+                require(uint256(s) >= _threshold.mul(65), "Invalid contract signature location: inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
-                require(uint256(s) + 32 <= signatures.length, "Invalid contract signature location: length not present");
+                require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
 
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
@@ -228,7 +228,7 @@ contract GnosisSafe
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
-                require(uint256(s) + 32 + contractSignatureLen <= signatures.length, "Invalid contract signature location: data not complete");
+                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "Invalid contract signature location: data not complete");
 
                 // Check signature
                 bytes memory contractSignature;
