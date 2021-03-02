@@ -33,7 +33,7 @@ describe("GnosisSafe", async () => {
         }
     })
 
-    describe.only("requiredTxGas", async () => {
+    describe("requiredTxGas", async () => {
 
         it('should revert without reason if tx fails', async () => {
             const { safe, reverter } = await setupTests()
