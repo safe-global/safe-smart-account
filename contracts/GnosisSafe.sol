@@ -5,6 +5,7 @@ import "./base/FallbackManager.sol";
 import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
+import "./common/StorageAccessible.sol";
 import "./interfaces/ISignatureValidator.sol";
 import "./external/GnosisSafeMath.sol";
 
@@ -13,7 +14,7 @@ import "./external/GnosisSafeMath.sol";
 /// @author Richard Meissner - <richard@gnosis.io>
 /// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
 contract GnosisSafe
-    is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager {
+    is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
 
     using GnosisSafeMath for uint256;
 
@@ -265,6 +266,7 @@ contract GnosisSafe
     /// @param data Data payload of Safe transaction.
     /// @param operation Operation type of Safe transaction.
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
+    /// @notice Deprecated in favor of common/StorageAccessible.sol and will be removed in next version.
     function requiredTxGas(address to, uint256 value, bytes calldata data, Enum.Operation operation)
         external
         returns (uint256)

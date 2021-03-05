@@ -23,6 +23,12 @@ export const getFactory = async () => {
     return Factory.attach(FactoryDeployment.address);
 }
 
+export const getSimulateTxAccessor = async () => {
+    const SimulateTxAccessorDeployment = await deployments.get("SimulateTxAccessor");
+    const SimulateTxAccessor = await hre.ethers.getContractFactory("SimulateTxAccessor");
+    return SimulateTxAccessor.attach(SimulateTxAccessorDeployment.address);
+}
+
 export const getMultiSend = async () => {
     const MultiSendDeployment = await deployments.get("MultiSend");
     const MultiSend = await hre.ethers.getContractFactory("MultiSend");
@@ -49,9 +55,9 @@ export const getSafeTemplate = async () => {
     return Safe.attach(template);
 }
 
-export const getSafeWithOwners = async (owners: string[], threhsold?: number, fallbackHandler?: string) => {
+export const getSafeWithOwners = async (owners: string[], threshold?: number, fallbackHandler?: string) => {
     const template = await getSafeTemplate()
-    await template.setup(owners, threhsold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero)
+    await template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero)
     return template
 }
 

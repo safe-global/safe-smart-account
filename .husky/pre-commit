@@ -1,0 +1,21 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Redirect output to stderr.
+exec 1>&2
+ 
+# prevent it.only or describe.only commited
+if [ "$allowonlytests" != "true" ] &&
+    test $(git diff --cached | grep -E "\b(it|describe).only\("  | wc -l) != 0
+then
+    cat <<\EOF
+Error: Attempt to add it.only or describe.only - which may disable all other tests
+ 
+If you know what you are doing you can disable this check using:
+ 
+    git config hooks.allowonlytests true
+EOF
+    exit 1
+fi
+ 
+exit 0
