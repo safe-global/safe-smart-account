@@ -28,10 +28,10 @@ jobs:
         include:
         - solidity: "0.8.2"
           settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":10000}}'
+    env:
+      SOLIDITY_VERSION: ${{ matrix.solidity }}
+      SOLIDITY_SETTINGS: ${{ matrix.settings }}
     steps:
-      - env:
-          SOLIDITY_VERSION: ${{ matrix.solidity }}
-          SOLIDITY_SETTINGS: ${{ matrix.settings }}
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
