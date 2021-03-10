@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.6.0;
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.7.0 <0.8.0;
 
 
 /// @title SecuredTokenTransfer - Secure token transfer
@@ -20,7 +21,7 @@ contract SecuredTokenTransfer {
         bytes memory data = abi.encodeWithSignature("transfer(address,uint256)", receiver, amount);
         // solium-disable-next-line security/no-inline-assembly
         assembly {
-            let success := call(sub(gas, 10000), token, 0, add(data, 0x20), mload(data), 0, 0)
+            let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)
             let ptr := mload(0x40)
             mstore(0x40, add(ptr, returndatasize()))
             returndatacopy(ptr, 0, returndatasize())

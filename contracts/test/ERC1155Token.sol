@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.6.0;
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.7.0 <0.8.0;
 
 import "../interfaces/ERC1155TokenReceiver.sol";
 import "../external/GnosisSafeMath.sol";
@@ -49,8 +50,8 @@ contract ERC1155Token {
             "ERC1155: need operator approval for 3rd party transfers."
         );
 
-        _balances[id][from] = _balances[id][from].sub(value);
-        _balances[id][to] = value.add(_balances[id][to]);
+        _balances[id][from] = _balances[id][from] - value;
+        _balances[id][to] = value + _balances[id][to];
 
         _doSafeTransferAcceptanceCheck(msg.sender, from, to, id, value, data);
     }
@@ -65,7 +66,7 @@ contract ERC1155Token {
     function mint(address to, uint256 id, uint256 value, bytes calldata data) external {
         require(to != address(0), "ERC1155: mint to the zero address");
 
-        _balances[id][to] = value.add(_balances[id][to]);
+        _balances[id][to] = value + _balances[id][to];
 
         _doSafeTransferAcceptanceCheck(msg.sender, address(0), to, id, value, data);
     }

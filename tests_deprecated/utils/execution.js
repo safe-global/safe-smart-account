@@ -161,7 +161,7 @@ let executeTransaction = async function(lw, safe, subject, accounts, to, value, 
 let deployToken = async function(deployer) {
     return deployContract(deployer, `contract TestToken {
         mapping (address => uint) public balances;
-        constructor() public {
+        constructor() {
             balances[msg.sender] = 1000000000000;
         }
 

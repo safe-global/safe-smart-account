@@ -1,7 +1,10 @@
-pragma solidity >=0.5.0 <0.6.0;
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.7.0 <0.8.0;
+
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
+import "./common/EtherPaymentFallback.sol";
 import "./common/MasterCopy.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
@@ -12,9 +15,8 @@ import "./external/GnosisSafeMath.sol";
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-/// @author Ricardo Guilherme Schmidt - (Status Research & Development GmbH) - Gas Token Payment
 contract GnosisSafe
-    is MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
+    is EtherPaymentFallback, MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
 
     using GnosisSafeMath for uint256;
 
@@ -58,7 +60,7 @@ contract GnosisSafe
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
     // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
-    constructor() public {
+    constructor() {
         // By setting the threshold it is not possible to call setup anymore,
         // so we create a Safe with 0 owners and threshold 1.
         // This is an unusable Safe, perfect for the mastercopy
@@ -171,7 +173,7 @@ contract GnosisSafe
         returns (uint256 payment)
     {
         // solium-disable-next-line security/no-tx-origin
-        address payable receiver = refundReceiver == address(0) ? tx.origin : refundReceiver;
+        address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
             // For ETH we will only adjust the gas price to not be higher than the actual used gas price
             payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
@@ -211,7 +213,7 @@ contract GnosisSafe
             // If v is 0 then it is a contract signature
             if (v == 0) {
                 // When handling contract signatures the address of the contract is encoded into r
-                currentOwner = address(uint256(r));
+                currentOwner = address(uint160(uint256(r)));
 
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
@@ -240,7 +242,7 @@ contract GnosisSafe
             // If v is 1 then it is an approved hash
             } else if (v == 1) {
                 // When handling approved hashes the address of the approver is encoded into r
-                currentOwner = address(uint256(r));
+                currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "Hash has not been approved");
             } else if (v > 30) {
@@ -357,7 +359,7 @@ contract GnosisSafe
             abi.encode(SAFE_MSG_TYPEHASH, keccak256(message))
         );
         return keccak256(
-            abi.encodePacked(byte(0x19), byte(0x01), domainSeparator(), safeMessageHash)
+            abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeMessageHash)
         );
     }
 
@@ -392,7 +394,7 @@ contract GnosisSafe
         bytes32 safeTxHash = keccak256(
             abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce)
         );
-        return abi.encodePacked(byte(0x19), byte(0x01), domainSeparator(), safeTxHash);
+        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
     }
 
     /// @dev Returns hash to be signed by owners.

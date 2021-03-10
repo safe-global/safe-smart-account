@@ -14,7 +14,7 @@ describe("ProxyFactory", async () => {
         address _singleton;
         address public creator;
         bool public isInitialized;
-        constructor() public payable {
+        constructor() payable {
             creator = msg.sender;
         }
 
@@ -52,7 +52,7 @@ describe("ProxyFactory", async () => {
             const { factory } = await setupTests()
             await expect(
                 factory.createProxy(AddressZero, "0x")
-            ).to.be.revertedWith("Invalid master copy address provided")
+            ).to.be.revertedWith("Invalid singleton address provided")
         })
 
         it('should revert with invalid initializer', async () => {

@@ -1,4 +1,5 @@
-pragma solidity >=0.5.0 <0.6.0;
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.7.0 <0.8.0;
 
 import "../interfaces/ERC1155TokenReceiver.sol";
 import "../interfaces/ERC721TokenReceiver.sol";
@@ -12,6 +13,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     string public constant VERSION = "1.0.0";
 
     function onERC1155Received(address, address, uint256, uint256, bytes calldata)
+        override
         external
         returns(bytes4)
     {
@@ -19,6 +21,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     }
 
     function onERC1155BatchReceived(address, address, uint256[] calldata, uint256[] calldata, bytes calldata)
+        override
         external
         returns(bytes4)
     {
@@ -26,6 +29,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     }
 
     function onERC721Received(address, address, uint256, bytes calldata)
+        override
         external
         returns(bytes4)
     {
@@ -33,7 +37,10 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     }
 
     // solium-disable-next-line no-empty-blocks
-    function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) external {
+    function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) 
+        override
+        external 
+    {
         // We implement this for completeness, doesn't really have any value
     }
 

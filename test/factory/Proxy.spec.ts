@@ -11,7 +11,7 @@ describe("Proxy", async () => {
             const Proxy = await hre.ethers.getContractFactory("GnosisSafeProxy");
             await expect(
                 Proxy.deploy(AddressZero)
-            ).to.be.revertedWith("Invalid master copy address provided")
+            ).to.be.revertedWith("Invalid singleton address provided")
         })
 
     })

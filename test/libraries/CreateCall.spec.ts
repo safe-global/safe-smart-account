@@ -10,7 +10,7 @@ describe("CreateCall", async () => {
     const CONTRACT_SOURCE = `
     contract Test {
         address public creator;
-        constructor() public payable {
+        constructor() payable {
             creator = msg.sender;
         }
 
