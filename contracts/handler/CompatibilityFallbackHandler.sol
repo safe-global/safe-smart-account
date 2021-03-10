@@ -9,6 +9,7 @@ import "../GnosisSafe.sol";
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
+    address internal constant SENTINEL_MODULES = address(0x1);
     bytes4 internal constant UPDATED_MAGIC_VALUE = 0x1626ba7e;
 
     /**
@@ -52,5 +53,18 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         ISignatureValidator validator = ISignatureValidator(msg.sender);
         bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
         return (value == EIP1271_MAGIC_VALUE) ? UPDATED_MAGIC_VALUE : bytes4(0);
+    }
+    
+    /// @dev Returns array of first 10 modules.
+    /// @return Array of modules.
+    function getModules()
+        external
+        view
+        returns (address[] memory)
+    {
+        // Caller should be a Safe
+        GnosisSafe safe = GnosisSafe(msg.sender);
+        (address[] memory array,) = safe.getModulesPaginated(SENTINEL_MODULES, 10);
+        return array;
     }
 }

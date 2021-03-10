@@ -116,24 +116,13 @@ contract ModuleManager is SelfAuthorized, Executor {
         return SENTINEL_MODULES != module && modules[module] != address(0);
     }
 
-    /// @dev Returns array of first 10 modules.
-    /// @return Array of modules.
-    function getModules()
-        public
-        view
-        returns (address[] memory)
-    {
-        (address[] memory array,) = getModulesPaginated(SENTINEL_MODULES, 10);
-        return array;
-    }
-
     /// @dev Returns array of modules.
     /// @param start Start of the page.
     /// @param pageSize Maximum number of modules that should be returned.
     /// @return array Array of modules.
     /// @return next Start of the next page.
     function getModulesPaginated(address start, uint256 pageSize)
-        public
+        external
         view
         returns (address[] memory array, address next)
     {

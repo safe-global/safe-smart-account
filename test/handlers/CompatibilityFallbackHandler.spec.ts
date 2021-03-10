@@ -126,4 +126,23 @@ describe("CompatibilityFallbackHandler", async () => {
             expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, buildSignatureBytes([sig1, sig2]))).to.be.eq("0x1626ba7e")
         })
     })
+
+    
+
+    describe("getModules", async () => {
+        it('returns enabled modules', async () => {
+            const { safe, validator } = await setupTests()
+            await expect(
+                executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1, user2])
+            ).to.emit(safe, "EnabledModule").withArgs(user2.address)
+
+            await expect(
+                await safe.isModuleEnabled(user2.address)
+            ).to.be.true
+
+            await expect(
+                await validator.getModules()
+            ).to.be.deep.equal([user2.address])
+        })
+    })
 })
