@@ -26,7 +26,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != address(0))
             // Setup has to complete successfully or transaction fails.
-            require(executeDelegateCall(to, data, gasleft()), "Could not finish initialization");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "Could not finish initialization");
     }
 
     /// @dev Allows to add a module to the whitelist.
