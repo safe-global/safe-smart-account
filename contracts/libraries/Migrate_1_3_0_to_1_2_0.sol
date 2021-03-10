@@ -29,8 +29,8 @@ contract Migration is SelfAuthorized {
     /// @dev Allows to migrate the contract. This can only be done via a Safe transaction.
     function migrate()
         public
+        authorized
     {
-        requireSelfCall();
         // Master copy address cannot be null.
         singleton = safe120Singleton;
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));

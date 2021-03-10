@@ -301,8 +301,8 @@ contract GnosisSafe
     */
     function signMessage(bytes calldata _data)
         external
+        authorized
     {
-        requireSelfCall();
         bytes32 msgHash = getMessageHash(_data);
         signedMessages[msgHash] = 1;
         emit SignMsg(msgHash);
