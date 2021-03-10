@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { deployments, waffle } from "hardhat";
+import { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
@@ -54,27 +54,27 @@ describe("CompatibilityFallbackHandler", async () => {
         })
     })
     
-    describe("isValidsignature", async () => {
+    describe("isValidSignature(bytes,bytes)", async () => {
 
         it('should revert if called directly', async () => {
             const { handler } = await setupTests()
-            await expect(handler.callStatic.isValidSignature("0xbaddad", "0x")).to.be.revertedWith("function call to a non-contract account")
+            await expect(handler.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.revertedWith("function call to a non-contract account")
         })
 
         it('should revert if message was not signed', async () => {
             const { validator } = await setupTests()
-            await expect(validator.callStatic.isValidSignature("0xbaddad", "0x")).to.be.revertedWith("Hash not approved")
+            await expect(validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.revertedWith("Hash not approved")
         })
 
         it('should revert if signature is not valid', async () => {
             const { validator } = await setupTests()
-            await expect(validator.callStatic.isValidSignature("0xbaddad", "0xdeaddeaddeaddead")).to.be.reverted
+            await expect(validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0xdeaddeaddeaddead")).to.be.reverted
         })
 
         it('should return magic value if message was signed', async () => {
             const { safe, validator } = await setupTests()
             await executeContractCallWithSigners(safe, safe, "signMessage", ["0xbaddad"], [user1, user2])
-            expect(await validator.callStatic.isValidSignature("0xbaddad", "0x")).to.be.eq("0x20c13b0b")
+            expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.eq("0x20c13b0b")
         })
 
         it('should return magic value if enough owners signed', async () => {
@@ -84,7 +84,46 @@ describe("CompatibilityFallbackHandler", async () => {
                 data: await user1._signTypedData({ verifyingContract: validator.address, chainId: await chainId() }, EIP712_SAFE_MESSAGE_TYPE, { message: "0xbaddad" })
             }
             const sig2 = await signHash(user2, calculateSafeMessageHash(validator, "0xbaddad", await chainId()))
-            expect(await validator.callStatic.isValidSignature("0xbaddad", buildSignatureBytes([sig1, sig2]))).to.be.eq("0x20c13b0b")
+            expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", buildSignatureBytes([sig1, sig2]))).to.be.eq("0x20c13b0b")
+        })
+    })
+    
+    describe("isValidSignature(bytes32,bytes)", async () => {
+
+        it('should revert if called directly', async () => {
+            const { handler } = await setupTests()
+            const dataHash = ethers.utils.keccak256("0xbaddad")
+            await expect(handler.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.revertedWith("function call to a non-contract account")
+        })
+
+        it('should revert if message was not signed', async () => {
+            const { validator } = await setupTests()
+            const dataHash = ethers.utils.keccak256("0xbaddad")
+            await expect(validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.revertedWith("Hash not approved")
+        })
+
+        it('should revert if signature is not valid', async () => {
+            const { validator } = await setupTests()
+            const dataHash = ethers.utils.keccak256("0xbaddad")
+            await expect(validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0xdeaddeaddeaddead")).to.be.reverted
+        })
+
+        it('should return magic value if message was signed', async () => {
+            const { safe, validator } = await setupTests()
+            const dataHash = ethers.utils.keccak256("0xbaddad")
+            await executeContractCallWithSigners(safe, safe, "signMessage", [dataHash], [user1, user2])
+            expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.eq("0x1626ba7e")
+        })
+
+        it('should return magic value if enough owners signed', async () => {
+            const { validator } = await setupTests()
+            const dataHash = ethers.utils.keccak256("0xbaddad")
+            const sig1 = {
+                signer: user1.address,
+                data: await user1._signTypedData({ verifyingContract: validator.address, chainId: await chainId() }, EIP712_SAFE_MESSAGE_TYPE, { message: dataHash })
+            }
+            const sig2 = await signHash(user2, calculateSafeMessageHash(validator,dataHash, await chainId()))
+            expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, buildSignatureBytes([sig1, sig2]))).to.be.eq("0x1626ba7e")
         })
     })
 })
