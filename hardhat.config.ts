@@ -16,7 +16,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK } = process.env;
+const { INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -40,6 +40,9 @@ import "./src/tasks/local_verify"
 import "./src/tasks/deploy_contracts"
 import "./src/tasks/show_codesize"
 
+const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6"
+const soliditySettings = SOLIDITY_SETTINGS && JSON.parse(SOLIDITY_SETTINGS)
+
 export default {
   paths: {
     artifacts: "build/artifacts",
@@ -49,7 +52,7 @@ export default {
   },
   solidity: {
     compilers: [
-      { version: "0.7.6" },
+      { version: primarySolidityVersion, settings: soliditySettings },
       { version: "0.6.12" },
       { version: "0.5.17" },
     ]
