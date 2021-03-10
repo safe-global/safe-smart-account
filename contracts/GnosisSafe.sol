@@ -5,7 +5,7 @@ import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
 import "./common/EtherPaymentFallback.sol";
-import "./common/MasterCopy.sol";
+import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./common/StorageAccessible.sol";
@@ -16,7 +16,7 @@ import "./external/GnosisSafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract GnosisSafe
-    is EtherPaymentFallback, MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
+    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
 
     using GnosisSafeMath for uint256;
 
@@ -63,7 +63,7 @@ contract GnosisSafe
     constructor() {
         // By setting the threshold it is not possible to call setup anymore,
         // so we create a Safe with 0 owners and threshold 1.
-        // This is an unusable Safe, perfect for the mastercopy
+        // This is an unusable Safe, perfect for the singleton
         threshold = 1;
     }
 
