@@ -1,6 +1,8 @@
 module.exports = {
     skipFiles: [
         'test/Token.sol',
+        'test/ERC20Token.sol',
+        'test/TestHandler.sol',
         'test/ERC1155Token.sol',
     ],
     mocha: {
