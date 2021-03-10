@@ -13,7 +13,7 @@ task("codesize", "Displays the codesize of the contracts")
         for (const contract of contracts) {
             const artifact = await hre.artifacts.readArtifact(contract)
             if (taskArgs.contractname && taskArgs.contractname !== artifact.contractName) continue
-            console.log(artifact.contractName, Math.max(0, (artifact.deployedBytecode.length - 2) / 2), "bytes")
+            console.log(artifact.contractName, Math.max(0, (artifact.deployedBytecode.length - 2) / 2), "bytes (limit is 24576)")
         }
     });    
 
