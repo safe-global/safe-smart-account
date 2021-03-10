@@ -41,7 +41,7 @@ import "./src/tasks/deploy_contracts"
 import "./src/tasks/show_codesize"
 
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6"
-const soliditySettings = SOLIDITY_SETTINGS && JSON.parse(SOLIDITY_SETTINGS)
+const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined
 
 export default {
   paths: {
