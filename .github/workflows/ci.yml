@@ -23,6 +23,7 @@ jobs:
   benchmarks:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         solidity: ["0.7.6", "0.8.2"]
         include:
