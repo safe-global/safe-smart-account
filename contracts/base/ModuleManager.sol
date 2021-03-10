@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
@@ -35,8 +35,8 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param module Module to be whitelisted.
     function enableModule(address module)
         public
-        authorized
-    {
+    {   
+        requireSelfCall();
         // Module address cannot be null or sentinel.
         require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
         // Module cannot be added twice.
@@ -53,8 +53,8 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param module Module to be removed.
     function disableModule(address prevModule, address module)
         public
-        authorized
     {
+        requireSelfCall();
         // Validate module address and check that it corresponds to module index.
         require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
         require(modules[prevModule] == module, "Invalid prevModule, module pair provided");

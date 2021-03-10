@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
@@ -116,16 +116,16 @@ contract GnosisSafe
     function execTransaction(
         address to,
         uint256 value,
-        bytes calldata data,
+        bytes memory data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes calldata signatures
+        bytes memory signatures
     )
-        external
+        public
         payable
         returns (bool success)
     {
@@ -301,8 +301,8 @@ contract GnosisSafe
     */
     function signMessage(bytes calldata _data)
         external
-        authorized
     {
+        requireSelfCall();
         bytes32 msgHash = getMessageHash(_data);
         signedMessages[msgHash] = 1;
         emit SignMsg(msgHash);

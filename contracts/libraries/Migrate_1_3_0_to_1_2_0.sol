@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 import "../common/SelfAuthorized.sol";
 
 /// @title Migration - migrates a Safe contract from 1.3.0 to 1.2.0
@@ -29,8 +29,8 @@ contract Migration is SelfAuthorized {
     /// @dev Allows to migrate the contract. This can only be done via a Safe transaction.
     function migrate()
         public
-        authorized
     {
+        requireSelfCall();
         // Master copy address cannot be null.
         singleton = safe120Singleton;
         domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));

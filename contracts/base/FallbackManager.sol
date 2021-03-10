@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "../common/SelfAuthorized.sol";
 
@@ -22,7 +22,8 @@ contract FallbackManager is SelfAuthorized {
     ///      Only fallback calls without value and with data will be forwarded.
     ///      This can only be done via a Safe transaction.
     /// @param handler contract to handle fallbacks calls.
-    function setFallbackHandler(address handler) public authorized {
+    function setFallbackHandler(address handler) public {
+        requireSelfCall();
         internalSetFallbackHandler(handler);
     }
 

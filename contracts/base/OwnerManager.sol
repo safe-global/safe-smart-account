@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 import "../common/SelfAuthorized.sol";
 
 /// @title OwnerManager - Manages a set of owners and a threshold to perform actions.
@@ -53,8 +53,8 @@ contract OwnerManager is SelfAuthorized {
     /// @param _threshold New threshold.
     function addOwnerWithThreshold(address owner, uint256 _threshold)
         public
-        authorized
     {
+        requireSelfCall();
         // Owner address cannot be null, the sentinel or the Safe itself.
         require(owner != address(0) && owner != SENTINEL_OWNERS && owner != address(this), "Invalid owner address provided");
         // No duplicate owners allowed.
@@ -76,8 +76,8 @@ contract OwnerManager is SelfAuthorized {
     /// @param _threshold New threshold.
     function removeOwner(address prevOwner, address owner, uint256 _threshold)
         public
-        authorized
     {
+        requireSelfCall();
         // Only allow to remove an owner, if threshold can still be reached.
         require(ownerCount - 1 >= _threshold, "New owner count needs to be larger than new threshold");
         // Validate owner address and check that it corresponds to owner index.
@@ -100,8 +100,8 @@ contract OwnerManager is SelfAuthorized {
     /// @param newOwner New owner address.
     function swapOwner(address prevOwner, address oldOwner, address newOwner)
         public
-        authorized
     {
+        requireSelfCall();
         // Owner address cannot be null, the sentinel or the Safe itself.
         require(newOwner != address(0) && newOwner != SENTINEL_OWNERS && newOwner != address(this), "Invalid owner address provided");
         // No duplicate owners allowed.
@@ -122,8 +122,8 @@ contract OwnerManager is SelfAuthorized {
     /// @param _threshold New threshold.
     function changeThreshold(uint256 _threshold)
         public
-        authorized
     {
+        requireSelfCall();
         // Validate that threshold is smaller than number of owners.
         require(_threshold <= ownerCount, "Threshold cannot exceed owner count");
         // There has to be at least one Safe owner.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "./DefaultCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
@@ -26,7 +26,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         returns (bytes4)
     {
         // Caller should be a Safe
-        GnosisSafe safe = GnosisSafe(msg.sender);
+        GnosisSafe safe = GnosisSafe(payable(msg.sender));
         bytes32 messageHash = safe.getMessageHash(_data);
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
@@ -63,7 +63,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         returns (address[] memory)
     {
         // Caller should be a Safe
-        GnosisSafe safe = GnosisSafe(msg.sender);
+        GnosisSafe safe = GnosisSafe(payable(msg.sender));
         (address[] memory array,) = safe.getModulesPaginated(SENTINEL_MODULES, 10);
         return array;
     }
