@@ -6,7 +6,7 @@ import { BigNumber } from "ethers";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1] = waffle.provider.getWallets();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -47,7 +47,7 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("Transaction reverted without a reason")
         })
 
-        it('should return estimate in revert', async () => {
+        it('should always revert', async () => {
             const { safe } = await setupTests()
             const readOnlySafe = safe.connect(hre.ethers.provider)
             await readOnlySafe.callStatic.requiredTxGas(
@@ -57,9 +57,7 @@ describe("GnosisSafe", async () => {
                 throw Error("Should never be successful")
             }, (error) => {
                 const message: string = error.message
-                // We use some reasonable maximum just to check if something meaningfull is returned
-                const buf = Buffer.from(message)
-                expect(BigNumber.from(buf.slice(buf.length - 32)).toNumber()).to.be.lt(10000)
+                expect(message.indexOf("Transaction reverted without a reason") < 0).to.be.true
             })
         })
 
@@ -68,20 +66,6 @@ describe("GnosisSafe", async () => {
             const data = safe.interface.encodeFunctionData("requiredTxGas", [safe.address, 0, "0x", 0])
             const result = await decoder.callStatic.decode(safe.address, data)
             expect(BigNumber.from("0x" + result.slice(result.length - 32)).toNumber()).to.be.lt(10000)
-        })
-
-        it('can be called from any address', async () => {
-            const { safe } = await setupTests()
-            await safe.callStatic.requiredTxGas(
-                safe.address, 0, "0x", 0
-            ).then(() => {
-                throw Error("Should never be successful")
-            }, (error) => {
-                const message: string = error.message
-                // We use some reasonable maximum just to check if something meaningfull is returned
-                const buf = Buffer.from(message)
-                expect(BigNumber.from(buf.slice(buf.length - 32)).toNumber()).to.be.lt(10000)
-            })
         })
     })
 })

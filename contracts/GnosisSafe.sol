@@ -307,29 +307,6 @@ contract GnosisSafe
         signedMessages[msgHash] = 1;
         emit SignMsg(msgHash);
     }
-
-    /**
-    * Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
-    * @dev Should return whether the signature provided is valid for the provided data.
-    *       The save does not implement the interface since `checkSignatures` is not a view method.
-    *       The method will not perform any state changes (see parameters of `checkSignatures`)
-    * @param _data Arbitrary length data signed on the behalf of address(this)
-    * @param _signature Signature byte array associated with _data
-    * @return a bool upon valid or invalid signature with corresponding _data
-    */
-    function isValidSignature(bytes calldata _data, bytes calldata _signature)
-        external
-        view
-        returns (bytes4)
-    {
-        bytes32 messageHash = getMessageHash(_data);
-        if (_signature.length == 0) {
-            require(signedMessages[messageHash] != 0, "Hash not approved");
-        } else {
-            checkSignatures(messageHash, _data, _signature);
-        }
-        return EIP1271_MAGIC_VALUE;
-    }
     
     /// @dev Returns the chain id used by this contract.
     function getChainId() public view returns (uint256) {

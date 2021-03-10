@@ -11,6 +11,14 @@ export const defaultCallbackHandlerContract = async () => {
     return await hre.ethers.getContractFactory("DefaultCallbackHandler");
 }
 
+export const compatFallbackHandlerDeployment = async () => {
+    return await deployments.get("CompatibilityFallbackHandler");
+}
+
+export const compatFallbackHandlerContract = async () => {
+    return await hre.ethers.getContractFactory("CompatibilityFallbackHandler");
+}
+
 export const getSafeSingleton = async () => {
     const SafeDeployment = await deployments.get("GnosisSafe");
     const Safe = await hre.ethers.getContractFactory("GnosisSafe");
@@ -63,6 +71,10 @@ export const getSafeWithOwners = async (owners: string[], threshold?: number, fa
 
 export const getDefaultCallbackHandler = async () => {
     return (await defaultCallbackHandlerContract()).attach((await defaultCallbackHandlerDeployment()).address);
+}
+
+export const getCompatFallbackHandler = async () => {
+    return (await compatFallbackHandlerContract()).attach((await compatFallbackHandlerDeployment()).address);
 }
 
 export const compile = async (source: string) => {
