@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
+import "./base/GuardManager.sol";
 import "./common/EtherPaymentFallback.sol";
 import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
@@ -16,7 +17,7 @@ import "./external/GnosisSafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract GnosisSafe
-    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
+    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible, GuardManager {
 
     using GnosisSafeMath for uint256;
 
@@ -142,6 +143,7 @@ contract GnosisSafe
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures);
         }
+        checkCalldata();
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
         require(gasleft() >= (safeTxGas * 64 / 63).max(safeTxGas + 2500) + 500, "Not enough gas to execute safe transaction");
@@ -218,7 +220,7 @@ contract GnosisSafe
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= _threshold.mul(65), "Invalid contract signature location: inside static part");
+                require(uint256(s) >= _threshold.mul(65), "inside static part");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
                 require(uint256(s).add(32) <= signatures.length, "Invalid contract signature location: length not present");
