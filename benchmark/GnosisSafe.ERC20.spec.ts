@@ -9,11 +9,11 @@ const [, , , , user5] = waffle.provider.getWallets();
 
 benchmark("ERC20", [{
     name: "transfer",
-    prepare: async (contracts: Contracts, target: string) => {
+    prepare: async (contracts: Contracts, target: string, nonce: number) => {
         const token = contracts.additions.token
         await token.transfer(target, 1000)
         const data = token.interface.encodeFunctionData("transfer", [user5.address, 500])
-        return buildSafeTransaction({ to: token.address, data, safeTxGas: 1000000, nonce: 0 })
+        return buildSafeTransaction({ to: token.address, data, safeTxGas: 1000000, nonce })
     },
     after: async (contracts: Contracts) => {
         expect(
