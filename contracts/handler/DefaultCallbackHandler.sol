@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "../interfaces/ERC1155TokenReceiver.sol";
 import "../interfaces/ERC721TokenReceiver.sol";
@@ -15,6 +15,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     function onERC1155Received(address, address, uint256, uint256, bytes calldata)
         override
         external
+        pure
         returns(bytes4)
     {
         return 0xf23a6e61;
@@ -23,6 +24,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     function onERC1155BatchReceived(address, address, uint256[] calldata, uint256[] calldata, bytes calldata)
         override
         external
+        pure
         returns(bytes4)
     {
         return 0xbc197c81;
@@ -31,6 +33,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     function onERC721Received(address, address, uint256, bytes calldata)
         override
         external
+        pure
         returns(bytes4)
     {
         return 0x150b7a02;
@@ -40,6 +43,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) 
         override
         external 
+        pure
     {
         // We implement this for completeness, doesn't really have any value
     }

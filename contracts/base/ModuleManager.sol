@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
@@ -26,7 +26,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != address(0))
             // Setup has to complete successfully or transaction fails.
-            require(executeDelegateCall(to, data, gasleft()), "Could not finish initialization");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "Could not finish initialization");
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -116,24 +116,13 @@ contract ModuleManager is SelfAuthorized, Executor {
         return SENTINEL_MODULES != module && modules[module] != address(0);
     }
 
-    /// @dev Returns array of first 10 modules.
-    /// @return Array of modules.
-    function getModules()
-        public
-        view
-        returns (address[] memory)
-    {
-        (address[] memory array,) = getModulesPaginated(SENTINEL_MODULES, 10);
-        return array;
-    }
-
     /// @dev Returns array of modules.
     /// @param start Start of the page.
     /// @param pageSize Maximum number of modules that should be returned.
     /// @return array Array of modules.
     /// @return next Start of the next page.
     function getModulesPaginated(address start, uint256 pageSize)
-        public
+        external
         view
         returns (address[] memory array, address next)
     {

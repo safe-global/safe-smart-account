@@ -1,19 +1,7 @@
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import { task } from "hardhat/config";
-import solc from "solc"
-
-const solcCache: Record<string, any> = {}
-
-const loadSolc = async (version: string): Promise<any> => {
-    return await new Promise((resolve, reject) => {
-        if (solcCache[version] !== undefined) resolve(solcCache[version])
-        else solc.loadRemoteVersion(`v${version}`, (error: any, soljson: any) => {
-            solcCache[version] = soljson
-            return (error) ? reject(error) : resolve(soljson);
-        });
-    });
-}
+import { loadSolc } from "../utils/solc";
 
 task("local-verify", "Verifies that the local deployment files correspond to the on chain code")
     .setAction(async (_, hre) => {

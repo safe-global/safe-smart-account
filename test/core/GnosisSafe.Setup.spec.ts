@@ -30,8 +30,8 @@ describe("GnosisSafe", async () => {
                 await singleton.getThreshold()
             ).to.be.deep.eq(BigNumber.from(1))
             await expect(
-                await singleton.getModules()
-            ).to.be.deep.eq([])
+                await singleton.getModulesPaginated(AddressOne, 10)
+            ).to.be.deep.eq([[], AddressZero])
 
             // "Should not be able to retrieve owners (currently the contract will run in an endless loop when not initialized)"
             await expect(

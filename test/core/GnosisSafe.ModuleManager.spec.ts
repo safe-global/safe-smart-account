@@ -61,8 +61,8 @@ describe("ModuleManager", async () => {
             ).to.be.true
 
             await expect(
-                await safe.getModules()
-            ).to.be.deep.equal([user2.address])
+                await safe.getModulesPaginated(AddressOne, 10)
+            ).to.be.deep.equal([[user2.address], AddressOne])
         })
 
         it('can enable multiple', async () => {
@@ -72,14 +72,14 @@ describe("ModuleManager", async () => {
             ).to.emit(safe, "EnabledModule").withArgs(user1.address)
 
             await expect(await safe.isModuleEnabled(user1.address)).to.be.true
-            await expect(await safe.getModules()).to.be.deep.equal([user1.address])
+            await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user1.address], AddressOne])
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
             ).to.emit(safe, "EnabledModule").withArgs(user2.address)
 
             await expect(await safe.isModuleEnabled(user2.address)).to.be.true
-            await expect(await safe.getModules()).to.be.deep.equal([user2.address, user1.address])
+            await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address, user1.address], AddressOne])
         })
     })
 
@@ -135,19 +135,19 @@ describe("ModuleManager", async () => {
             await expect(await safe.isModuleEnabled(user1.address)).to.be.true
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
             await expect(await safe.isModuleEnabled(user2.address)).to.be.true
-            await expect(await safe.getModules()).to.be.deep.equal([user2.address, user1.address])
+            await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address, user1.address], AddressOne])
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [user2.address, user1.address], [user1])
             ).to.emit(safe, "DisabledModule").withArgs(user1.address)
             await expect(await safe.isModuleEnabled(user1.address)).to.be.false
-            await expect(await safe.getModules()).to.be.deep.equal([user2.address])
+            await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address], AddressOne])
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, user2.address], [user1])
             ).to.emit(safe, "DisabledModule").withArgs(user2.address)
             await expect(await safe.isModuleEnabled(user2.address)).to.be.false
-            await expect(await safe.getModules()).to.be.deep.equal([])
+            await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[], AddressOne])
         })
     })
 

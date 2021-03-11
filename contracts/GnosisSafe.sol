@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
 import "./common/EtherPaymentFallback.sol";
-import "./common/MasterCopy.sol";
+import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./common/StorageAccessible.sol";
@@ -16,7 +16,7 @@ import "./external/GnosisSafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract GnosisSafe
-    is EtherPaymentFallback, MasterCopy, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
+    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
 
     using GnosisSafeMath for uint256;
 
@@ -63,7 +63,7 @@ contract GnosisSafe
     constructor() {
         // By setting the threshold it is not possible to call setup anymore,
         // so we create a Safe with 0 owners and threshold 1.
-        // This is an unusable Safe, perfect for the mastercopy
+        // This is an unusable Safe, perfect for the singleton
         threshold = 1;
     }
 
@@ -116,16 +116,16 @@ contract GnosisSafe
     function execTransaction(
         address to,
         uint256 value,
-        bytes calldata data,
+        bytes memory data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes calldata signatures
+        bytes memory signatures
     )
-        external
+        public
         payable
         returns (bool success)
     {
@@ -306,29 +306,6 @@ contract GnosisSafe
         bytes32 msgHash = getMessageHash(_data);
         signedMessages[msgHash] = 1;
         emit SignMsg(msgHash);
-    }
-
-    /**
-    * Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
-    * @dev Should return whether the signature provided is valid for the provided data.
-    *       The save does not implement the interface since `checkSignatures` is not a view method.
-    *       The method will not perform any state changes (see parameters of `checkSignatures`)
-    * @param _data Arbitrary length data signed on the behalf of address(this)
-    * @param _signature Signature byte array associated with _data
-    * @return a bool upon valid or invalid signature with corresponding _data
-    */
-    function isValidSignature(bytes calldata _data, bytes calldata _signature)
-        external
-        view
-        returns (bytes4)
-    {
-        bytes32 messageHash = getMessageHash(_data);
-        if (_signature.length == 0) {
-            require(signedMessages[messageHash] != 0, "Hash not approved");
-        } else {
-            checkSignatures(messageHash, _data, _signature);
-        }
-        return EIP1271_MAGIC_VALUE;
     }
     
     /// @dev Returns the chain id used by this contract.
