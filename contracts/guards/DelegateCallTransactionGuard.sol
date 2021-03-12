@@ -30,7 +30,7 @@ contract DelegateCallTransactionGuard is Guard {
 
     function checkCalldata(bytes calldata data, address) override view external {
         // We only check known calls
-        if (dataSeletor(data[:4]) != GnosisSafe.execTransaction.selector) return;
+        if (data.length < 4 || dataSeletor(data[:4]) != GnosisSafe.execTransaction.selector) return;
         address to;
         uint8 operation;
         (to,,,operation,,,,,,) = abi.decode(data[4:], (address,uint256,bytes,uint8,int256,uint256,uint256,address,address,bytes));
