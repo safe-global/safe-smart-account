@@ -11,9 +11,8 @@ interface Guard {
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract GuardManager is SelfAuthorized {
     // keccak256("guard_manager.guard.address")
-    // TODO: update
     bytes32 internal constant GUARD_STORAGE_SLOT =
-        0x7c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939917d5;
+        0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     function internalSetGuard(address handler) internal {
         bytes32 slot = GUARD_STORAGE_SLOT;
