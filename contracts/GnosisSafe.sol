@@ -143,7 +143,16 @@ contract GnosisSafe
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures);
         }
-        checkCalldata();
+        {
+            address guard = getGuard();
+            if (guard != address(0)) {
+                Guard(guard).checkTransaction(
+                    to, value, data, operation, // Transaction info
+                    safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
+                    signatures, msg.sender
+                );
+            }
+        }
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
         require(gasleft() >= (safeTxGas * 64 / 63).max(safeTxGas + 2500) + 500, "Not enough gas to execute safe transaction");

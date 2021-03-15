@@ -1,10 +1,23 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 
 interface Guard {
-    function checkCalldata(bytes calldata data, address sender) external;
+    function checkTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver,
+        bytes memory signatures,
+        address msgSender
+    ) external;
 }
 
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract
@@ -27,15 +40,15 @@ contract GuardManager is SelfAuthorized {
         }
     }
 
-    function checkCalldata() internal {
+    function getGuard()
+        internal
+        view
+        returns (address guard)
+    {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solium-disable-next-line security/no-inline-assembly
-        address guard;
         assembly {
             guard := sload(slot)
-        }
-        if (guard != address(0)) {
-            Guard(guard).checkCalldata(msg.data, msg.sender);
         }
     }
 }
