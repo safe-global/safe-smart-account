@@ -49,9 +49,12 @@ describe("GuardManager", async () => {
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: 1 })
             const signature = await safeApproveHash(user2, safe, safeTx)
             const signatureBytes = buildSignatureBytes([signature])
-            const execData = safe.interface.encodeFunctionData("execTransaction", [safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes])
             const guardInterface = (await hre.ethers.getContractAt("Guard", mock.address)).interface
-            const checkData = guardInterface.encodeFunctionData("checkCalldata", [execData, user1.address])
+            const checkData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas,
+                safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
+                signatureBytes, user1.address
+            ])
             await mock.givenCalldataRevertWithMessage(checkData, "Computer says Nah")
 
             await expect(

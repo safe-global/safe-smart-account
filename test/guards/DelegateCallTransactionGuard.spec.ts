@@ -3,7 +3,7 @@ import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners } from "../utils/setup";
-import { executeContractCallWithSigners } from "../utils/execution";
+import { buildContractCall, executeContractCallWithSigners } from "../utils/execution";
 import { AddressOne } from "../utils/constants";
 
 describe("DelegateCallTransactionGuard", async () => {
@@ -43,21 +43,31 @@ describe("DelegateCallTransactionGuard", async () => {
         })
     })
 
-    describe("checkCalldata", async () => {
+    describe("checkTransaction", async () => {
 
-        it('must NOT revert on empty calldata', async () => {
+        it('should revert delegate call', async () => {
             const { safe, guard } = await setupTests()
-
-            await guard.checkCalldata("0x", safe.address)
+            const tx = buildContractCall(safe, "setGuard", [AddressZero], 0, true)
+            await expect(
+                guard.checkTransaction(
+                    tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas,
+                    tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver,
+                    "0x", user1.address
+                )
+            ).to.be.revertedWith("This call is restricted")
         })
 
-        it('must NOT revert on unknown calldata', async () => {
-            const { guard } = await setupTests()
-
-            await guard.checkCalldata("0xbaddad42", user1.address)
+        it('must NOT revert normal call', async () => {
+            const { safe, guard } = await setupTests()
+            const tx = buildContractCall(safe, "setGuard", [AddressZero], 0)
+            await guard.checkTransaction(
+                tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas,
+                tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver,
+                "0x", user1.address
+            )
         })
 
-        it('should on delegate call', async () => {
+        it('should revert on delegate call via Safe', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "setGuard", [AddressZero], [user1], true)
@@ -66,7 +76,7 @@ describe("DelegateCallTransactionGuard", async () => {
             await executeContractCallWithSigners(safe, safe, "setGuard", [AddressZero], [user1])
         })
 
-        it('can set allowed target', async () => {
+        it('can set allowed target via Safe', async () => {
             const { safe, guardFactory } = await setupTests()
             const guard = await guardFactory.deploy(AddressOne)
             await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
