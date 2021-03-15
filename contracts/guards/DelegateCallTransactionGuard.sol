@@ -14,7 +14,8 @@ contract DelegateCallTransactionGuard is Guard {
     }
 
     fallback() external {
-        // We only check known calls
+        // We don't revert on fallback to avoid issues in case of a Safe upgrade
+        // E.g. The expected check method might change and then the Safe would be locked.
     }
 
     function checkTransaction(
