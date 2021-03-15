@@ -4,9 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title StorageAccessible - generic base contract that allows callers to access all internal storage.
 /// @notice Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol
 contract StorageAccessible {
-    bytes4 internal constant SIMULATE_DELEGATECALL_INTERNAL_SELECTOR = bytes4(
-        keccak256("simulateDelegatecallInternal(address,bytes)")
-    );
+    // bytes4(keccak256("simulateDelegatecallInternal(address,bytes)"));
+    bytes4 internal constant SIMULATE_DELEGATECALL_INTERNAL_SELECTOR = 0x43218e19;
 
     /**
      * @dev Reads `length` bytes of storage in the currents contract

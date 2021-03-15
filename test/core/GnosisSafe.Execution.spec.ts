@@ -48,7 +48,7 @@ describe("GnosisSafe", async () => {
                     tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, signatureBytes,
                     { gasLimit: 1000000 }
                 )
-            ).to.be.revertedWith("Not enough gas to execute safe transaction")
+            ).to.be.revertedWith("GS010")
         })
 
         it('should emit event for successful call execution', async () => {

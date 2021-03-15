@@ -155,13 +155,13 @@ describe("ModuleManager", async () => {
         it('can not be called from sentinel', async () => {
             const { safe, mock } = await setupTests()
             const readOnlySafe = safe.connect(hre.ethers.provider)
-            await expect(readOnlySafe.callStatic.execTransactionFromModule(mock.address, 0, "0xbaddad", 0, { from: AddressOne })).to.be.revertedWith("Method can only be called from an enabled module")
+            await expect(readOnlySafe.callStatic.execTransactionFromModule(mock.address, 0, "0xbaddad", 0, { from: AddressOne })).to.be.revertedWith("GS104")
         })
 
         it('can only be called from enabled module', async () => {
             const { safe, mock } = await setupTests()
             const user2Safe = safe.connect(user2)
-            await expect(user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)).to.be.revertedWith("Method can only be called from an enabled module")
+            await expect(user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)).to.be.revertedWith("GS104")
         })
 
         it('emits event on execution success', async () => {
@@ -191,13 +191,13 @@ describe("ModuleManager", async () => {
         it('can not be called from sentinel', async () => {
             const { safe, mock } = await setupTests()
             const readOnlySafe = safe.connect(hre.ethers.provider)
-            await expect(readOnlySafe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0, { from: AddressOne })).to.be.revertedWith("Method can only be called from an enabled module")
+            await expect(readOnlySafe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0, { from: AddressOne })).to.be.revertedWith("GS104")
         })
 
         it('can only be called from enabled module', async () => {
             const { safe, mock } = await setupTests()
             const user2Safe = safe.connect(user2)
-            await expect(user2Safe.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)).to.be.revertedWith("Method can only be called from an enabled module")
+            await expect(user2Safe.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)).to.be.revertedWith("GS104")
         })
 
         it('emits event on execution failure', async () => {
