@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SelfAuthorized {
     function requireSelfCall() private view {
-        require(msg.sender == address(this), "Method can only be called from this contract");
+        require(msg.sender == address(this), "GS031");
     }
 
     modifier authorized() {

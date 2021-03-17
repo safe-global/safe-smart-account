@@ -22,7 +22,7 @@ describe("ModuleManager", async () => {
     describe("enableModule", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.enableModule(user2.address)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.enableModule(user2.address)).to.be.revertedWith("GS031")
         })
 
         it('can not set sentinel', async () => {
@@ -86,7 +86,7 @@ describe("ModuleManager", async () => {
     describe("disableModule", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.disableModule(AddressOne, user2.address)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.disableModule(AddressOne, user2.address)).to.be.revertedWith("GS031")
         })
 
         it('can not set sentinel', async () => {

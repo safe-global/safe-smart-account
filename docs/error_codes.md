@@ -20,6 +20,7 @@
 
 ### General auth related
 `GS030`: `Only owners can approve a hash`
+`GS031`: `Method can only be called from this contract`
 
 ### Module management related
 `GS100`: `Modules have already been initialized`

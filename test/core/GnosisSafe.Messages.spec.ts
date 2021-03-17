@@ -29,7 +29,7 @@ describe("GnosisSafe", async () => {
 
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.signMessage("0xbaddad")).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.signMessage("0xbaddad")).to.be.revertedWith("GS031")
         })
 
         it('should emit event', async () => {
