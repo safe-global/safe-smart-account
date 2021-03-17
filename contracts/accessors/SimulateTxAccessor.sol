@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../base/Executor.sol";
@@ -9,7 +10,7 @@ contract SimulateTxAccessor is Executor {
     bytes32 constant private GUARD_VALUE = keccak256("simulate_tx_accessor.guard.bytes32");
     bytes32 guard;
 
-    constructor() public {
+    constructor() {
         guard = GUARD_VALUE;
     }
 

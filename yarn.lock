@@ -3584,7 +3584,7 @@ ethereum-cryptography@^0.1.2, ethereum-cryptography@^0.1.3:
     secp256k1 "^4.0.1"
     setimmediate "^1.0.5"
 
-ethereum-waffle@^3.2.0:
+ethereum-waffle@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/ethereum-waffle/-/ethereum-waffle-3.3.0.tgz#166a0cc1d3b2925f117b20ef0951b3fe72e38e79"
   integrity sha512-4xm3RWAPCu5LlaVxYEg0tG3L7g5ovBw1GY/UebrzZ+OTx22vcPjI+bvelFlGBpkdnO5yOIFXjH2eK59tNAe9IA==
@@ -3817,7 +3817,7 @@ ethers@^4.0.32:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^5.0.0, ethers@^5.0.1, ethers@^5.0.19, ethers@^5.0.2:
+ethers@^5.0.0, ethers@^5.0.1, ethers@^5.0.2, ethers@^5.0.32:
   version "5.0.32"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.0.32.tgz#f009970be31d96a589bf0ce597a39c10c7e297a6"
   integrity sha512-rORfGWR0HsA4pjKMMcWZorw12DHsXqfIAuPVHJsXt+vI24jvXcVqx+rLsSvgOoLdaCMdxiN5qlIq2+4axKG31g==
@@ -7962,7 +7962,7 @@ solidity-comments-extractor@^0.0.4:
   resolved "https://registry.yarnpkg.com/solidity-comments-extractor/-/solidity-comments-extractor-0.0.4.tgz#ce420aef23641ffd0131c7d80ba85b6e1e42147e"
   integrity sha512-58glBODwXIKMaQ7rfcJOrWtFQMMOK28tJ0/LcB5Xhu7WtAxk4UX2fpgKPuaL41XjMp/y0gAa1MTLqk018wuSzA==
 
-solidity-coverage@^0.7.13:
+solidity-coverage@^0.7.16:
   version "0.7.16"
   resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.7.16.tgz#c8c8c46baa361e2817bbf275116ddd2ec90a55fb"
   integrity sha512-ttBOStywE6ZOTJmmABSg4b8pwwZfYKG8zxu40Nz+sRF5bQX7JULXWj/XbX0KXps3Fsp8CJXg8P29rH3W54ipxw==

@@ -18,9 +18,7 @@ contract GnosisSafeProxy {
 
     /// @dev Constructor function sets address of singleton contract.
     /// @param _singleton Singleton address.
-    constructor(address _singleton)
-        public
-    {
+    constructor(address _singleton) {
         require(_singleton != address(0), "Invalid singleton address provided");
         singleton = _singleton;
     }
