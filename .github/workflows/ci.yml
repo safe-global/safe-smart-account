@@ -22,13 +22,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   benchmarks:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         solidity: ["0.7.6", "0.8.2"]
+        experimental: [false]
         include:
         - solidity: "0.8.2"
           settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":10000}}'
+          experimental: true
     env:
       SOLIDITY_VERSION: ${{ matrix.solidity }}
       SOLIDITY_SETTINGS: ${{ matrix.settings }}
