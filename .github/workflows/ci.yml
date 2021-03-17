@@ -22,16 +22,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   benchmarks:
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         solidity: ["0.7.6", "0.8.2"]
-        experimental: [false]
         include:
         - solidity: "0.8.2"
           settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":10000}}'
-          experimental: true
     env:
       SOLIDITY_VERSION: ${{ matrix.solidity }}
       SOLIDITY_SETTINGS: ${{ matrix.settings }}
@@ -44,7 +41,4 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn
-      - run: yarn build
-      - run: yarn hardhat codesize --contractname GnosisSafe
-      - run: yarn benchmark
+      - run: (yarn && yarn build && yarn hardhat codesize --contractname GnosisSafe && yarn benchmark) || echo "Benchmark failed"
