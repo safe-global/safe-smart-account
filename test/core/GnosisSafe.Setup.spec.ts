@@ -63,7 +63,7 @@ describe("GnosisSafe", async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, user1.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Duplicate owner address provided")
+            ).to.be.revertedWith("GS204")
         })
 
         it('should revert if 0 address is used as an owner', async () => {

@@ -9,6 +9,8 @@ import "../GnosisSafe.sol";
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
+    bytes4 internal constant SIMULATE_SELECTOR = bytes4(keccak256("simulate(address,bytes)"));
+
     address internal constant SENTINEL_MODULES = address(0x1);
     bytes4 internal constant UPDATED_MAGIC_VALUE = 0x1626ba7e;
 
@@ -66,5 +68,44 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         GnosisSafe safe = GnosisSafe(payable(msg.sender));
         (address[] memory array,) = safe.getModulesPaginated(SENTINEL_MODULES, 10);
         return array;
+    }
+    
+    /**
+     * @dev Performs a delegetecall on a targetContract in the context of self.
+     * Internally reverts execution to avoid side effects (making it static). Catches revert and returns encoded result as bytes.
+     * @param targetContract Address of the contract containing the code to execute.
+     * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
+     */
+    function simulateDelegatecall(
+        address targetContract,
+        bytes calldata calldataPayload
+    ) external returns (bytes memory response) {
+        bytes memory innerCall = abi.encodeWithSelector(
+            SIMULATE_SELECTOR,
+            targetContract,
+            calldataPayload
+        );
+        (, response) = address(msg.sender).call(innerCall);
+        bool innerSuccess = response[response.length - 1] == 0x01;
+        setLength(response, response.length - 1);
+        if (innerSuccess) {
+            return response;
+        } else {
+            revertWith(response);
+        }
+    }
+
+    function revertWith(bytes memory response) internal pure {
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            revert(add(response, 0x20), mload(response))
+        }
+    }
+
+    function setLength(bytes memory buffer, uint256 length) internal pure {
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            mstore(buffer, length)
+        }
     }
 }

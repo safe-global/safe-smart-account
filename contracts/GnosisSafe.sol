@@ -116,7 +116,7 @@ contract GnosisSafe
     function execTransaction(
         address to,
         uint256 value,
-        bytes memory data,
+        bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
@@ -365,7 +365,7 @@ contract GnosisSafe
     function encodeTransactionData(
         address to,
         uint256 value,
-        bytes memory data,
+        bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
@@ -399,7 +399,7 @@ contract GnosisSafe
     function getTransactionHash(
         address to,
         uint256 value,
-        bytes memory data,
+        bytes calldata data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
