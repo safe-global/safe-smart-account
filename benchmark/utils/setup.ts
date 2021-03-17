@@ -1,9 +1,10 @@
 import { expect } from "chai";
-import { deployments, waffle } from "hardhat";
+import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getDefaultCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
-import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature } from "../../test/utils/execution";
+import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, executeContractCallWithSigners } from "../../test/utils/execution";
 import { Wallet, Contract } from "ethers";
+import { AddressZero } from "@ethersproject/constants";
 
 const [user1, user2, user3, user4, user5] = waffle.provider.getWallets();
 
@@ -12,14 +13,17 @@ export interface Contracts {
     additions: any | undefined
 }
 
-const generateTarget = async (owners: Wallet[], threshold: number) => {
+const generateTarget = async (owners: Wallet[], threshold: number, guardAddress: string) => {
     const fallbackHandler = await getDefaultCallbackHandler()
-    return await getSafeWithOwners(owners.map((owner) => owner.address), threshold, fallbackHandler.address)
+    const safe = await getSafeWithOwners(owners.map((owner) => owner.address), threshold, fallbackHandler.address)
+    await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], owners)
+    return safe
 }
 
 export const configs = [
     { name: "single owner", signers: [user1], threshold: 1 },
-    { name: "2 out of 2", signers: [user1, user2], threshold: 2 },
+    { name: "single owner and guard", signers: [user1], threshold: 1, useGuard: true },
+    { name: "2 out of 23", signers: [user1, user2], threshold: 2 },
     { name: "3 out of 3", signers: [user1, user2, user3], threshold: 3 },
     { name: "3 out of 5", signers: [user1, user2, user3, user4, user5], threshold: 3 },
 ]
@@ -27,9 +31,11 @@ export const configs = [
 const setupBenchmarkContracts = async (benchmarkFixture?: () => Promise<any>) => {
     return await deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const guardFactory = await hre.ethers.getContractFactory("DelegateCallTransactionGuard");
+        const guard = await guardFactory.deploy(AddressZero)
         const targets = []
         for (const config of configs) {
-            targets.push(await generateTarget(config.signers, config.threshold))
+            targets.push(await generateTarget(config.signers, config.threshold, config.useGuard ? guard.address : AddressZero))
         }
         return {
             targets,
@@ -40,7 +46,7 @@ const setupBenchmarkContracts = async (benchmarkFixture?: () => Promise<any>) =>
 
 export interface Benchmark {
     name: string,
-    prepare: (contracts: Contracts, target: string) => Promise<SafeTransaction>,
+    prepare: (contracts: Contracts, target: string, nonce: number) => Promise<SafeTransaction>,
     after?: (contracts: Contracts) => Promise<void>,
     fixture?: () => Promise<any>
 }
@@ -52,7 +58,7 @@ export const benchmark = async (topic: string, benchmarks: Benchmark[]) => {
         describe(`${topic} - ${name}`, async () => {
             it("with an EOA", async () => {
                 const contracts = await contractSetup()
-                const tx = await prepare(contracts, user2.address)
+                const tx = await prepare(contracts, user2.address, 0)
                 await logGas(name, user2.sendTransaction({
                     to: tx.to,
                     value: tx.value,
@@ -65,7 +71,8 @@ export const benchmark = async (topic: string, benchmarks: Benchmark[]) => {
                 it(`with a ${config.name} Safe`, async () => {
                     const contracts = await contractSetup()
                     const target = contracts.targets[i]
-                    const tx = await prepare(contracts, target.address)
+                    const nonce = await target.nonce();
+                    const tx = await prepare(contracts, target.address, nonce)
                     const threshold = await target.getThreshold()
                     const sigs: SafeSignature[] = await Promise.all(config.signers.slice(0, threshold).map(async (signer) => {
                         return await safeSignTypedData(signer, target, tx)

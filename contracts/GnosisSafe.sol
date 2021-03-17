@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
+import "./base/GuardManager.sol";
 import "./common/EtherPaymentFallback.sol";
 import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
@@ -16,7 +17,7 @@ import "./external/GnosisSafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract GnosisSafe
-    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible {
+    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible, GuardManager {
 
     using GnosisSafeMath for uint256;
 
@@ -141,6 +142,16 @@ contract GnosisSafe
             nonce++;
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures);
+        }
+        {
+            address guard = getGuard();
+            if (guard != address(0)) {
+                Guard(guard).checkTransaction(
+                    to, value, data, operation, // Transaction info
+                    safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
+                    signatures, msg.sender
+                );
+            }
         }
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
