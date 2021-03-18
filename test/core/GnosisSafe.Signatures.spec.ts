@@ -56,7 +56,7 @@ describe("GnosisSafe", async () => {
             const signerSafe = safe.connect(user2)
             await expect(
                 signerSafe.approveHash(txHash)
-            ).to.be.revertedWith("Only owners can approve a hash")
+            ).to.be.revertedWith("GS030")
         })
 
         it('approving should emit event', async () => {
@@ -76,7 +76,7 @@ describe("GnosisSafe", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000000" // Some data to read
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: inside static part")
+            ).to.be.revertedWith("GS021")
         })
 
         it('should fail if sigantures data is not present', async () => {
@@ -86,7 +86,7 @@ describe("GnosisSafe", async () => {
 
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: length not present")
+            ).to.be.revertedWith("GS022")
         })
 
         it('should fail if sigantures data is too short', async () => {
@@ -97,7 +97,7 @@ describe("GnosisSafe", async () => {
 
             await expect(
                 safe.execTransaction(safe.address, 0, "0x", 0, 0, 0, 0, AddressZero, AddressZero, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: data not complete")
+            ).to.be.revertedWith("GS023")
         })
 
         it('should be able to use EIP-712 for signature generation', async () => {
@@ -117,7 +117,7 @@ describe("GnosisSafe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [await safeSignTypedData(user1, safe, tx, 1)])
-            ).to.be.revertedWith("Invalid owner provided")
+            ).to.be.revertedWith("GS026")
         })
 
         it('should be able to use Signed Ethereum Messages for signature generation', async () => {
@@ -148,7 +148,7 @@ describe("GnosisSafe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(user2Safe, tx, [await safeApproveHash(user1, safe, tx, true)])
-            ).to.be.revertedWith("Hash has not been approved")
+            ).to.be.revertedWith("GS025")
         })
 
         it('should be able to use pre approved hashes for signature generation', async () => {
@@ -178,7 +178,7 @@ describe("GnosisSafe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [])
-            ).to.be.revertedWith("Threshold needs to be defined!")
+            ).to.be.revertedWith("GS001")
         })
 
         it('should revert if not the required amount of signature data is provided', async () => {
@@ -187,7 +187,7 @@ describe("GnosisSafe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [])
-            ).to.be.revertedWith("Signatures data too short")
+            ).to.be.revertedWith("GS020")
         })
 
         it('should not be able to use different signature type of same owner', async () => {
@@ -196,7 +196,7 @@ describe("GnosisSafe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx), await safeSignTypedData(user1, safe, tx), await safeSignTypedData(user3, safe, tx)])
-            ).to.be.revertedWith("Invalid owner provided")
+            ).to.be.revertedWith("GS026")
         })
 
         it('should be able to mix all signature types', async () => {
@@ -227,7 +227,7 @@ describe("GnosisSafe", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000000" // Some data to read
             await expect(
                 safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: inside static part")
+            ).to.be.revertedWith("GS021")
         })
 
         it('should fail if sigantures data is not present', async () => {
@@ -240,7 +240,7 @@ describe("GnosisSafe", async () => {
 
             await expect(
                 safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: length not present")
+            ).to.be.revertedWith("GS022")
         })
 
         it('should fail if sigantures data is too short', async () => {
@@ -254,7 +254,7 @@ describe("GnosisSafe", async () => {
 
             await expect(
                 safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Invalid contract signature location: data not complete")
+            ).to.be.revertedWith("GS023")
         })
 
         it('should not be able to use different chainId for signing', async () => {
@@ -266,7 +266,7 @@ describe("GnosisSafe", async () => {
             const signatures = buildSignatureBytes([await safeSignTypedData(user1, safe, tx, 1)])
             await expect(
                 safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Invalid owner provided")
+            ).to.be.revertedWith("GS026")
         })
 
         it('if not msg.sender on-chain approval is required', async () => {
@@ -278,7 +278,7 @@ describe("GnosisSafe", async () => {
             const signatures = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true)])
             await expect(
                 user2Safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Hash has not been approved")
+            ).to.be.revertedWith("GS025")
         })
 
         it('should revert if threshold is not set', async () => {
@@ -289,7 +289,7 @@ describe("GnosisSafe", async () => {
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
             await expect(
                 safe.checkSignatures(txHash, txHashData, "0x")
-            ).to.be.revertedWith("Threshold needs to be defined!")
+            ).to.be.revertedWith("GS001")
         })
 
         it('should revert if not the required amount of signature data is provided', async () => {
@@ -300,7 +300,7 @@ describe("GnosisSafe", async () => {
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
             await expect(
                 safe.checkSignatures(txHash, txHashData, "0x")
-            ).to.be.revertedWith("Signatures data too short")
+            ).to.be.revertedWith("GS020")
         })
 
         it('should not be able to use different signature type of same owner', async () => {
@@ -316,7 +316,7 @@ describe("GnosisSafe", async () => {
             ])
             await expect(
                 safe.checkSignatures(txHash, txHashData, signatures)
-            ).to.be.revertedWith("Invalid owner provided")
+            ).to.be.revertedWith("GS026")
         })
 
         it('should be able to mix all signature types', async () => {

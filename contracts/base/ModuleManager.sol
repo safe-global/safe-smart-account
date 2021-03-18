@@ -22,11 +22,11 @@ contract ModuleManager is SelfAuthorized, Executor {
     function setupModules(address to, bytes memory data)
         internal
     {
-        require(modules[SENTINEL_MODULES] == address(0), "Modules have already been initialized");
+        require(modules[SENTINEL_MODULES] == address(0), "GS100");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != address(0))
             // Setup has to complete successfully or transaction fails.
-            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "Could not finish initialization");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "GS000");
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -38,9 +38,9 @@ contract ModuleManager is SelfAuthorized, Executor {
         authorized
     {
         // Module address cannot be null or sentinel.
-        require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
+        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
         // Module cannot be added twice.
-        require(modules[module] == address(0), "Module has already been added");
+        require(modules[module] == address(0), "GS102");
         modules[module] = modules[SENTINEL_MODULES];
         modules[SENTINEL_MODULES] = module;
         emit EnabledModule(module);
@@ -56,8 +56,8 @@ contract ModuleManager is SelfAuthorized, Executor {
         authorized
     {
         // Validate module address and check that it corresponds to module index.
-        require(module != address(0) && module != SENTINEL_MODULES, "Invalid module address provided");
-        require(modules[prevModule] == module, "Invalid prevModule, module pair provided");
+        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
+        require(modules[prevModule] == module, "GS103");
         modules[prevModule] = modules[module];
         modules[module] = address(0);
         emit DisabledModule(module);
@@ -73,7 +73,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "Method can only be called from an enabled module");
+        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, gasleft());
         if (success) emit ExecutionFromModuleSuccess(msg.sender);

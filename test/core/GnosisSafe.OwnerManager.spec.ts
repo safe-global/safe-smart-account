@@ -21,7 +21,7 @@ describe("OwnerManager", async () => {
     describe("addOwnerWithThreshold", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.addOwnerWithThreshold(user2.address, 1)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.addOwnerWithThreshold(user2.address, 1)).to.be.revertedWith("GS031")
         })
 
         it('can not set Safe itself', async () => {
@@ -98,7 +98,7 @@ describe("OwnerManager", async () => {
     describe("removeOwner", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.removeOwner(AddressOne, user2.address, 1)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.removeOwner(AddressOne, user2.address, 1)).to.be.revertedWith("GS031")
         })
 
         it('can not remove sentinel', async () => {
@@ -207,7 +207,7 @@ describe("OwnerManager", async () => {
     describe("swapOwner", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.swapOwner(AddressOne, user1.address, user2.address)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.swapOwner(AddressOne, user1.address, user2.address)).to.be.revertedWith("GS031")
         })
 
         it('can not swap in Safe itseld', async () => {
@@ -299,7 +299,7 @@ describe("OwnerManager", async () => {
     describe("changeThreshold", async () => {
         it('can only be called from Safe itself', async () => {
             const { safe } = await setupTests()
-            await expect(safe.changeThreshold(1)).to.be.revertedWith("Method can only be called from this contract")
+            await expect(safe.changeThreshold(1)).to.be.revertedWith("GS031")
         })
     })
 })

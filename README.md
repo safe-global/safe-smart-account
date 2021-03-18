@@ -60,6 +60,7 @@ yarn hardhat --network <network> etherscan-verify
 Documentation
 -------------
 - [Safe developer portal](http://docs.gnosis.io/safe)
+- [Error codes](docs/error_codes.md)
 - [Coding guidelines](docs/guidelines.md)
 
 Audits/ Formal Verification

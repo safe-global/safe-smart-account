@@ -32,7 +32,7 @@ describe("Migration", async () => {
     describe("migrate", async () => {
         it('can only be called from Safe itself', async () => {
             const { migration } = await setupTests()
-            await expect(migration.migrate()).to.be.revertedWith("Method can only be called from this contract")
+            await expect(migration.migrate()).to.be.revertedWith("GS031")
         })
 
         it.skip('can migrate', async () => {

@@ -5,6 +5,8 @@ import { AddressZero } from "@ethersproject/constants";
 import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
 import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../utils/execution";
 import { chainId } from "../utils/encoding";
+import { BigNumber } from "ethers";
+import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", async () => {
 
@@ -15,10 +17,12 @@ describe("CompatibilityFallbackHandler", async () => {
         const handler = await getCompatFallbackHandler()
         const safe = await getSafeWithOwners([user1.address, user2.address], 2, handler.address)
         const validator = (await compatFallbackHandlerContract()).attach(safe.address)
+        const killLib = await killLibContract(user1);
         return {
             safe,
             validator,
-            handler
+            handler,
+            killLib
         }
     })
 
@@ -127,8 +131,6 @@ describe("CompatibilityFallbackHandler", async () => {
         })
     })
 
-    
-
     describe("getModules", async () => {
         it('returns enabled modules', async () => {
             const { safe, validator } = await setupTests()
@@ -143,6 +145,57 @@ describe("CompatibilityFallbackHandler", async () => {
             await expect(
                 await validator.getModules()
             ).to.be.deep.equal([user2.address])
+        })
+    })
+    
+
+    describe("simulateDelegatecall", async () => {
+
+        it.skip('can be called for any Safe', async () => {
+        })
+
+        it('should revert changes', async () => {
+            const { validator, killLib } = await setupTests()
+            const code = await ethers.provider.getCode(validator.address)
+            expect(
+                await validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("killme"))
+            ).to.be.eq("0x")
+            expect(
+                await ethers.provider.getCode(validator.address)
+            ).to.be.eq(code)
+        })
+
+        it('should return result', async () => {
+            const { validator, killLib, handler } = await setupTests()
+            expect(
+                await validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("expose"))
+            ).to.be.eq("0x000000000000000000000000" + handler.address.slice(2).toLowerCase())
+        })
+
+        it('should propagate revert message', async () => {
+            const { validator, killLib } = await setupTests()
+            await expect(
+                validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("trever"))
+            ).to.revertedWith("Why are you doing this?")
+        })
+
+        it('should simulate transaction', async () => {
+            const { validator, killLib } = await setupTests()
+            const estimate = await validator.callStatic.simulateDelegatecall(
+                killLib.address,
+                killLib.interface.encodeFunctionData("estimate", [validator.address, "0x"])
+            )
+            expect(BigNumber.from(estimate).toNumber()).to.be.lte(5000)
+        })
+
+        it('should return modified state', async () => {
+            const { validator, killLib } = await setupTests()
+            const value = await validator.callStatic.simulateDelegatecall(
+                killLib.address,
+                killLib.interface.encodeFunctionData("updateAndGet", [])
+            )
+            expect(BigNumber.from(value).toNumber()).to.be.eq(1)
+            expect((await killLib.value()).toNumber()).to.be.eq(0)
         })
     })
 })

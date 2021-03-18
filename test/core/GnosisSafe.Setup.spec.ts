@@ -40,7 +40,7 @@ describe("GnosisSafe", async () => {
 
             await expect(
                 singleton.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero),
-            ).to.be.revertedWith("Owners have already been setup")
+            ).to.be.revertedWith("GS200")
         })
 
         it('should set domain hash', async () => {
@@ -56,63 +56,63 @@ describe("GnosisSafe", async () => {
             await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Owners have already been setup")
+            ).to.be.revertedWith("GS200")
         })
 
         it('should revert if same owner is included twice', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, user1.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Duplicate owner address provided")
+            ).to.be.revertedWith("GS204")
         })
 
         it('should revert if 0 address is used as an owner', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, AddressZero], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Invalid owner address provided")
+            ).to.be.revertedWith("GS203")
         })
 
         it('should revert if Safe itself is used as an owner', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, template.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Invalid owner address provided")
+            ).to.be.revertedWith("GS203")
         })
 
         it('should revert if sentinel is used as an owner', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, AddressOne], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Invalid owner address provided")
+            ).to.be.revertedWith("GS203")
         })
 
         it('should revert if same owner is included twice one after each other', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Invalid owner address provided")
+            ).to.be.revertedWith("GS203")
         })
 
         it('should revert if threshold is too high', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 4, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Threshold cannot exceed owner count")
+            ).to.be.revertedWith("GS201")
         })
 
         it('should revert if threshold is 0', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Threshold needs to be greater than 0")
+            ).to.be.revertedWith("GS202")
         })
 
         it('should revert if owners are empty', async () => {
             const { template } = await setupTests()
             await expect(
                 template.setup([], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Threshold needs to be greater than 0")
+            ).to.be.revertedWith("GS202")
         })
 
         it('should set fallback handler and call sub inititalizer', async () => {
@@ -155,7 +155,7 @@ describe("GnosisSafe", async () => {
             const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"])
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, testIntializer.address, initData, AddressZero, AddressZero, 0, AddressZero)
-            ).to.be.revertedWith("Could not finish initialization")
+            ).to.be.revertedWith("GS000")
         })
 
         it('should fail if ether payment fails', async () => {
@@ -166,7 +166,7 @@ describe("GnosisSafe", async () => {
             await mock.givenCalldataRevert(transferData)
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero)
-            ).to.be.revertedWith("Could not pay gas costs with ether")
+            ).to.be.revertedWith("GS011")
         })
 
         it('should work with ether payment to deployer', async () => {
@@ -205,7 +205,7 @@ describe("GnosisSafe", async () => {
             await mock.givenCalldataRevert(transferData)
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, AddressZero)
-            ).to.be.revertedWith("Could not pay gas costs with token")
+            ).to.be.revertedWith("GS012")
         })
 
         it('should work with token payment to deployer', async () => {

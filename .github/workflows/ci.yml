@@ -41,7 +41,4 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn
-      - run: yarn build
-      - run: yarn hardhat codesize --contractname GnosisSafe
-      - run: yarn benchmark
+      - run: (yarn && yarn build && yarn hardhat codesize --contractname GnosisSafe && yarn benchmark) || echo "Benchmark failed"

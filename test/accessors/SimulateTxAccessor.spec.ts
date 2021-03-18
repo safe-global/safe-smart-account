@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getSimulateTxAccessor, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
 import { buildContractCall } from "../utils/execution";
 import { parseEther } from "ethers/lib/utils";
 
@@ -21,10 +21,14 @@ describe("SimulateTxAccessor", async () => {
             }
         }`
         const interactor = await deployContract(user1, source);
+        const handler = await getCompatFallbackHandler()
+        const safe = await getSafeWithOwners([user1.address], 1, handler.address)
+        const simulator = handler.attach(safe.address)
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe,
             accessor,
-            interactor
+            interactor,
+            simulator
         }
     })
 
@@ -50,10 +54,10 @@ describe("SimulateTxAccessor", async () => {
         })
 
         it('simulate call', async () => {
-            const { safe, accessor } = await setupTests()
+            const { safe, accessor, simulator } = await setupTests()
             const tx = buildContractCall(safe, "getOwners", [], 0)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await safe.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(
                 safe.interface.decodeFunctionResult("getOwners", simulation.returnData)[0]
@@ -67,12 +71,12 @@ describe("SimulateTxAccessor", async () => {
         })
 
         it('simulate delegatecall', async () => {
-            const { safe, accessor, interactor } = await setupTests()
+            const { safe, accessor, interactor, simulator } = await setupTests()
             await user1.sendTransaction({to: safe.address, value: parseEther("1")})
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             const tx = buildContractCall(interactor, "sendAndReturnBalance", [user2.address, parseEther("1")], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await safe.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(
                 interactor.interface.decodeFunctionResult("sendAndReturnBalance", simulation.returnData)[0]
@@ -86,10 +90,10 @@ describe("SimulateTxAccessor", async () => {
         })
 
         it('simulate revert', async () => {
-            const { safe, accessor, interactor } = await setupTests()
+            const { safe, accessor, interactor, simulator } = await setupTests()
             const tx = buildContractCall(interactor, "sendAndReturnBalance", [user2.address, parseEther("1")], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await safe.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(simulation.returnData).to.be.deep.eq("0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5472616e73666572206661696c65640000000000000000000000000000000000")
             expect(
