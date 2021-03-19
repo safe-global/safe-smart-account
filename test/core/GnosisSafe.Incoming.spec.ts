@@ -53,7 +53,7 @@ describe("GnosisSafe", async () => {
                 caller.callEth(safe.address, {
                     value: parseEther("1")
                 })
-            ).to.emit(safe, "Received").withArgs(caller.address, parseEther("1"))
+            ).to.emit(safe, "SafeReceived").withArgs(caller.address, parseEther("1"))
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
         })
 
@@ -65,7 +65,7 @@ describe("GnosisSafe", async () => {
                     to: safe.address,
                     value: parseEther("1")
                 })
-            ).to.emit(safe, "Received").withArgs(user1.address, parseEther("1"))
+            ).to.emit(safe, "SafeReceived").withArgs(user1.address, parseEther("1"))
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
         })
 

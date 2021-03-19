@@ -6,13 +6,13 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract EtherPaymentFallback {
 
-    event Received(address indexed sender, uint256 value);
+    event SafeReceived(address indexed sender, uint256 value);
 
     /// @dev Fallback function accepts Ether transactions.
     receive()
         external
         payable
     {
-        emit Received(msg.sender, msg.value);
+        emit SafeReceived(msg.sender, msg.value);
     }
 }
