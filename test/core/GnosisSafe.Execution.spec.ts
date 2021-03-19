@@ -108,7 +108,7 @@ describe("GnosisSafe", async () => {
         it('should emit payment in success event', async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({
-                to: safe.address, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 100000, refundReceiver: user2.address
+                to: user1.address, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 100000, refundReceiver: user2.address
             })
 
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
@@ -120,6 +120,7 @@ describe("GnosisSafe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
             ).to.emit(safe, "ExecutionSuccess")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
+            console.log(receipt.logs)
             const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[0].data, receipt.logs[0].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
