@@ -2,6 +2,7 @@ import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
+import { logGas } from "./execution";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -68,9 +69,13 @@ export const getSafeTemplate = async () => {
     return Safe.attach(template);
 }
 
-export const getSafeWithOwners = async (owners: string[], threshold?: number, fallbackHandler?: string) => {
+export const getSafeWithOwners = async (owners: string[], threshold?: number, fallbackHandler?: string, logGasUsage?: boolean) => {
     const template = await getSafeTemplate()
-    await template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero)
+    await logGas(
+        `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`, 
+        template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero),
+        !logGasUsage
+    )
     return template
 }
 

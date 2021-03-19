@@ -38,6 +38,13 @@ contract GnosisSafe
     //);
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
+    event SafeSetup(
+        address indexed initiator,
+        address[] owners,
+        uint256 threshold,
+        address initializer,
+        address fallbackHandler
+    );
     event ApproveHash(
         bytes32 indexed approvedHash,
         address indexed owner
@@ -99,6 +106,7 @@ contract GnosisSafe
             // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
             handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
         }
+        emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
