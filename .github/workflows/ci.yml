@@ -4,6 +4,12 @@ on: [push]
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        contract-name: ["GnosisSafe", "GnosisSafeL2"]
+    env:
+      SAFE_CONTRACT_UNDER_TEST: ${{ matrix.contract-name }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

@@ -134,6 +134,7 @@ contract GnosisSafe
         bytes memory signatures
     )
         public
+        virtual
         payable
         returns (bool success)
     {

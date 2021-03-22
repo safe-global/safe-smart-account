@@ -70,6 +70,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param operation Operation type of module transaction.
     function execTransactionFromModule(address to, uint256 value, bytes memory data, Enum.Operation operation)
         public
+        virtual
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
