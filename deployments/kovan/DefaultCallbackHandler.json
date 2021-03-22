@@ -1,0 +1,218 @@
+{
+  "address": "0x5235C12A92331D406bf6b0C8507EE02438811C72",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "NAME",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "VERSION",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "tokensReceived",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xf62f824cacbc0204717bf26f85e92956a37d7d5612e3f281154abfa95d2c6e5a",
+  "receipt": {
+    "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "from": "0xFC72c97DC841AE43d5A302dcB43D8682AFdbB2dc",
+    "contractAddress": null,
+    "transactionIndex": 4,
+    "gasUsed": "448248",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x9d8c0b25545e80daadc9c1445fb48e1151d54090c09a89900421d6687fac9339",
+    "transactionHash": "0xf62f824cacbc0204717bf26f85e92956a37d7d5612e3f281154abfa95d2c6e5a",
+    "logs": [],
+    "blockNumber": 24022167,
+    "cumulativeGasUsed": "824749",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "c1aab00b9a4529d51c507014a6e782a4",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"NAME\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155BatchReceived\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"tokensReceived\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.pm>\",\"kind\":\"dev\",\"methods\":{},\"title\":\"Default Callback Handler - returns true for known token callbacks\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/handler/DefaultCallbackHandler.sol\":\"DefaultCallbackHandler\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/handler/DefaultCallbackHandler.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\nimport \\\"../interfaces/ERC1155TokenReceiver.sol\\\";\\nimport \\\"../interfaces/ERC721TokenReceiver.sol\\\";\\nimport \\\"../interfaces/ERC777TokensRecipient.sol\\\";\\n\\n/// @title Default Callback Handler - returns true for known token callbacks\\n/// @author Richard Meissner - <richard@gnosis.pm>\\ncontract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver {\\n\\n    string public constant NAME = \\\"Default Callback Handler\\\";\\n    string public constant VERSION = \\\"1.0.0\\\";\\n\\n    function onERC1155Received(address, address, uint256, uint256, bytes calldata)\\n        override\\n        external\\n        pure\\n        returns(bytes4)\\n    {\\n        return 0xf23a6e61;\\n    }\\n\\n    function onERC1155BatchReceived(address, address, uint256[] calldata, uint256[] calldata, bytes calldata)\\n        override\\n        external\\n        pure\\n        returns(bytes4)\\n    {\\n        return 0xbc197c81;\\n    }\\n\\n    function onERC721Received(address, address, uint256, bytes calldata)\\n        override\\n        external\\n        pure\\n        returns(bytes4)\\n    {\\n        return 0x150b7a02;\\n    }\\n\\n    // solium-disable-next-line no-empty-blocks\\n    function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) \\n        override\\n        external \\n        pure\\n    {\\n        // We implement this for completeness, doesn't really have any value\\n    }\\n\\n}\",\"keccak256\":\"0x6b7ed20d98a48b64f7045d0061c29664979f134a833eca649486c3f8d396d6e2\",\"license\":\"LGPL-3.0-only\"},\"contracts/interfaces/ERC1155TokenReceiver.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\n/**\\n    Note: The ERC-165 identifier for this interface is 0x4e2312e0.\\n*/\\ninterface ERC1155TokenReceiver {\\n    /**\\n        @notice Handle the receipt of a single ERC1155 token type.\\n        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeTransferFrom` after the balance has been updated.        \\n        This function MUST return `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))` (i.e. 0xf23a6e61) if it accepts the transfer.\\n        This function MUST revert if it rejects the transfer.\\n        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\\n        @param _operator  The address which initiated the transfer (i.e. msg.sender)\\n        @param _from      The address which previously owned the token\\n        @param _id        The ID of the token being transferred\\n        @param _value     The amount of tokens being transferred\\n        @param _data      Additional data with no specified format\\n        @return           `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))`\\n    */\\n    function onERC1155Received(address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data) external returns(bytes4);\\n\\n    /**\\n        @notice Handle the receipt of multiple ERC1155 token types.\\n        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.        \\n        This function MUST return `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))` (i.e. 0xbc197c81) if it accepts the transfer(s).\\n        This function MUST revert if it rejects the transfer(s).\\n        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\\n        @param _operator  The address which initiated the batch transfer (i.e. msg.sender)\\n        @param _from      The address which previously owned the token\\n        @param _ids       An array containing ids of each token being transferred (order and length must match _values array)\\n        @param _values    An array containing amounts of each token being transferred (order and length must match _ids array)\\n        @param _data      Additional data with no specified format\\n        @return           `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))`\\n    */\\n    function onERC1155BatchReceived(address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external returns(bytes4);       \\n}\",\"keccak256\":\"0x7c1515de7ea19e942b4bffd956351a38f782c999a74277ea3bc342273b8a0cf0\",\"license\":\"LGPL-3.0-only\"},\"contracts/interfaces/ERC721TokenReceiver.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\n/// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.\\ninterface ERC721TokenReceiver {\\n    /// @notice Handle the receipt of an NFT\\n    /// @dev The ERC721 smart contract calls this function on the recipient\\n    ///  after a `transfer`. This function MAY throw to revert and reject the\\n    ///  transfer. Return of other than the magic value MUST result in the\\n    ///  transaction being reverted.\\n    ///  Note: the contract address is always the message sender.\\n    /// @param _operator The address which called `safeTransferFrom` function\\n    /// @param _from The address which previously owned the token\\n    /// @param _tokenId The NFT identifier which is being transferred\\n    /// @param _data Additional data with no specified format\\n    /// @return `bytes4(keccak256(\\\"onERC721Received(address,address,uint256,bytes)\\\"))`\\n    ///  unless throwing\\n    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes calldata _data) external returns(bytes4);\\n}\",\"keccak256\":\"0xa57e3af8e93843a31c8a93bb407c29133c3b513a4df6c61742c6dfed78b0d720\",\"license\":\"LGPL-3.0-only\"},\"contracts/interfaces/ERC777TokensRecipient.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\ninterface ERC777TokensRecipient {\\n    function tokensReceived(\\n        address operator,\\n        address from,\\n        address to,\\n        uint256 amount,\\n        bytes calldata data,\\n        bytes calldata operatorData\\n    ) external;\\n}\",\"keccak256\":\"0xf55588cda5eaff6d5baab9fd34f8ede8c2931fbd5870180d1b7f84ab3058ae51\",\"license\":\"LGPL-3.0-only\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610725806100206000396000f3fe608060405234801561001057600080fd5b50600436106100615760003560e01c806223de2914610066578063150b7a021461019e578063a3f4df7e14610294578063bc197c8114610317578063f23a6e61146104ad578063ffa1ad74146105ad575b600080fd5b61019c600480360360c081101561007c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561010357600080fd5b82018360208201111561011557600080fd5b8035906020019184600183028401116401000000008311171561013757600080fd5b90919293919293908035906020019064010000000081111561015857600080fd5b82018360208201111561016a57600080fd5b8035906020019184600183028401116401000000008311171561018c57600080fd5b9091929391929390505050610630565b005b61025f600480360360808110156101b457600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561021b57600080fd5b82018360208201111561022d57600080fd5b8035906020019184600183028401116401000000008311171561024f57600080fd5b909192939192939050505061063a565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b61029c61064f565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156102dc5780820151818401526020810190506102c1565b50505050905090810190601f1680156103095780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b610478600480360360a081101561032d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561038a57600080fd5b82018360208201111561039c57600080fd5b803590602001918460208302840111640100000000831117156103be57600080fd5b9091929391929390803590602001906401000000008111156103df57600080fd5b8201836020820111156103f157600080fd5b8035906020019184602083028401116401000000008311171561041357600080fd5b90919293919293908035906020019064010000000081111561043457600080fd5b82018360208201111561044657600080fd5b8035906020019184600183028401116401000000008311171561046857600080fd5b9091929391929390505050610688565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b610578600480360360a08110156104c357600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291908035906020019064010000000081111561053457600080fd5b82018360208201111561054657600080fd5b8035906020019184600183028401116401000000008311171561056857600080fd5b90919293919293905050506106a0565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b6105b56106b6565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156105f55780820151818401526020810190506105da565b50505050905090810190601f1680156106225780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b5050505050505050565b600063150b7a0260e01b905095945050505050565b6040518060400160405280601881526020017f44656661756c742043616c6c6261636b2048616e646c6572000000000000000081525081565b600063bc197c8160e01b905098975050505050505050565b600063f23a6e6160e01b90509695505050505050565b6040518060400160405280600581526020017f312e302e300000000000000000000000000000000000000000000000000000008152508156fea2646970667358221220aa50e95e252d8b5c3b4e4064ef1d20102580c1fd902dcd127f06bd499b3f89bc64736f6c63430007060033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100615760003560e01c806223de2914610066578063150b7a021461019e578063a3f4df7e14610294578063bc197c8114610317578063f23a6e61146104ad578063ffa1ad74146105ad575b600080fd5b61019c600480360360c081101561007c57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561010357600080fd5b82018360208201111561011557600080fd5b8035906020019184600183028401116401000000008311171561013757600080fd5b90919293919293908035906020019064010000000081111561015857600080fd5b82018360208201111561016a57600080fd5b8035906020019184600183028401116401000000008311171561018c57600080fd5b9091929391929390505050610630565b005b61025f600480360360808110156101b457600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561021b57600080fd5b82018360208201111561022d57600080fd5b8035906020019184600183028401116401000000008311171561024f57600080fd5b909192939192939050505061063a565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b61029c61064f565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156102dc5780820151818401526020810190506102c1565b50505050905090810190601f1680156103095780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b610478600480360360a081101561032d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561038a57600080fd5b82018360208201111561039c57600080fd5b803590602001918460208302840111640100000000831117156103be57600080fd5b9091929391929390803590602001906401000000008111156103df57600080fd5b8201836020820111156103f157600080fd5b8035906020019184602083028401116401000000008311171561041357600080fd5b90919293919293908035906020019064010000000081111561043457600080fd5b82018360208201111561044657600080fd5b8035906020019184600183028401116401000000008311171561046857600080fd5b9091929391929390505050610688565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b610578600480360360a08110156104c357600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291908035906020019064010000000081111561053457600080fd5b82018360208201111561054657600080fd5b8035906020019184600183028401116401000000008311171561056857600080fd5b90919293919293905050506106a0565b60405180827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916815260200191505060405180910390f35b6105b56106b6565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156105f55780820151818401526020810190506105da565b50505050905090810190601f1680156106225780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b5050505050505050565b600063150b7a0260e01b905095945050505050565b6040518060400160405280601881526020017f44656661756c742043616c6c6261636b2048616e646c6572000000000000000081525081565b600063bc197c8160e01b905098975050505050505050565b600063f23a6e6160e01b90509695505050505050565b6040518060400160405280600581526020017f312e302e300000000000000000000000000000000000000000000000000000008152508156fea2646970667358221220aa50e95e252d8b5c3b4e4064ef1d20102580c1fd902dcd127f06bd499b3f89bc64736f6c63430007060033",
+  "devdoc": {
+    "author": "Richard Meissner - <richard@gnosis.pm>",
+    "kind": "dev",
+    "methods": {},
+    "title": "Default Callback Handler - returns true for known token callbacks",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
