@@ -35,7 +35,6 @@ describe("GnosisSafeL2", async () => {
             })
 
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
-            const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
             let executedTx: any;
