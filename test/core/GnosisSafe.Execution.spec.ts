@@ -67,11 +67,27 @@ describe("GnosisSafe", async () => {
             ).to.be.eq("0x" + "baddad".padEnd(64, "0"))
         })
 
-        it('should emit event for failed call execution', async () => {
+        it('should emit event for failed call execution if safeTxGas > 0', async () => {
+            const { safe, reverter } = await setupTests()
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], false, { safeTxGas: 1 })
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
+        it('should emit event for failed call execution if gasPrice > 0', async () => {
+            const { safe, reverter } = await setupTests()
+            // Fund refund
+            await user1.sendTransaction({ to: safe.address, value: 10000000 })
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], false, { gasPrice: 1 })
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
+        it('should revert for failed call execution if gasPrice == 0 and safeTxGas == 0', async () => {
             const { safe, reverter } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, reverter, "revert", [], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('should emit event for successful delegatecall execution', async () => {
@@ -89,12 +105,27 @@ describe("GnosisSafe", async () => {
             ).to.be.eq("0x" + "".padEnd(64, "0"))
         })
 
-        it('should emit event for failed delegatecall execution', async () => {
+        it('should emit event for failed delegatecall execution  if safeTxGas > 0', async () => {
             const { safe, reverter } = await setupTests()
-            const txHash = calculateSafeTransactionHash(safe, buildContractCall(reverter, "revert", [], await safe.nonce(), true), await chainId())
+            const txHash = calculateSafeTransactionHash(safe, buildContractCall(reverter, "revert", [], await safe.nonce(), true, { safeTxGas: 1 }), await chainId())
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true, { safeTxGas: 1 })
+            ).to.emit(safe, "ExecutionFailure").withArgs(txHash, 0)
+        })
+
+        it('should emit event for failed delegatecall execution if gasPrice > 0', async () => {
+            const { safe, reverter } = await setupTests()
+            await user1.sendTransaction({ to: safe.address, value: 10000000 })
+            await expect(
+                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true, { gasPrice: 1 })
+            ).to.emit(safe, "ExecutionFailure")
+        })
+
+        it('should emit event for failed delegatecall execution if gasPrice == 0 and safeTxGas == 0', async () => {
+            const { safe, reverter } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true)
-            ).to.emit(safe, "ExecutionFailure").withArgs(txHash, 0)
+            ).to.revertedWith("GS013")
         })
 
         it('should revert on unknown operation', async () => {

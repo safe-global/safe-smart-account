@@ -30,14 +30,14 @@ describe("ModuleManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "enableModule", [AddressOne], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not set 0 Address', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "enableModule", [AddressZero], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not add module twice', async () => {
@@ -47,7 +47,7 @@ describe("ModuleManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('emits event for new module', async () => {
@@ -94,14 +94,14 @@ describe("ModuleManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, AddressOne], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not set 0 Address', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, AddressZero], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevModule, module pair provided - Invalid target', async () => {
@@ -109,7 +109,7 @@ describe("ModuleManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, user1.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevModule, module pair provided - Invalid sentinel', async () => {
@@ -117,7 +117,7 @@ describe("ModuleManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressZero, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevModule, module pair provided - Invalid source', async () => {
@@ -126,7 +126,7 @@ describe("ModuleManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [user1.address, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('emits event for disabled module', async () => {

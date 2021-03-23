@@ -4,10 +4,11 @@
 - `GS000`: `Could not finish initialization`
 - `GS001`: `Threshold needs to be defined`
 
-### General gas related
-- `GS010`: `Not enough gas to execute safe transaction`
+### General gas/ execution related
+- `GS010`: `Not enough gas to execute Safe transaction`
 - `GS011`: `Could not pay gas costs with ether`
 - `GS012`: `Could not pay gas costs with token`
+- `GS013`: `Safe transaction failed when gasPrice and safeTxGas were 0`
 
 ### General signature validation related
 - `GS020`: `Signatures data too short`

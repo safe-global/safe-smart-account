@@ -60,7 +60,7 @@ describe("MultiSend", async () => {
             const safeTx = buildMultiSendSafeTx(multiSend, txs, await safe.nonce())
             await expect(
                 executeTx(safe, safeTx, [ await safeApproveHash(user1, safe, safeTx, true) ])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Can execute empty multisend', async () => {
@@ -99,7 +99,7 @@ describe("MultiSend", async () => {
                 buildSafeTransaction({to: user2.address, value: parseEther("1"), nonce: 0}),
                 buildSafeTransaction({to: user2.address, value: parseEther("1"), nonce: 0}),
             ]
-            const safeTx = buildMultiSendSafeTx(multiSend, txs, await safe.nonce())
+            const safeTx = buildMultiSendSafeTx(multiSend, txs, await safe.nonce(), { safeTxGas: 1 })
             await expect(
                 executeTx(safe, safeTx, [ await safeApproveHash(user1, safe, safeTx, true) ])
             ).to.emit(safe, "ExecutionFailure")

@@ -29,7 +29,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [safe.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not set sentinel', async () => {
@@ -37,14 +37,14 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [AddressOne, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not set 0 Address', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [AddressZero, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not add owner twice', async () => {
@@ -53,21 +53,21 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not add owner and change threshold to 0', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 0], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not add owner and change threshold to larger number than new owner count', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 3], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('emits event for new owner', async () => {
@@ -107,7 +107,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, AddressOne, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not remove 0 Address', async () => {
@@ -116,7 +116,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, AddressZero, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid target', async () => {
@@ -124,7 +124,7 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, user1.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid sentinel', async () => {
@@ -132,7 +132,7 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressZero, user2.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid source', async () => {
@@ -140,7 +140,7 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user1.address, user2.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not remove owner and change threshold to larger number than new owner count', async () => {
@@ -148,7 +148,7 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 2], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not remove owner and change threshold to 0', async () => {
@@ -156,14 +156,14 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 0], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not remove owner only owner', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, user1.address, 1], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('emits event for removed owner and threshold if changed', async () => {
@@ -200,7 +200,7 @@ describe("OwnerManager", async () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 2], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
     })
 
@@ -210,12 +210,12 @@ describe("OwnerManager", async () => {
             await expect(safe.swapOwner(AddressOne, user1.address, user2.address)).to.be.revertedWith("GS031")
         })
 
-        it('can not swap in Safe itseld', async () => {
+        it('can not swap in Safe itself', async () => {
             const { safe } = await setupTests()
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, safe.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not swap in sentinel', async () => {
@@ -223,7 +223,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, AddressOne], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not swap in 0 Address', async () => {
@@ -231,7 +231,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, AddressZero], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not swap in existing owner', async () => {
@@ -239,7 +239,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, user1.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not swap out sentinel', async () => {
@@ -247,7 +247,7 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user1.address, AddressOne, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('can not swap out 0 address', async () => {
@@ -255,28 +255,28 @@ describe("OwnerManager", async () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user3.address, AddressZero, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid target', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user3.address, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid sentinel', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressZero, user1.address, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('Invalid prevOwner, owner pair provided - Invalid source', async () => {
             const { safe } = await setupTests()
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user2.address, user1.address, user2.address], [user1])
-            ).to.emit(safe, "ExecutionFailure")
+            ).to.revertedWith("GS013")
         })
 
         it('emits event for replacing owner', async () => {
