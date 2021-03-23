@@ -111,10 +111,10 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     return signatureBytes
 }
 
-export const logGas = async (message: string, tx: Promise<any>): Promise<any> => {
+export const logGas = async (message: string, tx: Promise<any>, skip?: boolean): Promise<any> => {
     return tx.then(async (result) => {
         const receipt = await result.wait()
-        console.log("           Used", receipt.gasUsed.toNumber(), `gas for >${message}<`)
+        if (!skip) console.log("           Used", receipt.gasUsed.toNumber(), `gas for >${message}<`)
         return result
     })
 }

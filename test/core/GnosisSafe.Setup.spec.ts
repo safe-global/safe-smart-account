@@ -22,7 +22,7 @@ describe("GnosisSafe", async () => {
         }
     })
 
-    describe("Setup", async () => {
+    describe("setup", async () => {
         it('should not allow to call setup on singleton', async () => {
             await deployments.fixture();
             const singleton = await getSafeSingleton()
@@ -45,7 +45,9 @@ describe("GnosisSafe", async () => {
 
         it('should set domain hash', async () => {
             const { template } = await setupTests()
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            await expect(
+                template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            ).to.emit(template, "SafeSetup").withArgs(user1.address, [user1.address, user2.address, user3.address], 2, AddressZero, AddressZero)
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(template, await chainId()))
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
             await expect(await template.getThreshold()).to.be.deep.eq(BigNumber.from(2))
@@ -129,7 +131,9 @@ describe("GnosisSafe", async () => {
             }`
             const testIntializer = await deployContract(user1, source);
             const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"])
-            await template.setup([user1.address, user2.address, user3.address], 2, testIntializer.address, initData, AddressOne, AddressZero, 0, AddressZero)
+            await expect(
+                template.setup([user1.address, user2.address, user3.address], 2, testIntializer.address, initData, AddressOne, AddressZero, 0, AddressZero)
+            ).to.emit(template, "SafeSetup").withArgs(user1.address, [user1.address, user2.address, user3.address], 2, testIntializer.address, AddressOne)
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(template, await chainId()))
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
             await expect(await template.getThreshold()).to.be.deep.eq(BigNumber.from(2))
