@@ -15,6 +15,6 @@ export const encodeMultiSend = (txs: MetaTransaction[]): string => {
     return "0x" + txs.map((tx) => encodeMetaTransaction(tx)).join("")
 }
 
-export const buildMultiSendSafeTx = (multiSend: Contract, txs: MetaTransaction[], nonce: number): SafeTransaction => {
-    return buildContractCall(multiSend, "multiSend", [encodeMultiSend(txs)], nonce, true)
+export const buildMultiSendSafeTx = (multiSend: Contract, txs: MetaTransaction[], nonce: number, overrides?: Partial<SafeTransaction>): SafeTransaction => {
+    return buildContractCall(multiSend, "multiSend", [encodeMultiSend(txs)], nonce, true, overrides)
 }

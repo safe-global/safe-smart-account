@@ -124,18 +124,18 @@ export const executeTx = async (safe: Contract, safeTx: SafeTransaction, signatu
     return safe.execTransaction(safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas, safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver, signatureBytes, overrides || {})
 }
 
-export const buildContractCall = (contract: Contract, method: string, params: any[], nonce: number, delegateCall?: boolean): SafeTransaction => {
+export const buildContractCall = (contract: Contract, method: string, params: any[], nonce: number, delegateCall?: boolean, overrides?: Partial<SafeTransaction>): SafeTransaction => {
     const data = contract.interface.encodeFunctionData(method, params)
-    return buildSafeTransaction({
+    return buildSafeTransaction(Object.assign({
         to: contract.address,
         data,
         operation: delegateCall ? 1 : 0,
         nonce
-    })
+    }, overrides))
 }
 
-export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[], delegateCall?: boolean) => {
-    const tx = buildContractCall(contract, method, params, await safe.nonce(), delegateCall)
+export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[], delegateCall?: boolean, overrides?: Partial<SafeTransaction>) => {
+    const tx = buildContractCall(contract, method, params, await safe.nonce(), delegateCall, overrides)
     const sigs = await Promise.all(signers.map((signer) => safeSignTypedData(signer, safe, tx)))
     return executeTx(safe, tx, sigs)
 }
