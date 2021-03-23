@@ -4,7 +4,7 @@
 - `GS000`: `Could not finish initialization`
 - `GS001`: `Threshold needs to be defined`
 
-### General gas related
+### General gas/ execution related
 - `GS010`: `Not enough gas to execute Safe transaction`
 - `GS011`: `Could not pay gas costs with ether`
 - `GS012`: `Could not pay gas costs with token`
