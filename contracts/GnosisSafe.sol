@@ -170,7 +170,7 @@ contract GnosisSafe
             // We only substract 2500 (compared to the 3000 before) to ensure that the amount passed is still higher than safeTxGas
             success = execute(to, value, data, operation, gasPrice == 0 ? (gasleft() - 2500) : safeTxGas);
             gasUsed = gasUsed.sub(gasleft());
-            // If no safeTxGas and no gasPrice was set (aka both are 0), then the internal tx is required to be successful
+            // If no safeTxGas and no gasPrice was set (e.g. both are 0), then the internal tx is required to be successful
             require(success || safeTxGas != 0 || gasPrice != 0, "GS013");
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;

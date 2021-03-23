@@ -8,7 +8,7 @@
 - `GS010`: `Not enough gas to execute Safe transaction`
 - `GS011`: `Could not pay gas costs with ether`
 - `GS012`: `Could not pay gas costs with token`
-- `GS013`: `Safe transaction failed when gasPrice and safeTxGas where 0`
+- `GS013`: `Safe transaction failed when gasPrice and safeTxGas were 0`
 
 ### General signature validation related
 - `GS020`: `Signatures data too short`
