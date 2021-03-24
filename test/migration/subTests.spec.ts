@@ -4,11 +4,13 @@ import { parseEther } from "@ethersproject/units"
 import { expect } from "chai";
 import hre, { ethers, waffle } from "hardhat";
 import { AddressOne } from "../utils/constants";
-import { buildSafeTransaction, executeContractCallWithSigners, executeTx, executeTxWithSigners } from "../utils/execution"
+import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../utils/execution"
+import { buildMultiSendSafeTx } from "../utils/multisend";
 
 interface TestSetup {
     migratedSafe: Contract,
-    mock: Contract
+    mock: Contract,
+    multiSend: Contract
 }
 
 export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
@@ -72,6 +74,39 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
                 user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
             ).to.emit(migratedSafe, "ExecutionFromModuleSuccess").withArgs(user2.address)
             expect(await mock.callStatic.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(BigNumber.from(1));
+        })
+    })
+
+    describe("multiSend", async () => {
+        it('execute multisend via delegatecall', async () => {
+            const { migratedSafe, mock, multiSend } = await setupTests()
+
+            await user1.sendTransaction({to: migratedSafe.address, value: parseEther("1")})
+            const userBalance = await hre.ethers.provider.getBalance(user2.address)
+            await expect(await hre.ethers.provider.getBalance(migratedSafe.address)).to.be.deep.eq(parseEther("1"))
+
+            const txs: MetaTransaction[] = [
+                buildSafeTransaction({to: user2.address, value: parseEther("1"), nonce: 0}),
+                buildSafeTransaction({to: mock.address, data: "0xbaddad", nonce: 0})
+            ]
+            const safeTx = buildMultiSendSafeTx(multiSend, txs, await migratedSafe.nonce())
+            await expect(
+                executeTxWithSigners(migratedSafe, safeTx, [ user1 ])
+            ).to.emit(migratedSafe, "ExecutionSuccess")
+            
+            await expect(await hre.ethers.provider.getBalance(migratedSafe.address)).to.be.deep.eq(parseEther("0"))
+            await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(parseEther("1")))
+            expect(await mock.callStatic.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(BigNumber.from(1));
+        })
+    })
+
+    describe("fallbackHandler", async () => {
+        it('should be correctly set', async () => {
+            const { migratedSafe, mock } = await setupTests()
+            // Check fallback handler
+            await expect(
+                await ethers.provider.getStorageAt(migratedSafe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5")
+            ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
         })
     })
 }
