@@ -1,8 +1,9 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts"
 import { parseEther } from "@ethersproject/units"
 import { expect } from "chai";
 import hre, { ethers, waffle } from "hardhat";
-import { buildSafeTransaction, executeTx, executeTxWithSigners } from "../utils/execution"
+import { buildSafeTransaction, executeContractCallWithSigners, executeTx, executeTxWithSigners } from "../utils/execution"
 
 interface TestSetup {
     migratedSafe: Contract,
@@ -11,7 +12,7 @@ interface TestSetup {
 
 export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2, user3] = waffle.provider.getWallets();
 
     describe("execTransaction", async () => {
         it('should be able to transfer ETH', async () => {
@@ -27,6 +28,30 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
             await expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(parseEther("1")))
             await expect(await ethers.provider.getBalance(migratedSafe.address)).to.be.deep.eq(parseEther("0"))
+        })
+    })
+
+    describe("addOwner", async () => {
+        it('should add owner and change treshold', async () => {
+            const { migratedSafe } = await setupTests()
+
+            await expect(
+                executeContractCallWithSigners(migratedSafe, migratedSafe, "addOwnerWithThreshold", [user2.address, 2], [user1])
+            ).to.emit(migratedSafe, "AddedOwner").withArgs(user2.address).and.to.emit(migratedSafe, "ChangedThreshold")
+
+            await expect(await migratedSafe.getThreshold()).to.be.deep.eq(BigNumber.from(2))
+            await expect(await migratedSafe.getOwners()).to.be.deep.equal([user2.address, user1.address])
+
+            await expect(
+                executeContractCallWithSigners(migratedSafe, migratedSafe, "addOwnerWithThreshold", [user3.address, 1], [user1, user2])
+            ).to.emit(migratedSafe, "AddedOwner").withArgs(user3.address).and.to.emit(migratedSafe, "ChangedThreshold")
+
+            await expect(await migratedSafe.getThreshold()).to.be.deep.eq(BigNumber.from(1))
+            await expect(await migratedSafe.getOwners()).to.be.deep.equal([user3.address, user2.address, user1.address])
+
+            await expect(await migratedSafe.isOwner(user1.address)).to.be.true
+            await expect(await migratedSafe.isOwner(user2.address)).to.be.true
+            await expect(await migratedSafe.isOwner(user3.address)).to.be.true
         })
     })
 }
