@@ -2,36 +2,28 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 
-/// @title Multi Send - Allows to batch multiple transactions into one.
-/// @author Nick Dodson - <nick.dodson@consensys.net>
-/// @author Gonçalo Sá - <goncalo.sa@consensys.net>
+/// @title Multi Send Call Only - Allows to batch multiple transactions into one, but only calls
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract MultiSend {
-
-    bytes32 constant private GUARD_VALUE = keccak256("multisend.guard.bytes32");
-
-    bytes32 guard;
-
-    constructor() {
-        guard = GUARD_VALUE;
-    }
+/// @notice The guard logic is not required here as this contract doesn't support nested delegate calls
+contract MultiSendCallOnly {
 
     /// @dev Sends multiple transactions and reverts all if one fails.
     /// @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of
-    ///                     operation as a uint8 with 0 for a call or 1 for a delegatecall (=> 1 byte),
+    ///                     operation has to be uint8(0) in this version (=> 1 byte),
     ///                     to as a address (=> 20 bytes),
     ///                     value as a uint256 (=> 32 bytes),
     ///                     data length as a uint256 (=> 32 bytes),
     ///                     data as bytes.
     ///                     see abi.encodePacked for more information on packed encoding
+    /// @notice The code is for most part the same as the normal MultiSend (to keep compatibility), 
+    ///         but reverts if a transaction tries to use a delegatecall.
     /// @notice This method is payable as delegatecalls keep the msg.value from the previous call
     ///         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
     function multiSend(bytes memory transactions)
         public
         payable
     {
-        require(guard != GUARD_VALUE, "MultiSend should only be called via delegatecall");
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let length := mload(transactions)
@@ -53,7 +45,8 @@ contract MultiSend {
                 let success := 0
                 switch operation
                 case 0 { success := call(gas(), to, value, data, dataLength, 0, 0) }
-                case 1 { success := delegatecall(gas(), to, data, dataLength, 0, 0) }
+                // This version does not allow delegatecalls
+                case 1 { revert(0, 0) }
                 if eq(success, 0) { revert(0, 0) }
                 // Next entry starts at 85 byte + data length
                 i := add(i, add(0x55, dataLength))

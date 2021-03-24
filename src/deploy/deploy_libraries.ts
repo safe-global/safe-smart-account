@@ -21,6 +21,13 @@ const deploy: DeployFunction = async function (
     log: true,
     deterministicDeployment: true,
   });
+
+  await deploy("MultiSendCallOnly", {
+    from: deployer,
+    args: [],
+    log: true,
+    deterministicDeployment: true,
+  });
 };
 
 deploy.tags = ['libraries']

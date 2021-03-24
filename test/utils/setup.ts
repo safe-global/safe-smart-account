@@ -44,6 +44,12 @@ export const getMultiSend = async () => {
     return MultiSend.attach(MultiSendDeployment.address);
 }
 
+export const getMultiSendCallOnly = async () => {
+    const MultiSendDeployment = await deployments.get("MultiSendCallOnly");
+    const MultiSend = await hre.ethers.getContractFactory("MultiSendCallOnly");
+    return MultiSend.attach(MultiSendDeployment.address);
+}
+
 export const getCreateCall = async () => {
     const CreateCallDeployment = await deployments.get("CreateCall");
     const CreateCall = await hre.ethers.getContractFactory("CreateCall");
