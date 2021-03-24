@@ -2,10 +2,10 @@ import { expect } from "chai";
 import hre, { ethers, deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners, getSafeSingleton, migrationContract, getFactory, getMock } from "../utils/setup";
-import { buildSafeTransaction, executeTx, executeTxWithSigners, safeApproveHash } from "../utils/execution";
+import { getSafeSingleton, getFactory, getMock } from "../utils/setup";
+import { buildSafeTransaction, executeTx, safeApproveHash } from "../utils/execution";
 import { verificationTests } from "./subTests.spec";
-import deploymentData from "./safeDeployment.json";
+import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../utils/proxies";
 
 describe("Upgrade from Safe 1.2.0", () => {
