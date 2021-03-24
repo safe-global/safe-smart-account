@@ -4,10 +4,11 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../interfaces/ERC1155TokenReceiver.sol";
 import "../interfaces/ERC721TokenReceiver.sol";
 import "../interfaces/ERC777TokensRecipient.sol";
+import "../interfaces/IERC165.sol";
 
 /// @title Default Callback Handler - returns true for known token callbacks
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver {
+contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver, IERC165 {
 
     string public constant NAME = "Default Callback Handler";
     string public constant VERSION = "1.0.0";
@@ -46,6 +47,19 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
         pure
     {
         // We implement this for completeness, doesn't really have any value
+    }
+
+    
+    function supportsInterface(bytes4 interfaceId) 
+        virtual 
+        override 
+        external 
+        view 
+        returns (bool) 
+    {
+        return interfaceId == type(ERC1155TokenReceiver).interfaceId
+            || interfaceId == type(ERC721TokenReceiver).interfaceId
+            || interfaceId == type(IERC165).interfaceId;
     }
 
 }
