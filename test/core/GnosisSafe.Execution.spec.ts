@@ -37,7 +37,7 @@ describe("GnosisSafe", async () => {
         }
     })
 
-    describe("execTransactions", async () => {
+    describe("execTransaction", async () => {
 
         it('should revert if too little gas is provided', async () => {
             const { safe } = await setupTests()

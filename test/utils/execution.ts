@@ -134,10 +134,14 @@ export const buildContractCall = (contract: Contract, method: string, params: an
     }, overrides))
 }
 
+export const executeTxWithSigners = async (safe: Contract, tx: SafeTransaction, signers: Wallet[], overrides?: any) => {
+    const sigs = await Promise.all(signers.map((signer) => safeSignTypedData(signer, safe, tx)))
+    return executeTx(safe, tx, sigs, overrides)
+}
+
 export const executeContractCallWithSigners = async (safe: Contract, contract: Contract, method: string, params: any[], signers: Wallet[], delegateCall?: boolean, overrides?: Partial<SafeTransaction>) => {
     const tx = buildContractCall(contract, method, params, await safe.nonce(), delegateCall, overrides)
-    const sigs = await Promise.all(signers.map((signer) => safeSignTypedData(signer, safe, tx)))
-    return executeTx(safe, tx, sigs)
+    return executeTxWithSigners(safe, tx, signers)
 }
 
 export const buildSafeTransaction = (template: {
