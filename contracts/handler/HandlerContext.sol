@@ -7,6 +7,8 @@ pragma solidity >=0.7.0 <0.9.0;
 contract HandlerContext {
 
     // This function does not rely on a trusted forwarder. Use the returned value only to check information against the calling manager.
+    /// @notice This is only reliable in combination with a FallbackManager that supports this (e.g. Safe contract >=1.3.0). 
+    ///         When using this functionality make sure that the linked _manager (aka msg.sender) supports this.
     function _msgSender() internal pure returns (address sender) {
         // The assembly code is more direct than the Solidity version using `abi.decode`.
         assembly { sender := shr(96, calldataload(sub(calldatasize(), 20))) }
