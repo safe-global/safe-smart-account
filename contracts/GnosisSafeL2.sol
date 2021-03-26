@@ -10,7 +10,6 @@ contract GnosisSafeL2
     is GnosisSafe {
 
     event SafeMultiSigTransaction(
-        address sender,
         address to,
         uint256 value,
         bytes data,
@@ -20,8 +19,10 @@ contract GnosisSafeL2
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        uint256 nonce,
-        bytes signatures
+        bytes signatures,
+        // We combine nonce, sender and threshold into one to avoid stack too deep
+        // Dev note: additionalInfo should not contain `bytes`, as this complicates decoding
+        bytes additionalInfo
     );
 
     event SafeModuleTransaction(
@@ -60,10 +61,13 @@ contract GnosisSafeL2
         public
         override
         payable
-        returns (bool success)
+        returns (bool)
     {
+        bytes memory additionalInfo;
+        {
+            additionalInfo = abi.encode(nonce, msg.sender, threshold);
+        }
         emit SafeMultiSigTransaction(
-            msg.sender,
             to,
             value,
             data,
@@ -73,8 +77,8 @@ contract GnosisSafeL2
             gasPrice,
             gasToken,
             refundReceiver,
-            nonce,
-            signatures
+            signatures,
+            additionalInfo
         );
         return super.execTransaction(
             to,

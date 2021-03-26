@@ -1,10 +1,9 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { safeApproveHash, buildSafeTransaction, executeTx, calculateSafeTransactionHash, executeContractCallWithSigners } from "../utils/execution";
+import { safeApproveHash, buildSafeTransaction, buildSignatureBytes, executeTx, executeContractCallWithSigners } from "../utils/execution";
 import { parseEther } from "@ethersproject/units";
-import { chainId } from "../utils/encoding";
 import { safeContractUnderTest } from "../utils/config";
 
 describe("GnosisSafeL2", async () => {
@@ -37,13 +36,28 @@ describe("GnosisSafeL2", async () => {
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
+            const additionalInfo = ethers.utils.defaultAbiCoder.encode(['uint256', 'address', 'uint256'], [tx.nonce, user1.address, 1])
+            const signatures = [await safeApproveHash(user1, safe, tx, true)]
+            const signatureBytes = buildSignatureBytes(signatures).toLowerCase()
             let executedTx: any;
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
+                executeTx(safe, tx, signatures).then((tx) => { executedTx = tx; return tx })
             )
-            .to.emit(safe, "ExecutionSuccess")
-            .to.emit(safe, "SafeMultiSigTransaction")
-            // TODO: test args
+                .to.emit(safe, "ExecutionSuccess")
+                .to.emit(safe, "SafeMultiSigTransaction")
+                .withArgs(
+                    tx.to,
+                    tx.value,
+                    tx.data,
+                    tx.operation,
+                    tx.safeTxGas,
+                    tx.baseGas,
+                    tx.gasPrice,
+                    tx.gasToken,
+                    tx.refundReceiver,
+                    signatureBytes,
+                    additionalInfo
+                )
         })
 
         it('should emit SafeModuleTransaction event', async () => {
@@ -54,8 +68,8 @@ describe("GnosisSafeL2", async () => {
             await expect(
                 user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
             )
-            .to.emit(safe, "ExecutionFromModuleSuccess").withArgs(user2.address)
-            .to.emit(safe, "SafeModuleTransaction").withArgs(user2.address, mock.address, 0, "0xbaddad", 0, true)
+                .to.emit(safe, "ExecutionFromModuleSuccess").withArgs(user2.address)
+                .to.emit(safe, "SafeModuleTransaction").withArgs(user2.address, mock.address, 0, "0xbaddad", 0, true)
         })
 
     })
