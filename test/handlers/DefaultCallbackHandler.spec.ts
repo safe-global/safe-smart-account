@@ -10,7 +10,7 @@ describe("DefaultCallbackHandler", async () => {
     });
 
     describe("ERC1155", async () => {
-        it('should supports ERC1155 interface', async () => {
+        it('should support ERC1155 interface', async () => {
             const handler = await getDefaultCallbackHandler()
             await expect(
                 await handler.callStatic.supportsInterface("0x4e2312e0")
@@ -33,7 +33,7 @@ describe("DefaultCallbackHandler", async () => {
     })
 
     describe("ERC721", async () => {
-        it('should supports ERC721 interface', async () => {
+        it('should support ERC721 interface', async () => {
             const handler = await getDefaultCallbackHandler()
             await expect(
                 await handler.callStatic.supportsInterface("0x150b7a02")
@@ -56,6 +56,13 @@ describe("DefaultCallbackHandler", async () => {
     })
 
     describe("ERC165", async () => {
+        it('should support ERC165 interface', async () => {
+            const handler = await getDefaultCallbackHandler()
+            await expect(
+                await handler.callStatic.supportsInterface("0x01ffc9a7")
+            ).to.be.eq(true)
+        })
+
         it('should not support random interface', async () => {
             const handler = await getDefaultCallbackHandler()
             await expect(
