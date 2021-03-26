@@ -8,7 +8,7 @@ const deploy: DeployFunction = async function (
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
-  await deploy("GnosisSafe", {
+  await deploy("GnosisSafeL2", {
     from: deployer,
     args: [],
     log: true,
@@ -16,5 +16,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
-deploy.tags = ['singleton']
+deploy.tags = ['l2']
 export default deploy;

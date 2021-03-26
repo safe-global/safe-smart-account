@@ -1,0 +1,90 @@
+{
+  "address": "0x27a1eD8122A5527b5FD8D191BCC79a29FebA3b2E",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum Enum.Operation",
+          "name": "operation",
+          "type": "uint8"
+        }
+      ],
+      "name": "simulate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "estimate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "returnData",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "args": [],
+  "solcInputHash": "c719c3671f181108e3d57399398119c2",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"enum Enum.Operation\",\"name\":\"operation\",\"type\":\"uint8\"}],\"name\":\"simulate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"estimate\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"returnData\",\"type\":\"bytes\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.pm>\",\"kind\":\"dev\",\"methods\":{},\"title\":\"Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/accessors/SimulateTxAccessor.sol\":\"SimulateTxAccessor\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/accessors/SimulateTxAccessor.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\nimport \\\"../base/Executor.sol\\\";\\n\\n/// @title Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions\\n/// @author Richard Meissner - <richard@gnosis.pm>\\ncontract SimulateTxAccessor is Executor {\\n\\n    bytes32 constant private GUARD_VALUE = keccak256(\\\"simulate_tx_accessor.guard.bytes32\\\");\\n    bytes32 guard;\\n\\n    constructor() {\\n        guard = GUARD_VALUE;\\n    }\\n\\n    modifier onlyDelegateCall() {\\n        require(guard != GUARD_VALUE, \\\"SimulateTxAccessor should only be called via delegatecall\\\");\\n        _;\\n    }\\n\\n    function simulate(address to, uint256 value, bytes calldata data, Enum.Operation operation)\\n        external\\n        onlyDelegateCall()\\n        returns(uint256 estimate, bool success, bytes memory returnData)\\n    {\\n        uint256 startGas = gasleft();\\n        success = execute(to, value, data, operation, gasleft());\\n        estimate = startGas - gasleft();\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            // Load free memory location\\n            let ptr := mload(0x40)\\n            // We allocate memory for the return data by setting the free memory location to\\n            // current free memory location + data size + 32 bytes for data size value\\n            mstore(0x40, add(ptr, add(returndatasize(), 0x20)))\\n            // Store the size\\n            mstore(ptr, returndatasize())\\n            // Store the data\\n            returndatacopy(add(ptr, 0x20), 0, returndatasize())\\n            // Point the return data to the correct memory location\\n            returnData := ptr\\n        }\\n    }\\n}\",\"keccak256\":\"0x9ff7fb592d54edf5b3d31a9c836a711b1e90ea7960609286bdac2dc3b0ef6121\",\"license\":\"LGPL-3.0-only\"},\"contracts/base/Executor.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\nimport \\\"../common/Enum.sol\\\";\\n\\n/// @title Executor - A contract that can execute transactions\\n/// @author Richard Meissner - <richard@gnosis.pm>\\ncontract Executor {\\n    function execute(\\n        address to,\\n        uint256 value,\\n        bytes memory data,\\n        Enum.Operation operation,\\n        uint256 txGas\\n    ) internal returns (bool success) {\\n        if (operation == Enum.Operation.DelegateCall) {\\n            // solium-disable-next-line security/no-inline-assembly\\n            assembly {\\n                success := delegatecall(\\n                    txGas,\\n                    to,\\n                    add(data, 0x20),\\n                    mload(data),\\n                    0,\\n                    0\\n                )\\n            }\\n        } else {\\n            // solium-disable-next-line security/no-inline-assembly\\n            assembly {\\n                success := call(\\n                    txGas,\\n                    to,\\n                    value,\\n                    add(data, 0x20),\\n                    mload(data),\\n                    0,\\n                    0\\n                )\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x33c511ddb3bf1d47cfaa8fe0eb39f3289c4a4b4a0e2c5fb0954670071204eda4\",\"license\":\"LGPL-3.0-only\"},\"contracts/common/Enum.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\n\\n/// @title Enum - Collection of enums\\n/// @author Richard Meissner - <richard@gnosis.pm>\\ncontract Enum {\\n    enum Operation {\\n        Call,\\n        DelegateCall\\n    }\\n}\\n\",\"keccak256\":\"0xa1acacda381b8bd62dd19a8fc1fb61001e5b7a0f632f743169014966fc310319\",\"license\":\"LGPL-3.0-only\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b507fc441218ef024281ef528f487f2918622afa04d8b68ecba5c1fa9aae482e00ebb600081905550610328806100476000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c80631c5fb21114610030575b600080fd5b6100de6004803603608081101561004657600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561008d57600080fd5b82018360208201111561009f57600080fd5b803590602001918460018302840111640100000000831117156100c157600080fd5b9091929391929390803560ff169060200190929190505050610169565b60405180848152602001831515815260200180602001828103825283818151815260200191508051906020019080838360005b8381101561012c578082015181840152602081019050610111565b50505050905090810190601f1680156101595780820380516001836020036101000a031916815260200191505b5094505050505060405180910390f35b60008060607fc441218ef024281ef528f487f2918622afa04d8b68ecba5c1fa9aae482e00ebb60005414156101e9576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260398152602001806102ba6039913960400191505060405180910390fd5b60005a905061023f898989898080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050885a61026d565b92505a8103935060405160203d0181016040523d81523d6000602083013e8092505050955095509592505050565b600060018081111561027b57fe5b83600181111561028757fe5b14156102a0576000808551602087018986f490506102b0565b600080855160208701888a87f190505b9594505050505056fe53696d756c61746554784163636573736f722073686f756c64206f6e6c792062652063616c6c6564207669612064656c656761746563616c6ca2646970667358221220a6796438c1380e5f23b5f7290cda63f5622b9ea69bfc14e80dacb5ba57b82efc64736f6c63430007060033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c80631c5fb21114610030575b600080fd5b6100de6004803603608081101561004657600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561008d57600080fd5b82018360208201111561009f57600080fd5b803590602001918460018302840111640100000000831117156100c157600080fd5b9091929391929390803560ff169060200190929190505050610169565b60405180848152602001831515815260200180602001828103825283818151815260200191508051906020019080838360005b8381101561012c578082015181840152602081019050610111565b50505050905090810190601f1680156101595780820380516001836020036101000a031916815260200191505b5094505050505060405180910390f35b60008060607fc441218ef024281ef528f487f2918622afa04d8b68ecba5c1fa9aae482e00ebb60005414156101e9576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260398152602001806102ba6039913960400191505060405180910390fd5b60005a905061023f898989898080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050885a61026d565b92505a8103935060405160203d0181016040523d81523d6000602083013e8092505050955095509592505050565b600060018081111561027b57fe5b83600181111561028757fe5b14156102a0576000808551602087018986f490506102b0565b600080855160208701888a87f190505b9594505050505056fe53696d756c61746554784163636573736f722073686f756c64206f6e6c792062652063616c6c6564207669612064656c656761746563616c6ca2646970667358221220a6796438c1380e5f23b5f7290cda63f5622b9ea69bfc14e80dacb5ba57b82efc64736f6c63430007060033",
+  "devdoc": {
+    "author": "Richard Meissner - <richard@gnosis.pm>",
+    "kind": "dev",
+    "methods": {},
+    "title": "Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 1948,
+        "contract": "contracts/accessors/SimulateTxAccessor.sol:SimulateTxAccessor",
+        "label": "guard",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_bytes32"
+      }
+    ],
+    "types": {
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

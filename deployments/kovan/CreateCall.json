@@ -68,22 +68,6 @@
       "type": "function"
     }
   ],
-  "transactionHash": "0x52e3cf76112e1aefad709c856a5128f5d15d5d5d069469313a19d2a66264ddd7",
-  "receipt": {
-    "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
-    "from": "0x05c85Ab5B09Eb8A55020d72daf6091E04e264af9",
-    "contractAddress": null,
-    "transactionIndex": 23,
-    "gasUsed": "294718",
-    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0x76dfcf14964a1f5595843a3a5086514aa3e23dc671d8298c09f9fde9809b874a",
-    "transactionHash": "0x52e3cf76112e1aefad709c856a5128f5d15d5d5d069469313a19d2a66264ddd7",
-    "logs": [],
-    "blockNumber": 8301441,
-    "cumulativeGasUsed": "3772784",
-    "status": 1,
-    "byzantium": true
-  },
   "args": [],
   "solcInputHash": "c719c3671f181108e3d57399398119c2",
   "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"name\":\"ContractCreation\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"}],\"name\":\"performCreate\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"deploymentData\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"}],\"name\":\"performCreate2\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"newContract\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Richard Meissner - <richard@gnosis.io>\",\"kind\":\"dev\",\"methods\":{},\"title\":\"Create Call - Allows to use the different create opcodes to deploy a contract\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/libraries/CreateCall.sol\":\"CreateCall\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/libraries/CreateCall.sol\":{\"content\":\"// SPDX-License-Identifier: LGPL-3.0-only\\npragma solidity >=0.7.0 <0.9.0;\\n\\n\\n/// @title Create Call - Allows to use the different create opcodes to deploy a contract\\n/// @author Richard Meissner - <richard@gnosis.io>\\ncontract CreateCall {\\n    event ContractCreation(address newContract);\\n\\n    function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns(address newContract) {\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)\\n        }\\n        require(newContract != address(0), \\\"Could not deploy contract\\\");\\n        emit ContractCreation(newContract);\\n    }\\n\\n    function performCreate(uint256 value, bytes memory deploymentData) public returns(address newContract) {\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))\\n        }\\n        require(newContract != address(0), \\\"Could not deploy contract\\\");\\n        emit ContractCreation(newContract);\\n    }\\n}\",\"keccak256\":\"0x2b6c00e3d39b7662ffe5c83f4c45c4e350d322f75a94c67c719a96905a110441\",\"license\":\"LGPL-3.0-only\"}},\"version\":1}",
