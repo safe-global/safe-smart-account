@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, ethers, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { safeApproveHash, buildSafeTransaction, buildSignatureBytes, executeTx, executeContractCallWithSigners } from "../utils/execution";
+import { safeApproveHash, buildSafeTransaction, buildSignatureBytes, executeTx, executeContractCallWithSigners } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 import { safeContractUnderTest } from "../utils/config";
 

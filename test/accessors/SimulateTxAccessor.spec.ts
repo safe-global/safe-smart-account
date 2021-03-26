@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
-import { buildContractCall } from "../utils/execution";
+import { buildContractCall } from "../../src/utils/execution";
 import { parseEther } from "ethers/lib/utils";
 
 describe("SimulateTxAccessor", async () => {

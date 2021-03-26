@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, deployContract, getMock, getSafeTemplate } from "../utils/setup";
-import { executeContractCallWithSigners } from "../utils/execution";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("FallbackManager", async () => {
 

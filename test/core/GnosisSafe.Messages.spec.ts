@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getSafeWithOwners } from "../utils/setup";
-import { executeContractCallWithSigners, calculateSafeMessageHash } from "../utils/execution";
+import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {

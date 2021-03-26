@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getSafeWithOwners } from "../utils/setup";
-import { AddressOne } from "../utils/constants";
+import { AddressOne } from "../../src/utils/constants";
 
 describe("GnosisSafe", async () => {
 

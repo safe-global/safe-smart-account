@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners, getSafeSingleton, migrationContract } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
-import { executeContractCallWithSigners } from "../utils/execution";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("Migration", async () => {
 

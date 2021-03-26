@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getDefaultCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
-import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, executeContractCallWithSigners } from "../../test/utils/execution";
+import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, executeContractCallWithSigners } from "../../src/utils/execution";
 import { Wallet, Contract } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 

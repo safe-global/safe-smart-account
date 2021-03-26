@@ -3,9 +3,9 @@ import { Contract } from "@ethersproject/contracts"
 import { parseEther } from "@ethersproject/units"
 import { expect } from "chai";
 import hre, { ethers, waffle } from "hardhat";
-import { AddressOne } from "../utils/constants";
-import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../utils/execution"
-import { buildMultiSendSafeTx } from "../utils/multisend";
+import { AddressOne } from "../../src/utils/constants";
+import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution"
+import { buildMultiSendSafeTx } from "../../src/utils/multisend";
 
 interface TestSetup {
     migratedSafe: Contract,

@@ -2,8 +2,8 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners } from "../utils/setup";
-import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../utils/execution";
-import { buildMultiSendSafeTx } from "../utils/multisend";
+import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
+import { buildMultiSendSafeTx } from "../../src/utils/multisend";
 import { parseEther } from "@ethersproject/units";
 
 describe("MultiSendCallOnly", async () => {

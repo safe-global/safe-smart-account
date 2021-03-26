@@ -1,6 +1,4 @@
-
-import { ethers } from "hardhat"
-import { Contract } from "ethers"
+import { ethers, Contract } from "ethers"
 
 export const calculateProxyAddress = async (factory: Contract, singleton: string, inititalizer: string, nonce: number | string) => {
     const deploymentCode = ethers.utils.solidityPack(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton])
