@@ -104,7 +104,6 @@ contract GnosisSafeL2
         override
         returns (bool success)
     {
-        success = super.execTransactionFromModule(to, value, data, operation);
         emit SafeModuleTransaction(
             msg.sender,
             to,
@@ -113,5 +112,6 @@ contract GnosisSafeL2
             operation,
             success
         );
+        success = super.execTransactionFromModule(to, value, data, operation);
     }
 }
