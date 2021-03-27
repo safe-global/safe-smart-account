@@ -78,31 +78,9 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
     function simulateDelegatecall(
-<<<<<<< HEAD
         address targetContract, // solhint-disable-line no-unused-var
         bytes calldata calldataPayload // solhint-disable-line no-unused-var
     ) public returns (bytes memory response) {
-=======
-        address targetContract,
-        bytes calldata calldataPayload
-    ) external returns (bytes memory response) {
-        bytes memory innerCall = abi.encodeWithSelector(
-            SIMULATE_SELECTOR,
-            targetContract,
-            calldataPayload
-        );
-        (, response) = address(msg.sender).call(innerCall);
-        bool innerSuccess = response[response.length - 1] == 0x01;
-        setLength(response, response.length - 1);
-        if (innerSuccess) {
-            return response;
-        } else {
-            revertWith(response);
-        }
-    }
-
-    function revertWith(bytes memory response) internal pure {
->>>>>>> 9d22efd... Fix lint warnings
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let internalCalldata := mload(0x40)
@@ -119,7 +97,6 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
                 sub(calldatasize(), 0x04)
             )
 
-<<<<<<< HEAD
             // `pop` is required here by the compiler, as top level expressions
             // can't have return values in inline assembly. `call` typically
             // returns a 0 or 1 value indicated whether or not it reverted, but
@@ -154,12 +131,6 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
             if iszero(mload(0x00)) {
                 revert(add(response, 0x20), mload(response))
             }
-=======
-    function setLength(bytes memory buffer, uint256 length) internal pure {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            mstore(buffer, length)
->>>>>>> 9d22efd... Fix lint warnings
         }
     }
 }

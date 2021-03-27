@@ -68,8 +68,8 @@ describe("GnosisSafeL2", async () => {
             await expect(
                 user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
             )
+                .to.emit(safe, "SafeModuleTransaction").withArgs(user2.address, mock.address, 0, "0xbaddad", 0)
                 .to.emit(safe, "ExecutionFromModuleSuccess").withArgs(user2.address)
-                .to.emit(safe, "SafeModuleTransaction").withArgs(user2.address, mock.address, 0, "0xbaddad", 0, true)
         })
 
     })

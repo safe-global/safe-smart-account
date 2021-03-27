@@ -30,8 +30,7 @@ contract GnosisSafeL2
         address to,
         uint256 value,
         bytes data,
-        Enum.Operation operation,
-        bool success
+        Enum.Operation operation
     );
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
@@ -109,8 +108,7 @@ contract GnosisSafeL2
             to,
             value,
             data,
-            operation,
-            success
+            operation
         );
         success = super.execTransactionFromModule(to, value, data, operation);
     }
