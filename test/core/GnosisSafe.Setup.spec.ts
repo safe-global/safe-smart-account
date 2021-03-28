@@ -5,8 +5,8 @@ import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { parseEther } from "@ethersproject/units";
 import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
-import { calculateSafeDomainSeparator } from "../utils/execution";
-import { AddressOne } from "../utils/constants";
+import { calculateSafeDomainSeparator } from "../../src/utils/execution";
+import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
 
 
@@ -123,7 +123,7 @@ describe("GnosisSafe", async () => {
             contract Initializer {
                 function init(bytes4 data) public {
                     bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
-                    // solium-disable-next-line security/no-inline-assembly
+                    // solhint-disable-next-line no-inline-assembly
                     assembly {
                         sstore(slot, data)
                     }

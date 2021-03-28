@@ -3,8 +3,8 @@ import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners } from "../utils/setup";
-import { buildContractCall, executeContractCallWithSigners } from "../utils/execution";
-import { AddressOne } from "../utils/constants";
+import { buildContractCall, executeContractCallWithSigners } from "../../src/utils/execution";
+import { AddressOne } from "../../src/utils/constants";
 
 describe("DelegateCallTransactionGuard", async () => {
 

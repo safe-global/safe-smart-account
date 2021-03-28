@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
-import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../utils/execution";
+import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 import { chainId } from "../utils/encoding";
 
@@ -16,7 +16,7 @@ describe("GnosisSafe", async () => {
             contract StorageSetter {
                 function setStorage(bytes3 data) public {
                     bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
-                    // solium-disable-next-line security/no-inline-assembly
+                    // solhint-disable-next-line no-inline-assembly
                     assembly {
                         sstore(slot, data)
                     }
@@ -151,7 +151,8 @@ describe("GnosisSafe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
             ).to.emit(safe, "ExecutionSuccess")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
-            const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[0].data, receipt.logs[0].topics)
+            const logIndex = receipt.logs.length - 1
+            const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[logIndex].data, receipt.logs[logIndex].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
             expect(successEvent.payment.toNumber()).to.be.lte(5000)
@@ -174,7 +175,8 @@ describe("GnosisSafe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
             ).to.emit(safe, "ExecutionFailure")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
-            const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[0].data, receipt.logs[0].topics)
+            const logIndex = receipt.logs.length - 1
+            const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[logIndex].data, receipt.logs[logIndex].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
             expect(successEvent.payment.toNumber()).to.be.lte(5000)

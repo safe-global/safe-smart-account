@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getFactory, getMock, getSafeWithOwners } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber, Contract } from "ethers";
-import { calculateProxyAddress, calculateProxyAddressWithCallback } from "../utils/proxies";
+import { calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
 import { getAddress } from "ethers/lib/utils";
 
 describe("ProxyFactory", async () => {

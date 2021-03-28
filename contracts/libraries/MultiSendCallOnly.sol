@@ -24,7 +24,7 @@ contract MultiSendCallOnly {
         public
         payable
     {
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20

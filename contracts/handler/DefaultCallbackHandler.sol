@@ -40,7 +40,6 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
         return 0x150b7a02;
     }
 
-    // solium-disable-next-line no-empty-blocks
     function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) 
         override
         external 

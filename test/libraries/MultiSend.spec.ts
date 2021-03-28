@@ -2,8 +2,8 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getMock, getMultiSend, getSafeWithOwners } from "../utils/setup";
-import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../utils/execution";
-import { buildMultiSendSafeTx, encodeMultiSend } from "../utils/multisend";
+import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
+import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
 import { parseEther } from "@ethersproject/units";
 
 describe("MultiSend", async () => {
@@ -16,7 +16,7 @@ describe("MultiSend", async () => {
             contract StorageSetter {
                 function setStorage(bytes3 data) public {
                     bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
-                    // solium-disable-next-line security/no-inline-assembly
+                    // solhint-disable-next-line no-inline-assembly
                     assembly {
                         sstore(slot, data)
                     }

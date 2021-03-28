@@ -11,7 +11,7 @@ contract MultiSend {
 
     bytes32 constant private GUARD_VALUE = keccak256("multisend.guard.bytes32");
 
-    bytes32 guard;
+    bytes32 private guard;
 
     constructor() {
         guard = GUARD_VALUE;
@@ -32,7 +32,7 @@ contract MultiSend {
         payable
     {
         require(guard != GUARD_VALUE, "MultiSend should only be called via delegatecall");
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20

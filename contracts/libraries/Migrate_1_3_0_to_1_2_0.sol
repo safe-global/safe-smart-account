@@ -28,7 +28,7 @@ contract Migration {
     bytes32 private domainSeparator;
 
     // Define guard last to avoid conflict with Safe storage layout
-    bytes32 guard;
+    bytes32 private guard;
 
     /// @dev Allows to migrate the contract. This can only be called via a delegatecall.
     function migrate()

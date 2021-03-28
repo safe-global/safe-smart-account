@@ -70,6 +70,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     /// @param operation Operation type of module transaction.
     function execTransactionFromModule(address to, uint256 value, bytes memory data, Enum.Operation operation)
         public
+        virtual
         returns (bool success)
     {
         // Only whitelisted modules are allowed.
@@ -90,7 +91,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         returns (bool success, bytes memory returnData)
     {
         success = execTransactionFromModule(to, value, data, operation);
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             // Load free memory location
             let ptr := mload(0x40)
@@ -139,7 +140,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         }
         next = currentModule;
         // Set correct size of returned array
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             mstore(array, moduleCount)
         }

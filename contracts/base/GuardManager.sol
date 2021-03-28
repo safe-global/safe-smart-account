@@ -34,7 +34,7 @@ contract GuardManager is SelfAuthorized {
         authorized
     {
         bytes32 slot = GUARD_STORAGE_SLOT;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             sstore(slot, guard)
         }
@@ -46,7 +46,7 @@ contract GuardManager is SelfAuthorized {
         returns (address guard)
     {
         bytes32 slot = GUARD_STORAGE_SLOT;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             guard := sload(slot)
         }

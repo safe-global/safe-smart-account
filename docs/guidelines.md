@@ -9,7 +9,7 @@ The data can be stored to this location with
 
 ```
 bytes32 slot = VARIABLE_SLOT;
-// solium-disable-next-line security/no-inline-assembly
+// solhint-disable-next-line no-inline-assembly
 assembly {
     sstore(slot, value)
 }
@@ -19,7 +19,7 @@ and read with
 
 ```
 bytes32 slot = VARIABLE_SLOT;
-// solium-disable-next-line security/no-inline-assembly
+// solhint-disable-next-line no-inline-assembly
 assembly {
     value := sload(slot)
 }

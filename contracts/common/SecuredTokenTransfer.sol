@@ -20,7 +20,7 @@ contract SecuredTokenTransfer {
     {
         // 0xa9059cbb - keccack("transfer(address,uint256)")
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0)
             let ptr := mload(0x40)

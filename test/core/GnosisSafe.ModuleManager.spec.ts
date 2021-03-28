@@ -4,8 +4,8 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners, getMock } from "../utils/setup";
-import { executeContractCallWithSigners } from "../utils/execution";
-import { AddressOne } from "../utils/constants";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
+import { AddressOne } from "../../src/utils/constants";
 
 describe("ModuleManager", async () => {
 

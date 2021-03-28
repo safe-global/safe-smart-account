@@ -2,7 +2,8 @@ import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
-import { logGas } from "./execution";
+import { logGas } from "../../src/utils/execution";
+import { safeContractUnderTest } from "./config";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -21,8 +22,8 @@ export const compatFallbackHandlerContract = async () => {
 }
 
 export const getSafeSingleton = async () => {
-    const SafeDeployment = await deployments.get("GnosisSafe");
-    const Safe = await hre.ethers.getContractFactory("GnosisSafe");
+    const SafeDeployment = await deployments.get(safeContractUnderTest());
+    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
     return Safe.attach(SafeDeployment.address);
 }
 
@@ -71,7 +72,7 @@ export const getSafeTemplate = async () => {
     const factory = await getFactory()
     const template = await factory.callStatic.createProxy(singleton.address, "0x")
     await factory.createProxy(singleton.address, "0x").then((tx: any) => tx.wait())
-    const Safe = await hre.ethers.getContractFactory("GnosisSafe");
+    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
     return Safe.attach(template);
 }
 

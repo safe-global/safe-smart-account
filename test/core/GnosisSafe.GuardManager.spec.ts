@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, buildSignatureBytes, executeContractCallWithSigners, executeTx, safeApproveHash } from "../utils/execution";
+import { buildSafeTransaction, buildSignatureBytes, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
 
 describe("GuardManager", async () => {
 

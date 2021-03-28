@@ -8,7 +8,7 @@ contract CreateCall {
     event ContractCreation(address newContract);
 
     function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns(address newContract) {
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)
         }
@@ -17,7 +17,7 @@ contract CreateCall {
     }
 
     function performCreate(uint256 value, bytes memory deploymentData) public returns(address newContract) {
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))
         }

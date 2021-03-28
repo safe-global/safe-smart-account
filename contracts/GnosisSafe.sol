@@ -134,6 +134,7 @@ contract GnosisSafe
         bytes memory signatures
     )
         public
+        virtual
         payable
         returns (bool success)
     {
@@ -193,12 +194,11 @@ contract GnosisSafe
         private
         returns (uint256 payment)
     {
-        // solium-disable-next-line security/no-tx-origin
+        // solhint-disable-next-line avoid-tx-origin
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
             // For ETH we will only adjust the gas price to not be higher than the actual used gas price
             payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
-            // solium-disable-next-line security/no-send
             require(receiver.send(payment), "GS011");
         } else {
             payment = gasUsed.add(baseGas).mul(gasPrice);
@@ -213,8 +213,8 @@ contract GnosisSafe
     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
     */
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures)
-        view
         public
+        view
     {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
@@ -246,7 +246,7 @@ contract GnosisSafe
 
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
-                // solium-disable-next-line security/no-inline-assembly
+                // solhint-disable-next-line no-inline-assembly
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
@@ -254,7 +254,7 @@ contract GnosisSafe
 
                 // Check signature
                 bytes memory contractSignature;
-                // solium-disable-next-line security/no-inline-assembly
+                // solhint-disable-next-line no-inline-assembly
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
@@ -296,7 +296,6 @@ contract GnosisSafe
     {
         uint256 startGas = gasleft();
         // We don't provide an error message here, as we use it to return the estimate
-        // solium-disable-next-line error-reason
         require(execute(to, value, data, operation, gasleft()));
         uint256 requiredGas = startGas - gasleft();
         // Convert response to string and return via error message
@@ -332,7 +331,7 @@ contract GnosisSafe
     /// @dev Returns the chain id used by this contract.
     function getChainId() public view returns (uint256) {
         uint256 id;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             id := chainid()
         }

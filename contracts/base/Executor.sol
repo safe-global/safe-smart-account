@@ -13,7 +13,7 @@ contract Executor {
         uint256 txGas
     ) internal returns (bool success) {
         if (operation == Enum.Operation.DelegateCall) {
-            // solium-disable-next-line security/no-inline-assembly
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 success := delegatecall(
                     txGas,
@@ -25,7 +25,7 @@ contract Executor {
                 )
             }
         } else {
-            // solium-disable-next-line security/no-inline-assembly
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 success := call(
                     txGas,
