@@ -40,26 +40,26 @@ describe("StorageAccessible", async () => {
         })
     })
 
-    describe("simulate", async () => {
+    describe("simulateDelegatecallInternal", async () => {
 
         it('should revert changes', async () => {
             const { safe, killLib } = await setupTests()
             await expect(
-                safe.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("killme"))
+                safe.callStatic.simulateDelegatecallInternal(killLib.address, killLib.interface.encodeFunctionData("killme"))
             ).to.be.reverted
         })
 
         it('should revert the revert with message', async () => {
             const { safe, killLib } = await setupTests()
             await expect(
-                safe.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("trever"))
-            ).to.revertedWith("Why are you doing this?")
+                safe.callStatic.simulateDelegatecallInternal(killLib.address, killLib.interface.encodeFunctionData("trever"))
+            ).to.be.reverted
         })
 
         it('should return estimate in revert', async () => {
             const { safe, killLib } = await setupTests()
             await expect(
-                safe.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("estimate", [safe.address, "0x"]))
+                safe.callStatic.simulateDelegatecallInternal(killLib.address, killLib.interface.encodeFunctionData("estimate", [safe.address, "0x"]))
             ).to.be.reverted
         })
     })

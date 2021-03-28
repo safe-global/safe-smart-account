@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /// @title StorageAccessible - generic base contract that allows callers to access all internal storage.
-/// @notice Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol
+/// @notice See https://github.com/gnosis/util-contracts/blob/bb5fe5fb5df6d8400998094fb1b32a178a47c3a1/contracts/StorageAccessible.sol
 contract StorageAccessible {
     /**
      * @dev Reads `length` bytes of storage in the currents contract
@@ -27,22 +27,34 @@ contract StorageAccessible {
 
     /**
      * @dev Performs a delegetecall on a targetContract in the context of self.
-     * Internally reverts execution to avoid side effects (making it static). Returns encoded result as revert message
-     * concatenated with the success flag of the inner call as a last byte.
+     * Internally reverts execution to avoid side effects (making it static).
+     *
+     * This method reverts with data equal to `abi.encode(bool(success), bytes(response))`.
+     * Specifically, the `returndata` after a call to this method will be:
+     * `success:bool || response.length:uint256 || response:bytes`.
+     *
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
-    function simulate(
+    function simulateDelegatecallInternal(
         address targetContract,
-        bytes calldata calldataPayload
-    ) external returns (bytes memory) {
-        (bool success, bytes memory response) = targetContract.delegatecall(
-            calldataPayload
-        );
-        bytes memory responseWithStatus = abi.encodePacked(response, success);
-        // solium-disable-next-line security/no-inline-assembly
+        bytes memory calldataPayload
+    ) external {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
-            revert(add(responseWithStatus, 0x20), mload(responseWithStatus))
+            let success := delegatecall(
+                gas(),
+                targetContract,
+                add(calldataPayload, 0x20),
+                mload(calldataPayload),
+                0,
+                0
+            )
+
+            mstore(0x00, success)
+            mstore(0x20, returndatasize())
+            returndatacopy(0x40, 0, returndatasize())
+            revert(0, add(returndatasize(), 0x40))
         }
     }
 }
