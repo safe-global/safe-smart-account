@@ -24,9 +24,9 @@ contract MultiSendCallOnly {
             let length := mload(transactions)
             let i := 0x20
             for {
-
+                // Pre block is not used in "while mode"
             } lt(i, length) {
-
+                // Post block is not used in "while mode"
             } {
                 // First byte of the data is the operation.
                 // We shift by 248 bits (256 - 8 [operation byte]) it right since mload will always load 32 bytes (a word).
