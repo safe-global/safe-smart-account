@@ -86,7 +86,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
             pop(
                 call(
                     gas(),
-                    // address() has been change to caller() to use the implemtation of the Safe
+                    // address() has been changed to caller() to use the implemtation of the Safe
                     caller(),
                     0,
                     internalCalldata,
