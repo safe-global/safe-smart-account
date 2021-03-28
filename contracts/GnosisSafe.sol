@@ -16,9 +16,18 @@ import "./external/GnosisSafeMath.sol";
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract GnosisSafe
-    is EtherPaymentFallback, Singleton, ModuleManager, OwnerManager, SignatureDecoder, SecuredTokenTransfer, ISignatureValidatorConstants, FallbackManager, StorageAccessible, GuardManager {
-
+contract GnosisSafe is
+    EtherPaymentFallback,
+    Singleton,
+    ModuleManager,
+    OwnerManager,
+    SignatureDecoder,
+    SecuredTokenTransfer,
+    ISignatureValidatorConstants,
+    FallbackManager,
+    StorageAccessible,
+    GuardManager
+{
     using GnosisSafeMath for uint256;
 
     string public constant VERSION = "1.3.0";
@@ -38,26 +47,11 @@ contract GnosisSafe
     //);
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
-    event SafeSetup(
-        address indexed initiator,
-        address[] owners,
-        uint256 threshold,
-        address initializer,
-        address fallbackHandler
-    );
-    event ApproveHash(
-        bytes32 indexed approvedHash,
-        address indexed owner
-    );
-    event SignMsg(
-        bytes32 indexed msgHash
-    );
-    event ExecutionFailure(
-        bytes32 txHash, uint256 payment
-    );
-    event ExecutionSuccess(
-        bytes32 txHash, uint256 payment
-    );
+    event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
+    event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
+    event SignMsg(bytes32 indexed msgHash);
+    event ExecutionFailure(bytes32 txHash, uint256 payment);
+    event ExecutionSuccess(bytes32 txHash, uint256 payment);
 
     uint256 public nonce;
     bytes32 private _deprecatedDomainSeparator;
@@ -92,9 +86,7 @@ contract GnosisSafe
         address paymentToken,
         uint256 payment,
         address payable paymentReceiver
-    )
-        external
-    {
+    ) external {
         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
         setupOwners(_owners, _threshold);
         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
@@ -132,20 +124,26 @@ contract GnosisSafe
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    )
-        public
-        virtual
-        payable
-        returns (bool success)
-    {
+    ) public payable virtual returns (bool success) {
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            bytes memory txHashData = encodeTransactionData(
-                to, value, data, operation, // Transaction info
-                safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
-                nonce
-            );
+            bytes memory txHashData =
+                encodeTransactionData(
+                    // Transaction info
+                    to,
+                    value,
+                    data,
+                    operation,
+                    safeTxGas,
+                    // Payment info
+                    baseGas,
+                    gasPrice,
+                    gasToken,
+                    refundReceiver,
+                    // Signature info
+                    nonce
+                );
             // Increase nonce and execute transaction.
             nonce++;
             txHash = keccak256(txHashData);
@@ -155,15 +153,26 @@ contract GnosisSafe
             address guard = getGuard();
             if (guard != address(0)) {
                 Guard(guard).checkTransaction(
-                    to, value, data, operation, // Transaction info
-                    safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, // Payment info
-                    signatures, msg.sender
+                    // Transaction info
+                    to,
+                    value,
+                    data,
+                    operation,
+                    safeTxGas,
+                    // Payment info
+                    baseGas,
+                    gasPrice,
+                    gasToken,
+                    refundReceiver,
+                    // Signature info
+                    signatures,
+                    msg.sender
                 );
             }
         }
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
-        require(gasleft() >= (safeTxGas * 64 / 63).max(safeTxGas + 2500) + 500, "GS010");
+        require(gasleft() >= ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
@@ -190,10 +199,7 @@ contract GnosisSafe
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver
-    )
-        private
-        returns (uint256 payment)
-    {
+    ) private returns (uint256 payment) {
         // solhint-disable-next-line avoid-tx-origin
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
@@ -207,15 +213,16 @@ contract GnosisSafe
     }
 
     /**
-    * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
-    * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-    * @param data That should be signed (this is passed to an external validator contract)
-    * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
-    */
-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures)
-        public
-        view
-    {
+     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param data That should be signed (this is passed to an external validator contract)
+     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
+     */
+    function checkSignatures(
+        bytes32 dataHash,
+        bytes memory data,
+        bytes memory signatures
+    ) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
@@ -231,8 +238,8 @@ contract GnosisSafe
         uint256 i;
         for (i = 0; i < _threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
-            // If v is 0 then it is a contract signature
             if (v == 0) {
+                // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
 
@@ -260,23 +267,22 @@ contract GnosisSafe
                     contractSignature := add(add(signatures, s), 0x20)
                 }
                 require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
-            // If v is 1 then it is an approved hash
             } else if (v == 1) {
+                // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
+                // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
                 currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
             } else {
+                // Default is the ecrecover flow with the provided data hash
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require (
-                currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS,
-                "GS026"
-            );
+            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
         }
     }
@@ -290,10 +296,12 @@ contract GnosisSafe
     /// @param operation Operation type of Safe transaction.
     /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
     /// @notice Deprecated in favor of common/StorageAccessible.sol and will be removed in next version.
-    function requiredTxGas(address to, uint256 value, bytes calldata data, Enum.Operation operation)
-        external
-        returns (uint256)
-    {
+    function requiredTxGas(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation
+    ) external returns (uint256) {
         uint256 startGas = gasleft();
         // We don't provide an error message here, as we use it to return the estimate
         require(execute(to, value, data, operation, gasleft()));
@@ -303,31 +311,26 @@ contract GnosisSafe
     }
 
     /**
-    * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
-    * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
-    */
-    function approveHash(bytes32 hashToApprove)
-        external
-    {
+     * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
+     * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
+     */
+    function approveHash(bytes32 hashToApprove) external {
         require(owners[msg.sender] != address(0), "GS030");
         approvedHashes[msg.sender][hashToApprove] = 1;
         emit ApproveHash(hashToApprove, msg.sender);
     }
 
     /**
-    * @dev Marks a message as signed, so that it can be used with EIP-1271
-    * @notice Marks a message (`_data`) as signed.
-    * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
-    */
-    function signMessage(bytes calldata _data)
-        external
-        authorized
-    {
+     * @dev Marks a message as signed, so that it can be used with EIP-1271
+     * @notice Marks a message (`_data`) as signed.
+     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
+     */
+    function signMessage(bytes calldata _data) external authorized {
         bytes32 msgHash = getMessageHash(_data);
         signedMessages[msgHash] = 1;
         emit SignMsg(msgHash);
     }
-    
+
     /// @dev Returns the chain id used by this contract.
     function getChainId() public view returns (uint256) {
         uint256 id;
@@ -345,19 +348,9 @@ contract GnosisSafe
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param message Message that should be hashed
     /// @return Message hash.
-    function getMessageHash(
-        bytes memory message
-    )
-        public
-        view
-        returns (bytes32)
-    {
-        bytes32 safeMessageHash = keccak256(
-            abi.encode(SAFE_MSG_TYPEHASH, keccak256(message))
-        );
-        return keccak256(
-            abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeMessageHash)
-        );
+    function getMessageHash(bytes memory message) public view returns (bytes32) {
+        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeMessageHash));
     }
 
     /// @dev Returns the bytes that are hashed to be signed by owners.
@@ -383,14 +376,23 @@ contract GnosisSafe
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    )
-        public
-        view
-        returns (bytes memory)
-    {
-        bytes32 safeTxHash = keccak256(
-            abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce)
-        );
+    ) public view returns (bytes memory) {
+        bytes32 safeTxHash =
+            keccak256(
+                abi.encode(
+                    SAFE_TX_TYPEHASH,
+                    to,
+                    value,
+                    keccak256(data),
+                    operation,
+                    safeTxGas,
+                    baseGas,
+                    gasPrice,
+                    gasToken,
+                    refundReceiver,
+                    _nonce
+                )
+            );
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
     }
 
@@ -417,11 +419,7 @@ contract GnosisSafe
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    )
-        public
-        view
-        returns (bytes32)
-    {
+    ) public view returns (bytes32) {
         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
 }

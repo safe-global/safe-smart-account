@@ -6,8 +6,7 @@ import "../base/Executor.sol";
 /// @title Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SimulateTxAccessor is Executor {
-
-    bytes32 constant private GUARD_VALUE = keccak256("simulate_tx_accessor.guard.bytes32");
+    bytes32 private constant GUARD_VALUE = keccak256("simulate_tx_accessor.guard.bytes32");
     bytes32 private guard;
 
     constructor() {
@@ -19,10 +18,19 @@ contract SimulateTxAccessor is Executor {
         _;
     }
 
-    function simulate(address to, uint256 value, bytes calldata data, Enum.Operation operation)
+    function simulate(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation
+    )
         external
         onlyDelegateCall()
-        returns(uint256 estimate, bool success, bytes memory returnData)
+        returns (
+            uint256 estimate,
+            bool success,
+            bytes memory returnData
+        )
     {
         uint256 startGas = gasleft();
         success = execute(to, value, data, operation, gasleft());

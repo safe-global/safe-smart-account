@@ -6,8 +6,7 @@ import "../base/GuardManager.sol";
 import "../GnosisSafe.sol";
 
 contract DelegateCallTransactionGuard is Guard {
-
-    address immutable public allowedTarget;
+    address public immutable allowedTarget;
 
     constructor(address target) {
         allowedTarget = target;
@@ -30,7 +29,7 @@ contract DelegateCallTransactionGuard is Guard {
         address payable,
         bytes memory,
         address
-    ) override external view {
+    ) external view override {
         require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
     }
 }

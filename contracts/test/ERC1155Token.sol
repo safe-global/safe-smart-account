@@ -5,14 +5,13 @@ import "../interfaces/ERC1155TokenReceiver.sol";
 import "../external/GnosisSafeMath.sol";
 
 contract ERC1155Token {
-
     using GnosisSafeMath for uint256;
 
     // Mapping from token ID to owner balances
-    mapping (uint256 => mapping(address => uint256)) private _balances;
+    mapping(uint256 => mapping(address => uint256)) private _balances;
 
     // Mapping from owner to operator approvals
-    mapping (address => mapping(address => bool)) private _operatorApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     /**
         @dev Get the specified address' balance for token with specified ID.
@@ -41,9 +40,7 @@ contract ERC1155Token {
         uint256 id,
         uint256 value,
         bytes calldata data
-    )
-        external
-    {
+    ) external {
         require(to != address(0), "ERC1155: target address must be non-zero");
         require(
             from == msg.sender || _operatorApprovals[from][msg.sender] == true,
@@ -63,7 +60,12 @@ contract ERC1155Token {
      * @param value Amount of the token to be minted
      * @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
      */
-    function mint(address to, uint256 id, uint256 value, bytes calldata data) external {
+    function mint(
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external {
         require(to != address(0), "ERC1155: mint to the zero address");
 
         _balances[id][to] = value + _balances[id][to];
@@ -78,7 +80,9 @@ contract ERC1155Token {
 
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
-        assembly { size := extcodesize(account) }
+        assembly {
+            size := extcodesize(account)
+        }
         return size > 0;
     }
 
@@ -89,10 +93,8 @@ contract ERC1155Token {
         uint256 id,
         uint256 value,
         bytes memory data
-    )
-        internal
-    {
-        if(isContract(to)) {
+    ) internal {
+        if (isContract(to)) {
             require(
                 ERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) ==
                     ERC1155TokenReceiver(to).onERC1155Received.selector,

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-
 /// @title SignatureDecoder - Decodes signatures that a encoded as bytes
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SignatureDecoder {
-
     /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.
     /// @notice Make sure to peform a bounds check for @param pos, to avoid out of bounds access on @param signatures
     /// @param pos which signature to read. A prior bounds check of this parameter should be performed, to avoid out of bounds access
@@ -13,7 +11,11 @@ contract SignatureDecoder {
     function signatureSplit(bytes memory signatures, uint256 pos)
         internal
         pure
-        returns (uint8 v, bytes32 r, bytes32 s)
+        returns (
+            uint8 v,
+            bytes32 r,
+            bytes32 s
+        )
     {
         // The signature format is a compact form of:
         //   {bytes32 r}{bytes32 s}{uint8 v}
