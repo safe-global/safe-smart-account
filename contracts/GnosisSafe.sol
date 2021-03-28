@@ -130,15 +130,18 @@ contract GnosisSafe is
         {
             bytes memory txHashData =
                 encodeTransactionData(
+                    // Transaction info
                     to,
                     value,
                     data,
-                    operation, // Transaction info
+                    operation,
                     safeTxGas,
+                    // Payment info
                     baseGas,
                     gasPrice,
                     gasToken,
-                    refundReceiver, // Payment info
+                    refundReceiver,
+                    // Signature info
                     nonce
                 );
             // Increase nonce and execute transaction.
@@ -150,15 +153,18 @@ contract GnosisSafe is
             address guard = getGuard();
             if (guard != address(0)) {
                 Guard(guard).checkTransaction(
+                    // Transaction info
                     to,
                     value,
                     data,
-                    operation, // Transaction info
+                    operation,
                     safeTxGas,
+                    // Payment info
                     baseGas,
                     gasPrice,
                     gasToken,
-                    refundReceiver, // Payment info
+                    refundReceiver,
+                    // Signature info
                     signatures,
                     msg.sender
                 );
@@ -232,8 +238,8 @@ contract GnosisSafe is
         uint256 i;
         for (i = 0; i < _threshold; i++) {
             (v, r, s) = signatureSplit(signatures, i);
-            // If v is 0 then it is a contract signature
             if (v == 0) {
+                // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
 
@@ -261,16 +267,18 @@ contract GnosisSafe is
                     contractSignature := add(add(signatures, s), 0x20)
                 }
                 require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
-                // If v is 1 then it is an approved hash
             } else if (v == 1) {
+                // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
                 require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
+                // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
                 currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
             } else {
+                // Default is the ecrecover flow with the provided data hash
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
