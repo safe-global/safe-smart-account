@@ -16,7 +16,7 @@ describe("MultiSend", async () => {
             contract StorageSetter {
                 function setStorage(bytes3 data) public {
                     bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
-                    // solium-disable-next-line security/no-inline-assembly
+                    // solhint-disable-next-line no-inline-assembly
                     assembly {
                         sstore(slot, data)
                     }

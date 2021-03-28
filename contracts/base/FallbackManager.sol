@@ -12,7 +12,7 @@ contract FallbackManager is SelfAuthorized {
 
     function internalSetFallbackHandler(address handler) internal {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             sstore(slot, handler)
         }
@@ -28,7 +28,7 @@ contract FallbackManager is SelfAuthorized {
 
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let handler := sload(slot)
             if iszero(handler) {

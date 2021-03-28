@@ -19,7 +19,7 @@ contract GnosisSafeProxyFactory {
     {
         proxy = new GnosisSafeProxy(singleton);
         if (data.length > 0)
-            // solium-disable-next-line security/no-inline-assembly
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 if eq(call(gas(), proxy, 0, add(data, 0x20), mload(data), 0, 0), 0) { revert(0, 0) }
             }
@@ -48,7 +48,7 @@ contract GnosisSafeProxyFactory {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
         bytes memory deploymentData = abi.encodePacked(type(GnosisSafeProxy).creationCode, uint256(uint160(_singleton)));
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
         }
@@ -65,7 +65,7 @@ contract GnosisSafeProxyFactory {
     {
         proxy = deployProxyWithNonce(_singleton, initializer, saltNonce);
         if (initializer.length > 0)
-            // solium-disable-next-line security/no-inline-assembly
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) { revert(0,0) }
             }

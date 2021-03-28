@@ -28,7 +28,7 @@ contract GnosisSafeProxy {
         external
         payable
     {
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let _singleton := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s

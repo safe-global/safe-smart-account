@@ -8,7 +8,7 @@ import "../base/Executor.sol";
 contract SimulateTxAccessor is Executor {
 
     bytes32 constant private GUARD_VALUE = keccak256("simulate_tx_accessor.guard.bytes32");
-    bytes32 guard;
+    bytes32 private guard;
 
     constructor() {
         guard = GUARD_VALUE;
@@ -27,7 +27,7 @@ contract SimulateTxAccessor is Executor {
         uint256 startGas = gasleft();
         success = execute(to, value, data, operation, gasleft());
         estimate = startGas - gasleft();
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             // Load free memory location
             let ptr := mload(0x40)

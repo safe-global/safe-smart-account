@@ -77,7 +77,7 @@ contract ERC1155Token {
         // constructor execution.
 
         uint256 size;
-        // solium-disable-next-line security/no-inline-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly { size := extcodesize(account) }
         return size > 0;
     }
