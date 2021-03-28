@@ -6,9 +6,7 @@ import "./GnosisSafe.sol";
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract GnosisSafeL2
-    is GnosisSafe {
-
+contract GnosisSafeL2 is GnosisSafe {
     event SafeMultiSigTransaction(
         address to,
         uint256 value,
@@ -25,13 +23,7 @@ contract GnosisSafeL2
         bytes additionalInfo
     );
 
-    event SafeModuleTransaction(
-        address module,
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation
-    );
+    event SafeModuleTransaction(address module, address to, uint256 value, bytes data, Enum.Operation operation);
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
     ///      Note: The fees are always transfered, even if the user transaction fails.
@@ -56,12 +48,7 @@ contract GnosisSafeL2
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    )
-        public
-        override
-        payable
-        returns (bool)
-    {
+    ) public payable override returns (bool) {
         bytes memory additionalInfo;
         {
             additionalInfo = abi.encode(nonce, msg.sender, threshold);
@@ -79,18 +66,7 @@ contract GnosisSafeL2
             signatures,
             additionalInfo
         );
-        return super.execTransaction(
-            to,
-            value,
-            data,
-            operation,
-            safeTxGas,
-            baseGas,
-            gasPrice,
-            gasToken,
-            refundReceiver,
-            signatures
-        );
+        return super.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
     }
 
     /// @dev Allows a Module to execute a Safe transaction without any further confirmations.
@@ -98,18 +74,13 @@ contract GnosisSafeL2
     /// @param value Ether value of module transaction.
     /// @param data Data payload of module transaction.
     /// @param operation Operation type of module transaction.
-    function execTransactionFromModule(address to, uint256 value, bytes memory data, Enum.Operation operation)
-        public
-        override
-        returns (bool success)
-    {
-        emit SafeModuleTransaction(
-            msg.sender,
-            to,
-            value,
-            data,
-            operation
-        );
+    function execTransactionFromModule(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation
+    ) public override returns (bool success) {
+        emit SafeModuleTransaction(msg.sender, to, value, data, operation);
         success = super.execTransactionFromModule(to, value, data, operation);
     }
 }

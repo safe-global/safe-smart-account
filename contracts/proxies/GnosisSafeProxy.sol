@@ -11,7 +11,6 @@ interface IProxy {
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract GnosisSafeProxy {
-
     // singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
     address internal singleton;
@@ -24,10 +23,7 @@ contract GnosisSafeProxy {
     }
 
     /// @dev Fallback function forwards all transactions and returns all received return data.
-    fallback ()
-        external
-        payable
-    {
+    fallback() external payable {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let _singleton := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
@@ -39,7 +35,9 @@ contract GnosisSafeProxy {
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
-            if eq(success, 0) { revert(0, returndatasize()) }
+            if eq(success, 0) {
+                revert(0, returndatasize())
+            }
             return(0, returndatasize())
         }
     }

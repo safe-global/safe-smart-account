@@ -15,27 +15,12 @@ contract Executor {
         if (operation == Enum.Operation.DelegateCall) {
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                success := delegatecall(
-                    txGas,
-                    to,
-                    add(data, 0x20),
-                    mload(data),
-                    0,
-                    0
-                )
+                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
             }
         } else {
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                success := call(
-                    txGas,
-                    to,
-                    value,
-                    add(data, 0x20),
-                    mload(data),
-                    0,
-                    0
-                )
+                success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
             }
         }
     }
