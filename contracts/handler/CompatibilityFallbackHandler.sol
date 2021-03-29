@@ -63,15 +63,16 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
-    function simulateDelegatecall(
+    function simulate(
         address targetContract, // solhint-disable-line no-unused-var
         bytes calldata calldataPayload // solhint-disable-line no-unused-var
     ) public returns (bytes memory response) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let internalCalldata := mload(0x40)
-            // Store `simulateDelegatecallInternal.selector`.
-            mstore(internalCalldata, "\x43\x21\x8e\x19")
+            // Store `simulateAndRevert.selector`.
+            // String representation is used to force right padding
+            mstore(internalCalldata, "\xb4\xfa\xba\x09")
             // Abuse the fact that both this and the internal methods have the
             // same signature, and differ only in symbol name (and therefore,
             // selector) and copy calldata directly. This saves us approximately
@@ -91,7 +92,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
                     0,
                     internalCalldata,
                     calldatasize(),
-                    // The `simulateDelegatecallInternal` call always reverts, and
+                    // The `simulateAndRevert` call always reverts, and
                     // instead encodes whether or not it was successful in the return
                     // data. The first 32-byte word of the return data contains the
                     // `success` value, so write it to memory address 0x00 (which is

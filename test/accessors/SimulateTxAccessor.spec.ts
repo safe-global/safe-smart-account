@@ -57,7 +57,7 @@ describe("SimulateTxAccessor", async () => {
             const { safe, accessor, simulator } = await setupTests()
             const tx = buildContractCall(safe, "getOwners", [], 0)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(
                 safe.interface.decodeFunctionResult("getOwners", simulation.returnData)[0]
@@ -76,7 +76,7 @@ describe("SimulateTxAccessor", async () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             const tx = buildContractCall(interactor, "sendAndReturnBalance", [user2.address, parseEther("1")], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(
                 interactor.interface.decodeFunctionResult("sendAndReturnBalance", simulation.returnData)[0]
@@ -93,7 +93,7 @@ describe("SimulateTxAccessor", async () => {
             const { safe, accessor, interactor, simulator } = await setupTests()
             const tx = buildContractCall(interactor, "sendAndReturnBalance", [user2.address, parseEther("1")], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await simulator.callStatic.simulateDelegatecall(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData) 
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(simulation.returnData).to.be.deep.eq("0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5472616e73666572206661696c65640000000000000000000000000000000000")
             expect(
