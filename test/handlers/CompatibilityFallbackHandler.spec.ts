@@ -149,7 +149,7 @@ describe("CompatibilityFallbackHandler", async () => {
     })
     
 
-    describe("simulateDelegatecall", async () => {
+    describe("simulate", async () => {
 
         it.skip('can be called for any Safe', async () => {
         })
@@ -158,7 +158,7 @@ describe("CompatibilityFallbackHandler", async () => {
             const { validator, killLib } = await setupTests()
             const code = await ethers.provider.getCode(validator.address)
             expect(
-                await validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("killme"))
+                await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("killme"))
             ).to.be.eq("0x")
             expect(
                 await ethers.provider.getCode(validator.address)
@@ -168,20 +168,20 @@ describe("CompatibilityFallbackHandler", async () => {
         it('should return result', async () => {
             const { validator, killLib, handler } = await setupTests()
             expect(
-                await validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("expose"))
+                await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("expose"))
             ).to.be.eq("0x000000000000000000000000" + handler.address.slice(2).toLowerCase())
         })
 
         it('should propagate revert message', async () => {
             const { validator, killLib } = await setupTests()
             await expect(
-                validator.callStatic.simulateDelegatecall(killLib.address, killLib.interface.encodeFunctionData("trever"))
+                validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("trever"))
             ).to.revertedWith("Why are you doing this?")
         })
 
         it('should simulate transaction', async () => {
             const { validator, killLib } = await setupTests()
-            const estimate = await validator.callStatic.simulateDelegatecall(
+            const estimate = await validator.callStatic.simulate(
                 killLib.address,
                 killLib.interface.encodeFunctionData("estimate", [validator.address, "0x"])
             )
@@ -190,7 +190,7 @@ describe("CompatibilityFallbackHandler", async () => {
 
         it('should return modified state', async () => {
             const { validator, killLib } = await setupTests()
-            const value = await validator.callStatic.simulateDelegatecall(
+            const value = await validator.callStatic.simulate(
                 killLib.address,
                 killLib.interface.encodeFunctionData("updateAndGet", [])
             )

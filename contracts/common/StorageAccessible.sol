@@ -32,7 +32,7 @@ contract StorageAccessible {
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
-    function simulateDelegatecallInternal(address targetContract, bytes memory calldataPayload) external {
+    function simulateAndRevert(address targetContract, bytes memory calldataPayload) external {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let success := delegatecall(gas(), targetContract, add(calldataPayload, 0x20), mload(calldataPayload), 0, 0)
