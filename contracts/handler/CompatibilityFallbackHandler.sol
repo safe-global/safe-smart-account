@@ -63,10 +63,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
-    function simulate(
-        address targetContract,
-        bytes calldata calldataPayload
-    ) external returns (bytes memory response) {
+    function simulate(address targetContract, bytes calldata calldataPayload) external returns (bytes memory response) {
         // Suppress compiler warnings about not using parameters, while allowing
         // parameters to keep names for documentation purposes. This does not
         // generate code.
@@ -93,7 +90,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
             pop(
                 call(
                     gas(),
-                    // address() has been changed to caller() to use the implemtation of the Safe
+                    // address() has been changed to caller() to use the implementation of the Safe
                     caller(),
                     0,
                     internalCalldata,

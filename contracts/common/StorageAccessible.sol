@@ -13,6 +13,7 @@ contract StorageAccessible {
     function getStorageAt(uint256 offset, uint256 length) public view returns (bytes memory) {
         bytes memory result = new bytes(length * 32);
         for (uint256 index = 0; index < length; index++) {
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 let word := sload(add(offset, index))
                 mstore(add(add(result, 0x20), mul(index, 0x20)), word)
