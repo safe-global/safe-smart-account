@@ -64,9 +64,15 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
     function simulate(
-        address targetContract, // solhint-disable-line no-unused-var
-        bytes calldata calldataPayload // solhint-disable-line no-unused-var
-    ) public returns (bytes memory response) {
+        address targetContract,
+        bytes calldata calldataPayload
+    ) external returns (bytes memory response) {
+        // Suppress compiler warnings about not using parameters, while allowing
+        // parameters to keep names for documentation purposes. This does not
+        // generate code.
+        targetContract;
+        calldataPayload;
+
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let internalCalldata := mload(0x40)
