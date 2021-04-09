@@ -102,7 +102,7 @@ contract GnosisSafe is
     }
 
     /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
-    ///      Note: The fees are always transfered, even if the user transaction fails.
+    ///      Note: The fees are always transferred, even if the user transaction fails.
     /// @param to Destination address of Safe transaction.
     /// @param value Ether value of Safe transaction.
     /// @param data Data payload of Safe transaction.
