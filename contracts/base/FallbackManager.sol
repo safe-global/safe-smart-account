@@ -25,6 +25,7 @@ contract FallbackManager is SelfAuthorized {
         internalSetFallbackHandler(handler);
     }
 
+    // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly

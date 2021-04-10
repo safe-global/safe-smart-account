@@ -13,7 +13,7 @@ contract OwnerManager is SelfAuthorized {
     address internal constant SENTINEL_OWNERS = address(0x1);
 
     mapping(address => address) internal owners;
-    uint256 ownerCount;
+    uint256 internal ownerCount;
     uint256 internal threshold;
 
     /// @dev Setup function sets initial storage of contract.
