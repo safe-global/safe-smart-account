@@ -6,15 +6,14 @@ import "../base/Executor.sol";
 /// @title Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract SimulateTxAccessor is Executor {
-    bytes32 private constant GUARD_VALUE = keccak256("simulate_tx_accessor.guard.bytes32");
-    bytes32 private guard;
+    address private immutable accessorSingleton;
 
     constructor() {
-        guard = GUARD_VALUE;
+        accessorSingleton = address(this);
     }
 
     modifier onlyDelegateCall() {
-        require(guard != GUARD_VALUE, "SimulateTxAccessor should only be called via delegatecall");
+        require(address(this) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
         _;
     }
 
