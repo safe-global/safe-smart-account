@@ -7,12 +7,10 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract MultiSend {
-    bytes32 private constant GUARD_VALUE = keccak256("multisend.guard.bytes32");
-
-    bytes32 private guard;
+    address private immutable multisendSingleton;
 
     constructor() {
-        guard = GUARD_VALUE;
+        multisendSingleton = address(this);
     }
 
     /// @dev Sends multiple transactions and reverts all if one fails.
@@ -26,7 +24,7 @@ contract MultiSend {
     /// @notice This method is payable as delegatecalls keep the msg.value from the previous call
     ///         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
     function multiSend(bytes memory transactions) public payable {
-        require(guard != GUARD_VALUE, "MultiSend should only be called via delegatecall");
+        require(address(this) != multisendSingleton, "MultiSend should only be called via delegatecall");
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let length := mload(transactions)

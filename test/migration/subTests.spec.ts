@@ -1,4 +1,4 @@
-import { BigNumber } from "@ethersproject/bignumber";
+import { BigNumber } from "ethers";
 import { Contract } from "@ethersproject/contracts"
 import { parseEther } from "@ethersproject/units"
 import { expect } from "chai";
