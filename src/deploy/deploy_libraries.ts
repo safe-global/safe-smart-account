@@ -30,5 +30,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
-deploy.tags = ['libraries']
+deploy.tags = ['libraries', 'l2-suite', 'main-suite']
 export default deploy;
