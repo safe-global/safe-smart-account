@@ -40,7 +40,7 @@ This will perform the following steps
 
 ```bash
 yarn build
-yarn deploy --network <network>
+yarn hardhat --network <network> deploy
 yarn hardhat --network <network> etherscan-verify
 yarn hardhat --network <network> local-verify
 ```
