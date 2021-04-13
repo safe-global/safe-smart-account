@@ -40,7 +40,7 @@ This will perform the following steps
 
 ```bash
 yarn build
-yarn deploy --network <network>
+yarn hardhat --network <network> deploy
 yarn hardhat --network <network> etherscan-verify
 yarn hardhat --network <network> local-verify
 ```
@@ -65,6 +65,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
+- [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
 - [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
 - [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)

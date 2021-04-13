@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-deploy";
 import dotenv from "dotenv";
-import type { HttpNetworkUserConfig } from "hardhat/types";
+import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import yargs from "yargs";
 
 const argv = yargs
@@ -16,7 +16,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
+const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -44,7 +44,7 @@ import "./src/tasks/show_codesize"
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6"
 const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined
 
-export default {
+const userConfig: HardhatUserConfig = {
   paths: {
     artifacts: "build/artifacts",
     cache: "build/cache",
@@ -103,3 +103,10 @@ export default {
     apiKey: ETHERSCAN_API_KEY,
   },
 };
+if (NODE_URL) {
+  userConfig.networks!!.custom = {
+    ...sharedNetworkConfig,
+    url: NODE_URL,
+  }
+}
+export default userConfig

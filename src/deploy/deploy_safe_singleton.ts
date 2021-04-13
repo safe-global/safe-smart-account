@@ -16,5 +16,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
-deploy.tags = ['singleton']
+deploy.tags = ['singleton', 'main-suite']
 export default deploy;

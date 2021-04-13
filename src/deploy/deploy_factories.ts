@@ -16,5 +16,5 @@ const deploy: DeployFunction = async function (
   });
 };
 
-deploy.tags = ['factory']
+deploy.tags = ['factory', 'l2-suite', 'main-suite']
 export default deploy;
