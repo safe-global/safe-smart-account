@@ -227,8 +227,24 @@ contract GnosisSafe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
+        checkNSignatures(dataHash, data, signatures, _threshold);
+    }
+
+    /**
+     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param data That should be signed (this is passed to an external validator contract)
+     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
+     * @param requiredSignatures Amount of required valid signatures.
+     */
+    function checkNSignatures(
+        bytes32 dataHash,
+        bytes memory data,
+        bytes memory signatures,
+        uint256 requiredSignatures
+    ) public view {
         // Check that the provided signature data is not too short
-        require(signatures.length >= _threshold.mul(65), "GS020");
+        require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -236,7 +252,7 @@ contract GnosisSafe is
         bytes32 r;
         bytes32 s;
         uint256 i;
-        for (i = 0; i < _threshold; i++) {
+        for (i = 0; i < requiredSignatures; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
                 // If v is 0 then it is a contract signature
@@ -246,7 +262,7 @@ contract GnosisSafe is
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= _threshold.mul(65), "GS021");
+                require(uint256(s) >= requiredSignatures.mul(65), "GS021");
 
                 // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
                 require(uint256(s).add(32) <= signatures.length, "GS022");
