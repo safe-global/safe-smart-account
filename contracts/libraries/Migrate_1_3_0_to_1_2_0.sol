@@ -25,7 +25,7 @@ contract Migration {
     bytes32 private _slot3;
     bytes32 private _slot4;
     bytes32 private _slot5;
-    // For the migration we need to set the old domain seperator in storage
+    // For the migration we need to set the old domain separator in storage
     bytes32 private domainSeparator;
 
     // Define guard last to avoid conflict with Safe storage layout
