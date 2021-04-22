@@ -70,6 +70,19 @@ describe("FallbackManager", async () => {
 
         })
 
+        it('emits event when is set', async () => {
+            const { safe } = await setupWithTemplate()
+            const handler = await defaultCallbackHandlerDeployment()
+
+            // Setup Safe
+            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+
+            // Check event
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            ).to.emit(safe, "ChangedFallbackHandler").withArgs(handler.address)
+        })
+
         it('is called when set', async () => {
             const { safe } = await setupWithTemplate()
             const handler = await defaultCallbackHandlerDeployment()
@@ -126,9 +139,9 @@ describe("FallbackManager", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000020" +
                 "0000000000000000000000000000000000000000000000000000000000000098" +
                 // Function call
-                "b2a88d99" + 
+                "b2a88d99" +
                 "000000000000000000000000" + user2.address.slice(2).toLowerCase() +
-                "0000000000000000000000000000000000000000000000000000000000000040" + 
+                "0000000000000000000000000000000000000000000000000000000000000040" +
                 "000000000000000000000000000000000000000000000000000000000000000b" +
                 "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
                 user1.address.slice(2).toLowerCase() + "0000000000000000"
