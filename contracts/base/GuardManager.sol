@@ -23,6 +23,7 @@ interface Guard {
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract GuardManager is SelfAuthorized {
+    event ChangedGuard(address guard);
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
@@ -34,6 +35,7 @@ contract GuardManager is SelfAuthorized {
         assembly {
             sstore(slot, guard)
         }
+        emit ChangedGuard(guard);
     }
 
     function getGuard() internal view returns (address guard) {

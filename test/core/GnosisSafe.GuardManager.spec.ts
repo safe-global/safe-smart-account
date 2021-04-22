@@ -35,7 +35,9 @@ describe("GuardManager", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
-            await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
+            await expect(
+                await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
+            ).to.emit(safe, "ChangedGuard").withArgs(mock.address)
 
             // Check fallback handler
             await expect(

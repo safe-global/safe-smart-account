@@ -61,13 +61,28 @@ describe("FallbackManager", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5")
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
-            await executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            ).to.emit(safe, "ChangedFallbackHandler").withArgs(handler.address)
 
             // Check fallback handler
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5")
             ).to.be.eq("0x" + handler.address.toLowerCase().slice(2).padStart(64, "0"))
 
+        })
+
+        it('emits event when is set', async () => {
+            const { safe } = await setupWithTemplate()
+            const handler = await defaultCallbackHandlerDeployment()
+
+            // Setup Safe
+            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+
+            // Check event
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            ).to.emit(safe, "ChangedFallbackHandler").withArgs(handler.address)
         })
 
         it('is called when set', async () => {
@@ -126,9 +141,9 @@ describe("FallbackManager", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000020" +
                 "0000000000000000000000000000000000000000000000000000000000000098" +
                 // Function call
-                "b2a88d99" + 
+                "b2a88d99" +
                 "000000000000000000000000" + user2.address.slice(2).toLowerCase() +
-                "0000000000000000000000000000000000000000000000000000000000000040" + 
+                "0000000000000000000000000000000000000000000000000000000000000040" +
                 "000000000000000000000000000000000000000000000000000000000000000b" +
                 "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
                 user1.address.slice(2).toLowerCase() + "0000000000000000"
