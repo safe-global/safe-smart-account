@@ -68,7 +68,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
             await expect(
                 factory.createProxy(singleton.address, "0x")
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
             expect(await proxy.creator()).to.be.eq(AddressZero)
             expect(await proxy.isInitialized()).to.be.eq(false)
@@ -83,7 +83,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
             await expect(
                 factory.createProxy(singleton.address, singleton.interface.encodeFunctionData("init", []))
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
             expect(await proxy.creator()).to.be.eq(factory.address)
             expect(await proxy.isInitialized()).to.be.eq(true)
@@ -117,7 +117,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddress(factory, singleton.address, initCode, saltNonce)
             await expect(
                 factory.createProxyWithNonce(singleton.address, initCode, saltNonce)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
             expect(await proxy.creator()).to.be.eq(AddressZero)
             expect(await proxy.isInitialized()).to.be.eq(false)
@@ -132,7 +132,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddress(factory, singleton.address, initCode, saltNonce)
             await expect(
                 factory.createProxyWithNonce(singleton.address, initCode, saltNonce)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
             expect(await proxy.creator()).to.be.eq(factory.address)
             expect(await proxy.isInitialized()).to.be.eq(true)
@@ -147,7 +147,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddress(factory, singleton.address, initCode, saltNonce)
             await expect(
                 factory.createProxyWithNonce(singleton.address, initCode, saltNonce)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             await expect(
                 factory.createProxyWithNonce(singleton.address, initCode, saltNonce)
             ).to.be.revertedWith("Create2 call failed")
@@ -162,11 +162,11 @@ describe("ProxyFactory", async () => {
             const { factory, mock, singleton } = await setupTests()
             let callback = await hre.ethers.getContractAt("IProxyCreationCallback", mock.address)
             const initCode = singleton.interface.encodeFunctionData("init", [])
-            
+
             const proxyAddress = await calculateProxyAddressWithCallback(factory, singleton.address, initCode, saltNonce, mock.address)
             await expect(
                 factory.createProxyWithCallback(singleton.address, initCode, saltNonce, mock.address)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
 
             expect(await mock.callStatic.invocationCount()).to.be.deep.equal(BigNumber.from(1))
 
@@ -189,7 +189,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddressWithCallback(factory, singleton.address, initCode, saltNonce, mock.address)
             await expect(
                 factory.createProxyWithCallback(singleton.address, initCode, saltNonce, mock.address)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
         })
 
         it('should work without callback', async () => {
@@ -198,7 +198,7 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddressWithCallback(factory, singleton.address, initCode, saltNonce, AddressZero)
             await expect(
                 factory.createProxyWithCallback(singleton.address, initCode, saltNonce, AddressZero)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress)
+            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
             expect(await proxy.creator()).to.be.eq(AddressZero)
             expect(await proxy.isInitialized()).to.be.eq(false)
