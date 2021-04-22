@@ -61,7 +61,9 @@ describe("FallbackManager", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5")
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
-            await executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1])
+            ).to.emit(safe, "ChangedFallbackHandler").withArgs(handler.address)
 
             // Check fallback handler
             await expect(
