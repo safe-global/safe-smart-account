@@ -8,7 +8,6 @@ import "../GnosisSafe.sol";
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
-
     //keccak256(
     //    "SafeMessage(bytes message)"
     //);
@@ -37,7 +36,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         }
         return EIP1271_MAGIC_VALUE;
     }
-    
+
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param message Message that should be hashed
     /// @return Message hash.

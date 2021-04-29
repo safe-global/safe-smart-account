@@ -19,9 +19,7 @@ interface Guard {
         address msgSender
     ) external;
 
-    function checkAfterExecution(
-        bytes32 txHash
-    ) external;
+    function checkAfterExecution(bytes32 txHash) external;
 }
 
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract
