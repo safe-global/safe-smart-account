@@ -51,7 +51,6 @@ contract GnosisSafe is
     uint256 public nonce;
     bytes32 private _deprecatedDomainSeparator;
     // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
-    // TODO: add lib to set this
     mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;

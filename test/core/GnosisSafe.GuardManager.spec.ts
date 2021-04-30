@@ -4,7 +4,8 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, buildSignatureBytes, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
+import { buildSafeTransaction, buildSignatureBytes, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
+import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
 
@@ -45,19 +46,20 @@ describe("GuardManager", async () => {
             ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
         })
 
-        it('reverts if the guard reverts', async () => {
+        it('reverts if the pre hook of the guard reverts', async () => {
             const { safe, mock } = await setupWithTemplate()
 
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: 1 })
             const signature = await safeApproveHash(user2, safe, safeTx)
             const signatureBytes = buildSignatureBytes([signature])
             const guardInterface = (await hre.ethers.getContractAt("Guard", mock.address)).interface
-            const checkData = guardInterface.encodeFunctionData("checkTransaction", [
+            const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
                 safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas,
                 safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
                 signatureBytes, user1.address
             ])
-            await mock.givenCalldataRevertWithMessage(checkData, "Computer says Nah")
+            await mock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah")
+            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId())])
 
             await expect(
                 executeTx(safe, safeTx, [signature])
@@ -69,8 +71,40 @@ describe("GuardManager", async () => {
                 executeTx(safe, safeTx, [signature])
             ).to.emit(safe, "ExecutionSuccess")
 
-            expect(await mock.callStatic.invocationCount()).to.be.deep.equals(BigNumber.from(2));
-            expect(await mock.callStatic.invocationCountForCalldata(checkData)).to.be.deep.equals(BigNumber.from(1));
+            expect(await mock.callStatic.invocationCount()).to.be.deep.equals(BigNumber.from(3));
+            expect(await mock.callStatic.invocationCountForCalldata(checkTxData)).to.be.deep.equals(BigNumber.from(1));
+            expect(await mock.callStatic.invocationCountForCalldata(checkExecData)).to.be.deep.equals(BigNumber.from(1));
+            expect(await mock.callStatic.invocationCountForCalldata("0xbaddad42")).to.be.deep.equals(BigNumber.from(1));
+        })
+
+        it('reverts if the post hook of the guard reverts', async () => {
+            const { safe, mock } = await setupWithTemplate()
+
+            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: 1 })
+            const signature = await safeApproveHash(user2, safe, safeTx)
+            const signatureBytes = buildSignatureBytes([signature])
+            const guardInterface = (await hre.ethers.getContractAt("Guard", mock.address)).interface
+            const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas,
+                safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
+                signatureBytes, user1.address
+            ])
+            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId())])
+            await mock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah")
+
+            await expect(
+                executeTx(safe, safeTx, [signature])
+            ).to.be.revertedWith("Computer says Nah")
+
+            await mock.reset()
+
+            await expect(
+                executeTx(safe, safeTx, [signature])
+            ).to.emit(safe, "ExecutionSuccess")
+
+            expect(await mock.callStatic.invocationCount()).to.be.deep.equals(BigNumber.from(3));
+            expect(await mock.callStatic.invocationCountForCalldata(checkTxData)).to.be.deep.equals(BigNumber.from(1));
+            expect(await mock.callStatic.invocationCountForCalldata(checkExecData)).to.be.deep.equals(BigNumber.from(1));
             expect(await mock.callStatic.invocationCountForCalldata("0xbaddad42")).to.be.deep.equals(BigNumber.from(1));
         })
     })

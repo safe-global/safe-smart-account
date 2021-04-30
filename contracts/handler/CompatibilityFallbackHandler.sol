@@ -28,7 +28,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     function isValidSignature(bytes calldata _data, bytes calldata _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         GnosisSafe safe = GnosisSafe(payable(msg.sender));
-        bytes32 messageHash = getMessageHash(safe, _data);
+        bytes32 messageHash = getMessageHashForSafe(safe, _data);
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
@@ -40,7 +40,15 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param message Message that should be hashed
     /// @return Message hash.
-    function getMessageHash(GnosisSafe safe, bytes memory message) public view returns (bytes32) {
+    function getMessageHash(bytes memory message) public view returns (bytes32) {
+        return getMessageHashForSafe(GnosisSafe(payable(msg.sender)), message);
+    }
+
+    /// @dev Returns hash of a message that can be signed by owners.
+    /// @param safe Safe to which the message is targeted
+    /// @param message Message that should be hashed
+    /// @return Message hash.
+    function getMessageHashForSafe(GnosisSafe safe, bytes memory message) public view returns (bytes32) {
         bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
         return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash));
     }
