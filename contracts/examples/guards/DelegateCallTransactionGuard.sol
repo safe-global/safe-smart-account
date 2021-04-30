@@ -35,5 +35,5 @@ contract DelegateCallTransactionGuard is Guard {
         require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
     }
 
-    function checkAfterExecution(bytes32 txHash) external view override {}
+    function checkAfterExecution(bytes32, bool) external view override {}
 }

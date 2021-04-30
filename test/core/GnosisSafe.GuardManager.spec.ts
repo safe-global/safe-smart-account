@@ -59,7 +59,7 @@ describe("GuardManager", async () => {
                 signatureBytes, user1.address
             ])
             await mock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah")
-            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId())])
+            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId()), true])
 
             await expect(
                 executeTx(safe, safeTx, [signature])
@@ -89,7 +89,7 @@ describe("GuardManager", async () => {
                 safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
                 signatureBytes, user1.address
             ])
-            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId())])
+            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId()), true])
             await mock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah")
 
             await expect(

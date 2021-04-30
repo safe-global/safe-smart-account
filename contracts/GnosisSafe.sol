@@ -188,7 +188,7 @@ contract GnosisSafe is
         }
         {
             if (guard != address(0)) {
-                Guard(guard).checkAfterExecution(txHash);
+                Guard(guard).checkAfterExecution(txHash, success);
             }
         }
     }
