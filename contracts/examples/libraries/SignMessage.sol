@@ -7,7 +7,6 @@ import "../../GnosisSafe.sol";
 /// @title SignMessageLib - Allows to set an entry in the signedMessages
 /// @author Richard Meissner - <richard@gnosis.io>
 contract SignMessageLib is GnosisSafeStorage {
-
     //keccak256(
     //    "SafeMessage(bytes message)"
     //);
@@ -29,6 +28,7 @@ contract SignMessageLib is GnosisSafeStorage {
     /// @return Message hash.
     function getMessageHash(bytes memory message) public view returns (bytes32) {
         bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
-        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), GnosisSafe(payable(address(this))).domainSeparator(), safeMessageHash));
+        return
+            keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), GnosisSafe(payable(address(this))).domainSeparator(), safeMessageHash));
     }
 }
