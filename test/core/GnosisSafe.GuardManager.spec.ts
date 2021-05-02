@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, buildSignatureBytes, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
+import { buildContractCall, buildSafeTransaction, buildSignatureBytes, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
@@ -24,7 +24,7 @@ describe("GuardManager", async () => {
 
     describe("setGuard", async () => {
 
-        it('is correctly set', async () => {
+        it('is not called when setting initially', async () => {
             const { safe, mock } = await setupWithTemplate()
 
             const slot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"))
@@ -36,6 +36,8 @@ describe("GuardManager", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
+            await mock.reset()
+
             await expect(
                 await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
             ).to.emit(safe, "ChangedGuard").withArgs(mock.address)
@@ -44,8 +46,49 @@ describe("GuardManager", async () => {
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
+            
+            // Guard should not be called, as it was not set before the transaction execution
+            expect(await mock.callStatic.invocationCount()).to.be.eq(0);
         })
 
+        it('is called when removed', async () => {
+            const { safe, mock } = await setupWithTemplate()
+
+            const slot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"))
+
+            // Check fallback handler
+            await expect(
+                await hre.ethers.provider.getStorageAt(safe.address, slot)
+            ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
+
+            const safeTx = buildContractCall(safe, "setGuard", [AddressZero], await safe.nonce())
+            const signature = await safeApproveHash(user2, safe, safeTx)
+            const signatureBytes = buildSignatureBytes([signature])
+
+            await expect(
+                executeTx(safe, safeTx, [signature])
+            ).to.emit(safe, "ChangedGuard").withArgs(AddressZero)
+
+            // Check fallback handler
+            await expect(
+                await hre.ethers.provider.getStorageAt(safe.address, slot)
+            ).to.be.eq("0x" + "".padStart(64, "0"))
+            
+            expect(await mock.callStatic.invocationCount()).to.be.eq(2);
+            const guardInterface = (await hre.ethers.getContractAt("Guard", mock.address)).interface
+            const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
+                safeTx.to, safeTx.value, safeTx.data, safeTx.operation, safeTx.safeTxGas,
+                safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
+                signatureBytes, user1.address
+            ])
+            expect(await mock.callStatic.invocationCountForCalldata(checkTxData)).to.be.eq(1);
+            // Guard should also be called for post exec check, even if it is removed with the Safe tx
+            const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId()), true])
+            expect(await mock.callStatic.invocationCountForCalldata(checkExecData)).to.be.eq(1);
+        })
+    })
+
+    describe("execTransaction", async () => {
         it('reverts if the pre hook of the guard reverts', async () => {
             const { safe, mock } = await setupWithTemplate()
 
