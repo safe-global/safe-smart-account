@@ -29,7 +29,7 @@ contract DebugTransactionGuard is Guard {
 
     event GasUsage(address indexed safe, bytes32 indexed txHash, uint256 indexed nonce, bool success);
 
-    mapping(bytes32 => uint256) txNonces;
+    mapping(bytes32 => uint256) public txNonces;
 
     function checkTransaction(
         address to,
