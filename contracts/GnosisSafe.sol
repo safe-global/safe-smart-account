@@ -42,11 +42,6 @@ contract GnosisSafe is
     // );
     bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
-    //keccak256(
-    //    "SafeMessage(bytes message)"
-    //);
-    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
-
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
     event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
     event SignMsg(bytes32 indexed msgHash);
@@ -149,8 +144,8 @@ contract GnosisSafe is
             txHash = keccak256(txHashData);
             checkSignatures(txHash, txHashData, signatures);
         }
+        address guard = getGuard();
         {
-            address guard = getGuard();
             if (guard != address(0)) {
                 Guard(guard).checkTransaction(
                     // Transaction info
@@ -190,6 +185,11 @@ contract GnosisSafe is
             }
             if (success) emit ExecutionSuccess(txHash, payment);
             else emit ExecutionFailure(txHash, payment);
+        }
+        {
+            if (guard != address(0)) {
+                Guard(guard).checkAfterExecution(txHash, success);
+            }
         }
     }
 
@@ -336,17 +336,6 @@ contract GnosisSafe is
         emit ApproveHash(hashToApprove, msg.sender);
     }
 
-    /**
-     * @dev Marks a message as signed, so that it can be used with EIP-1271
-     * @notice Marks a message (`_data`) as signed.
-     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this)
-     */
-    function signMessage(bytes calldata _data) external authorized {
-        bytes32 msgHash = getMessageHash(_data);
-        signedMessages[msgHash] = 1;
-        emit SignMsg(msgHash);
-    }
-
     /// @dev Returns the chain id used by this contract.
     function getChainId() public view returns (uint256) {
         uint256 id;
@@ -359,14 +348,6 @@ contract GnosisSafe is
 
     function domainSeparator() public view returns (bytes32) {
         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
-    }
-
-    /// @dev Returns hash of a message that can be signed by owners.
-    /// @param message Message that should be hashed
-    /// @return Message hash.
-    function getMessageHash(bytes memory message) public view returns (bytes32) {
-        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
-        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeMessageHash));
     }
 
     /// @dev Returns the bytes that are hashed to be signed by owners.

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../common/Enum.sol";
-import "../base/GuardManager.sol";
-import "../GnosisSafe.sol";
+import "../../common/Enum.sol";
+import "../../base/GuardManager.sol";
+import "../../GnosisSafe.sol";
 
 contract DelegateCallTransactionGuard is Guard {
     address public immutable allowedTarget;
@@ -34,4 +34,6 @@ contract DelegateCallTransactionGuard is Guard {
     ) external view override {
         require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
     }
+
+    function checkAfterExecution(bytes32, bool) external view override {}
 }

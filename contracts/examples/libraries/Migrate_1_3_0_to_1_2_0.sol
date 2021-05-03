@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
+import "./GnosisSafeStorage.sol";
 
 /// @title Migration - migrates a Safe contract from 1.3.0 to 1.2.0
 /// @author Richard Meissner - <richard@gnosis.io>
-contract Migration {
+contract Migration is GnosisSafeStorage {
     bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     address public immutable migrationSingleton;
@@ -17,18 +18,6 @@ contract Migration {
 
     event ChangedMasterCopy(address singleton);
 
-    // Here to have the same storage layout as the Safe
-    address private singleton;
-    // Some unused slots to have the correct layout
-    bytes32 private _slot1;
-    bytes32 private _slot2;
-    bytes32 private _slot3;
-    bytes32 private _slot4;
-    bytes32 private _slot5;
-    // For the migration we need to set the old domain separator in storage
-    bytes32 private domainSeparator;
-
-    // Define guard last to avoid conflict with Safe storage layout
     bytes32 private guard;
 
     /// @dev Allows to migrate the contract. This can only be called via a delegatecall.

@@ -18,6 +18,8 @@ interface Guard {
         bytes memory signatures,
         address msgSender
     ) external;
+
+    function checkAfterExecution(bytes32 txHash, bool success) external;
 }
 
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
@@ -14,6 +14,7 @@ describe("CompatibilityFallbackHandler", async () => {
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler()
         const safe = await getSafeWithOwners([user1.address, user2.address], 2, handler.address)
         const validator = (await compatFallbackHandlerContract()).attach(safe.address)
@@ -22,7 +23,8 @@ describe("CompatibilityFallbackHandler", async () => {
             safe,
             validator,
             handler,
-            killLib
+            killLib,
+            signLib
         }
     })
 
@@ -76,8 +78,8 @@ describe("CompatibilityFallbackHandler", async () => {
         })
 
         it('should return magic value if message was signed', async () => {
-            const { safe, validator } = await setupTests()
-            await executeContractCallWithSigners(safe, safe, "signMessage", ["0xbaddad"], [user1, user2])
+            const { safe, validator, signLib } = await setupTests()
+            await executeContractCallWithSigners(safe, signLib, "signMessage", ["0xbaddad"], [user1, user2], true)
             expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.eq("0x20c13b0b")
         })
 
@@ -113,9 +115,9 @@ describe("CompatibilityFallbackHandler", async () => {
         })
 
         it('should return magic value if message was signed', async () => {
-            const { safe, validator } = await setupTests()
+            const { safe, validator, signLib } = await setupTests()
             const dataHash = ethers.utils.keccak256("0xbaddad")
-            await executeContractCallWithSigners(safe, safe, "signMessage", [dataHash], [user1, user2])
+            await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true)
             expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.eq("0x1626ba7e")
         })
 
@@ -147,7 +149,31 @@ describe("CompatibilityFallbackHandler", async () => {
             ).to.be.deep.equal([user2.address])
         })
     })
-    
+
+    describe("getMessageHash", async () => {
+        it('should generate the correct hash', async () => {
+            const { safe, validator } = await setupTests()
+            expect(
+                await validator.getMessageHash("0xdead")
+            ).to.be.eq(calculateSafeMessageHash(safe, "0xdead", await chainId()))
+        })
+    })
+
+    describe("getMessageHashForSafe", async () => {
+        it('should revert if target does not return domain separator', async () => {
+            const { handler } = await setupTests()
+            await expect(
+                handler.getMessageHashForSafe(handler.address, "0xdead")
+            ).to.be.reverted
+        })
+
+        it('should generate the correct hash', async () => {
+            const { handler, safe } = await setupTests()
+            expect(
+                await handler.getMessageHashForSafe(safe.address, "0xdead")
+            ).to.be.eq(calculateSafeMessageHash(safe, "0xdead", await chainId()))
+        })
+    })
 
     describe("simulate", async () => {
 

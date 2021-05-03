@@ -8,6 +8,11 @@ import "../GnosisSafe.sol";
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
+    //keccak256(
+    //    "SafeMessage(bytes message)"
+    //);
+    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
+
     bytes4 internal constant SIMULATE_SELECTOR = bytes4(keccak256("simulate(address,bytes)"));
 
     address internal constant SENTINEL_MODULES = address(0x1);
@@ -23,13 +28,29 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     function isValidSignature(bytes calldata _data, bytes calldata _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         GnosisSafe safe = GnosisSafe(payable(msg.sender));
-        bytes32 messageHash = safe.getMessageHash(_data);
+        bytes32 messageHash = getMessageHashForSafe(safe, _data);
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
             safe.checkSignatures(messageHash, _data, _signature);
         }
         return EIP1271_MAGIC_VALUE;
+    }
+
+    /// @dev Returns hash of a message that can be signed by owners.
+    /// @param message Message that should be hashed
+    /// @return Message hash.
+    function getMessageHash(bytes memory message) public view returns (bytes32) {
+        return getMessageHashForSafe(GnosisSafe(payable(msg.sender)), message);
+    }
+
+    /// @dev Returns hash of a message that can be signed by owners.
+    /// @param safe Safe to which the message is targeted
+    /// @param message Message that should be hashed
+    /// @return Message hash.
+    function getMessageHashForSafe(GnosisSafe safe, bytes memory message) public view returns (bytes32) {
+        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash));
     }
 
     /**
