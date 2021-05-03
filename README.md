@@ -20,13 +20,15 @@ yarn build
 yarn test
 ```
 
+### Deployments
+
+A collection of the different Safe contract deployments and their addresses can be found in the [Safe deployments](https://github.com/gnosis/safe-deployments) repository.
+
+To add support for a new network follow the steps of the ``Deploy`` section and create a PR in the [Safe deployments](https://github.com/gnosis/safe-deployments) repository. 
+
 ### Deploy
 
-Some contracts require that the Solidity compile target is at least `petersburg` (e.g. GnosisSafeProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
-
-Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
-
-This will deploy the contracts deterministically and verify the contracts on etherscan.
+This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
 Preparation:
 - Set `MNEMONIC` in `.env`
@@ -44,6 +46,16 @@ yarn hardhat --network <network> deploy
 yarn hardhat --network <network> etherscan-verify
 yarn hardhat --network <network> local-verify
 ```
+
+#### Custom Networks
+
+It is possible to use the `NODE_URL` env var to connect to any EVM based network via an RPC endpoint. This connection then can be used with the `custom` network.
+
+E.g. to deploy the Safe contract suite on that network you would run `yarn deploy-all custom`. 
+
+The resulting addresses should be on all networks the same.
+
+Note: Address will vary if contract code is changed or a different Solidity version is used.
 
 ### Verify contract
 

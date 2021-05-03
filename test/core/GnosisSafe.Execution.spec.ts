@@ -179,7 +179,7 @@ describe("GnosisSafe", async () => {
             const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[logIndex].data, receipt.logs[logIndex].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
-            expect(successEvent.payment.toNumber()).to.be.lte(5000)
+            expect(successEvent.payment.toNumber()).to.be.lte(10000)
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
         })
 
@@ -218,7 +218,7 @@ describe("GnosisSafe", async () => {
             ).to.emit(safe, "ExecutionFailure")
 
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 4000000 }),
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
                 "Safe transaction should succeed with high gasLimit"
             ).to.emit(safe, "ExecutionSuccess")
 
@@ -226,7 +226,7 @@ describe("GnosisSafe", async () => {
             tx.gasPrice = 1
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 4000000 }),
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
                 "Safe transaction should fail with gasPrice 1 and high gasLimit"
             ).to.emit(safe, "ExecutionFailure")
         })
