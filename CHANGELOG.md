@@ -18,21 +18,21 @@ Issue: [#170](https://github.com/gnosis/safe-contracts/issues/170)
 
 Expected behaviour:
 
-The chainId has been added to the EIP-712 domain. In case of a change of the chainId (e.g. hardfork related) the new chainId will automatically be used for future signature checks.
+The `chainId` has been added to the EIP-712 domain. In case of a change of the `chainId` (e.g. hardfork related) the new `chainId` will automatically be used for future signature checks.
 
 #### Add transaction guard
 Issue: [#224](https://github.com/gnosis/safe-contracts/issues/224)
 
 Expected behaviour:
 
-It is possible to add a transaction guard, which can check all of the parameters that have been sent to execTransaction prior to execution. For this check the checkTransaction needs to be implemented by the guard. In case that checkTransaction reverts, execTransaction will also revert. Another check that can be implemented by the guard is checkAfterExecution. This check is called at the very end of the execution and allows to perform checks on the final state of the Safe. The parameters passed to that check are the safeTxHash and a success boolean.
+It is possible to add a transaction guard, which can check all of the parameters that have been sent to `execTransaction` prior to execution. For this check the `checkTransaction` needs to be implemented by the guard. In case that `checkTransaction` reverts, `execTransaction` will also revert. Another check that can be implemented by the guard is `checkAfterExecution`. This check is called at the very end of the execution and allows to perform checks on the final state of the Safe. The parameters passed to that check are the `safeTxHash` and a `success` boolean.
 
 #### Add StorageAccessible support
 Issue: [#201](https://github.com/gnosis/safe-contracts/issues/201)
 
 Expected behaviour:
 
-It is possible to use simulateDelegatecallInternal to simulate logic on the Safe by providing a contract and calldata. This contract will then be called via a delegate call and the result will be returned via a revert.The revert data will have the following format: 
+It is possible to use `simulateDelegatecallInternal` to simulate logic on the Safe by providing a contract and calldata. This contract will then be called via a delegatecall and the result will be returned via a revert.The revert data will have the following format: 
 `success:bool || response.length:uint256 || response:bytes`. 
 
 Important: This method will always revert.
@@ -47,9 +47,9 @@ Issue: [#248](https://github.com/gnosis/safe-contracts/issues/248)
 
 Expected behaviour:
 
-The checkSignature method is now a view method that is public. This makes it possible that it can be used in other contracts (e.g. modules) to make it easier to reuse existing signature check logic. The function expects that there are at least enough valid signatures to hit the threshold.
-Another method that has been added to make the usage from external contracts easier is checkNSignatures which allows to set how many valid signatures are expected.
-Note: The storage allocated by approveHash will no longer be zeroed when being used in checkSignature. If this is required a delegatecall with a contract that zeroes past approved hashes should be used.
+The `checkSignature` method is now a view method that is public. This makes it possible that it can be used in other contracts (e.g. modules) to make it easier to reuse existing signature check logic. The function expects that there are at least enough valid signatures to hit the threshold.
+Another method that has been added to make the usage from external contracts easier is `checkNSignatures` which allows to set how many valid signatures are expected.
+Note: The storage allocated by `approveHash` will no longer be zeroed when being used in `checkSignature`. If this is required a delegatecall with a contract that zeroes past approved hashes should be used.
 
 #### Remove authorized from requiredTxGas
 Issue: [#247](https://github.com/gnosis/safe-contracts/issues/247)
@@ -57,30 +57,30 @@ Issue: [#247](https://github.com/gnosis/safe-contracts/issues/247)
 Expected behaviour:
 
 To make it easier to interact with this method (e.g. by providing a wrapper). The requirement that the method can only be called by the Safe itself has been removed. The method will still always revert. 
-Note: This method is superseded by the StorageAccessible logic and will be removed in the next major version.
+Note: This method is superseded by the `StorageAccessible` logic and will be removed in the next major version.
 
 #### Move EIP-1271 logic to fallback handler
 Issue: [#223](https://github.com/gnosis/safe-contracts/issues/223)
 
 Expected behaviour:
 
-As EIP-1271 is still changing the logic for it has been moved to a fallback handler. The fallback handler uses the checkSignatures method to validate the signatures. Also this fallback handler supports the latest version of EIP-1271. The logic to mark a message hash as signed in the contract also has been moved to other contracts. getMessageHash has been moved to a fallback handler and signMessage into a library that can be used via delegate call.
-Note: The checkSignature method still uses the previous version of EIP-1271 that uses the data to be signed instead of the hash of the data.
+As EIP-1271 is still changing the logic for it has been moved to a fallback handler. The fallback handler uses the `checkSignatures` method to validate the signatures. Also this fallback handler supports the latest version of EIP-1271. The logic to mark a message hash as signed in the contract also has been moved to other contracts. `getMessageHash` has been moved to a fallback handler and `signMessage` into a library that can be used via delegatecall.
+Note: The `checkSignature` method still uses the previous version of EIP-1271 that uses the data to be signed instead of the hash of the data.
 
 #### Send along msg.sender to fallback handler
 Issue: [#246](https://github.com/gnosis/safe-contracts/issues/246)
 
 Expected behaviour:
 
-When the Safe forwards a call to the fallback handler it will append the msg.sender to the calldata. This will allow the fallback handler to use this information. 
-Note: Fallback handlers should make sure that the connected Safe supports this, else this can be used by the caller to influence the fallback handler (by specifying an arbitrary msg.sender)
+When the Safe forwards a call to the fallback handler it will append the `msg.sender` to the calldata. This will allow the fallback handler to use this information. 
+Note: Fallback handlers should make sure that the connected Safe supports this, else this can be used by the caller to influence the fallback handler (by specifying an arbitrary `msg.sender`)
 
 #### Revert on failure if safeTxGas and gasPrice are 0
 Issue: [#274](https://github.com/gnosis/safe-contracts/issues/274)
 
 Expected behaviour:
 
-If safeTxGas is 0 (therefore all available gas has been used for the internal tx) and gasPrice is also 0 (therefore no refund is involved). The transaction will revert when the internal tx fails. This makes it easier to interact with the Safe without having to estimate the internal transaction ahead of time.
+If `safeTxGas` is 0 (therefore all available gas has been used for the internal tx) and `gasPrice` is also 0 (therefore no refund is involved) the transaction will revert when the internal tx fails. This makes it easier to interact with the Safe without having to estimate the internal transaction ahead of time.
 
 #### Add setup event
 Issue: [#233](https://github.com/gnosis/safe-contracts/issues/233)
@@ -94,7 +94,7 @@ Issue: [#209](https://github.com/gnosis/safe-contracts/issues/209)
 
 Expected behaviour:
 
-When the Safe is receiving ETH it will not trigger an event (with exception of ETH received via a call to execTransaction or as a result of a selfdestruct of another contract).
+When the Safe is receiving ETH it will not trigger an event (with exception of ETH received via a call to `execTransaction` or as a result of a selfdestruct of another contract).
 Note: It will not be possible anymore to send ETH via the solidity calls transfer or send to a Safe. This is expected to break because of the gas costs changes with the Berlin hard fork in any case (even without the event) when using the legacy transaction format. As there is also a new transaction format (EIP-2930) it is possible to use that together with the correct access list to still execute transfer/ send calls and emit the event.
 
 ### Layer 2
@@ -105,12 +105,12 @@ File: [`contracts/GnosisSafeL2.sol`](https://github.com/gnosis/safe-contracts/bl
 Expected behaviour:
 
 The extended version will emit an event with all the information related to the Safe transaction that will be executed. As this is quite gas expensive, it is only expected that this version will be used on Layer 2 networks with low gas prices.
-It is expected that the events are emitted on entry to the method. As the normal Safe methods emit already some events after the execution of the Safe transaction. This will make it possible to connect other events to that call as they are “boxed” by the GnosisSafeL2 events and the GnosisSafe events.
+It is expected that the events are emitted on entry to the method. As the normal Safe methods emit already some events after the execution of the Safe transaction. This will make it possible to connect other events to that call as they are "boxed" by the GnosisSafeL2 events and the GnosisSafe events.
 
 Example:
 
-On entry into execTransaction of the GnosisSafeL2 contract a SafeMultiSigTransaction event will be emitted that contains all the parameters of the function and the nonce, msg.sender and threshold. Once the internal execution has finished the execTransaction of the GnosisSafe contract will emit a ExecutionSuccess or ExecutionFailure event. When processing the events of that transaction it is now possible to connect all events that were emitted between these two events to this specific Safe transaction.
-Same can be done with the SafeModuleTransaction and ExecutionFromModuleSuccess (or ExecutionFromModuleFailure) events when executing a transaction via a module.
+On entry into `execTransaction` of the `GnosisSafeL2` contract a `SafeMultiSigTransaction` event will be emitted that contains all the parameters of the function and the `nonce`, `msg.sender` and `threshold`. Once the internal execution has finished the `execTransaction` of the `GnosisSafe` contract will emit a `ExecutionSuccess` or `ExecutionFailure` event. When processing the events of that transaction it is now possible to connect all events that were emitted between these two events to this specific Safe transaction.
+Same can be done with the `SafeModuleTransaction` and `ExecutionFromModuleSuccess` (or `ExecutionFromModuleFailure`) events when executing a transaction via a module.
 
 ### Fallback handlers
 
@@ -121,7 +121,7 @@ File: [`contracts/handler/DefaultCallbackHandler.sol`](https://github.com/gnosis
 
 Expected behaviour:
 
-Indicate via the supportsInterface method of ERC 165 that the ERC721 and ERC1155 receiver interfaces are supported. 
+Indicate via the `supportsInterface` method of ERC 165 that the ERC721 and ERC1155 receiver interfaces are supported. 
 
 #### Add CompatibilityFallbackHandler
 Issue: [#223](https://github.com/gnosis/safe-contracts/issues/223)
@@ -130,14 +130,14 @@ File: [`contracts/handler/CompatibilityFallbackHandler.sol`](https://github.com/
 
 Expected behaviour:
 
-The CompatibilityFallbackHandler extends the DefaultCallbackHandler and implements support for some logic that has been removed from the core contracts. Namely EIP-1271 support and the non reverting method of the StorageAccessible contract. Also the fallback manager contains the logic to verify Safe messages.
+The `CompatibilityFallbackHandler` extends the `DefaultCallbackHandler` and implements support for some logic that has been removed from the core contracts. Namely EIP-1271 support and the non reverting method of the `StorageAccessible` contract. Also the fallback manager contains the logic to verify Safe messages.
 
 #### Add possibility to get sender in fallback handler
 File: [`contracts/handler/HandlerContext.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/handler/HandlerContext.sol)
 
 Expected behaviour:
 
-The HandlerContext can be used to retrieve the msg.sender and the Safe (aka manager) that have been forwarding the call to the fallback handler. The msg.sender is expected to be appended to the calldata (e.g. last 20 bytes). This will only work if used with a Safe contract that supports this (e.g. 1.3.0 or newer).
+The `HandlerContext` can be used to retrieve the `msg.sender` and the Safe (aka manager) that have been forwarding the call to the fallback handler. The `msg.sender` is expected to be appended to the calldata (e.g. last 20 bytes). This will only work if used with a Safe contract that supports this (e.g. 1.3.0 or newer).
 
 ### Guard
 
@@ -148,7 +148,7 @@ Note: **This contract is meant as an example to demonstrate how to facilitate a 
 
 Expected behaviour:
 
-This transaction guard can be used to prevent that Safe transactions that use a delegatecall operation are being executed. It is also possible to specify an exception when deploying the contract (e.g. a MultiSendCallOnly instance).
+This transaction guard can be used to prevent that Safe transactions that use a delegatecall operation are being executed. It is also possible to specify an exception when deploying the contract (e.g. a `MultiSendCallOnly` instance).
 
 #### Add DebugTransactionGuard
 File: [`contracts/examples/guards/DebugTransactionGuard.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/DebugTransactionGuard.sol)
@@ -177,15 +177,15 @@ File: [`contracts/libraries/MultiSend.sol`](https://github.com/gnosis/safe-contr
 
 Expected behaviour:
 
-The multisSend is now payable therefore will enforce anymore that msg.value is 0. ETH that is not transferred out again will remain in this (the calling contract when used via a delegate call or the contract when used via call, only possible with MultiSendCallOnly)
+The `multisSend` is now payable therefore will enforce anymore that `msg.value` is 0. ETH that is not transferred out again will remain in `this` (the calling contract when used via a delegatecall or the contract when used via call, only possible with `MultiSendCallOnly`)
 
 #### Add MuliSend that disallows delegate operation
 File: [`contracts/libraries/MultiSendCallOnly.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/libraries/MultiSendCallOnly.sol)
 
 Expected behaviour:
 
-The logic is the same as for the normal MultiSend, but when an attempt is made to execute a transaction via a delegate call the contract will revert.
-Note: The encoding of the data send to the multiSend method is exactly the same as for the normal MultiSend, this makes it easy to exchange the contracts depending on the use case.
+The logic is the same as for the normal `MultiSend`, but when an attempt is made to execute a transaction via a delegatecall the contract will revert.
+Note: The encoding of the data send to the `multiSend` method is exactly the same as for the normal `MultiSend`, this makes it easy to exchange the contracts depending on the use case.
 
 #### Add base contract for Gnosis Safe storage layout
 File: [`contracts/examples/libraries/GnosisSafeStorage.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/GnosisSafeStorage.sol)
@@ -194,7 +194,7 @@ Note: **This contract is meant as an example to demonstrate how access the Gnosi
 
 Expected behaviour:
 
-The contract contains the basic storage layout of the GnosisSafe.sol contract.
+The contract contains the basic storage layout of the `GnosisSafe.sol` contract.
 
 #### Add contract to mark Safe messages as signed
 File: [`contracts/examples/libraries/SignMessage.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/SignMessage.sol)
@@ -203,7 +203,7 @@ Note: **This contract is meant as an example to demonstrate how to mark Safe mes
 
 Expected behaviour:
 
-The library is meant as a compatibility tool for the remove signMessage function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the signedMessages mapping.
+The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the `signedMessages` mapping.
 
 #### Add Migration example to downgrade from 1.3.0 to 1.2.0
 File: [`contracts/examples/libraries/Migrate_1_3_0_to_1_2_0.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/Migrate_1_3_0_to_1_2_0.sol)
