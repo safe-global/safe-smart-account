@@ -5,8 +5,8 @@ import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
 import "../../GnosisSafe.sol";
 
-contract ReentrencyTransactionGuard is Guard {
-    bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrentry_guard.guard.struct");
+contract ReentrancyTransactionGuard is Guard {
+    bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrancy_guard.guard.struct");
 
     struct GuardValue {
         bool active;
@@ -41,7 +41,7 @@ contract ReentrencyTransactionGuard is Guard {
         address
     ) external override {
         GuardValue storage guard = getGuard();
-        require(!guard.active, "Reentrency detected");
+        require(!guard.active, "Reentrancy detected");
         guard.active = true;
     }
 

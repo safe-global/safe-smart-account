@@ -10,7 +10,7 @@ Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.
 
 Solidity optimizer: `disabled`
 
-## Expected determinisitic deployment addresses
+## Expected deterministic deployment addresses
 
 ### Core contracts
 - `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE70955`
@@ -178,14 +178,14 @@ Expected behaviour:
 
 This transaction guard can be used to log more details about a transaction. This is similar to what the L2 version of the Safe does, but implemented as a transaction guard. One event will be emitted containing the transaction details and another to track the status of a specific nonce.
 
-#### Add ReentrencyTransactionGuard
-File: [`contracts/examples/guards/ReentrencyTransactionGuard.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/ReentrencyTransactionGuard.sol)
+#### Add ReentrancyTransactionGuard
+File: [`contracts/examples/guards/ReentrancyTransactionGuard.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/ReentrancyTransactionGuard.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate a guard. This should not be used in production without further checks.**
 
 Expected behaviour:
 
-This transaction guard can be used to prevent that Safe transactions can re-enter the `execTransaction` method. The transaction guard does not differentiate between different Safes, so if multiple Safes use the same guard instance it prevents entrency in all of the connected Safes.
+This transaction guard can be used to prevent that Safe transactions can re-enter the `execTransaction` method. The transaction guard does not differentiate between different Safes, so if multiple Safes use the same guard instance it prevents entrancy in all of the connected Safes.
 
 ### Libraries
 
