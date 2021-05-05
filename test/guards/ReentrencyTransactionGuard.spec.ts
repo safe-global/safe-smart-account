@@ -1,19 +1,17 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { AddressZero } from "@ethersproject/constants";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import { buildSafeTransaction, buildSignatureBytes, executeContractCallWithSigners, executeTx, executeTxWithSigners, safeSignTypedData } from "../../src/utils/execution";
-import { BigNumber } from "@ethersproject/bignumber";
 
-describe("ReentrencyTransactionGuard", async () => {
+describe("ReentrancyTransactionGuard", async () => {
 
     const [user1] = waffle.provider.getWallets();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const safe = await getSafeWithOwners([user1.address])
-        const guardFactory = await hre.ethers.getContractFactory("ReentrencyTransactionGuard");
+        const guardFactory = await hre.ethers.getContractFactory("ReentrancyTransactionGuard");
         const guard = await guardFactory.deploy()
         const mock = await getMock()
         await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
@@ -53,7 +51,7 @@ describe("ReentrencyTransactionGuard", async () => {
             const signatures = [await safeSignTypedData(user1, safe, safeTx)]
             const signatureBytes = buildSignatureBytes(signatures)
 
-            // We should revert with GS013 as the internal tx is reverted because of the reentrency guard
+            // We should revert with GS013 as the internal tx is reverted because of the reentrancy guard
             await expect(
                 executeContractCallWithSigners(safe, safe, "execTransaction", [
                     safeTx.to,
