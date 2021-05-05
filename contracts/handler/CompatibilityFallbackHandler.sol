@@ -79,7 +79,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     }
 
     /**
-     * @dev Performs a delegetecall on a targetContract in the context of self.
+     * @dev Performs a delegatecall on a targetContract in the context of self.
      * Internally reverts execution to avoid side effects (making it static). Catches revert and returns encoded result as bytes.
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
