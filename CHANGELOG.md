@@ -113,7 +113,7 @@ Issue: [#209](https://github.com/gnosis/safe-contracts/issues/209)
 
 Expected behaviour:
 
-When the Safe is receiving ETH it will not trigger an event (with exception of ETH received via a call to `execTransaction` or as a result of a selfdestruct of another contract).
+When the Safe is receiving ETH it will now trigger an event (with exception of ETH received via a call to `execTransaction` or as a result of a selfdestruct of another contract).
 Note: It will not be possible anymore to send ETH via the solidity calls transfer or send to a Safe. This is expected to break because of the gas costs changes with the Berlin hard fork in any case (even without the event) when using the legacy transaction format. As there is also a new transaction format (EIP-2930) it is possible to use that together with the correct access list to still execute transfer/ send calls and emit the event.
 
 ### Layer 2
