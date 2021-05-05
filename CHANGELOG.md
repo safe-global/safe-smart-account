@@ -2,11 +2,13 @@
 
 This changelog only contains changes starting from version 1.3.0
 
-# 1.3.0
+# Version 1.3.0
+
+## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (more info see issue [#251](https://github.com/gnosis/safe-contracts/issues/251))
 
-Solidity optimizer: disabled
+Solidity optimizer: `disabled`
 
 ## Expected determinisitic deployment addresses
 
