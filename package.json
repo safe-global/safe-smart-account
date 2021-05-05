@@ -4,15 +4,18 @@
   "description": "Ethereum multisig contract",
   "homepage": "https://github.com/gnosis/safe-contracts/",
   "license": "GPL-3.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "files": [
     "contracts",
+    "dist",
+    "src",
     "test",
-    "build",
-    "networks.json"
+    "build"
   ],
   "scripts": {
     "build": "hardhat compile",
+    "build:ts": "yarn rimraf dist && tsc",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "benchmark": "yarn test benchmark/*.ts",
@@ -23,7 +26,8 @@
     "lint:ts": "eslint --max-warnings 0 .",
     "fmt:sol": "prettier 'contracts/**/*.sol' -w",
     "prepack": "yarn build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prepublish": "yarn rimraf build && yarn build && yarn build:ts"
   },
   "repository": {
     "type": "git",
@@ -49,31 +53,32 @@
     "@types/node": "^14.14.21",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
+    "@types/yargs": "^15.0.10",
+    "argv": "^0.0.2",
     "chai": "^4.2.0",
     "debug": "^4.2.0",
+    "dotenv": "^8.0.0",
     "eslint": "^7.13.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-prettier": "^3.1.4",
     "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.1.4",
     "hardhat": "^2.2.1",
     "hardhat-deploy": "^0.7.5",
     "husky": "^5.1.3",
     "prettier": "^2.1.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.60",
+    "solc": "0.7.6",
     "solhint": "^3.3.2",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.16",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
-  },
-  "dependencies": {
-    "@types/yargs": "^15.0.10",
-    "argv": "^0.0.2",
-    "dotenv": "^8.0.0",
-    "ethers": "^5.1.4",
-    "solc": "0.7.6",
+    "typescript": "^4.2.4",
     "yargs": "^16.1.1"
+  },
+  "peerDependencies": {
+    "ethers": "^5.1.4"
   }
 }

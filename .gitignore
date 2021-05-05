@@ -5,6 +5,7 @@ node_modules/
 .openzeppelin/.session
 deployments/
 env/
+dist/
 .env
 bin/
 solc
