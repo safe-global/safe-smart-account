@@ -37,7 +37,7 @@ Issue: [#170](https://github.com/gnosis/safe-contracts/issues/170)
 
 Expected behaviour:
 
-The `chainId` has been added to the EIP-712 domain. In case of a change of the `chainId` (e.g. hardfork related) the new `chainId` will automatically be used for future signature checks.
+The `chainId` has been added to the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) domain. In case of a change of the `chainId` (e.g. hardfork related) the new `chainId` will automatically be used for future signature checks.
 
 #### Add transaction guard
 Issue: [#224](https://github.com/gnosis/safe-contracts/issues/224)
@@ -83,8 +83,8 @@ Issue: [#223](https://github.com/gnosis/safe-contracts/issues/223)
 
 Expected behaviour:
 
-As EIP-1271 is still changing the logic for it has been moved to a fallback handler. The fallback handler uses the `checkSignatures` method to validate the signatures. Also this fallback handler supports the latest version of EIP-1271. The logic to mark a message hash as signed in the contract also has been moved to other contracts. `getMessageHash` has been moved to a fallback handler and `signMessage` into a library that can be used via delegatecall.
-Note: The `checkSignature` method still uses the previous version of EIP-1271 that uses the data to be signed instead of the hash of the data.
+As [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) is still changing the logic for it has been moved to a fallback handler. The fallback handler uses the `checkSignatures` method to validate the signatures. Also this fallback handler supports the latest version of [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271). The logic to mark a message hash as signed in the contract also has been moved to other contracts. `getMessageHash` has been moved to a fallback handler and `signMessage` into a library that can be used via delegatecall.
+Note: The `checkSignature` method still uses the previous version of [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) that uses the data to be signed instead of the hash of the data.
 
 #### Send along msg.sender to fallback handler
 Issue: [#246](https://github.com/gnosis/safe-contracts/issues/246)
@@ -114,7 +114,7 @@ Issue: [#209](https://github.com/gnosis/safe-contracts/issues/209)
 Expected behaviour:
 
 When the Safe is receiving ETH it will now trigger an event (with exception of ETH received via a call to `execTransaction` or as a result of a selfdestruct of another contract).
-Note: It will not be possible anymore to send ETH via the solidity calls transfer or send to a Safe. This is expected to break because of the gas costs changes with the Berlin hard fork in any case (even without the event) when using the legacy transaction format. As there is also a new transaction format (EIP-2930) it is possible to use that together with the correct access list to still execute transfer/ send calls and emit the event.
+Note: It will not be possible anymore to send ETH via the solidity calls transfer or send to a Safe. This is expected to break because of the gas costs changes with the Berlin hard fork ([EIP-2929](https://eips.ethereum.org/EIPS/eip-2929)) in any case (even without the event) when using the legacy transaction format. As there is also a new transaction format ([EIP-2930](https://eips.ethereum.org/EIPS/eip-2930)) it is possible to use that together with the correct access list to still execute transfer/ send calls and emit the event.
 
 ### Layer 2
 
@@ -140,7 +140,7 @@ File: [`contracts/handler/DefaultCallbackHandler.sol`](https://github.com/gnosis
 
 Expected behaviour:
 
-Indicate via the `supportsInterface` method of ERC 165 that the ERC721 and ERC1155 receiver interfaces are supported. 
+Indicate via the `supportsInterface` method of [EIP-165](https://eips.ethereum.org/EIPS/eip-165) that the [EIP-721](https://eips.ethereum.org/EIPS/eip-721) and [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) receiver interfaces are supported. 
 
 #### Add CompatibilityFallbackHandler
 Issue: [#223](https://github.com/gnosis/safe-contracts/issues/223)
@@ -149,7 +149,7 @@ File: [`contracts/handler/CompatibilityFallbackHandler.sol`](https://github.com/
 
 Expected behaviour:
 
-The `CompatibilityFallbackHandler` extends the `DefaultCallbackHandler` and implements support for some logic that has been removed from the core contracts. Namely EIP-1271 support and the non reverting method of the `StorageAccessible` contract. Also the fallback manager contains the logic to verify Safe messages.
+The `CompatibilityFallbackHandler` extends the `DefaultCallbackHandler` and implements support for some logic that has been removed from the core contracts. Namely [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) support and the non reverting method of the `StorageAccessible` contract. Also the fallback manager contains the logic to verify Safe messages.
 
 #### Add possibility to get sender in fallback handler
 File: [`contracts/handler/HandlerContext.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/handler/HandlerContext.sol)
