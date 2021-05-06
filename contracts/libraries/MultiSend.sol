@@ -1,5 +1,5 @@
-pragma solidity >=0.5.0 <0.7.0;
-
+// SPDX-License-Identifier: LGPL-3.0-only
+pragma solidity >=0.7.0 <0.9.0;
 
 /// @title Multi Send - Allows to batch multiple transactions into one.
 /// @author Nick Dodson - <nick.dodson@consensys.net>
@@ -7,13 +7,10 @@ pragma solidity >=0.5.0 <0.7.0;
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract MultiSend {
+    address private immutable multisendSingleton;
 
-    bytes32 constant private GUARD_VALUE = keccak256("multisend.guard.bytes32");
-
-    bytes32 guard;
-
-    constructor() public {
-        guard = GUARD_VALUE;
+    constructor() {
+        multisendSingleton = address(this);
     }
 
     /// @dev Sends multiple transactions and reverts all if one fails.
@@ -24,15 +21,19 @@ contract MultiSend {
     ///                     data length as a uint256 (=> 32 bytes),
     ///                     data as bytes.
     ///                     see abi.encodePacked for more information on packed encoding
-    function multiSend(bytes memory transactions)
-        public
-    {
-        require(guard != GUARD_VALUE, "MultiSend should only be called via delegatecall");
-        // solium-disable-next-line security/no-inline-assembly
+    /// @notice This method is payable as delegatecalls keep the msg.value from the previous call
+    ///         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
+    function multiSend(bytes memory transactions) public payable {
+        require(address(this) != multisendSingleton, "MultiSend should only be called via delegatecall");
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20
-            for { } lt(i, length) { } {
+            for {
+                // Pre block is not used in "while mode"
+            } lt(i, length) {
+                // Post block is not used in "while mode"
+            } {
                 // First byte of the data is the operation.
                 // We shift by 248 bits (256 - 8 [operation byte]) it right since mload will always load 32 bytes (a word).
                 // This will also zero out unused data.
@@ -48,9 +49,15 @@ contract MultiSend {
                 let data := add(transactions, add(i, 0x55))
                 let success := 0
                 switch operation
-                case 0 { success := call(gas, to, value, data, dataLength, 0, 0) }
-                case 1 { success := delegatecall(gas, to, data, dataLength, 0, 0) }
-                if eq(success, 0) { revert(0, 0) }
+                    case 0 {
+                        success := call(gas(), to, value, data, dataLength, 0, 0)
+                    }
+                    case 1 {
+                        success := delegatecall(gas(), to, data, dataLength, 0, 0)
+                    }
+                if eq(success, 0) {
+                    revert(0, 0)
+                }
                 // Next entry starts at 85 byte + data length
                 i := add(i, add(0x55, dataLength))
             }

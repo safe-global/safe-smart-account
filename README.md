@@ -2,62 +2,84 @@ Gnosis Safe Contracts
 =====================
 
 [![npm version](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts)
-[![Build Status](https://travis-ci.org/gnosis/safe-contracts.svg?branch=development)](https://travis-ci.org/gnosis/safe-contracts)
+[![Build Status](https://github.com/gnosis/safe-contracts/workflows/safe-contracts/badge.svg?branch=development)](https://github.com/gnosis/safe-contracts/actions)
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/safe-contracts/badge.svg?branch=development)](https://coveralls.io/github/gnosis/safe-contracts)
 
-Install
--------
+Usage
+-----
 ### Install requirements with yarn:
 
 ```bash
 yarn
 ```
 
-### Run all tests (requires Node version >=7 for `async/await`):
+### Run all tests:
 
 ```bash
-yarn truffle compile
+yarn build
 yarn test
 ```
 
-`yarn test` will start a ganache-cli with the correct configuration. If you want to run `yarn truffle test` you need to start a [ganache-cli](https://github.com/trufflesuite/ganache-cli) instance. For this it is required to use the [`--noVMErrorsOnRPCResponse`](https://github.com/trufflesuite/ganache-cli#options) option. This option will make sure that ganache-cli behaves the same as other clients (e.g. geth and parity) when handling reverting calls to contracts. This is required as some flows parse the error message (see https://gnosis-safe.readthedocs.io/en/latest/contracts/transactions.html#safe-transaction-gas-limit-estimation).
+### Deployments
+
+A collection of the different Safe contract deployments and their addresses can be found in the [Safe deployments](https://github.com/gnosis/safe-deployments) repository.
+
+To add support for a new network follow the steps of the ``Deploy`` section and create a PR in the [Safe deployments](https://github.com/gnosis/safe-deployments) repository. 
 
 ### Deploy
 
-Some contracts require that the Solidity compile target is at least `petersburg` (e.g. GnosisSafeProxyFactory and MultiSend). This is default since [Solidity 0.5.5](https://github.com/ethereum/solidity/releases/tag/v0.5.5).
+> :warning: **Make sure to use the correct commit when deploying the contracts.** Any change (even comments) within the contract files will result in different addresses. The tagged versions that are used by the Gnosis Safe team can be found in the [releases](https://github.com/gnosis/safe-contracts/releases).
 
-Note: The formal verification was performed using the contract compiled with solcjs 0.5.0.
+This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
 Preparation:
-- Set `INFURA_TOKEN` in `.env`
-- Set `NETWORK` in `.env`
-- Run `yarn truffle compile`
-
-Truffle:
 - Set `MNEMONIC` in `.env`
+- Set `INFURA_KEY` in `.env`
 
 ```bash
-yarn truffle deploy
+yarn deploy-all <network>
 ```
+
+This will perform the following steps
+
+```bash
+yarn build
+yarn hardhat --network <network> deploy
+yarn hardhat --network <network> etherscan-verify
+yarn hardhat --network <network> local-verify
+```
+
+#### Custom Networks
+
+It is possible to use the `NODE_URL` env var to connect to any EVM based network via an RPC endpoint. This connection then can be used with the `custom` network.
+
+E.g. to deploy the Safe contract suite on that network you would run `yarn deploy-all custom`. 
+
+The resulting addresses should be on all networks the same.
+
+Note: Address will vary if contract code is changed or a different Solidity version is used.
 
 ### Verify contract
 
-Note: To completely replicate the bytecode that has been deployed it is required that the project path is `/gnosis-safe` this can be archived using `sudo mkdir /gnosis-safe && sudo mount -B <your_repo_path> /gnosis-safe`. Make sure the run `yarn` again if the path has been changed after the inital `yarn install`. If you use a different path you will only get partial matches.
+This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
+```bash
+yarn hardhat --network <network> local-verify
+```
 
-You can locally verify contract using the scripts `generate_meta.js` and `verify_deployment.js`.
-
-With `node scripts/generate_meta.js` a `meta` folder is created in the `build` folder that contains all files required to verify the source code on https://verification.komputing.org/ and https://etherscan.io/
-
-For Etherscan only the `GnosisSafeEtherscan.json` file is required. For sourcify the `GnosisSafeMeta.json` and all the `.sol` files are required.
-
-Once the meta data has been generated you can verify that your local compiled code corresponds to the version deployed by Gnosis with `yarn do <network> scripts/verify_deployment.js`.
+This command will upload the contract source to Etherescan
+```bash
+yarn hardhat --network <network> etherscan-verify
+```
 
 Documentation
 -------------
 - [Safe developer portal](http://docs.gnosis.io/safe)
+- [Error codes](docs/error_codes.md)
 - [Coding guidelines](docs/guidelines.md)
 
 Audits/ Formal Verification
 ---------
+- [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
 - [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
 - [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
@@ -69,12 +91,4 @@ All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MER
 
 License
 -------
-All smart contracts are released under LGPL v.3.
-
-Contributors
-------------
-- Stefan George ([Georgi87](https://github.com/Georgi87))
-- Richard Meissner ([rmeissner](https://github.com/rmeissner))
-- Christian Lundkvist ([christianlundkvist](https://github.com/christianlundkvist))
-- Nick Dodson ([SilentCicero](https://github.com/SilentCicero))
-- Gonçalo Sá ([GNSPS](https://github.com/GNSPS))
+All smart contracts are released under LGPL-3.0
