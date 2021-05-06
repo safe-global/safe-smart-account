@@ -23,9 +23,6 @@
 - `GS030`: `Only owners can approve a hash`
 - `GS031`: `Method can only be called from this contract`
 
-### Guard management related
-- `GS040`: `Guard does not implement IERC165`
-
 ### Module management related
 - `GS100`: `Modules have already been initialized`
 - `GS101`: `Invalid module address provided`
@@ -40,3 +37,6 @@
 - `GS203`: `Invalid owner address provided`
 - `GS204`: `Address is already an owner`
 - `GS205`: `Invalid prevOwner, owner pair provided`
+
+### Guard management related
+- `GS300`: `Guard does not implement IERC165`

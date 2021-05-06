@@ -43,7 +43,7 @@ contract GuardManager is SelfAuthorized {
     function setGuard(address guard) external authorized {
         if (guard != address(0)) {
             revert();
-            // require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS040");
+            // require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
         }
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
