@@ -13,7 +13,7 @@ Solidity optimizer: `disabled`
 ## Expected deterministic deployment addresses
 
 ### Core contracts
-- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE70955`
+- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
 - `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
 ### Factory contracts
 - `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
