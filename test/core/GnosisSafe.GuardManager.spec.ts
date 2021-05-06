@@ -31,7 +31,7 @@ describe("GuardManager", async () => {
 
             await executeContractCallWithSigners(safe, safe, "setGuard", [AddressZero], [user2])
 
-            // Check fallback handler
+            // Check guard
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + "".padStart(64, "0"))
@@ -42,11 +42,11 @@ describe("GuardManager", async () => {
                 await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
             ).to.emit(safe, "ChangedGuard").withArgs(mock.address)
 
-            // Check fallback handler
+            // Check guard
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
-            
+
             // Guard should not be called, as it was not set before the transaction execution
             expect(await mock.callStatic.invocationCount()).to.be.eq(0);
         })
@@ -56,7 +56,7 @@ describe("GuardManager", async () => {
 
             const slot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"))
 
-            // Check fallback handler
+            // Check guard
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + mock.address.toLowerCase().slice(2).padStart(64, "0"))
@@ -69,11 +69,11 @@ describe("GuardManager", async () => {
                 executeTx(safe, safeTx, [signature])
             ).to.emit(safe, "ChangedGuard").withArgs(AddressZero)
 
-            // Check fallback handler
+            // Check guard
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + "".padStart(64, "0"))
-            
+
             expect(await mock.callStatic.invocationCount()).to.be.eq(2);
             const guardInterface = (await hre.ethers.getContractAt("Guard", mock.address)).interface
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
