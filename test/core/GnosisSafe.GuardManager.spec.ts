@@ -10,24 +10,27 @@ import { chainId } from "../utils/encoding";
 describe("GuardManager", async () => {
 
     const [user1, user2] = waffle.provider.getWallets();
-    const guardEip165Calldata = "0x01ffc9a7e6d7a83a00000000000000000000000000000000000000000000000000000000" // Supports guard interface
 
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const mock = await getMock();
+
+        const guardContract = await hre.ethers.getContractAt("Guard", AddressZero)
+        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"])
         await mock.givenCalldataReturnBool(guardEip165Calldata, true)
         const safe = await getSafeWithOwners([user2.address])
         await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
         return {
             safe,
-            mock
+            mock,
+            guardEip165Calldata
         }
     })
 
     describe("setGuard", async () => {
 
         it('is not called when setting initially', async () => {
-            const { safe, mock } = await setupWithTemplate()
+            const { safe, mock, guardEip165Calldata } = await setupWithTemplate()
 
             const slot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"))
 
