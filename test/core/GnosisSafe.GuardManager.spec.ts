@@ -10,10 +10,12 @@ import { chainId } from "../utils/encoding";
 describe("GuardManager", async () => {
 
     const [user1, user2] = waffle.provider.getWallets();
+    const guardEip165Calldata = "0x01ffc9a7e6d7a83a00000000000000000000000000000000000000000000000000000000" // Supports guard interface
 
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const mock = await getMock();
+        await mock.givenCalldataReturnBool(guardEip165Calldata, true)
         const safe = await getSafeWithOwners([user2.address])
         await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
         return {
@@ -39,7 +41,17 @@ describe("GuardManager", async () => {
             await mock.reset()
 
             await expect(
-                await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
+                await hre.ethers.provider.getStorageAt(safe.address, slot)
+            ).to.be.eq("0x" + "".padStart(64, "0"))
+
+            // Reverts if it doesn't implement ERC165 Guard Interface
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
+            ).to.be.revertedWith("GS013")
+
+            await mock.givenCalldataReturnBool(guardEip165Calldata, true)
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
             ).to.emit(safe, "ChangedGuard").withArgs(mock.address)
 
             // Check guard
