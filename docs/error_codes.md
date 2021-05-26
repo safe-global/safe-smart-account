@@ -37,3 +37,6 @@
 - `GS203`: `Invalid owner address provided`
 - `GS204`: `Address is already an owner`
 - `GS205`: `Invalid prevOwner, owner pair provided`
+
+### Guard management related
+- `GS300`: `Guard does not implement IERC165`
