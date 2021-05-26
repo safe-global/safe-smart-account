@@ -209,7 +209,7 @@ Note: The encoding of the data send to the `multiSend` method is exactly the sam
 #### Add base contract for Gnosis Safe storage layout
 File: [`contracts/examples/libraries/GnosisSafeStorage.sol`](https://github.com/gnosis/safe-contracts/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/GnosisSafeStorage.sol)
 
-Note: **This contract is meant as an example to demonstrate how access the Gnosis Safe state within a library contract. This should not be used in production without further checks.**
+Note: **This contract is meant as an example to demonstrate how to access the Gnosis Safe state within a library contract. This should not be used in production without further checks.**
 
 Expected behaviour:
 
