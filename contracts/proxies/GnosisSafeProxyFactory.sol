@@ -78,7 +78,7 @@ contract GnosisSafeProxyFactory {
     /// @param _singleton Address of singleton contract.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    /// @param callback Callback that will be invoced after the new proxy contract has been successfully deployed and initialized.
+    /// @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
     function createProxyWithCallback(
         address _singleton,
         bytes memory initializer,
