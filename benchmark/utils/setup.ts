@@ -23,7 +23,7 @@ const generateTarget = async (owners: Wallet[], threshold: number, guardAddress:
 export const configs = [
     { name: "single owner", signers: [user1], threshold: 1 },
     { name: "single owner and guard", signers: [user1], threshold: 1, useGuard: true },
-    { name: "2 out of 23", signers: [user1, user2], threshold: 2 },
+    { name: "2 out of 2", signers: [user1, user2], threshold: 2 },
     { name: "3 out of 3", signers: [user1, user2, user3], threshold: 3 },
     { name: "3 out of 5", signers: [user1, user2, user3, user4, user5], threshold: 3 },
 ]
