@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ScopeTransactionGuard is BaseGuard, Ownable {
     struct Target {
         bool allowed;
+        bool scoped;
         mapping(bytes4 => bool) allowedFunctions;
     }
 
@@ -22,6 +23,10 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         allowedTargets[target].allowed = false;
     }
 
+    function setScope(address target, bool scoped) public onlyOwner() {
+        allowedTargets[target].scoped = scoped;
+    }
+
     function allowFunction(address target, bytes4 functionSig) public onlyOwner() {
         allowedTargets[target].allowedFunctions[functionSig] = true;
     }
@@ -32,6 +37,10 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
 
     function isAllowedTarget(address target) public view returns (bool) {
         return (allowedTargets[target].allowed);
+    }
+
+    function isScoped(address target) public view returns (bool) {
+        return (allowedTargets[target].scoped);
     }
 
     function isAllowedFunction(address target, bytes4 functionSig) public view returns (bool) {
@@ -61,7 +70,7 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         require(operation != Enum.Operation.DelegateCall, "No delegate calls");
         require(isAllowedTarget(to), "Target address is not allowed");
         bytes4 sig = abi.decode(data[:4], (bytes4));
-        require(isAllowedFunction(to, sig), "Target function is not allowed");
+        require(!allowedTargets[to].scoped || isAllowedFunction(to, sig), "Target function is not allowed");
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}
