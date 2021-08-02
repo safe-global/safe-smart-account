@@ -7,9 +7,18 @@ import "../../GnosisSafe.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ScopeTransactionGuard is BaseGuard, Ownable {
+    event TargetAllowed(address target);
+    event TargetDisallowed(address target);
+    event TargetScopeSet(address target, bool scoped);
+    event DelegateCallsAllowedOnTarget(address target);
+    event DelegateCallsDisallowedOnTarget(address target);
+    event FunctionAllowedOnTarget(address target, bytes4 sig);
+    event FunctionDisallowedOnTarget(address target, bytes4 sig);
+
     struct Target {
         bool allowed;
         bool scoped;
+        bool delegateCallAllowed;
         mapping(bytes4 => bool) allowedFunctions;
     }
 
@@ -17,22 +26,37 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
 
     function allowTarget(address target) public onlyOwner() {
         allowedTargets[target].allowed = true;
+        emit TargetAllowed(target);
     }
 
     function disallowTarget(address target) public onlyOwner() {
         allowedTargets[target].allowed = false;
+        emit TargetDisallowed(target);
     }
 
     function setScope(address target, bool scoped) public onlyOwner() {
         allowedTargets[target].scoped = scoped;
+        emit TargetScopeSet(target, scoped);
     }
 
-    function allowFunction(address target, bytes4 functionSig) public onlyOwner() {
-        allowedTargets[target].allowedFunctions[functionSig] = true;
+    function allowDelegateCall(address target) public onlyOwner() {
+        allowedTargets[target].delegateCallAllowed = true;
+        emit DelegateCallsAllowedOnTarget(target);
     }
 
-    function disallowFunction(address target, bytes4 functionSig) public onlyOwner() {
-        allowedTargets[target].allowedFunctions[functionSig] = false;
+    function disallowDelegateCall(address target) public onlyOwner() {
+        allowedTargets[target].delegateCallAllowed = false;
+        emit DelegateCallsDisallowedOnTarget(target);
+    }
+
+    function allowFunction(address target, bytes4 sig) public onlyOwner() {
+        allowedTargets[target].allowedFunctions[sig] = true;
+        emit FunctionAllowedOnTarget(target, sig);
+    }
+
+    function disallowFunction(address target, bytes4 sig) public onlyOwner() {
+        allowedTargets[target].allowedFunctions[sig] = false;
+        emit FunctionDisallowedOnTarget(target, sig);
     }
 
     function isAllowedTarget(address target) public view returns (bool) {
@@ -67,10 +91,17 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         bytes memory,
         address
     ) external view override {
-        require(operation != Enum.Operation.DelegateCall, "No delegate calls");
+        require(
+            operation != Enum.Operation.DelegateCall || allowedTargets[to].delegateCallAllowed,
+            "Delegate call not allowed to this address"
+        );
         require(isAllowedTarget(to), "Target address is not allowed");
-        bytes4 sig = abi.decode(data[:4], (bytes4));
-        require(!allowedTargets[to].scoped || isAllowedFunction(to, sig), "Target function is not allowed");
+        /// bytes4 sig = abi.decode(data[:4], (bytes4));
+        require(
+            !allowedTargets[to].scoped ||
+                isAllowedFunction(to, bytes4(data[0]) | (bytes4(data[1]) >> 8) | (bytes4(data[2]) >> 16) | (bytes4(data[3]) >> 24)),
+            "Target function is not allowed"
+        );
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}
