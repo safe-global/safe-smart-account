@@ -34,11 +34,6 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         emit TargetDisallowed(target);
     }
 
-    function setScope(address target, bool scoped) public onlyOwner() {
-        allowedTargets[target].scoped = scoped;
-        emit TargetScopeSet(target, scoped);
-    }
-
     function allowDelegateCall(address target) public onlyOwner() {
         allowedTargets[target].delegateCallAllowed = true;
         emit DelegateCallsAllowedOnTarget(target);
@@ -59,6 +54,11 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         emit FunctionDisallowedOnTarget(target, sig);
     }
 
+    function setScoped(address target, bool scoped) public onlyOwner() {
+        allowedTargets[target].scoped = scoped;
+        emit TargetScopeSet(target, scoped);
+    }
+
     function isAllowedTarget(address target) public view returns (bool) {
         return (allowedTargets[target].allowed);
     }
@@ -71,6 +71,10 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
         return (allowedTargets[target].allowedFunctions[functionSig]);
     }
 
+    function isAllowedToDelegateCall(address target) public view returns (bool) {
+        return (allowedTargets[target].delegateCallAllowed);
+    }
+
     // solhint-disallow-next-line payable-fallback
     fallback() external {
         // We don't revert on fallback to avoid issues in case of a Safe upgrade
@@ -80,7 +84,7 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
     function checkTransaction(
         address to,
         uint256,
-        bytes calldata data,
+        bytes memory data,
         Enum.Operation operation,
         uint256,
         uint256,
@@ -96,12 +100,16 @@ contract ScopeTransactionGuard is BaseGuard, Ownable {
             "Delegate call not allowed to this address"
         );
         require(isAllowedTarget(to), "Target address is not allowed");
-        /// bytes4 sig = abi.decode(data[:4], (bytes4));
-        require(
-            !allowedTargets[to].scoped ||
-                isAllowedFunction(to, bytes4(data[0]) | (bytes4(data[1]) >> 8) | (bytes4(data[2]) >> 16) | (bytes4(data[3]) >> 24)),
-            "Target function is not allowed"
-        );
+        if (data.length >= 4) {
+            require(
+                !allowedTargets[to].scoped ||
+                    isAllowedFunction(to, bytes4(data[0]) | (bytes4(data[1]) >> 8) | (bytes4(data[2]) >> 16) | (bytes4(data[3]) >> 24)),
+                "Target function is not allowed"
+            );
+        }
+        if (data.length < 4) {
+            require(!allowedTargets[to].scoped || isAllowedFunction(to, bytes4(0)), "Cannot send to this address");
+        }
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}
