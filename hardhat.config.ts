@@ -87,6 +87,10 @@ const userConfig: HardhatUserConfig = {
       ...sharedNetworkConfig,
       url: `https://kovan.infura.io/v3/${INFURA_KEY}`,
     },
+    polygon: {
+      ...sharedNetworkConfig,
+      url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
+    },
     volta: {
       ...sharedNetworkConfig,
       url: `https://volta-rpc.energyweb.org`,
