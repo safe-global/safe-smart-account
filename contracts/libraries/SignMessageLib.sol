@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./GnosisSafeStorage.sol";
-import "../../GnosisSafe.sol";
+import "../GnosisSafe.sol";
 
 /// @title SignMessageLib - Allows to set an entry in the signedMessages
 /// @author Richard Meissner - <richard@gnosis.io>
