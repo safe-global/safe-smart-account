@@ -102,6 +102,10 @@ const userConfig: HardhatUserConfig = {
     arbitrum: {
       ...sharedNetworkConfig,
       url: `https://arb1.arbitrum.io/rpc`,
+    },
+    fantomTestnet: {
+      ...sharedNetworkConfig,
+      url: `https://rpc.testnet.fantom.network/`,
     }
   },
   namedAccounts: {
