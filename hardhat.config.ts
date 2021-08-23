@@ -98,6 +98,10 @@ const userConfig: HardhatUserConfig = {
     bsc: {
       ...sharedNetworkConfig,
       url: `https://bsc-dataseed.binance.org/`,
+    },
+    arbitrum: {
+      ...sharedNetworkConfig,
+      url: `https://arb1.arbitrum.io/rpc`,
     }
   },
   namedAccounts: {
