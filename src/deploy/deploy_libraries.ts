@@ -28,6 +28,13 @@ const deploy: DeployFunction = async function (
     log: true,
     deterministicDeployment: true,
   });
+
+  await deploy("SignMessageLib", {
+    from: deployer,
+    args: [],
+    log: true,
+    deterministicDeployment: true,
+  });
 };
 
 deploy.tags = ['libraries', 'l2-suite', 'main-suite']
