@@ -60,6 +60,7 @@ describe("SignMessageLib", async () => {
         it("changes the expect storage slot without touching other ones", async () => {
           const { safe, lib } = await setupTests();
 
+          const SIGNED_MESSAGES_MAPPING_STORAGE_SLOT = 7
           const message = "no rugpull, funds must be safu";
           const eip191MessageHash = hre.ethers.utils.hashMessage(message);
           const safeInternalMsgHash = calculateSafeMessageHash(
@@ -68,7 +69,7 @@ describe("SignMessageLib", async () => {
             await chainId()
           );
           const expectedStorageSlot = hre.ethers.utils.keccak256(
-            hre.ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256"], [safeInternalMsgHash, 7])
+            hre.ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256"], [safeInternalMsgHash, SIGNED_MESSAGES_MAPPING_STORAGE_SLOT])
           );
 
           const masterCopyAddressBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
