@@ -5,7 +5,7 @@ import "@nomiclabs/hardhat-ethers";
 import { getContractStorageLayout } from "../utils/storage";
 
 describe("GnosisSafe", async () => {
-  it("follows storage layout defined GnosisSafeStorage library", async () => {
+  it("follows storage layout defined by GnosisSafeStorage library", async () => {
     const gnosisSafeStorageLayout = await getContractStorageLayout(
       hre,
       "GnosisSafeStorage"
