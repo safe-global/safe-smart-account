@@ -16,29 +16,24 @@ export const getContractStorageLayout = async (
     smartContractName
   );
 
+  const stateVariables: StateVariable[] = [];
+
   for (const artifactPath of await hre.artifacts.getBuildInfoPaths()) {
     const artifact = fs.readFileSync(artifactPath);
     const artifactJsonABI = JSON.parse(artifact.toString());
-    try {
-      if (
-        !artifactJsonABI.output.contracts[sourceName][contractName] &&
-        !artifactJsonABI.output.contracts[sourceName][contractName]
-          .storageLayout
-      ) {
-        continue;
-      }
-    } catch (e) {
+
+    const artifactIncludesStorageLayout =
+      artifactJsonABI?.output?.contracts?.[sourceName]?.[contractName]
+        ?.storageLayout;
+    if (!artifactIncludesStorageLayout) {
       continue;
     }
 
-    const contract: { name: string; stateVariables: StateVariable[] } = {
-      name: contractName,
-      stateVariables: [],
-    };
-    for (const stateVariable of artifactJsonABI.output.contracts[sourceName][
-      contractName
-    ].storageLayout.storage) {
-      contract.stateVariables.push({
+    const contractStateVariablesFromArtifact =
+      artifactJsonABI.output.contracts[sourceName][contractName].storageLayout
+        .storage;
+    for (const stateVariable of contractStateVariablesFromArtifact) {
+      stateVariables.push({
         name: stateVariable.label,
         slot: stateVariable.slot,
         offset: stateVariable.offset,
@@ -46,6 +41,10 @@ export const getContractStorageLayout = async (
       });
     }
 
-    console.log({ contract });
+    // The same contract can be present in multiple artifacts; thus we break if we already got
+    // storage layout once
+    break;
   }
+
+  return stateVariables;
 };

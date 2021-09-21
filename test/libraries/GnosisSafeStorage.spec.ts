@@ -1,9 +1,11 @@
-import { getContractStorageLayout } from "./../utils/storage";
 import { expect } from "chai";
+import assert from "assert";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getSafeWithOwners } from "../utils/setup";
 import { chainId } from "../utils/encoding";
+import { getContractStorageLayout } from "./../utils/storage";
+import { assert } from "console";
 
 describe("GnosisSafeStorage", async () => {
   const [user1, user2] = waffle.provider.getWallets();
@@ -20,6 +22,22 @@ describe("GnosisSafeStorage", async () => {
   });
 
   it("uses the same layout as GnosisSafe mastercopy contract", async () => {
-    getContractStorageLayout(hre, "GnosisSafeStorage");
+    const gnosisSafeStorageLayout = await getContractStorageLayout(
+      hre,
+      "GnosisSafeStorage"
+    );
+    const gnosisSafeMasterCopyStorageLayout = await getContractStorageLayout(
+      hre,
+      "GnosisSafe"
+    );
+
+    gnosisSafeStorageLayout.every((variable) =>
+      assert.(
+        variable,
+        gnosisSafeMasterCopyStorageLayout.find(
+          (masterCopyVar) => masterCopyVar.name === variable.name
+        )
+      )
+    );
   });
 });
