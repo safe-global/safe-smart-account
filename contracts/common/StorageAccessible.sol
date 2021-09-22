@@ -23,7 +23,7 @@ contract StorageAccessible {
     }
 
     /**
-     * @dev Performs a delegetecall on a targetContract in the context of self.
+     * @dev Performs a delegatecall on a targetContract in the context of self.
      * Internally reverts execution to avoid side effects (making it static).
      *
      * This method reverts with data equal to `abi.encode(bool(success), bytes(response))`.
