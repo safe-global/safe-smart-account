@@ -9,13 +9,17 @@ describe("GnosisSafe", async () => {
       hre,
       "GnosisSafeStorage"
     );
-    const gnosisSafeMasterCopyStorageLayout = await getContractStorageLayout(
+    const gnosisSafeSingletonStorageLayout = await getContractStorageLayout(
       hre,
       "GnosisSafe"
     );
-
-    expect(JSON.stringify(gnosisSafeMasterCopyStorageLayout)).to.include(
-      JSON.stringify(gnosisSafeStorageLayout)
-    );
+    
+    // Chai doesn't have built-in matcher for deep object equality
+    // For the sake of simplicity I decided just to convert the object to a string and compare the strings
+    expect(
+      JSON.stringify(gnosisSafeSingletonStorageLayout).startsWith(
+        JSON.stringify(gnosisSafeStorageLayout)
+      )
+    ).to.be.true;
   });
 });
