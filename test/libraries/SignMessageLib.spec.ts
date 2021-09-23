@@ -57,7 +57,7 @@ describe("SignMessageLib", async () => {
           ).to.revertedWith("GS013")
       })
 
-        it("changes the expect storage slot without touching other ones", async () => {
+        it("changes the expect storage slot without touching the most important ones", async () => {
           const { safe, lib } = await setupTests();
 
           const SIGNED_MESSAGES_MAPPING_STORAGE_SLOT = 7
