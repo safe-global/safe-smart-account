@@ -45,17 +45,10 @@ describe("SignMessageLib", async () => {
         })
 
         it('can be used only via DELEGATE call opcode', async () => {
-          const { safe, lib } = await setupTests()
-          const messageHash = calculateSafeMessageHash(safe, "0xbaddad", await chainId())
-          
-          expect(
-              await safe.signedMessages(messageHash)
-          ).to.be.eq(0)
+            const { lib } = await setupTests()
 
-          await expect(
-            executeContractCallWithSigners(safe, lib, "signMessage", ["0xbaddad"], [user1, user2])
-          ).to.revertedWith("GS013")
-      })
+            expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
+        })
 
         it("changes the expect storage slot without touching the most important ones", async () => {
           const { safe, lib } = await setupTests();
