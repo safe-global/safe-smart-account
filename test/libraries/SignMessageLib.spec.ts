@@ -44,7 +44,7 @@ describe("SignMessageLib", async () => {
             ).to.be.eq(1)
         })
 
-        it('can be used only via DELEGATE call opcode', async () => {
+        it('can be used only via DELEGATECALL opcode', async () => {
             const { lib } = await setupTests()
 
             expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
