@@ -50,7 +50,7 @@ describe("SignMessageLib", async () => {
             expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
         })
 
-        it("changes the expect storage slot without touching the most important ones", async () => {
+        it("changes the expected storage slot without touching the most important ones", async () => {
           const { safe, lib } = await setupTests();
 
           const SIGNED_MESSAGES_MAPPING_STORAGE_SLOT = 7
