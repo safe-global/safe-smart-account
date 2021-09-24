@@ -14,8 +14,8 @@ contract GnosisSafeStorage {
     uint256 internal threshold;
 
     // From /GnosisSafe.sol
-    bytes32 internal nonce;
-    bytes32 internal domainSeparator;
+    uint256 internal nonce;
+    bytes32 internal _deprecatedDomainSeparator;
     mapping(bytes32 => uint256) internal signedMessages;
     mapping(address => mapping(bytes32 => uint256)) internal approvedHashes;
 }
