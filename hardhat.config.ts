@@ -5,7 +5,7 @@ import "solidity-coverage";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
-import { getSingletonFactoryInfo } from "safe-singleton-factory";
+import { getSingletonFactoryInfo } from "@gnosis.pm/safe-singleton-factory";
 
 const argv = yargs
   .option("network", {
