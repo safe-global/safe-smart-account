@@ -28,7 +28,6 @@ if (PK) {
   sharedNetworkConfig.accounts = {
     mnemonic: MNEMONIC || DEFAULT_MNEMONIC,
   };
-  sharedNetworkConfig.chainId = 28;
 }
 
 if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].includes(argv.network) && INFURA_KEY === undefined) {
@@ -60,7 +59,6 @@ const userConfig: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: 28,
       allowUnlimitedContractSize: true,
       blockGasLimit: 100000000,
       gas: 100000000
@@ -104,6 +102,10 @@ const userConfig: HardhatUserConfig = {
     volta: {
       ...sharedNetworkConfig,
       url: `https://volta-rpc.energyweb.org`,
+    },
+    boba_rinkeby: {
+      ...sharedNetworkConfig,
+      url: `https://rinkeby.boba.network/`,
     },
   },
   namedAccounts: {

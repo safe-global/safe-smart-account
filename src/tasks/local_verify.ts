@@ -38,13 +38,7 @@ task("local-verify", "Verifies that the local deployment files correspond to the
                 const compiledContract = output.contracts[key][value as string];
                 const onChainCode = await hre.ethers.provider.getCode(deployment.address)
                 const onchainBytecodeHash = hre.ethers.utils.keccak256(onChainCode)
-                if (value === 'MultiSend'){
-                    console.log(onChainCode)
-                }
                 const localBytecodeHash = hre.ethers.utils.keccak256(`0x${compiledContract.evm.deployedBytecode.object}`)
-                if (value === 'MultiSend') {
-                    console.log(`0x${compiledContract.evm.deployedBytecode.object}`)
-                }
                 const verifySuccess = onchainBytecodeHash === localBytecodeHash ? "SUCCESS" : "FAILURE"
                 console.log(`Verification status for ${value}: ${verifySuccess}`)
             }
