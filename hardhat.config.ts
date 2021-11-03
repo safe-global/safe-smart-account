@@ -28,9 +28,10 @@ if (PK) {
   sharedNetworkConfig.accounts = {
     mnemonic: MNEMONIC || DEFAULT_MNEMONIC,
   };
+  sharedNetworkConfig.chainId = 28;
 }
 
-if (["mainnet", "rinkeby", "kovan", "goerli"].includes(argv.network) && INFURA_KEY === undefined) {
+if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].includes(argv.network) && INFURA_KEY === undefined) {
   throw new Error(
     `Could not find Infura key in env, unable to connect to network ${argv.network}`,
   );
@@ -59,6 +60,7 @@ const userConfig: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      chainId: 28,
       allowUnlimitedContractSize: true,
       blockGasLimit: 100000000,
       gas: 100000000
@@ -83,9 +85,21 @@ const userConfig: HardhatUserConfig = {
       ...sharedNetworkConfig,
       url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
     },
+    ropsten: {
+      ...sharedNetworkConfig,
+      url: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
+    },
     kovan: {
       ...sharedNetworkConfig,
       url: `https://kovan.infura.io/v3/${INFURA_KEY}`,
+    },
+    mumbai: {
+      ...sharedNetworkConfig,
+      url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
+    },
+    polygon: {
+      ...sharedNetworkConfig,
+      url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
     },
     volta: {
       ...sharedNetworkConfig,
@@ -106,6 +120,7 @@ if (NODE_URL) {
   userConfig.networks!!.custom = {
     ...sharedNetworkConfig,
     url: NODE_URL,
+    chainId: 28,
   }
 }
 export default userConfig

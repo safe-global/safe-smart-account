@@ -12,21 +12,32 @@ const deploy: DeployFunction = async function (
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
   });
 
   await deploy("MultiSend", {
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
   });
 
   await deploy("MultiSendCallOnly", {
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
+  });
+
+  await deploy("SignMessageLib", {
+    from: deployer,
+    args: [],
+    log: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
   });
 };
 

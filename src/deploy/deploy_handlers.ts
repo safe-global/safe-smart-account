@@ -12,14 +12,16 @@ const deploy: DeployFunction = async function (
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
   });
 
   await deploy("CompatibilityFallbackHandler", {
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
+    gasLimit: 9000000,
   });
 };
 
