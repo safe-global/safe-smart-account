@@ -887,10 +887,10 @@
   resolved "https://registry.yarnpkg.com/@gnosis.pm/mock-contract/-/mock-contract-4.0.0.tgz#eaf500fddcab81b5f6c22280a7b22ff891dd6f87"
   integrity sha512-SkRq2KwPx6vo0LAjSc8JhgQstrQFXRyn2yqquIfub7r2WHi5nUbF8beeSSXsd36hvBcQxQfmOIYNYRpj9JOhrQ==
 
-"@gnosis.pm/safe-singleton-factory@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-singleton-factory/-/safe-singleton-factory-1.0.0.tgz#2c87e53114a204ae929c25bc92b574d608d23c9b"
-  integrity sha512-7VC76h5Pi+IRnSu7BMo+dy3KpYr/RenzGzclkx8Rpbx64mw19bkBIV67o/TP8OZb4GYVTJde5JAXfkDwf0Xfdg==
+"@gnosis.pm/safe-singleton-factory@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-singleton-factory/-/safe-singleton-factory-1.0.3.tgz#be47df6b75fe61450c5493d9ffc2e66fb82c39a7"
+  integrity sha512-zmTWCs/FonuN7OiIinLja2PgkmP6Wvx14bmTb9Rf22qylKxA4VTzsaCjilL2vjvKc62YyHN5CW4B2V9VLXPSHQ==
   dependencies:
     "@types/yargs" "^15.0.10"
     argv "^0.0.2"
