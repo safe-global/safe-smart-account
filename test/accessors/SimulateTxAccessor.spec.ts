@@ -94,7 +94,7 @@ describe("SimulateTxAccessor", async () => {
             const expectedCode = await hre.ethers.provider.getCode(safe.address)
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
             const killLib = await deployContract(user1, killLibSource);
-            const tx = buildContractCall(killLib, "killme", [], 0)
+            const tx = buildContractCall(killLib, "killme", [], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
             await simulator.simulate(accessor.address, simulationData);
             const code = await hre.ethers.provider.getCode(safe.address)
