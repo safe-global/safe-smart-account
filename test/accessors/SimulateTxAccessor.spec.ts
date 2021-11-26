@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
-import { buildContractCall } from "../../src/utils/execution";
+import { buildContractCall, executeTx, executeTxWithSigners } from "../../src/utils/execution";
 import { parseEther } from "ethers/lib/utils";
 
 describe("SimulateTxAccessor", async () => {
@@ -100,6 +100,9 @@ describe("SimulateTxAccessor", async () => {
             const code = await hre.ethers.provider.getCode(safe.address)
             expect(code).to.be.eq(expectedCode)
             expect(code).to.be.not.eq("0x")
+            // Selfdestruct Safe (to be sure that this test works)
+            await executeTxWithSigners(safe, tx, [user1])
+            expect(await hre.ethers.provider.getCode(safe.address)).to.be.eq("0x")
         })
 
         it('simulate revert', async () => {
