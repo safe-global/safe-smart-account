@@ -31,7 +31,7 @@ abstract contract BaseGuard is Guard {
     }
 }
 
-/// @title Fallback Manager - A contract that manages fallback calls made to this contract
+/// @title Guard Manager - A contract that manages transaction guards which perform pre and post-checks on execution by multisig owners
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract GuardManager is SelfAuthorized {
     event ChangedGuard(address guard);
