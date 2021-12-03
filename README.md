@@ -9,6 +9,12 @@ Gnosis Safe Contracts
 
 Usage
 -----
+### Supported version
+
+Check out the version you want to deploy to a certain chain. The latest supported versions corresponds:
+- [v1.3.0-libs.0](https://github.com/gnosis/safe-contracts/tree/v1.3.0-libs.0)
+- The commit id [767ef36](https://github.com/gnosis/safe-contracts/commit/767ef36bba88bdbc0c9fe3708a4290cabef4c376)
+
 ### Install requirements with yarn:
 
 ```bash
