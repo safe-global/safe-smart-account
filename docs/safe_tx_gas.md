@@ -50,9 +50,9 @@ That means if `safeTxGas` is set to `0` the Safe contract sents along all awaila
 require(success || safeTxGas != 0 || gasPrice != 0, "GS013");
 ```
 
-As this also means that the `nonce` for this transaction is not used, **it is possible to retry the transaction in the future**.
+As this also means that the `nonce` for this transaction is **not** used, **it is possible to retry the transaction in the future**.
 
-It is potentially dangerous to have a signed, but unexecute Safe transaction, sitting around. To cancel such a transaction it is necessary to execute another Safe transaction with the same `nonce` (e.g. a Safe transaction to the Safe itself with `value = 0`, `data = '0x'` and `operation = 0`).
+It is potentially dangerous to have a signed, but unexecuted, Safe transaction sitting around. To cancel such a transaction it is necessary to execute another Safe transaction with the same `nonce` (e.g. a Safe transaction to the Safe itself with `value = 0`, `data = '0x'` and `operation = 0`).
 
 
 #### Migration from <1.3.0
