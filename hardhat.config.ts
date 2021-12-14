@@ -16,7 +16,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
+const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS, MORALIS_KEY } = process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -30,7 +30,7 @@ if (PK) {
   };
 }
 
-if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].includes(argv.network) && INFURA_KEY === undefined) {
+if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon", "fuji", "avalanche"].includes(argv.network) && INFURA_KEY === undefined) {
   throw new Error(
     `Could not find Infura key in env, unable to connect to network ${argv.network}`,
   );
@@ -103,6 +103,14 @@ const userConfig: HardhatUserConfig = {
       ...sharedNetworkConfig,
       url: `https://volta-rpc.energyweb.org`,
     },
+    fuji: {
+      ...sharedNetworkConfig, 
+      url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_KEY}/avalanche/testnet`,
+    },
+    avalanche: {
+      ...sharedNetworkConfig,
+      url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_KEY}/avalanche/mainnet`
+    }
   },
   namedAccounts: {
     deployer: 0,
