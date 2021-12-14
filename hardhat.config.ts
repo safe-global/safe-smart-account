@@ -105,11 +105,11 @@ const userConfig: HardhatUserConfig = {
     },
     fuji: {
       ...sharedNetworkConfig, 
-      url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_KEY}/avalanche/testnet`,
+      url: NODE_URL,
     },
     avalanche: {
       ...sharedNetworkConfig,
-      url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_KEY}/avalanche/mainnet`
+      url: NODE_URL
     }
   },
   namedAccounts: {
