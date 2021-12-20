@@ -16,7 +16,7 @@ if (gasPrice > 0) {
 }
 ```
 
-In this case the Safe contract will use the gas specified by the `safeTxGas` to execute the Safe transaction at it is not possible to adjust this later on by sending more gas along. This is important to prevent that the "relayer" can increase the amount of gas used and therefore also increase the refund being issued.
+In this case the Safe contract will use the gas specified by the `safeTxGas` to execute the Safe transaction as it is not possible to adjust this later on by sending more gas along. This is important to prevent that the "relayer" can increase the amount of gas used and therefore also increase the refund being issued.
 
 The Safe contract will "catch" the error if the Safe transaction fails (e.g. because of a revert in the target contract or out of gas) and still issue a refund for the used gas. 
 
