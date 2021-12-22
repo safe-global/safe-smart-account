@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
 contract GnosisSafeStorage {
     // From /common/Singleton.sol
     address internal singleton;
-    // From /common/ModuleManager.sol
+    // From /base/ModuleManager.sol
     mapping(address => address) internal modules;
     // From /common/OwnerManager.sol
     mapping(address => address) internal owners;
