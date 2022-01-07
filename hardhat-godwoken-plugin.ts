@@ -1,6 +1,6 @@
 import type { Artifact } from "hardhat/types";
 import { PolyjuiceWallet, PolyjuiceJsonRpcProvider } from "@polyjuice-provider/ethers";
-import { ContractFactory, Signer } from "ethers";
+import { Contract, ContractFactory, ethers, Signer } from "ethers";
 import { DeployOptions, DeployResult, Address } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { PayableOverrides } from '@ethersproject/contracts';
@@ -498,4 +498,24 @@ extendEnvironment(async (hre) => {
 
     hre.deployments = hreNew.deployments;
     hre.getNamedAccounts = hreNew.getNamedAccounts;
+
+    if (hre.ethers) {
+        hre.ethers = {
+            ...hre.ethers,
+            getContractAt: async function getContractAt <T extends ethers.Contract>(
+                nameOrAbi: string | any[],
+                address: string,
+                _signer?: ethers.Signer | string
+            ): Promise<T> {
+                if (typeof nameOrAbi === "string") {
+                    const artifact = await hre.artifacts.readArtifact(nameOrAbi);
+                    const abi = artifact.abi;
+
+                    return new Contract(address, abi, deployerWallet) as T;
+                }
+
+                throw new Error("Godwoken getContractAt does not implement alternative logic flow.");
+            }
+        };
+    }
 });
