@@ -2,6 +2,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-deploy";
+import "./hardhat-godwoken-plugin";
 import dotenv from "dotenv";
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import yargs from "yargs";
@@ -103,6 +104,9 @@ const userConfig: HardhatUserConfig = {
       ...sharedNetworkConfig,
       url: `https://volta-rpc.energyweb.org`,
     },
+    'godwoken-testnet': {
+      url: 'http://godwoken-testnet-web3-rpc.ckbapp.dev'
+    }
   },
   namedAccounts: {
     deployer: 0,
