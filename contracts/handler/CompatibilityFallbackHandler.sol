@@ -16,7 +16,6 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     bytes4 internal constant SIMULATE_SELECTOR = bytes4(keccak256("simulate(address,bytes)"));
 
     address internal constant SENTINEL_MODULES = address(0x1);
-    bytes4 internal constant UPDATED_MAGIC_VALUE = 0x1626ba7e;
 
     /**
      * Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
@@ -66,7 +65,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     function isValidSignature(bytes32 _dataHash, bytes calldata _signature) external view returns (bytes4) {
         ISignatureValidator validator = ISignatureValidator(msg.sender);
         bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
-        return (value == EIP1271_MAGIC_VALUE) ? UPDATED_MAGIC_VALUE : bytes4(0);
+        return (value == EIP1271_MAGIC_VALUE) ? EIP1271_UPDATED_MAGIC_VALUE : bytes4(0);
     }
 
     /// @dev Returns array of first 10 modules.

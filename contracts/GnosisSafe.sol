@@ -282,7 +282,8 @@ contract GnosisSafe is
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+
+                checkSmartContractSignature(data, contractSignature);
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
@@ -301,6 +302,34 @@ contract GnosisSafe is
             require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
         }
+    }
+
+    function checkSmartContractSignature(address currentOwner, bytes memory data, bytes memory contracSignature) internal  {
+        bool success;
+        bytes memory res;
+
+        (success, res) = _contractAddress.staticcall(
+            abi.encodeWithSelector(
+                ISignatureValidator(currentOwner).isValidSignature.selector,
+                data,
+                contracSignature
+            );
+        );
+
+        if (success) {
+            require(abi.decode(res, (uint4)) == EIP1271_MAGIC_VALUE, "GS024");
+            return
+        }
+
+        (success, res) = _contractAddress.staticcall(
+            abi.encodeWithSelector(
+                ISignatureValidator(currentOwner).isValidSignature.selector,
+                ab.decode(data, (bytes32)),
+                contracSignature
+            );
+        );
+
+        require(abi.decode(res, (uint4)) == EIP1271_UPDATED_MAGIC_VALUE, "GS024");
     }
 
     /// @dev Allows to estimate a Safe transaction.
