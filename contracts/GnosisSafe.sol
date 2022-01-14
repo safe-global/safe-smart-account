@@ -285,7 +285,7 @@ contract GnosisSafe is
                     contractSignature := add(add(signatures, s), 0x20)
                 }
 
-                checkSmartContractSignature(currentOwner, data, contractSignature);
+                checkContractSignature(currentOwner, data, contractSignature);
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
@@ -306,7 +306,7 @@ contract GnosisSafe is
         }
     }
 
-    function checkSmartContractSignature(address currentOwner, bytes memory data, bytes memory contracSignature) internal view {
+    function checkContractSignature(address currentOwner, bytes memory data, bytes memory contracSignature) internal view {
         bool success;
         bytes memory res;
 
