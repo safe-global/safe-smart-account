@@ -11,6 +11,7 @@ import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./common/StorageAccessible.sol";
 import "./interfaces/ISignatureValidator.sol";
+import "./interfaces/IEIP1271UpdatedSignatureValidator.sol";
 import "./external/GnosisSafeMath.sol";
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
@@ -24,6 +25,7 @@ contract GnosisSafe is
     SignatureDecoder,
     SecuredTokenTransfer,
     ISignatureValidatorConstants,
+    IEIP1271UpdatedSignatureValidatorConstants,
     FallbackManager,
     StorageAccessible,
     GuardManager
@@ -283,7 +285,7 @@ contract GnosisSafe is
                     contractSignature := add(add(signatures, s), 0x20)
                 }
 
-                checkSmartContractSignature(data, contractSignature);
+                checkSmartContractSignature(currentOwner, data, contractSignature);
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
@@ -304,32 +306,31 @@ contract GnosisSafe is
         }
     }
 
-    function checkSmartContractSignature(address currentOwner, bytes memory data, bytes memory contracSignature) internal  {
+    function checkSmartContractSignature(address currentOwner, bytes memory data, bytes memory contracSignature) internal view {
         bool success;
         bytes memory res;
 
-        (success, res) = _contractAddress.staticcall(
+        (success, res) = currentOwner.staticcall(
             abi.encodeWithSelector(
                 ISignatureValidator(currentOwner).isValidSignature.selector,
                 data,
                 contracSignature
-            );
+            )
         );
 
         if (success) {
-            require(abi.decode(res, (uint4)) == EIP1271_MAGIC_VALUE, "GS024");
-            return
+            return require(abi.decode(res, (bytes4)) == EIP1271_MAGIC_VALUE, "GS024");
         }
 
-        (success, res) = _contractAddress.staticcall(
+        (success, res) = currentOwner.staticcall(
             abi.encodeWithSelector(
-                ISignatureValidator(currentOwner).isValidSignature.selector,
-                ab.decode(data, (bytes32)),
+                IEIP1271UpdatedSignatureValidator(currentOwner).isValidSignature.selector,
+                abi.decode(data, (bytes32)),
                 contracSignature
-            );
+            )
         );
 
-        require(abi.decode(res, (uint4)) == EIP1271_UPDATED_MAGIC_VALUE, "GS024");
+        require(abi.decode(res, (bytes4)) == EIP1271_UPDATED_MAGIC_VALUE, "GS024");
     }
 
     /// @dev Allows to estimate a Safe transaction.

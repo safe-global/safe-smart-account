@@ -3,11 +3,12 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./DefaultCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
+import "../interfaces/IEIP1271UpdatedSignatureValidator.sol";
 import "../GnosisSafe.sol";
 
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
+contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator, IEIP1271UpdatedSignatureValidator {
     //keccak256(
     //    "SafeMessage(bytes message)"
     //);
@@ -62,7 +63,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @return a bool upon valid or invalid signature with corresponding _dataHash
      * @notice See https://github.com/gnosis/util-contracts/blob/bb5fe5fb5df6d8400998094fb1b32a178a47c3a1/contracts/StorageAccessible.sol
      */
-    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) external view returns (bytes4) {
+    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) public view override returns (bytes4) {
         ISignatureValidator validator = ISignatureValidator(msg.sender);
         bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
         return (value == EIP1271_MAGIC_VALUE) ? EIP1271_UPDATED_MAGIC_VALUE : bytes4(0);
