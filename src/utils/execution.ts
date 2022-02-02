@@ -1,5 +1,5 @@
-import { Contract, Wallet, utils, BigNumber, BigNumberish, Signer, PopulatedTransaction } from "ethers"
-import { TypedDataSigner } from "@ethersproject/abstract-signer";
+import { Contract, Wallet, utils, BigNumber, BigNumberish, PopulatedTransaction } from "ethers"
+import { TypedDataSigner, Signer } from "@ethersproject/abstract-signer";
 import { AddressZero } from "@ethersproject/constants";
 
 export const EIP_DOMAIN = {

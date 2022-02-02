@@ -64,6 +64,29 @@ The resulting addresses should be on all networks the same.
 
 Note: Address will vary if contract code is changed or a different Solidity version is used.
 
+#### Custom Networks with Replay Protection (EIP-155)
+
+Some chains may have EIP-155 enforced, which requires a transaction to use a `chainId`, which breaks the deterministic deployment intended in this repository.
+
+If that's the case, you might see an unexpected error while doing `yarn deploy-all custom` with a message similar to `invalid chain id for signer`.
+
+For this situation, you can request support for a new network by opening an issue in the [Safe Singleton Factory](https://github.com/gnosis/safe-singleton-factory), and adding a new configuration object to `hardhat.config.ts` using the safe singleton factory info provided by the gnosis team as follows:
+
+```json
+{
+    deterministicDeployment: {
+      "<network_id>": {
+        factory: "<factory_address>",
+        deployer: "<deployer_address>",
+        funding: "<required_funding_in_wei>",
+        signedTx: "<raw_signed_tx>",
+      }
+    }
+}
+```
+
+More info in the [Hardhat Deploy repo](https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory)
+
 ### Verify contract
 
 This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
