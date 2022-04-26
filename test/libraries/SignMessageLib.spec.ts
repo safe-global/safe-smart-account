@@ -66,8 +66,8 @@ describe("SignMessageLib", async () => {
           );
 
           const masterCopyAddressBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
-          const thresholdBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
-          const ownerCountBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
+          const ownerCountBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
+          const thresholdBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
           const nonceBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 5);
           const msgStorageSlotBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, expectedStorageSlot);
           
@@ -78,8 +78,8 @@ describe("SignMessageLib", async () => {
           await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true);
           
           const masterCopyAddressAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
-          const thresholdAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
-          const ownerCountAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
+          const ownerCountAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
+          const thresholdAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
           const nonceAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 5);
           const msgStorageSlotAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, expectedStorageSlot);
           
