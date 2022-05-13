@@ -46,9 +46,9 @@ describe("Migration", async () => {
             const { safe, migration, singleton120 } = await setupTests()
             // The emit matcher checks the address, which is the Safe as delegatecall is used
             const migrationSafe = migration.attach(safe.address)
-            
+
             await expect(
-                await ethers.provider.getStorageAt(safe.address, "0x06")
+                await ethers.provider.getStorageAt(safe.address, "0x" + "".padEnd(62, "0") + "06")
             ).to.be.eq("0x" + "".padEnd(64, "0"))
 
             await expect(
