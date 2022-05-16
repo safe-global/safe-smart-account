@@ -50,9 +50,9 @@ contract GnosisSafe is
 
     uint256 public nonce;
     bytes32 private _deprecatedDomainSeparator;
-    // Mapping to keep track of all message hashes that have been approve by ALL REQUIRED owners
+    // Mapping to keep track of all message hashes that have been approved by ALL REQUIRED owners
     mapping(bytes32 => uint256) public signedMessages;
-    // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
+    // Mapping to keep track of all hashes (message or transaction) that have been approved by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
     // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
@@ -71,7 +71,7 @@ contract GnosisSafe is
     /// @param fallbackHandler Handler for fallback calls to this contract
     /// @param paymentToken Token that should be used for the payment (0 is ETH)
     /// @param payment Value that should be paid
-    /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
+    /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
     function setup(
         address[] calldata _owners,
         uint256 _threshold,

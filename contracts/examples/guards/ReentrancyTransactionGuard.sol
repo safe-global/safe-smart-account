@@ -5,7 +5,7 @@ import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
 import "../../GnosisSafe.sol";
 
-contract ReentrancyTransactionGuard is Guard {
+contract ReentrancyTransactionGuard is BaseGuard {
     bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrancy_guard.guard.struct");
 
     struct GuardValue {
