@@ -1,5 +1,5 @@
 name: safe-contracts
-on: [push]
+on: [ push, pull_request ]
 
 jobs:
   tests:
