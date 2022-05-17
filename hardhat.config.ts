@@ -128,7 +128,11 @@ const userConfig: HardhatUserConfig = {
     fantomTestnet: {
       ...sharedNetworkConfig,
       url: `https://rpc.testnet.fantom.network/`,
-    }
+    },
+    avalanche: {
+      ...sharedNetworkConfig,
+      url: `https://api.avax.network/ext/bc/C/rpc`,
+    },
   },
   deterministicDeployment,
   namedAccounts: {
