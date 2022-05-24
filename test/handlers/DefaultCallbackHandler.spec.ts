@@ -72,7 +72,7 @@ describe("DefaultCallbackHandler", async () => {
     })
 
     describe("ERC223", async () => {
-        it('to handle tokensReceived', async () => {
+        it('to handle tokenFallback', async () => {
             const handler = await getDefaultCallbackHandler()
             await handler.callStatic.tokenFallback(AddressZero, 0, "0x")
         })
