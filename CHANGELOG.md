@@ -2,6 +2,77 @@
 
 This changelog only contains changes starting from version 1.3.0
 
+# Version 1.3.0-libs.0
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (more info see issue [#251](https://github.com/gnosis/safe-contracts/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy) (default)
+
+### Core contracts
+- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
+- `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+### Factory contracts
+- `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+### Handler contracts
+- `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
+- `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+### Lib contracts
+- `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
+- `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
+- `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+- `SignMessageLib` at `0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2`
+### Storage reader contracts
+- `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/gnosis/safe-singleton-factory)
+
+### Core contracts
+- `GnosisSafe` at `0x69f4D1788e39c87893C980c06EdF4b7f686e2938`
+- `GnosisSafeL2` at `0xfb1bffC9d739B8D520DaF37dF666da4C687191EA`
+### Factory contracts
+- `GnosisSafeProxyFactory` at `0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC`
+### Handler contracts
+- `DefaultCallbackHandler` at `0x3d8E605B02032A941Cfe26897Ca94d77a5BC24b3`
+- `CompatibilityFallbackHandler` at `0x017062a1dE2FE6b99BE3d9d37841FeD19F573804`
+### Lib contracts
+- `MultiSend` at `0x998739BFdAAdde7C933B942a68053933098f9EDa`
+- `MultiSendCallOnly` at `0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`
+- `CreateCall` at `0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d`
+- `SignMessageLib` at `0x98FFBBF51bb33A056B08ddf711f289936AafF717`
+### Storage reader contracts
+- `SimulateTxAccessor` at `0x727a77a074D1E6c4530e814F89E618a3298FC044`
+
+## Changes 
+
+### Deployment process
+
+To support deployment to networks that require replay protection support for the [Safe Singleton Factory](https://github.com/gnosis/safe-singleton-factory) has been added. This will result in an additional set of deterministic addresses which are listed above.
+
+### Libraries
+
+The following libraries have been marked as production ready.
+
+#### SignMessageLib
+
+File: [`contracts/libraries/SignMessage.sol`](https://github.com/gnosis/safe-contracts/blob/e57df14ea96dc7dabf93f041c7531f2ab6755c76/contracts/libraries/SignMessage.sol)
+
+Expected behaviour:
+
+The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the `signedMessages` mapping.
+
+#### GnosisSafeStorage
+
+
+File: [`contracts/libraries/GnosisSafeStorage.sol`](https://github.com/gnosis/safe-contracts/blob/e57df14ea96dc7dabf93f041c7531f2ab6755c76/contracts/libraries/GnosisSafeStorage.sol)
+
+Expected behaviour:
+
+The contract contains the basic storage layout of the `GnosisSafe.sol` contract and can be used by library contracts to access the storage variables.
+
 # Version 1.3.0
 
 ## Compiler settings
