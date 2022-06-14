@@ -20,18 +20,27 @@ describe("NestedSafes", async () => {
         const parentSafe = await getSafeWithOwners([safe1.address, safe2.address], 2, handler.address)
         const handlerSafe1 = handler.attach(safe1.address)
         const handlerSafe2 = handler.attach(safe2.address)
+        let staticPart = "0x"
+        if (safe1.address < safe2.address) {
+            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
+        } else {
+            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
+            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+        }
         return {
             safe1,
             safe2,
             parentSafe, 
             handlerSafe1,
             handlerSafe2,
-            signLib
+            signLib, 
+            staticPart
         }
     })
 
     it('should use EIP-1271 (contract signatures)', async () => {
-        const { safe1, safe2, parentSafe,handlerSafe1,handlerSafe2 } = await setupTests()
+        const { safe1, safe2, parentSafe, handlerSafe1, handlerSafe2, staticPart} = await setupTests()
         // Deposit some spare money for execution to owner safes
         await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(0)
         await user1.sendTransaction({to: safe1.address, value: parseEther("1")})
@@ -54,45 +63,36 @@ describe("NestedSafes", async () => {
         const messageData = await parentSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, nonce)
         
         // Get hash transaction for each safe
-        const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address,messageData)
-        const messageHashSafe2 = await handlerSafe2.getMessageHashForSafe(safe2.address,messageData)
+        const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address, messageData)
+        const messageHashSafe2 = await handlerSafe2.getMessageHashForSafe(safe2.address, messageData)
+        
         // Get all signs for each owner Safe1 (user1, user2) Safe2 (user3, user4)
         const sig1 = await signHash(user1, messageHashSafe1)
         const sig2 = await signHash(user2, messageHashSafe1)
         const sig3 = await signHash(user3, messageHashSafe2)
         const sig4 = await signHash(user4, messageHashSafe2)
-        let signSafe1 =  buildSignatureBytes([sig1, sig2])
-        let signSafe2 =  buildSignatureBytes([sig3, sig4])
+        const signSafe1 =  buildSignatureBytes([sig1, sig2])
+        const signSafe2 =  buildSignatureBytes([sig3, sig4])
         
        
         // Check if signature for each safe is correct
         expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe1)).to.be.eq("0x20c13b0b")
         expect(await handlerSafe2.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe2)).to.be.eq("0x20c13b0b")
 
-        let staticPart = "0x"
-        // Pack signatures in correct order
-        if (safe1.address < safe2.address) {
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-        } else {
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-        }
-
-        
-        let dynamicPart = 
+        const dynamicPart = 
         defaultAbiCoder.encode(['bytes'], [signSafe1]).slice(66)+
         defaultAbiCoder.encode(['bytes'], [signSafe2]).slice(66)
+        const signature = staticPart + dynamicPart
 
-        let signature = staticPart + dynamicPart
         // Should execute transaction withdraw 1 ether
         expect(await parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature)).to.be.ok
+        
         // Should be 0 
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.deep.eq(parseEther("0"))
     })
 
     it('should revert with hash not approved ', async () => {
-        const { safe1, safe2, parentSafe,handlerSafe1,handlerSafe2, signLib} = await setupTests()
+        const { safe1, safe2, parentSafe, handlerSafe1, signLib, staticPart} = await setupTests()
         // Deposit some spare money for execution to owner safes
         await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(0)
         await user1.sendTransaction({to: safe1.address, value: parseEther("1")})
@@ -115,34 +115,21 @@ describe("NestedSafes", async () => {
         const messageData = await parentSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, nonce)
         
         // Get hash transaction for each safe
-        const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address,messageData)
+        const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address, messageData)
 
         // Get all signs for each owner Safe1 (user1, user2) Safe2 (user3, user4)
         const sig1 = await signHash(user1, messageHashSafe1)
         const sig2 = await signHash(user2, messageHashSafe1)
-      
-        let signSafe1 =  buildSignatureBytes([sig1, sig2])
-        
-       
+        const signSafe1 =  buildSignatureBytes([sig1, sig2])
+         
         // Check if signature for each safe is correct
         expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe1)).to.be.eq("0x20c13b0b")
 
-        let staticPart = "0x"
-        // Pack signatures in correct order
-        if (safe1.address < safe2.address) {
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-        } else {
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-        }
-
-        
-        let dynamicPart = 
+        const dynamicPart = 
         defaultAbiCoder.encode(['bytes'], [signSafe1]).slice(66)+
         "0000000000000000000000000000000000000000000000000000000000000000"
+        const signature = staticPart + dynamicPart
 
-        let signature = staticPart + dynamicPart
         // Should revert with message hash not approved
         await expect(parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature),
         "Transaction should fail because hash is not approved").to.be.reverted;
