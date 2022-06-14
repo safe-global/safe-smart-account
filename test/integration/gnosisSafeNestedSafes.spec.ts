@@ -5,7 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { parseEther } from "@ethersproject/units";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
-import { buildSignatureBytes, signHash} from "../../src/utils/execution";
+import { buildSignatureBytes, signHash, executeContractCallWithSigners} from "../../src/utils/execution";
 
 
 describe("NestedSafes", async () => {
@@ -13,6 +13,7 @@ describe("NestedSafes", async () => {
     
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler()
         const safe1 = await getSafeWithOwners([user1.address, user2.address], 2, handler.address)
         const safe2 = await getSafeWithOwners([user3.address, user4.address], 2, handler.address)
@@ -24,7 +25,8 @@ describe("NestedSafes", async () => {
             safe2,
             parentSafe, 
             handlerSafe1,
-            handlerSafe2
+            handlerSafe2,
+            signLib
         }
     })
 
@@ -85,6 +87,72 @@ describe("NestedSafes", async () => {
         let signature = staticPart + dynamicPart
         // Should execute transaction withdraw 1 ether
         expect(await parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature)).to.be.ok
+        // Should be 0 
+        await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.deep.eq(parseEther("0"))
+    })
+
+    it('should revert with hash not approved ', async () => {
+        const { safe1, safe2, parentSafe,handlerSafe1,handlerSafe2, signLib} = await setupTests()
+        // Deposit some spare money for execution to owner safes
+        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(0)
+        await user1.sendTransaction({to: safe1.address, value: parseEther("1")})
+        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(parseEther("1"))
+        
+        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(0)
+        await user1.sendTransaction({to: safe2.address, value: parseEther("1")})
+        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(parseEther("1"))
+
+        await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(0)
+        await user1.sendTransaction({to: parentSafe.address, value: parseEther("1")})
+        await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(parseEther("1"))
+
+        // Withdraw 1 ETH
+        const to = user5.address
+        const value = parseEther("1")
+        const data = "0x"
+        const operation = 0
+        const nonce = await parentSafe.nonce()
+        const messageData = await parentSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, nonce)
+        
+        // Get hash transaction for each safe
+        const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address,messageData)
+
+        // Get all signs for each owner Safe1 (user1, user2) Safe2 (user3, user4)
+        const sig1 = await signHash(user1, messageHashSafe1)
+        const sig2 = await signHash(user2, messageHashSafe1)
+      
+        let signSafe1 =  buildSignatureBytes([sig1, sig2])
+        
+       
+        // Check if signature for each safe is correct
+        expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe1)).to.be.eq("0x20c13b0b")
+
+        let staticPart = "0x"
+        // Pack signatures in correct order
+        if (safe1.address < safe2.address) {
+            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
+        } else {
+            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
+            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+        }
+
+        
+        let dynamicPart = 
+        defaultAbiCoder.encode(['bytes'], [signSafe1]).slice(66)+
+        "0000000000000000000000000000000000000000000000000000000000000000"
+
+        let signature = staticPart + dynamicPart
+        // Should revert with message hash not approved
+        await expect(parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature),
+        "Transaction should fail because hash is not approved").to.be.reverted;
+        
+        // Approve transaction from safe2
+        await executeContractCallWithSigners(safe2, signLib, "signMessage", [messageData], [user3, user4], true)
+        
+        // Execute Transaction
+        await parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature)
+
         // Should be 0 
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.deep.eq(parseEther("0"))
     })
