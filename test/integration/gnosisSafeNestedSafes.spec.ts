@@ -21,12 +21,12 @@ describe("NestedSafes", async () => {
         const handlerSafe1 = handler.attach(safe1.address)
         const handlerSafe2 = handler.attach(safe2.address)
         let staticPart = "0x"
+        const staticPartSafe1 = "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+        const staticPartSafe2 = "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
         if (safe1.address < safe2.address) {
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
+            staticPart += staticPartSafe1 + staticPartSafe2
         } else {
-            staticPart += "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-            staticPart += "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
+            staticPart += staticPartSafe2 + staticPartSafe1
         }
         return {
             safe1,
@@ -132,7 +132,7 @@ describe("NestedSafes", async () => {
 
         // Should revert with message hash not approved
         await expect(parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature),
-        "Transaction should fail because hash is not approved").to.be.reverted;
+        "Transaction should fail because hash is not approved").to.be.revertedWith("Hash not approved");
         
         // Approve transaction from safe2
         await executeContractCallWithSigners(safe2, signLib, "signMessage", [messageData], [user3, user4], true)
