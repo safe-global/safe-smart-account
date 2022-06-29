@@ -74,7 +74,7 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
+    /// @dev Allows to create new proxy contract, execute a message call to the new proxy and call a specified callback within one transaction
     /// @param _singleton Address of singleton contract.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
