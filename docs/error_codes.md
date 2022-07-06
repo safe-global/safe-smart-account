@@ -8,8 +8,7 @@ Threshold is `equal to zero`, some error could happen during the Safe setup.
 
 ### General gas/ execution related
 - **GS010: Not enough gas to execute Safe transaction**  
-SafeTxHash is too high or gas limit is too low to execute the transaction, keep in mind that `2500 gwei` are needed to events and `500 gwei` to perform code until execution.  
-Review this values and increase the `gasLimit` or reduce the `safeTxHash` according the current gas price and your requirements.  
+SafeTxGas is too high or gas limit is too low to execute the transaction, keep in mind that `2500 gwei` are needed to events and `500 gwei` to perform code until execution.  
 
 - **GS011: Could not pay gas costs with ether**   
 There are not enough funds of `ether` to execute the transaction.   
@@ -20,54 +19,56 @@ There are not enough funds of the token choosen on `gasToken` to execute the tra
 Make sure you have enough of the gasToken or set it to `address(0)` if you want use ether.  
 
 - **GS013: Safe transaction failed when gasPrice and safeTxGas were 0**  
-This happen because the safe try to use all provided gas (gasLimit) but was insufficient.   
-Increase the gasLimit value and retry.   
+Transaction is not succesful, this could be for due to multiple reasons.
 
 ### General signature validation related
 - **GS020: Signatures data too short**  
-There are less signatures that the owners threeshold.  
+There are less signatures than the owners threshold.  
 Provide as many as signatures as the owners threshold.  
 
 - **GS021: Invalid contract signature location:** inside static part  
-`s` value is pointing inside the static part, instead to dynamic part (should point to the corresponding data signature).   
-Review the value of `s` to point to the beggining of the correct signature.  
+Wrong contract `v=0` signature because `s` value is pointing inside the static part, instead to dynamic part (should point to the corresponding data signature).   
+Review the value of `s` to point to the begining of the correct signature.  
 More information about signatures:  https://docs.gnosis-safe.io/contracts/signatures  
 
 - **GS022: Invalid contract signature location:** length not present  
-`s` value is greater than the last position of signatures (is pointing to empty value).   
-Review the `s` value to point to correct data signature or add missing data signature.   
+Wrong contract `v=0` signature because `s` value is greater than the last position of signatures (it's pointing to empty value).   
+Review s value to point to the correct data signature position or add the missing data signature.   
  
 - **GS023: Invalid contract signature location:** data not complete  
+Wrong contract `v=0` signature because `startingPosition + contractSignatureLen` is out of bounds.   
 
 - **GS024: Invalid contract signature provided**  
 The EIP1271 signature provided is wrong.  
-If you don't want to use this type of signature review the `v` value (0 is equals to contract signature).   
-The `hash` to generate the `signature` must be calculated by the account address provided in `r` value.   
+If you don't want to use this type of signature review the `v` value (0 for a contract signature).   
+The `hash` to generate the `signature` must be calculated by the account address provided in `r` value.  
+More information about signatures:  https://docs.gnosis-safe.io/contracts/signatures    
 
 - **GS025: Hash has not been approved**  
-The address provided on 'r' has not the hash in the list of approved.     
-If you want to pre-approve the `tx-hash` take a look that you are calculating correctly the `hash` with the correct owner and calling the method with the correct owner.   
+The owner provided on 'r' has not pre-approved the safeTxHash.     
+To pre-approve the safeTxHash call `approveHash` with the safeTxHash calculated by the owner.   
 
 - **GS026: Invalid owner provided**   
 The owner provided doesn't exist for the `Safe`   
-Review that the owners provided on `r` exist and the owners are correctly sorted.  
+Review that the signing owners are owners of the Safe and signatures are correctly sorted ascending by the owner (without EIP55 encoding).
 
 ### General auth related
 - **GS030`: Only owners can approve a hash**  
 The sender is not an owner.   
-Review that are using the correct sender.   
+Review that a correct owner is being used.   
+
 - **GS031: Method can only be called from this contract**  
-Wrong contract is trying to execute a non authorized method.  
+This method is only meant to be called from the contract itself.   
 
 ### Module management related
 - **GS100: Modules have already been initialized**  
-`setupModules` can be called once.   
+`setupModules` can only be called once.   
 
 - **GS101: Invalid module address provided**  
-The module address provided cannot be `Zero` or `SENTINEL`.    
+A module address cannot be zero address `address(0)` or sentinel address `address(1)`.    
 
 - **GS102: Module has already been added**   
-The module that are trying to add was added before.   
+The module was added before.   
 
 - **GS103: Invalid prevModule, module pair provided**  
 `prevModule` is not the previous element to `module` in the module list.   
