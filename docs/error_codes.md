@@ -8,7 +8,7 @@ Threshold is `equal to zero`, some error could happen during the Safe setup.
 
 ### General gas/ execution related
 - **GS010: Not enough gas to execute Safe transaction**  
-SafeTxGas is too high or gas limit is too low to execute the transaction, keep in mind that `2500 gwei` are needed to events and `500 gwei` to perform code until execution.  
+SafeTxGas is too high or gas limit is too low to execute the transaction, keep in mind that we require some gas, at least `2500` is needed for events and at least `500` to perform code until execution.  
 
 - **GS011: Could not pay gas costs with ether**   
 There are not enough funds of `ether` to execute the transaction.   
@@ -28,12 +28,12 @@ Provide as many as signatures as the owners threshold.
 
 - **GS021: Invalid contract signature location:** inside static part  
 Wrong contract `v=0` signature because `s` value is pointing inside the static part, instead to dynamic part (should point to the corresponding data signature).   
-Review the value of `s` to point to the begining of the correct signature.  
+Review the value of `s` to point to the beginning of the correct signature.  
 More information about signatures:  https://docs.gnosis-safe.io/contracts/signatures  
 
 - **GS022: Invalid contract signature location:** length not present  
 Wrong contract `v=0` signature because `s` value is greater than the last position of signatures (it's pointing to empty value).   
-Review s value to point to the correct data signature position or add the missing data signature.   
+Review `s` value points to the correct data signature position or add the missing data signature.   
  
 - **GS023: Invalid contract signature location:** data not complete  
 Wrong contract `v=0` signature because `startingPosition + contractSignatureLen` is out of bounds.   
