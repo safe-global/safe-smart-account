@@ -23,13 +23,16 @@ Transaction is not succesful, this could be for due to multiple reasons.
 
 ### General signature validation related
 - **GS020: Signatures data too short**  
-There are less signatures than the owners threshold.  
-Provide as many as signatures as the owners threshold.  
+The length of required signatures is less than 65*threeshold.
+Each signature has a constant length of 65 bytes `{32-bytes r}{32-bytes s}{1-byte v}`. If more data is necessary it can be appended to the end. 
+More information about signatures:   
+https://docs.gnosis-safe.io/contracts/signatures
 
 - **GS021: Invalid contract signature location:** inside static part  
 Wrong contract `v=0` signature because `s` value is pointing inside the static part, instead to dynamic part (should point to the corresponding data signature).   
 Review the value of `s` to point to the beginning of the correct signature.  
-More information about signatures:  https://docs.gnosis-safe.io/contracts/signatures  
+More information about signatures:  
+https://docs.gnosis-safe.io/contracts/signatures  
 
 - **GS022: Invalid contract signature location:** length not present  
 Wrong contract `v=0` signature because `s` value is greater than the last position of signatures (it's pointing to empty value).   
@@ -39,14 +42,17 @@ Review `s` value points to the correct data signature position or add the missin
 Wrong contract `v=0` signature because `startingPosition + contractSignatureLen` is out of bounds.   
 
 - **GS024: Invalid contract signature provided**  
-The EIP1271 signature provided is wrong.  
+The `EIP-1271` signature provided is wrong.  
 If you don't want to use this type of signature review the `v` value (0 for a contract signature).   
 The `hash` to generate the `signature` must be calculated by the account address provided in `r` value.  
-More information about signatures:  https://docs.gnosis-safe.io/contracts/signatures    
+More information about signatures:  
+https://docs.gnosis-safe.io/contracts/signatures     
+https://eips.ethereum.org/EIPS/eip-1271   
 
 - **GS025: Hash has not been approved**  
 The owner provided on 'r' has not pre-approved the safeTxHash.     
 To pre-approve the safeTxHash call `approveHash` with the safeTxHash calculated by the owner.   
+This error could happen also if the nonce has changed and therefore the safeTxHash is different than expected.  
 
 - **GS026: Invalid owner provided**   
 The owner provided doesn't exist for the `Safe`   
@@ -58,7 +64,6 @@ The sender is not an owner.
 Review that a correct owner is being used.   
 
 - **GS031: Method can only be called from this contract**  
-This method is only meant to be called from the contract itself.   
 
 ### Module management related
 - **GS100: Modules have already been initialized**  
@@ -68,7 +73,6 @@ This method is only meant to be called from the contract itself.
 A module address cannot be zero address `address(0)` or sentinel address `address(1)`.    
 
 - **GS102: Module has already been added**   
-The module was added before.   
 
 - **GS103: Invalid prevModule, module pair provided**  
 `prevModule` is not the previous element to `module` in the module list.   
@@ -94,7 +98,6 @@ Sender is calling `changeThreshold` with 0.
 The owner address provided cannot be `address(0)`, sentinel address `address(1)` or the current `safe` address.  
 
 - **GS204: Address is already an owner**  
-Sender is trying to add an owner that was added before.   
 
 - **GS205: Invalid prevOwner, owner pair provided**  
 `prevOwner` is not the previous element to `owner` in the owner list.   
