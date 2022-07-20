@@ -37,7 +37,9 @@ https://docs.gnosis-safe.io/contracts/signatures
 - **GS022: Invalid contract signature location:** length not present  
 Wrong contract `v=0` signature because `s` value is greater than the last position of signatures (it's pointing to empty value).   
 Review `s` value points to the correct data signature position or add the missing data signature.   
- 
+More information about contract signature:  
+https://docs.gnosis-safe.io/contracts/signatures  
+
 - **GS023: Invalid contract signature location:** data not complete  
 Wrong contract `v=0` signature because `startingPosition + contractSignatureLen` is out of bounds.   
 
@@ -50,13 +52,13 @@ https://docs.gnosis-safe.io/contracts/signatures
 https://eips.ethereum.org/EIPS/eip-1271   
 
 - **GS025: Hash has not been approved**  
-The owner provided on 'r' has not pre-approved the safeTxHash.     
+The owner provided on `r` has not pre-approved the safeTxHash.     
 To pre-approve the safeTxHash call `approveHash` with the safeTxHash calculated by the owner.   
 This error could happen also if the nonce has changed and therefore the safeTxHash is different than expected.  
 
 - **GS026: Invalid owner provided**   
 The owner provided doesn't exist for the `Safe`   
-Review that the signing owners are owners of the Safe and signatures are correctly sorted ascending by the owner (without EIP55 encoding).
+Review that the signing owners are owners of the Safe and signatures are correctly sorted ascending by the owner (without `EIP-55` encoding).
 
 ### General auth related
 - **GS030`: Only owners can approve a hash**  
@@ -81,8 +83,8 @@ A module address cannot be zero address `address(0)` or sentinel address `addres
 
 
 ### Owner management related
-- **GS200: Owners have already been setup** 
-`setupOwners` can only be called once.
+- **GS200: Owners have already been setup**   
+`setupOwners` can only be called once.  
 If you want to add, swap or remove an owner use the corresponding method:  
     - `adOwnerWithThreshold` 
     - `swapOwner`  
