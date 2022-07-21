@@ -5,7 +5,7 @@ import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
 import "../../GnosisSafe.sol";
 
-contract DelegateCallTransactionGuard is Guard {
+contract DelegateCallTransactionGuard is BaseGuard {
     address public immutable allowedTarget;
 
     constructor(address target) {

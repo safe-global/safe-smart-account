@@ -8,7 +8,7 @@ import "../../GnosisSafe.sol";
 /// @title Debug Transaction Guard - A guard that will emit events with extended information.
 /// @notice This guard is only meant as a development tool and example
 /// @author Richard Meissner - <richard@gnosis.pm>
-contract DebugTransactionGuard is Guard {
+contract DebugTransactionGuard is BaseGuard {
     // solhint-disable-next-line payable-fallback
     fallback() external {
         // We don't revert on fallback to avoid issues in case of a Safe upgrade

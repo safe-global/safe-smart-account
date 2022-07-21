@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import "./GnosisSafeStorage.sol";
+import "../../libraries/GnosisSafeStorage.sol";
 
 /// @title Migration - migrates a Safe contract from 1.3.0 to 1.2.0
 /// @author Richard Meissner - <richard@gnosis.io>
@@ -25,7 +25,7 @@ contract Migration is GnosisSafeStorage {
         require(address(this) != migrationSingleton, "Migration should only be called via delegatecall");
         // Master copy address cannot be null.
         singleton = safe120Singleton;
-        domainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
+        _deprecatedDomainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
         emit ChangedMasterCopy(singleton);
     }
 }
