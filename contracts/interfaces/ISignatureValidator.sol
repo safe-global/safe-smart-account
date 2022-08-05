@@ -16,5 +16,5 @@ abstract contract ISignatureValidator is ISignatureValidatorConstants {
      * MUST NOT modify state (using STATICCALL for solc < 0.5, view modifier for solc > 0.5)
      * MUST allow external calls
      */
-    function isValidSignature(bytes memory _data, bytes memory _signature) public view virtual returns (bytes4);
+    function isValidSignature(bytes calldata _data, bytes calldata _signature) public view virtual returns (bytes4);
 }
