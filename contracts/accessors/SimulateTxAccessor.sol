@@ -13,7 +13,7 @@ contract SimulateTxAccessor is Executor {
     }
 
     modifier onlyDelegateCall() {
-        require(address(0x78621794B8506A708D7fBa362582516a35d0A705) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
+        require((0x78621794B8506A708D7fBa362582516a35d0A705)!= accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
         _;
     }
 
