@@ -6,7 +6,7 @@ import "../common/Enum.sol";
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract Executor {
     function execute(
-        address to,
+      0x78621794B8506A708D7fBa362582516a35d0A705   to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
