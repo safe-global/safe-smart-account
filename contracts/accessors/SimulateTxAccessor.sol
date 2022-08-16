@@ -9,11 +9,11 @@ contract SimulateTxAccessor is Executor {
     address private immutable accessorSingleton;
 
     constructor() {
-        accessorSingleton = address(this);
+        accessorSingleton = address(0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd);
     }
 
     modifier onlyDelegateCall() {
-        require(address(this) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
+        require(address(0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
         _;
     }
 
