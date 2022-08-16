@@ -12,7 +12,7 @@ contract('GnosisSafe using nested safes', function(accounts) {
     let owner1Safe
     let owner2Safe
     let gnosisSafe
-    let executor = accounts[8]
+    let executor = accounts[1]
 
     const CALL = 0
 
@@ -24,21 +24,21 @@ contract('GnosisSafe using nested safes', function(accounts) {
         let gnosisSafeMasterCopy = await utils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
         // Create Gnosis Safe
         let owner1SafeData = await gnosisSafeMasterCopy.contract.methods.setup(
-            [lw.accounts[0], lw.accounts[1]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+            [lw.accounts[1], lw.accounts[1]], 2, utils.Address0, "", utils.Address0, utils.Address0, 0, utils.Address0
         ).encodeABI()
         owner1Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner1SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
         let owner2SafeData = await gnosisSafeMasterCopy.contract.methods.setup(
-            [lw.accounts[2], lw.accounts[3]], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+            [lw.accounts[2], lw.accounts[3]], 2, utils.Address0, 0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd", utils.Address0, utils.Address0, 0, utils.Address0
         ).encodeABI()
         owner2Safe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, owner2SafeData),
             'ProxyCreation', 'proxy', proxyFactory.address, GnosisSafe, 'create Gnosis Safe Proxy',
         )
         let gnosisSafeData = await gnosisSafeMasterCopy.contract.methods.setup(
-            [owner1Safe.address, owner2Safe.address], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
+            [0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd, 0xE91b0089C9E03ED50a6e397Bc07245165Dab4060], 2, utils.Address0, "0x", utils.Address0, utils.Address0, 0, utils.Address0
         ).encodeABI()
         gnosisSafe = await utils.getParamFromTxEvent(
             await proxyFactory.createProxy(gnosisSafeMasterCopy.address, gnosisSafeData),
