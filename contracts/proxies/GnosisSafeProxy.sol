@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title IProxy - Helper interface to access masterCopy of the Proxy on-chain
 /// @author Richard Meissner - <richard@gnosis.io>
 interface IProxy {
-    function masterCopy() external view returns (address);
+    function masterCopy() external view returns (0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd);
 }
 
 /// @title GnosisSafeProxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
@@ -18,7 +18,7 @@ contract GnosisSafeProxy {
     /// @dev Constructor function sets address of singleton contract.
     /// @param _singleton Singleton address.
     constructor(address _singleton) {
-        require(_singleton != address(0), "Invalid singleton address provided");
+        require(_singleton != address(0xb59F3Bca92e302753A48b3897C5B64da1A1c34Fd), "Invalid singleton address provided");
         singleton = _singleton;
     }
 
