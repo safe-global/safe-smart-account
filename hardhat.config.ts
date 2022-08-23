@@ -77,6 +77,11 @@ const userConfig: HardhatUserConfig = {
       blockGasLimit: 100000000,
       gas: 100000000
     },
+
+    custom: {
+      url: NODE_URL
+    },
+
     mainnet: {
       ...sharedNetworkConfig,
       url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,

@@ -887,17 +887,10 @@
   resolved "https://registry.yarnpkg.com/@gnosis.pm/mock-contract/-/mock-contract-4.0.0.tgz#eaf500fddcab81b5f6c22280a7b22ff891dd6f87"
   integrity sha512-SkRq2KwPx6vo0LAjSc8JhgQstrQFXRyn2yqquIfub7r2WHi5nUbF8beeSSXsd36hvBcQxQfmOIYNYRpj9JOhrQ==
 
-"@gnosis.pm/safe-singleton-factory@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-singleton-factory/-/safe-singleton-factory-1.0.3.tgz#be47df6b75fe61450c5493d9ffc2e66fb82c39a7"
-  integrity sha512-zmTWCs/FonuN7OiIinLja2PgkmP6Wvx14bmTb9Rf22qylKxA4VTzsaCjilL2vjvKc62YyHN5CW4B2V9VLXPSHQ==
-  dependencies:
-    "@types/yargs" "^15.0.10"
-    argv "^0.0.2"
-    axios "^0.21.1"
-    dotenv "^8.0.0"
-    ethers "^5.1.4"
-    yargs "^16.1.1"
+"@gnosis.pm/safe-singleton-factory@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.npmmirror.com/@gnosis.pm/safe-singleton-factory/-/safe-singleton-factory-1.0.11.tgz#02e5a4a2991109b6a2da9744d2c0705a5f3a2338"
+  integrity sha512-+P9oamkofzQ7Q4EHa2WOix3+YCnblUyc4nCXMZEPK4wKzIhHJsEbFPoyTObPC7J2S15m62CRNsEhp5EnJ82dhQ==
 
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
