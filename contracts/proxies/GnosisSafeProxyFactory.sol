@@ -24,11 +24,6 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, singleton);
     }
 
-    /// @dev Allows to retrieve the runtime code of a deployed Proxy. This can be used to check that the expected Proxy was deployed.
-    function proxyRuntimeCode() public pure returns (bytes memory) {
-        return type(GnosisSafeProxy).runtimeCode;
-    }
-
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
         return type(GnosisSafeProxy).creationCode;
