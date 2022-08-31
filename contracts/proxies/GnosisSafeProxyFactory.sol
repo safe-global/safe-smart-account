@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./GnosisSafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
-/// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
+/// @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafeProxyFactory {
     event ProxyCreation(GnosisSafeProxy proxy, address singleton);
