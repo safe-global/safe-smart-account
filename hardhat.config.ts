@@ -133,6 +133,10 @@ const userConfig: HardhatUserConfig = {
       ...sharedNetworkConfig,
       url: `https://api.avax.network/ext/bc/C/rpc`,
     },
+    ethw: {
+      ...sharedNetworkConfig,
+      url: `https://mainnet.ethereumpow.org`,
+    },
   },
   deterministicDeployment,
   namedAccounts: {
