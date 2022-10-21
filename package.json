@@ -21,7 +21,7 @@
     "benchmark": "yarn test benchmark/*.ts",
     "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
     "deploy-all": "hardhat deploy-contracts --network",
-    "deploy": "hardhat deploy --network",
+    "deploy": "hardhat deploy --reset --network",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",

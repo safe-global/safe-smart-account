@@ -25,10 +25,6 @@ const DEFAULT_MNEMONIC =
 const sharedNetworkConfig: HttpNetworkUserConfig = {};
 if (PK) {
   sharedNetworkConfig.accounts = [PK];
-} else {
-  sharedNetworkConfig.accounts = {
-    mnemonic: MNEMONIC || DEFAULT_MNEMONIC,
-  };
 }
 
 if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].includes(argv.network) && INFURA_KEY === undefined) {
@@ -74,8 +70,9 @@ const userConfig: HardhatUserConfig = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
-      blockGasLimit: 100000000,
-      gas: 100000000
+      gas: 3000000,
+      gasPrice: 1000000000,
+      blockGasLimit: 10000000,
     },
     mainnet: {
       ...sharedNetworkConfig,
@@ -149,6 +146,7 @@ if (NODE_URL) {
   userConfig.networks!!.custom = {
     ...sharedNetworkConfig,
     url: NODE_URL,
+    chainId:245022926,
   }
 }
 export default userConfig

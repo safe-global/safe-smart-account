@@ -12,7 +12,7 @@ const deploy: DeployFunction = async function (
     from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: false,
   });
 };
 
