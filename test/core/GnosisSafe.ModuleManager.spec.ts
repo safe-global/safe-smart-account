@@ -9,7 +9,7 @@ import { AddressOne } from "../../src/utils/constants";
 
 describe("ModuleManager", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2, user3] = waffle.provider.getWallets();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -242,6 +242,37 @@ describe("ModuleManager", async () => {
             await expect(
                 await user2Safe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
             ).to.be.deep.eq([false, "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000"])
+        })
+    })
+
+    describe("getModulesPaginated", async () => {
+        it('Returns all modules over multiple pages', async () => {
+            const { safe } = await setupTests()
+            await expect(
+                executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])
+            ).to.emit(safe, "EnabledModule").withArgs(user1.address)
+
+            await expect(
+                executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            ).to.emit(safe, "EnabledModule").withArgs(user2.address)
+
+            await expect(
+                executeContractCallWithSigners(safe, safe, "enableModule", [user3.address], [user1])
+            ).to.emit(safe, "EnabledModule").withArgs(user3.address)
+
+            await expect(await safe.isModuleEnabled(user1.address)).to.be.true
+            await expect(await safe.isModuleEnabled(user2.address)).to.be.true
+            await expect(await safe.isModuleEnabled(user3.address)).to.be.true
+            
+
+            await expect(await safe.getModulesPaginated(AddressOne, 1)).to.be.deep.equal([[user3.address], user3.address])
+            await expect(await safe.getModulesPaginated(user3.address, 1)).to.be.deep.equal([[user2.address], user2.address])
+            await expect(await safe.getModulesPaginated(user2.address, 1)).to.be.deep.equal([[user1.address], user1.address])
+            await expect(await safe.getModulesPaginated(user1.address, 1)).to.be.deep.equal([[], AddressZero])
+
+            await expect(await safe.getModulesPaginated(AddressOne, 2)).to.be.deep.equal([[user3.address, user2.address], user2.address])
+
+            await expect(await safe.getModulesPaginated(AddressOne, 3)).to.be.deep.equal([[user3.address, user2.address, user1.address], user1.address])
         })
     })
 })

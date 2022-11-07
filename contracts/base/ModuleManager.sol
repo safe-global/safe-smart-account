@@ -118,12 +118,13 @@ contract ModuleManager is SelfAuthorized, Executor {
         // Populate return array
         uint256 moduleCount = 0;
         address currentModule = modules[start];
+
         while (currentModule != address(0x0) && currentModule != SENTINEL_MODULES && moduleCount < pageSize) {
             array[moduleCount] = currentModule;
+            next = currentModule;
             currentModule = modules[currentModule];
             moduleCount++;
         }
-        next = currentModule;
         // Set correct size of returned array
         // solhint-disable-next-line no-inline-assembly
         assembly {
