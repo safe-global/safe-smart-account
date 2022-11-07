@@ -45,7 +45,7 @@ To make it easier to set the `safeTxGas` value a change has been made with the 1
 
 **When `safeTxGas` is set to `0`, the Safe contract will revert if the internal Safe transaction fails** (see [#274](https://github.com/gnosis/safe-contracts/issues/274))
 
-That means if `safeTxGas` is set to `0` the Safe contract sents along all awailable gas when performing the internal Safe transaction. If that transaction fails the Safe will revert and therefore also undo all State changes. This can be seen in [`GnosisSafe.sol`](https://github.com/gnosis/safe-contracts/blob/main/contracts/GnosisSafe.sol#L178-L180):
+That means if `safeTxGas` is set to `0` the Safe contract sents along all available gas when performing the internal Safe transaction. If that transaction fails the Safe will revert and therefore also undo all State changes. This can be seen in [`GnosisSafe.sol`](https://github.com/gnosis/safe-contracts/blob/main/contracts/GnosisSafe.sol#L178-L180):
 ```js
 require(success || safeTxGas != 0 || gasPrice != 0, "GS013");
 ```
