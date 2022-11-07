@@ -25,6 +25,20 @@ export const EIP712_SAFE_TX_TYPE = {
     ]
 }
 
+export const EIP712_SAFE_TX_V2_TYPES = {
+    SafeTx: [
+        { type: "address", name: "to" },
+        { type: "uint256", name: "value" },
+        { type: "bytes", name: "data" },
+        { type: "uint256", name: "gas" },
+    ],
+    SafeAction: [
+        { type: "SafeTx[]", name: "txs" },
+        { type: "bytes32", name: "meta" },
+        { type: "uint256", name: "nonce" },
+    ]
+}
+
 export const EIP712_SAFE_MESSAGE_TYPE = {
     // "SafeMessage(bytes message)"
     SafeMessage: [

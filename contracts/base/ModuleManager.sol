@@ -22,7 +22,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != address(0))
             // Setup has to complete successfully or transaction fails.
-            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "GS000");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, type(uint256).max), "GS000");
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -67,7 +67,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
         // Execute transaction without further confirmations.
-        success = execute(to, value, data, operation, gasleft());
+        success = execute(to, value, data, operation, type(uint256).max);
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
     }
