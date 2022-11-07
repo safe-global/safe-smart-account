@@ -26,7 +26,7 @@ This also result in the `nonce` of this transaction being used, so it is not pos
 
 If `gasPrice` is set to `0` then the Safe contracts will **not** issue a refund after the Safe transaction exection. 
 
-Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, based on this the Safe contracts will send along all available case when no refund is used.
+Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, based on this the Safe contracts will send along all available gas when no refund is used.
 
 Before the execution the Safe contracts always check if enough gas is available to satisfy the `safeTxGas`. This can be seen in [`GnosisSafe.sol`](hhttps://github.com/gnosis/safe-contracts/blob/main/contracts/GnosisSafe.sol#L168-L170):
 ```js
