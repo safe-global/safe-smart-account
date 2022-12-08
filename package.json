@@ -2,7 +2,7 @@
   "name": "@gnosis.pm/safe-contracts",
   "version": "1.3.0",
   "description": "Ethereum multisig contract",
-  "homepage": "https://github.com/gnosis/safe-contracts/",
+  "homepage": "https://github.com/safe-global/safe-contracts/",
   "license": "GPL-3.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -32,16 +32,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gnosis/gnosis-safe.git"
+    "url": "git+https://github.com/safe-global/safe-contracts.git"
   },
   "keywords": [
     "Ethereum",
     "Wallet",
     "Safe"
   ],
-  "author": "stefan@gnosis.pm",
+  "author": "richard@safe.global",
   "bugs": {
-    "url": "https://github.com/gnosis/gnosis-safe/issues"
+    "url": "https://github.com/safe-global/safe-contracts/issues"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^4.0.0",
