@@ -5,9 +5,9 @@
   * Adam Kolář (@adamkolar)
 
 ##### Notes
-An initial audit was performed on commit [4bfc0c8519f1893015d7edfd2c2780fca163c364](https://github.com/gnosis/safe-contracts/tree/4bfc0c8519f1893015d7edfd2c2780fca163c364) and contract changes until commit [9b305a0f80da7f1107d1181f52c844f089557d05](https://github.com/gnosis/safe-contracts/tree/9b305a0f80da7f1107d1181f52c844f089557d05) have been checked.
+An initial audit was performed on commit [4bfc0c8519f1893015d7edfd2c2780fca163c364](https://github.com/safe-global/safe-contracts/tree/4bfc0c8519f1893015d7edfd2c2780fca163c364) and contract changes until commit [9b305a0f80da7f1107d1181f52c844f089557d05](https://github.com/safe-global/safe-contracts/tree/9b305a0f80da7f1107d1181f52c844f089557d05) have been checked.
 
-The final audit was performed on commit [ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9](https://github.com/gnosis/safe-contracts/tree/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9).
+The final audit was performed on commit [ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9](https://github.com/safe-global/safe-contracts/tree/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9).
 
 
 ##### Files
