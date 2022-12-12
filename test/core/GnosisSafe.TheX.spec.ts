@@ -5,6 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { deployContract, getSafeSingleton, getSafeTemplate } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
 
 describe("TheXFix", async () => {
 
@@ -13,6 +14,27 @@ describe("TheXFix", async () => {
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const singleton = await getSafeSingleton()
+        const theXSource = `
+        contract TheX {
+
+            address public owner;
+
+            constructor() {
+                owner = msg.sender;
+            }
+
+            fallback() payable external {
+            }
+
+            function withdraw(address daoWallet) public {
+                require(msg.sender == owner, "Only owner can trigger this");
+                uint256 balance = address(this).balance;
+                require(balance > 0, "Nothing to withdraw");
+                (bool success, ) = daoWallet.call{value: balance}("DAO");
+                require(success, "DAO Transaction Unsuccessful");
+            }
+        }`
+        const theX = await deployContract(user1, theXSource);
         const fixSource = `
         contract TheXFixSingleton {
 
@@ -38,27 +60,6 @@ describe("TheXFix", async () => {
             }
         }`
         const fix = await deployContract(user1, fixSource, ethers.utils.defaultAbiCoder.encode(["address"], [singleton.address]).slice(2));
-        const theXSource = `
-        contract TheX {
-
-            address public owner;
-
-            constructor() {
-                owner = msg.sender;
-            }
-
-            fallback() payable external {
-            }   
-
-            function withdraw(address daoWallet) public {
-                require(msg.sender == owner, "Only owner can trigger this");
-                uint256 balance = address(this).balance;
-                require(balance > 0, "Nothing to withdraw");
-                (bool success, ) = daoWallet.call{value: balance}("DAO");
-                require(success, "DAO Transaction Unsuccessful");
-            }
-        }`
-        const theX = await deployContract(user1, theXSource);
         await user1.sendTransaction({ to: theX.address, value: 10000000 })
         return {
             safe: await getSafeTemplate(),
@@ -69,7 +70,7 @@ describe("TheXFix", async () => {
     })
 
     describe("execute fix", async () => {
-        it('sends along msg.sender on simple call', async () => {
+        it('upgrade to fix singleton and execute withdraw', async () => {
             const { safe, singleton, fix, theX } = await setupWithTemplate()
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
@@ -93,6 +94,9 @@ describe("TheXFix", async () => {
                 await hre.ethers.provider.getStorageAt(safe.address, "0x0")
             ).to.be.eq(defaultAbiCoder.encode(["address"], [singleton.address]))
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.eq(10000000)
+
+            await expect(await safe.getThreshold()).to.be.deep.eq(BigNumber.from(1))
+            await expect(await safe.getOwners()).to.be.deep.equal([user1.address, user2.address, ])
         })
     })
 })
