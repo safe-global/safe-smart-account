@@ -126,9 +126,9 @@ export const compile = async (source: string) => {
     }
 }
 
-export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
+export const deployContract = async (deployer: Wallet, source: string, constructor: string = ""): Promise<Contract> => {
     const output = await compile(source)
-    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 })
+    const transaction = await deployer.sendTransaction({ data: output.data + constructor, gasLimit: 6000000 })
     const receipt = await transaction.wait()
     return new Contract(receipt.contractAddress, output.interface, deployer)
 }
