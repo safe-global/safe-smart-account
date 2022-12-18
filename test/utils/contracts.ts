@@ -1,5 +1,5 @@
-import { Wallet } from "ethers";
-import { deployContract } from "./setup";
+import { Wallet } from "ethers"
+import { deployContract } from "./setup"
 
 export const killLibSource = `
 contract Test {
@@ -32,4 +32,6 @@ contract Test {
         revert("Why are you doing this?");
     }
 }`
-export const killLibContract = async (deployer: Wallet) => { return await deployContract(deployer, killLibSource) };
+export const killLibContract = async (deployer: Wallet) => {
+    return await deployContract(deployer, killLibSource)
+}
