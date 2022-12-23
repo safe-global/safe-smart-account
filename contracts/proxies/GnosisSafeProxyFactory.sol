@@ -4,12 +4,12 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./GnosisSafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
-/// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
+/// @title Proxy Factory - Allows to create new proxy contract and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafeProxyFactory {
     event ProxyCreation(GnosisSafeProxy proxy, address singleton);
 
-    /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
+    /// @dev Allows to create new proxy contract and execute a message call to the new proxy within one transaction.
     /// @param singleton Address of singleton contract.
     /// @param data Payload for message call sent to new proxy contract.
     function createProxy(address singleton, bytes memory data) public returns (GnosisSafeProxy proxy) {
@@ -74,7 +74,7 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
+    /// @dev Allows to create new proxy contract, execute a message call to the new proxy and call a specified callback within one transaction
     /// @param _singleton Address of singleton contract.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
@@ -90,7 +90,7 @@ contract GnosisSafeProxyFactory {
         if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);
     }
 
-    /// @dev Allows to get the address for a new proxy contact created via `createProxyWithNonce`
+    /// @dev Allows to get the address for a new proxy contract created via `createProxyWithNonce`
     ///      This method is only meant for address calculation purpose when you use an initializer that would revert,
     ///      therefore the response is returned with a revert. When calling this method set `from` to the address of the proxy factory.
     /// @param _singleton Address of singleton contract.
