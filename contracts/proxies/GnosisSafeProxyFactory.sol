@@ -4,25 +4,10 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./GnosisSafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
-/// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
+/// @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
 contract GnosisSafeProxyFactory {
     event ProxyCreation(GnosisSafeProxy proxy, address singleton);
-
-    /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
-    /// @param singleton Address of singleton contract.
-    /// @param data Payload for message call sent to new proxy contract.
-    function createProxy(address singleton, bytes memory data) public returns (GnosisSafeProxy proxy) {
-        proxy = new GnosisSafeProxy(singleton);
-        if (data.length > 0)
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                if eq(call(gas(), proxy, 0, add(data, 0x20), mload(data), 0, 0), 0) {
-                    revert(0, 0)
-                }
-            }
-        emit ProxyCreation(proxy, singleton);
-    }
 
     /// @dev Allows to retrieve the runtime code of a deployed Proxy. This can be used to check that the expected Proxy was deployed.
     function proxyRuntimeCode() public pure returns (bytes memory) {
@@ -39,13 +24,23 @@ contract GnosisSafeProxyFactory {
     /// @param _singleton Address of singleton contract.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    /// @param includeChainIdInSalt If true, the chain id will be included in the salt to calculate the address of the new proxy contract.
     function deployProxyWithNonce(
         address _singleton,
         bytes memory initializer,
-        uint256 saltNonce
+        uint256 saltNonce,
+        bool includeChainIdInSalt
     ) internal returns (GnosisSafeProxy proxy) {
+        require(isContract(_singleton), "Singleton contract not deployed");
+
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
-        bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
+        bytes32 salt;
+        if (includeChainIdInSalt) {
+            salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
+        } else {
+            salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
+        }
+
         bytes memory deploymentData = abi.encodePacked(type(GnosisSafeProxy).creationCode, uint256(uint160(_singleton)));
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -63,7 +58,27 @@ contract GnosisSafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce
     ) public returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce);
+        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, false);
+        if (initializer.length > 0)
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
+                    revert(0, 0)
+                }
+            }
+        emit ProxyCreation(proxy, _singleton);
+    }
+
+    /// @dev Same as `createProxyWithNonce` but includes the chain id in the salt to calculate the address of the new proxy contract.
+    /// @param _singleton Address of singleton contract.
+    /// @param initializer Payload for message call sent to new proxy contract.
+    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    function createChainSpecificProxyWithNonce(
+        address _singleton,
+        bytes memory initializer,
+        uint256 saltNonce
+    ) public returns (GnosisSafeProxy proxy) {
+        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, true);
         if (initializer.length > 0)
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -101,7 +116,43 @@ contract GnosisSafeProxyFactory {
         bytes calldata initializer,
         uint256 saltNonce
     ) external returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce);
+        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, false);
         revert(string(abi.encodePacked(proxy)));
+    }
+
+    /// @dev Allows to get the address for a new proxy contact created via `createChainSpecificProxyWithNonce`
+    ///      This method is only meant for address calculation purpose when you use an initializer that would revert,
+    ///      therefore the response is returned with a revert. When calling this method set `from` to the address of the proxy factory.
+    /// @param _singleton Address of singleton contract.
+    /// @param initializer Payload for message call sent to new proxy contract.
+    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    function calculateCreateChainSpecificProxyWithNonceAddress(
+        address _singleton,
+        bytes calldata initializer,
+        uint256 saltNonce
+    ) external returns (GnosisSafeProxy proxy) {
+        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, true);
+        revert(string(abi.encodePacked(proxy)));
+    }
+
+    /// @dev Returns true if `account` is a contract.
+    /// @param account The address being queried
+    function isContract(address account) internal view returns (bool) {
+        uint256 size;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            size := extcodesize(account)
+        }
+        return size > 0;
+    }
+
+    /// @dev Returns the chain id used by this contract.
+    function getChainId() public view returns (uint256) {
+        uint256 id;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            id := chainid()
+        }
+        return id;
     }
 }
