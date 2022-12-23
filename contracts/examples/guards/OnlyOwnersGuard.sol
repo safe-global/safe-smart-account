@@ -12,9 +12,7 @@ interface ISafe {
 contract OnlyOwnersGuard is BaseGuard {
     ISafe public safe;
 
-    constructor(address _safe) public {
-        safe = ISafe(_safe);
-    }
+    constructor() {}
 
     function checkTransaction(
         address,
@@ -31,7 +29,7 @@ contract OnlyOwnersGuard is BaseGuard {
         address msgSender
     ) external override {
         // Only owners can exec
-        address[] memory owners = safe.getOwners();
+        address[] memory owners = ISafe(msg.sender).getOwners();
         for (uint256 i = 0; i < owners.length; i++) {
             if (owners[i] == msgSender) {
                 return;

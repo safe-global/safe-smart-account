@@ -2,8 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
-import { chainId } from "../utils/encoding";
+import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
 
 describe("OnlyOwnersGuard", async () => {
 
@@ -13,7 +12,7 @@ describe("OnlyOwnersGuard", async () => {
         await deployments.fixture();
         const safe = await getSafeWithOwners([user1.address])
         const guardFactory = await hre.ethers.getContractFactory("OnlyOwnersGuard");
-        const guard = await guardFactory.deploy(safe.address)
+        const guard = await guardFactory.deploy()
         const mock = await getMock()
         await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
 
@@ -28,7 +27,7 @@ describe("OnlyOwnersGuard", async () => {
             const { safe, mock } = await setupTests()
             const nonce = await safe.nonce()
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce })
-            const safeTxHash = calculateSafeTransactionHash(safe, safeTx, await chainId())
+
             executeTxWithSigners(safe, safeTx, [user1])
         })
 
@@ -36,7 +35,7 @@ describe("OnlyOwnersGuard", async () => {
             const { safe, mock } = await setupTests()
             const nonce = await safe.nonce()
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce })
-            const safeTxHash = calculateSafeTransactionHash(safe, safeTx, await chainId())
+
             await expect(
                 executeTxWithSigners(safe, safeTx, [user2])
             ).to.be.reverted
