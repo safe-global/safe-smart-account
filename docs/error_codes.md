@@ -29,6 +29,8 @@
 - `GS102`: `Module has already been added`
 - `GS103`: `Invalid prevModule, module pair provided`
 - `GS104`: `Method can only be called from an enabled module`
+- `GS105`: `Invalid starting point for fetching paginated modules`
+- `GS106`: `Invalid page size for fetching paginated modules`
 
 ### Owner management related
 - `GS200`: `Owners have already been setup`
