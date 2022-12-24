@@ -66,11 +66,11 @@ Note: Address will vary if contract code is changed or a different Solidity vers
 
 #### Replay protection (EIP-155)
 
-Some networks require replay protection. This is not possible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
+Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
 
-It is possible to enable deployment via a different determinisitic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To enable this the `CUSTOM_DETERMINISTIC_DEPLOYMENT` env var has to be set to `true` (see `.env.sample`). To make sure that the latest version of this package is install, make sure to run `yarn add @gnosis.pm/safe-singleton-factory` before deployment.
+Safe contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, make sure to run `yarn add @gnosis.pm/safe-singleton-factory` before deployment. For more information, including how to deploy the factory to a new network, please refer to the factory repo.  
 
-Note: This will result in different addresses compared to the default deployment process.
+Note: This will result in different addresses compared to hardhat's default deterministic deployment process.
 
 ### Verify contract
 
