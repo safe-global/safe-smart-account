@@ -19,27 +19,12 @@ contract GnosisSafeProxyFactory {
         return type(GnosisSafeProxy).creationCode;
     }
 
-    /// @dev Allows to create new proxy contact using CREATE2 but it doesn't run the initializer.
+    /// @dev Allows to create a new proxy contact using CREATE2.
     ///      This method is only meant as an utility to be called from other methods
-    /// @param _singleton Address of singleton contract.
-    /// @param initializer Payload for message call sent to new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    /// @param includeChainIdInSalt If true, the chain id will be included in the salt to calculate the address of the new proxy contract.
-    function deployProxyWithNonce(
-        address _singleton,
-        bytes memory initializer,
-        uint256 saltNonce,
-        bool includeChainIdInSalt
-    ) internal returns (GnosisSafeProxy proxy) {
+    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+    /// @param salt Create2 salt to use for calculating the address of the new proxy contract.
+    function deployProxy(address _singleton, bytes32 salt) internal returns (GnosisSafeProxy proxy) {
         require(isContract(_singleton), "Singleton contract not deployed");
-
-        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
-        bytes32 salt;
-        if (includeChainIdInSalt) {
-            salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
-        } else {
-            salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
-        }
 
         bytes memory deploymentData = abi.encodePacked(type(GnosisSafeProxy).creationCode, uint256(uint160(_singleton)));
         // solhint-disable-next-line no-inline-assembly
@@ -49,8 +34,8 @@ contract GnosisSafeProxyFactory {
         require(address(proxy) != address(0), "Create2 call failed");
     }
 
-    /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
-    /// @param _singleton Address of singleton contract.
+    /// @dev Allows to create a new proxy contact and execute a message call to the new proxy within one transaction.
+    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
     function createProxyWithNonce(
@@ -58,7 +43,9 @@ contract GnosisSafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce
     ) public returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, false);
+        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
+        bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
+        proxy = deployProxy(_singleton, salt);
         if (initializer.length > 0)
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -69,8 +56,9 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Same as `createProxyWithNonce` but includes the chain id in the salt to calculate the address of the new proxy contract.
-    /// @param _singleton Address of singleton contract.
+    /// @dev Allows to create a new proxy contact that should exist only on 1 network (e.g. specific governance or admin accounts)
+    ///      by including the chain id in the create2 salt. Such proxies cannot be created on other networks by replaying the transaction.
+    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
     function createChainSpecificProxyWithNonce(
@@ -78,7 +66,9 @@ contract GnosisSafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce
     ) public returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, true);
+        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
+        bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
+        proxy = deployProxy(_singleton, salt);
         if (initializer.length > 0)
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -89,8 +79,8 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
-    /// @param _singleton Address of singleton contract.
+    /// @dev Allows to create a new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
+    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
     /// @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
@@ -103,36 +93,6 @@ contract GnosisSafeProxyFactory {
         uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
         proxy = createProxyWithNonce(_singleton, initializer, saltNonceWithCallback);
         if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);
-    }
-
-    /// @dev Allows to get the address for a new proxy contact created via `createProxyWithNonce`
-    ///      This method is only meant for address calculation purpose when you use an initializer that would revert,
-    ///      therefore the response is returned with a revert. When calling this method set `from` to the address of the proxy factory.
-    /// @param _singleton Address of singleton contract.
-    /// @param initializer Payload for message call sent to new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    function calculateCreateProxyWithNonceAddress(
-        address _singleton,
-        bytes calldata initializer,
-        uint256 saltNonce
-    ) external returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, false);
-        revert(string(abi.encodePacked(proxy)));
-    }
-
-    /// @dev Allows to get the address for a new proxy contact created via `createChainSpecificProxyWithNonce`
-    ///      This method is only meant for address calculation purpose when you use an initializer that would revert,
-    ///      therefore the response is returned with a revert. When calling this method set `from` to the address of the proxy factory.
-    /// @param _singleton Address of singleton contract.
-    /// @param initializer Payload for message call sent to new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    function calculateCreateChainSpecificProxyWithNonceAddress(
-        address _singleton,
-        bytes calldata initializer,
-        uint256 saltNonce
-    ) external returns (GnosisSafeProxy proxy) {
-        proxy = deployProxyWithNonce(_singleton, initializer, saltNonce, true);
-        revert(string(abi.encodePacked(proxy)));
     }
 
     /// @dev Returns true if `account` is a contract.

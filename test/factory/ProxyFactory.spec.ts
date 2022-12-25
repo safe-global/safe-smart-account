@@ -53,8 +53,9 @@ describe("ProxyFactory", async () => {
 
         it('should revert if singleton address is not a contract', async () => {
             const { factory } = await setupTests()
+            const randomAddress = ethers.utils.getAddress(ethers.utils.hexlify(ethers.utils.randomBytes(20)))
             await expect(
-                factory.createProxyWithNonce(AddressZero, "0x", saltNonce)
+                factory.createProxyWithNonce(randomAddress, "0x", saltNonce)
             ).to.be.revertedWith("Singleton contract not deployed")
         })
 
@@ -110,7 +111,7 @@ describe("ProxyFactory", async () => {
 
     describe("createChainSpecificProxyWithNonce", async () => {
 
-        const saltNonce = 73
+        const saltNonce = 42
 
         it('should revert if singleton address is not a contract', async () => {
             const { factory } = await setupTests()
@@ -232,42 +233,6 @@ describe("ProxyFactory", async () => {
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
             expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
-        })
-    })
-
-    describe("calculateCreateProxyWithNonceAddress", async () => {
-
-        const saltNonce = 4242
-
-        it('should return the calculated address in the revert message', async () => {
-            const { factory, singleton } = await setupTests()
-            const initCode = "0x"
-            const proxyAddress = await calculateProxyAddress(factory, singleton.address, initCode, saltNonce)
-            await expect(
-                factory.callStatic.calculateCreateProxyWithNonceAddress(singleton.address, initCode, saltNonce)
-            ).to.be.reverted
-            // Currently ethers provides no good way to grab the result directly from the factory
-            const data = factory.interface.encodeFunctionData("calculateCreateProxyWithNonceAddress", [singleton.address, initCode, saltNonce])
-            const response = await singleton.callStatic.forward(factory.address, data)
-            expect(proxyAddress).to.be.eq(getAddress(response.slice(138, 178)))
-        })
-    })
-
-    describe("calculateCreateChainSpecificProxyWithNonceAddress", async () => {
-
-        const saltNonce = 4242
-
-        it('should return the calculated address in the revert message', async () => {
-            const { factory, singleton } = await setupTests()
-            const initCode = "0x"
-            const proxyAddress = await calculateChainSpecificProxyAddress(factory, singleton.address, initCode, saltNonce, await chainId())
-            await expect(
-                factory.callStatic.calculateCreateProxyWithNonceAddress(singleton.address, initCode, saltNonce)
-            ).to.be.reverted
-            // Currently ethers provides no good way to grab the result directly from the factory
-            const data = factory.interface.encodeFunctionData("calculateCreateChainSpecificProxyWithNonceAddress", [singleton.address, initCode, saltNonce])
-            const response = await singleton.callStatic.forward(factory.address, data)
-            expect(proxyAddress).to.be.eq(getAddress(response.slice(138, 178)))
         })
     })
 })
