@@ -69,5 +69,12 @@ describe("DefaultCallbackHandler", async () => {
                 await handler.callStatic.supportsInterface("0xbaddad42")
             ).to.be.eq(false)
         })
+
+        it('should not support invalid interface', async () => {
+            const handler = await getDefaultCallbackHandler()
+            await expect(
+                await handler.callStatic.supportsInterface("0xffffffff")
+            ).to.be.eq(false)
+        })
     })
 })
