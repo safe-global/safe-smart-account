@@ -79,6 +79,14 @@
       "created_at": "2022-11-07T11:34:12Z",
       "repoId": 102186072,
       "pullRequestNo": 451
+    },
+    {
+      "name": "rodrigoherrerai",
+      "id": 80117772,
+      "comment_id": 1374603022,
+      "created_at": "2023-01-07T20:33:21Z",
+      "repoId": 102186072,
+      "pullRequestNo": 478
     }
   ]
 }
