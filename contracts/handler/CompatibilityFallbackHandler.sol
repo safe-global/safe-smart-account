@@ -25,7 +25,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      * @param _signature Signature byte array associated with _data
      * @return a bool upon valid or invalid signature with corresponding _data
      */
-    function isValidSignature(bytes calldata _data, bytes calldata _signature) public view override returns (bytes4) {
+    function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         GnosisSafe safe = GnosisSafe(payable(msg.sender));
         bytes32 messageHash = getMessageHashForSafe(safe, _data);
