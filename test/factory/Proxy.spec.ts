@@ -5,7 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 
 describe("Proxy", async () => {
 
-    describe("contrcutor", async () => {
+    describe("constructor", async () => {
 
         it('should revert with invalid singleton address', async () => {
             const Proxy = await hre.ethers.getContractFactory("GnosisSafeProxy");
