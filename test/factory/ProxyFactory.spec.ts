@@ -1,11 +1,10 @@
 import { expect } from "chai";
 import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getFactory, getMock, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getFactory, getMock, getSafeWithOwners, getGnosisSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber } from "ethers";
 import { calculateChainSpecificProxyAddress, calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
-import { getAddress } from "ethers/lib/utils";
 import { chainId } from './../utils/encoding';
 
 describe("ProxyFactory", async () => {
@@ -72,13 +71,14 @@ describe("ProxyFactory", async () => {
             const proxyAddress = await calculateProxyAddress(factory, singleton.address, initCode, saltNonce)
             await expect(
                 factory.createProxyWithNonce(singleton.address, initCode, saltNonce)
-            ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
+                ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
             const proxy = singleton.attach(proxyAddress)
+
             expect(await proxy.creator()).to.be.eq(AddressZero)
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
 
         it('should emit event with initializing', async () => {
@@ -93,7 +93,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(true)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
 
         it('should not be able to deploy same proxy twice', async () => {
@@ -139,7 +139,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
 
         it('should emit event with initializing', async () => {
@@ -154,7 +154,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(true)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
 
         it('should deploy proxy to create2 address with chainid included in salt', async () => {
@@ -166,7 +166,7 @@ describe("ProxyFactory", async () => {
 
             await factory.createChainSpecificProxyWithNonce(singleton.address, initCode, saltNonce)
 
-            expect(await provider.getCode(proxyAddress)).to.eq(await factory.proxyRuntimeCode())
+            expect(await provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
 
         it('should not be able to deploy same proxy twice', async () => {
@@ -232,7 +232,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getGnosisSafeProxyRuntimeCode())
         })
     })
 })
