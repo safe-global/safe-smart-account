@@ -19,7 +19,7 @@ contract GnosisSafeProxyFactory {
         return type(GnosisSafeProxy).creationCode;
     }
 
-    /// @dev Allows to create a new proxy contact using CREATE2.
+    /// @dev Allows to create a new proxy contract using CREATE2.
     ///      This method is only meant as an utility to be called from other methods
     /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param salt Create2 salt to use for calculating the address of the new proxy contract.
@@ -34,7 +34,7 @@ contract GnosisSafeProxyFactory {
         require(address(proxy) != address(0), "Create2 call failed");
     }
 
-    /// @dev Allows to create a new proxy contact and execute a message call to the new proxy within one transaction.
+    /// @dev Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
     /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
@@ -56,7 +56,7 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create a new proxy contact that should exist only on 1 network (e.g. specific governance or admin accounts)
+    /// @dev Allows to create a new proxy contract that should exist only on 1 network (e.g. specific governance or admin accounts)
     ///      by including the chain id in the create2 salt. Such proxies cannot be created on other networks by replaying the transaction.
     /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
@@ -79,7 +79,7 @@ contract GnosisSafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create a new proxy contact, execute a message call to the new proxy and call a specified callback within one transaction
+    /// @dev Allows to create a new proxy contract, execute a message call to the new proxy and call a specified callback within one transaction
     /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
     /// @param initializer Payload for message call sent to new proxy contract.
     /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
