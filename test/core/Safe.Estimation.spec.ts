@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
 import { BigNumber } from "ethers";
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const [user1] = waffle.provider.getWallets();
 

@@ -11,12 +11,12 @@ import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
 import "./common/StorageAccessible.sol";
 import "./interfaces/ISignatureValidator.sol";
-import "./external/GnosisSafeMath.sol";
+import "./external/SafeMath.sol";
 
-/// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
+/// @title Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract GnosisSafe is
+contract Safe is
     EtherPaymentFallback,
     Singleton,
     ModuleManager,
@@ -28,7 +28,7 @@ contract GnosisSafe is
     StorageAccessible,
     GuardManager
 {
-    using GnosisSafeMath for uint256;
+    using SafeMath for uint256;
 
     string public constant VERSION = "1.3.0";
 

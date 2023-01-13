@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import "../../libraries/GnosisSafeStorage.sol";
+import "../../libraries/SafeStorage.sol";
 
 /// @title Migration - migrates a Safe contract from 1.3.0 to 1.2.0
 /// @author Richard Meissner - <richard@gnosis.io>
-contract Migration is GnosisSafeStorage {
+contract Migration is SafeStorage {
     bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
 
     address public immutable migrationSingleton;

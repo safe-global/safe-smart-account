@@ -2,12 +2,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title GnosisSafeMath
+ * @title SafeMath
  * @dev Math operations with safety checks that revert on error
- * Renamed from SafeMath to GnosisSafeMath to avoid conflicts
  * TODO: remove once open zeppelin update to solc 0.5.0
  */
-library GnosisSafeMath {
+library SafeMath {
     /**
      * @dev Multiplies two numbers, reverts on overflow.
      */

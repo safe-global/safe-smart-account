@@ -10,7 +10,7 @@ import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
 
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const [user1, user2, user3] = waffle.provider.getWallets();
 

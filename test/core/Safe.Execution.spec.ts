@@ -6,7 +6,7 @@ import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, b
 import { parseEther } from "@ethersproject/units";
 import { chainId } from "../utils/encoding";
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const [user1, user2] = waffle.provider.getWallets();
 

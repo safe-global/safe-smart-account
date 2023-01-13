@@ -40,13 +40,13 @@ const EXPECTED_LAYOUT = [
   },
 ];
 
-describe("GnosisSafeStorage", async () => {
+describe("SafeStorage", async () => {
   it("follows the expected storage layout", async () => {
-    const gnosisSafeStorageLayout = await getContractStorageLayout(
+    const safeStorageLayout = await getContractStorageLayout(
       hre,
-      "GnosisSafeStorage"
+      "SafeStorage"
     );
 
-    expect(gnosisSafeStorageLayout).to.deep.eq(EXPECTED_LAYOUT);
+    expect(safeStorageLayout).to.deep.eq(EXPECTED_LAYOUT);
   });
 });

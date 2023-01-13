@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./GnosisSafe.sol";
+import "./Safe.sol";
 
-/// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
+/// @title Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
-contract GnosisSafeL2 is GnosisSafe {
+contract SafeL2 is Safe {
     event SafeMultiSigTransaction(
         address to,
         uint256 value,

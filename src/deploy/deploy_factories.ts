@@ -8,7 +8,7 @@ const deploy: DeployFunction = async function (
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
-  await deploy("GnosisSafeProxyFactory", {
+  await deploy("SafeProxyFactory", {
     from: deployer,
     args: [],
     log: true,

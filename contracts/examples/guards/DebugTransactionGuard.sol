@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
-import "../../GnosisSafe.sol";
+import "../../Safe.sol";
 
 /// @title Debug Transaction Guard - A guard that will emit events with extended information.
 /// @notice This guard is only meant as a development tool and example
@@ -48,7 +48,7 @@ contract DebugTransactionGuard is BaseGuard {
         uint256 nonce;
         bytes32 txHash;
         {
-            GnosisSafe safe = GnosisSafe(payable(msg.sender));
+            Safe safe = Safe(payable(msg.sender));
             nonce = safe.nonce() - 1;
             txHash = safe.getTransactionHash(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce);
         }
