@@ -286,5 +286,10 @@ describe("ModuleManager", async () => {
             await expect(await safe.getModulesPaginated(user3.address, 1)).to.be.deep.equal([[user2.address], user2.address])
             await expect(await safe.getModulesPaginated(user2.address, 1)).to.be.deep.equal([[user1.address], AddressOne])
         })
+
+        it('returns an empty array and end pointer for a safe with no modules', async () => {
+            const { safe } = await setupTests()
+            expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[], AddressOne])
+        })
     })
 })

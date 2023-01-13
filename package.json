@@ -2,7 +2,7 @@
   "name": "@gnosis.pm/safe-contracts",
   "version": "1.3.0",
   "description": "Ethereum multisig contract",
-  "homepage": "https://github.com/gnosis/safe-contracts/",
+  "homepage": "https://github.com/safe-global/safe-contracts/",
   "license": "GPL-3.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -32,23 +32,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gnosis/gnosis-safe.git"
+    "url": "git+https://github.com/safe-global/safe-contracts.git"
   },
   "keywords": [
     "Ethereum",
     "Wallet",
     "Safe"
   ],
-  "author": "stefan@gnosis.pm",
+  "author": "richard@safe.global",
   "bugs": {
-    "url": "https://github.com/gnosis/gnosis-safe/issues"
+    "url": "https://github.com/safe-global/safe-contracts/issues"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^4.0.0",
     "@gnosis.pm/safe-singleton-factory": "^1.0.3",
-    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
-    "@nomiclabs/hardhat-waffle": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "2.0.1",
     "@openzeppelin/contracts": "^3.4.0",
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.2.0",
@@ -66,21 +66,21 @@
     "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-prettier": "^3.1.4",
     "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.1.4",
+    "ethers": "5.4.0",
     "hardhat": "^2.2.1",
     "hardhat-deploy": "0.9.2",
     "husky": "^5.1.3",
     "prettier": "^2.1.2",
-    "prettier-plugin-solidity": "^1.0.0-alpha.60",
+    "prettier-plugin-solidity": "1.0.0-beta.10",
     "solc": "0.7.6",
-    "solhint": "^3.3.2",
-    "solhint-plugin-prettier": "^0.0.5",
+    "solhint": "3.3.4",
+    "solhint-plugin-prettier": "0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
     "yargs": "^16.1.1"
   },
   "peerDependencies": {
-    "ethers": "^5.1.4"
+    "ethers": "5.4.0"
   }
 }

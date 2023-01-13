@@ -33,7 +33,7 @@
 - `GS106`: `Invalid page size for fetching paginated modules`
 
 ### Owner management related
-- `GS200`: `Owners have already been setup`
+- `GS200`: `Owners have already been set up`
 - `GS201`: `Threshold cannot exceed owner count`
 - `GS202`: `Threshold needs to be greater than 0`
 - `GS203`: `Invalid owner address provided`

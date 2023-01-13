@@ -67,7 +67,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
         // Execute transaction without further confirmations.
-        success = execute(to, value, data, operation, gasleft());
+        success = execute(to, value, data, operation, type(uint256).max);
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
     }
@@ -121,13 +121,13 @@ contract ModuleManager is SelfAuthorized, Executor {
 
         // Populate return array
         uint256 moduleCount = 0;
-        address currentModule = modules[start];
-        while (currentModule != address(0) && currentModule != SENTINEL_MODULES && moduleCount < pageSize) {
-            array[moduleCount] = currentModule;
-            currentModule = modules[currentModule];
+        next = modules[start];
+        while (next != address(0) && next != SENTINEL_MODULES && moduleCount < pageSize) {
+            array[moduleCount] = next;
+            next = modules[next];
             moduleCount++;
         }
-        next = currentModule;
+
         // Because of the argument validation we can assume that
         // the `currentModule` will always be either a module address
         // or sentinel address (aka the end). If we haven't reached the end
