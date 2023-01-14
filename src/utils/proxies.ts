@@ -1,4 +1,4 @@
-import { ethers, Contract } from "ethers"
+import { ethers, Contract, BigNumberish } from "ethers"
 
 export const calculateProxyAddress = async (factory: Contract, singleton: string, inititalizer: string, nonce: number | string) => {
     const deploymentCode = ethers.utils.solidityPack(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton])
@@ -15,4 +15,13 @@ export const calculateProxyAddressWithCallback = async (factory: Contract, singl
         [nonce, callback]
     )
     return calculateProxyAddress(factory, singleton, inititalizer, saltNonceWithCallback)
+}
+
+export const calculateChainSpecificProxyAddress = async (factory: Contract, singleton: string, inititalizer: string, nonce: number | string, chainId: BigNumberish) => {
+    const deploymentCode = ethers.utils.solidityPack(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton])
+    const salt = ethers.utils.solidityKeccak256(
+        ["bytes32", "uint256", "uint256"],
+        [ethers.utils.solidityKeccak256(["bytes"], [inititalizer]), nonce, chainId]
+    )
+    return ethers.utils.getCreate2Address(factory.address, salt, ethers.utils.keccak256(deploymentCode))
 }
