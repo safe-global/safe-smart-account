@@ -1,7 +1,7 @@
-import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
+import type { HardhatUserConfig, HttpNetworkUserConfig, SolidityUserConfig } from "hardhat/types";
+import { ZkSolcConfig } from "@matterlabs/hardhat-zksync-solc/dist/src/types";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
-import "@matterlabs/hardhat-zksync-solc";
 import "solidity-coverage";
 import "hardhat-deploy";
 import dotenv from "dotenv";
@@ -18,7 +18,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
+const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS, TARGET_ZKSYNC } = process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -75,24 +75,48 @@ const deterministicDeployment = (network: string) => {
     }
   }
 
+
+type CompilerSettings = {
+  solidity: SolidityUserConfig
+  zksolc?: ZkSolcConfig
+}
+
+const getCompilerSettings = (): CompilerSettings => {
+  if (TARGET_ZKSYNC) {
+    import("@matterlabs/hardhat-zksync-solc")
+    return {
+      solidity: {
+        version: "0.8.15",
+      },
+      zksolc: {
+        version: "1.1.0",
+        compilerSource: "docker",
+        settings: {
+          experimental: {
+            dockerImage: "matterlabs/zksolc",
+          },
+        },
+      },
+    };
+  }
+
+  return {
+    solidity: {
+      compilers: [
+        { version: primarySolidityVersion, settings: soliditySettings },
+        { version: "0.6.12" },
+        { version: "0.5.17" },
+      ],
+    },
+  };
+};
+
 const userConfig: HardhatUserConfig = {
   paths: {
     artifacts: "build/artifacts",
     cache: "build/cache",
     deploy: "src/deploy",
     sources: "contracts",
-  },
-  solidity: {
-    version: "0.8.15",
-  },
-  zksolc: {
-    version: "1.1.0",
-    compilerSource: "docker",
-    settings: {
-      experimental: {
-        dockerImage: "matterlabs/zksolc",
-      },
-    },
   },
   networks: {
     hardhat: {
@@ -156,6 +180,7 @@ const userConfig: HardhatUserConfig = {
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
+  ...getCompilerSettings(),
 };
 if (NODE_URL) {
   userConfig.networks!!.custom = {
