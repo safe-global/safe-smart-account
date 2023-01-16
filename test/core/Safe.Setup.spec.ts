@@ -242,5 +242,13 @@ describe("Safe", async () => {
 
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
         })
+
+        it('should revert if the initializer address does not contain code', async () => {
+            const { template } = await setupTests()    
+            
+            await expect(
+                template.setup([user1.address], 1, user2.address, "0xbeef73", AddressZero, AddressZero, 0, AddressZero)
+            ).to.be.revertedWith("GS002")
+        })
     })
 })
