@@ -3,6 +3,7 @@
 ### General init related
 - `GS000`: `Could not finish initialization`
 - `GS001`: `Threshold needs to be defined`
+- `GS002`: `A call to set up modules couldn't be executed because the destination account was not a contract`
 
 ### General gas/ execution related
 - `GS010`: `Not enough gas to execute Safe transaction`

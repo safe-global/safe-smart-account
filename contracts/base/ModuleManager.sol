@@ -20,9 +20,11 @@ contract ModuleManager is SelfAuthorized, Executor {
     function setupModules(address to, bytes memory data) internal {
         require(modules[SENTINEL_MODULES] == address(0), "GS100");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
-        if (to != address(0))
+        if (to != address(0)) {
+            require(isContract(to), "GS002");
             // Setup has to complete successfully or transaction fails.
             require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "GS000");
+        }
     }
 
     /// @dev Allows to add a module to the whitelist.
@@ -143,5 +145,16 @@ contract ModuleManager is SelfAuthorized, Executor {
         assembly {
             mstore(array, moduleCount)
         }
+    }
+
+    /// @dev Returns true if `account` is a contract.
+    /// @param account The address being queried
+    function isContract(address account) internal view returns (bool) {
+        uint256 size;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            size := extcodesize(account)
+        }
+        return size > 0;
     }
 }
