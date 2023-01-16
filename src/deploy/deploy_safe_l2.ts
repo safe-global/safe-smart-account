@@ -8,7 +8,7 @@ const deploy: DeployFunction = async function (
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
-  await deploy("GnosisSafeL2", {
+  await deploy("SafeL2", {
     from: deployer,
     args: [],
     log: true,

@@ -4,7 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { getSafeWithOwners } from "../utils/setup";
 import { AddressOne } from "../../src/utils/constants";
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const [user1] = waffle.provider.getWallets();
 

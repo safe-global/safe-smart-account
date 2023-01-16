@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./GnosisSafeProxy.sol";
+import "./SafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
 /// @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract GnosisSafeProxyFactory {
-    event ProxyCreation(GnosisSafeProxy proxy, address singleton);
+contract SafeProxyFactory {
+    event ProxyCreation(SafeProxy proxy, address singleton);
 
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
-        return type(GnosisSafeProxy).creationCode;
+        return type(SafeProxy).creationCode;
     }
 
     /// @dev Allows to create a new proxy contract using CREATE2. Optionally executes an initializer call to a new proxy.
@@ -23,10 +23,10 @@ contract GnosisSafeProxyFactory {
         address _singleton,
         bytes memory initializer,
         bytes32 salt
-    ) internal returns (GnosisSafeProxy proxy) {
+    ) internal returns (SafeProxy proxy) {
         require(isContract(_singleton), "Singleton contract not deployed");
 
-        bytes memory deploymentData = abi.encodePacked(type(GnosisSafeProxy).creationCode, uint256(uint160(_singleton)));
+        bytes memory deploymentData = abi.encodePacked(type(SafeProxy).creationCode, uint256(uint160(_singleton)));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
@@ -51,7 +51,7 @@ contract GnosisSafeProxyFactory {
         address _singleton,
         bytes memory initializer,
         uint256 saltNonce
-    ) public returns (GnosisSafeProxy proxy) {
+    ) public returns (SafeProxy proxy) {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
         proxy = deployProxy(_singleton, initializer, salt);
@@ -67,7 +67,7 @@ contract GnosisSafeProxyFactory {
         address _singleton,
         bytes memory initializer,
         uint256 saltNonce
-    ) public returns (GnosisSafeProxy proxy) {
+    ) public returns (SafeProxy proxy) {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
         proxy = deployProxy(_singleton, initializer, salt);
@@ -84,7 +84,7 @@ contract GnosisSafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce,
         IProxyCreationCallback callback
-    ) public returns (GnosisSafeProxy proxy) {
+    ) public returns (SafeProxy proxy) {
         uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
         proxy = createProxyWithNonce(_singleton, initializer, saltNonceWithCallback);
         if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);

@@ -5,7 +5,7 @@ import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { defaultCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const mockErc1155 = async () => {
         const Erc1155 = await hre.ethers.getContractFactory("ERC1155Token");

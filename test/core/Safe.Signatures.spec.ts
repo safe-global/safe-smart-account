@@ -6,7 +6,7 @@ import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas, calculateSafeDomainSeparator, preimageSafeTransactionHash, buildSignatureBytes } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
-describe("GnosisSafe", async () => {
+describe("Safe", async () => {
 
     const [user1, user2, user3, user4] = waffle.provider.getWallets()
 

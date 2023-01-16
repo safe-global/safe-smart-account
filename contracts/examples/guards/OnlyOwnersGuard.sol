@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
-import "../../GnosisSafe.sol";
+import "../../Safe.sol";
 
 interface ISafe {
     function getOwners() external view returns (address[] memory);

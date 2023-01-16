@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
-import "../../GnosisSafe.sol";
+import "../../Safe.sol";
 
 contract DelegateCallTransactionGuard is BaseGuard {
     address public immutable allowedTarget;

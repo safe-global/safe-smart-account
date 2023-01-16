@@ -2,10 +2,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../interfaces/ERC1155TokenReceiver.sol";
-import "../external/GnosisSafeMath.sol";
+import "../external/SafeMath.sol";
 
 contract ERC1155Token {
-    using GnosisSafeMath for uint256;
+    using SafeMath for uint256;
 
     // Mapping from token ID to owner balances
     mapping(uint256 => mapping(address => uint256)) private _balances;

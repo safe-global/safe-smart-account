@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        contract-name: ["GnosisSafeL2"]
+        contract-name: ["SafeL2"]
     env:
       SAFE_CONTRACT_UNDER_TEST: ${{ matrix.contract-name }}
     steps:
@@ -78,4 +78,4 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: (yarn --frozen-lockfile && yarn build && yarn hardhat codesize --contractname GnosisSafe && yarn benchmark) || echo "Benchmark failed"
+      - run: (yarn --frozen-lockfile && yarn build && yarn hardhat codesize --contractname Safe && yarn benchmark) || echo "Benchmark failed"

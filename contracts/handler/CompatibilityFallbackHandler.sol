@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./DefaultCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
-import "../GnosisSafe.sol";
+import "../Safe.sol";
 
 /// @title Compatibility Fallback Handler - fallback handler to provider compatibility between pre 1.3.0 and 1.3.0+ Safe contracts
 /// @author Richard Meissner - <richard@gnosis.pm>
@@ -27,7 +27,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
      */
     function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
-        GnosisSafe safe = GnosisSafe(payable(msg.sender));
+        Safe safe = Safe(payable(msg.sender));
         bytes32 messageHash = getMessageHashForSafe(safe, _data);
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
@@ -41,14 +41,14 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     /// @param message Message that should be hashed
     /// @return Message hash.
     function getMessageHash(bytes memory message) public view returns (bytes32) {
-        return getMessageHashForSafe(GnosisSafe(payable(msg.sender)), message);
+        return getMessageHashForSafe(Safe(payable(msg.sender)), message);
     }
 
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param safe Safe to which the message is targeted
     /// @param message Message that should be hashed
     /// @return Message hash.
-    function getMessageHashForSafe(GnosisSafe safe, bytes memory message) public view returns (bytes32) {
+    function getMessageHashForSafe(Safe safe, bytes memory message) public view returns (bytes32) {
         bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
         return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash));
     }
@@ -73,7 +73,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     /// @return Array of modules.
     function getModules() external view returns (address[] memory) {
         // Caller should be a Safe
-        GnosisSafe safe = GnosisSafe(payable(msg.sender));
+        Safe safe = Safe(payable(msg.sender));
         (address[] memory array, ) = safe.getModulesPaginated(SENTINEL_MODULES, 10);
         return array;
     }

@@ -25,7 +25,7 @@ describe("Upgrade from Safe 1.2.0", () => {
         const proxyAddress = await calculateProxyAddress(factory, singleton120, "0x", saltNonce)
         await factory.createProxyWithNonce(singleton120, "0x", saltNonce).then((tx: any) => tx.wait())
         
-        const Safe = await hre.ethers.getContractFactory("GnosisSafe");
+        const Safe = await hre.ethers.getContractFactory("Safe");
         const safe = Safe.attach(proxyAddress)
         await safe.setup([user1.address], 1, AddressZero, "0x", mock.address, AddressZero, 0, AddressZero)
 

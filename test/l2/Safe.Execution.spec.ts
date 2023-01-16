@@ -6,10 +6,10 @@ import { safeApproveHash, buildSafeTransaction, buildSignatureBytes, executeTx, 
 import { parseEther } from "@ethersproject/units";
 import { safeContractUnderTest } from "../utils/config";
 
-describe("GnosisSafeL2", async () => {
+describe("SafeL2", async () => {
 
     before(function () {
-        if (safeContractUnderTest() != "GnosisSafeL2") {
+        if (safeContractUnderTest() != "SafeL2") {
             this.skip()
         }
     });

@@ -29,8 +29,8 @@ export const getSafeSingleton = async () => {
 }
 
 export const getFactory = async () => {
-    const FactoryDeployment = await deployments.get("GnosisSafeProxyFactory");
-    const Factory = await hre.ethers.getContractFactory("GnosisSafeProxyFactory");
+    const FactoryDeployment = await deployments.get("SafeProxyFactory");
+    const Factory = await hre.ethers.getContractFactory("SafeProxyFactory");
     return Factory.attach(FactoryDeployment.address);
 }
 
@@ -95,8 +95,8 @@ export const getCompatFallbackHandler = async () => {
     return (await compatFallbackHandlerContract()).attach((await compatFallbackHandlerDeployment()).address);
 }
 
-export const getGnosisSafeProxyRuntimeCode = async () => {
-    const proxyArtifact = await hre.artifacts.readArtifact('GnosisSafeProxy');
+export const getSafeProxyRuntimeCode = async () => {
+    const proxyArtifact = await hre.artifacts.readArtifact('SafeProxy');
 
     return proxyArtifact.deployedBytecode;
 }
