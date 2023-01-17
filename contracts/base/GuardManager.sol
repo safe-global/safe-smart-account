@@ -25,6 +25,16 @@ interface Guard {
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract GuardManager is SelfAuthorized {
+
+    // TODO: inline
+    bytes32 private constant GUARD_LOCK_SLOT = keccak256("guard_manager.guard_lock.struct");
+    uint256 private constant GUARD_LOCKED = 2; 
+    // Use 1 to keep storage dirty, to reduce gas costs
+    uint256 private constant GUARD_UNLOCKED = 1;
+    struct GuardLock {
+        uint256 state;
+    }
+
     event ChangedGuard(address guard);
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
@@ -46,5 +56,27 @@ contract GuardManager is SelfAuthorized {
         assembly {
             guard := sload(slot)
         }
+    }
+
+    function getGuardLock() internal pure returns (GuardLock storage lock) {
+        bytes32 slot = GUARD_LOCK_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock.slot := slot
+        }
+    }
+
+    function checkAndLockGuard() internal {
+        GuardLock storage lock = getGuardLock();
+        // TODO assign proper error code
+        require(lock.state != GUARD_LOCKED, "GSXXX");
+        lock.state = GUARD_LOCKED;
+    }
+
+    function unlockGuard() internal {
+        GuardLock storage lock = getGuardLock();
+        // TODO assign proper error code
+        require(lock.state == GUARD_LOCKED, "GSXXX");
+        lock.state = GUARD_UNLOCKED;
     }
 }
