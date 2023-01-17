@@ -55,6 +55,12 @@ contract GnosisSafe is
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
+    // TODO properly implement
+    uint256 private guardLock;
+    uint256 private constant GUARD_LOCKED = 2; 
+    // Use 1 to keep storage dirty, to reduce gas costs
+    uint256 private constant GUARD_UNLOCKED = 1;
+
     // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
     constructor() {
         // By setting the threshold it is not possible to call setup anymore,
@@ -147,6 +153,8 @@ contract GnosisSafe is
         address guard = getGuard();
         {
             if (guard != address(0)) {
+                require(guardLock != GUARD_LOCKED, "Guard is currently locked");
+                guardLock = GUARD_LOCKED;
                 Guard(guard).checkTransaction(
                     // Transaction info
                     to,
@@ -188,6 +196,7 @@ contract GnosisSafe is
         }
         {
             if (guard != address(0)) {
+                guardLock = GUARD_UNLOCKED;
                 Guard(guard).checkAfterExecution(txHash, success);
             }
         }
