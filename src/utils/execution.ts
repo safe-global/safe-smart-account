@@ -1,4 +1,4 @@
-import { Contract, Wallet, utils, BigNumber, BigNumberish, Signer, PopulatedTransaction } from "ethers"
+import { Contract, Wallet, utils, BigNumber, BigNumberish, Signer, PopulatedTransaction, ethers } from "ethers"
 import { TypedDataSigner } from "@ethersproject/abstract-signer";
 import { AddressZero } from "@ethersproject/constants";
 
@@ -50,7 +50,8 @@ export interface SafeTransaction extends MetaTransaction {
 
 export interface SafeSignature {
     signer: string,
-    data: string
+    data: string,
+    dynamic?: boolean
 }
 
 export const calculateSafeDomainSeparator = (safe: Contract, chainId: BigNumberish): string => {
@@ -84,6 +85,15 @@ export const safeApproveHash = async (signer: Signer, safe: Contract, safeTx: Sa
     }
 }
 
+export const buildContractSignature = async (signer: string, signature: string): Promise<SafeSignature> => {
+    const signerAddress = ethers.utils.getAddress(signer)
+    return {
+        signer: signerAddress,
+        data: signature,
+        dynamic: true
+    }
+}
+
 export const safeSignTypedData = async (signer: Signer & TypedDataSigner, safe: Contract, safeTx: SafeTransaction, chainId?: BigNumberish): Promise<SafeSignature> => {
     if (!chainId && !signer.provider) throw Error("Provider required to retrieve chainId")
     const cid = chainId || (await signer.provider!!.getNetwork()).chainId
@@ -111,10 +121,19 @@ export const safeSignMessage = async (signer: Signer, safe: Contract, safeTx: Sa
 export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
     let signatureBytes = "0x"
+    let dynamicBytes = ""
     for (const sig of signatures) {
-        signatureBytes += sig.data.slice(2)
+        if (sig.dynamic === true) {
+            // Each signature has a static part of 65 bytes and then the dynamic parts of the signatures before need to be added.
+            const position = ethers.utils.defaultAbiCoder.encode(["uint256"], [signatures.length * 65 + dynamicBytes.length / 2]) 
+            signatureBytes += "000000000000000000000000" + sig.signer.slice(2) + position.slice(2) + "00"
+            console.log(sig)
+            dynamicBytes += ethers.utils.defaultAbiCoder.encode(["bytes"], [sig.data]).slice(66)
+        } else {
+            signatureBytes += sig.data.slice(2)
+        }
     }
-    return signatureBytes
+    return signatureBytes + dynamicBytes
 }
 
 export const logGas = async (message: string, tx: Promise<any>, skip?: boolean): Promise<any> => {
