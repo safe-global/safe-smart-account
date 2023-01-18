@@ -303,29 +303,6 @@ contract Safe is
         }
     }
 
-    /// @dev Allows to estimate a Safe transaction.
-    ///      This method is only meant for estimation purpose, therefore the call will always revert and encode the result in the revert data.
-    ///      Since the `estimateGas` function includes refunds, call this method to get an estimated of the costs that are deducted from the safe with `execTransaction`
-    /// @param to Destination address of Safe transaction.
-    /// @param value Ether value of Safe transaction.
-    /// @param data Data payload of Safe transaction.
-    /// @param operation Operation type of Safe transaction.
-    /// @return Estimate without refunds and overhead fees (base transaction and payload data gas costs).
-    /// @notice Deprecated in favor of common/StorageAccessible.sol and will be removed in next version.
-    function requiredTxGas(
-        address to,
-        uint256 value,
-        bytes calldata data,
-        Enum.Operation operation
-    ) external returns (uint256) {
-        uint256 startGas = gasleft();
-        // We don't provide an error message here, as we use it to return the estimate
-        require(execute(to, value, data, operation, gasleft()));
-        uint256 requiredGas = startGas - gasleft();
-        // Convert response to string and return via error message
-        revert(string(abi.encodePacked(requiredGas)));
-    }
-
     /**
      * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
      * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
