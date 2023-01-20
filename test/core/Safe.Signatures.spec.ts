@@ -1,14 +1,17 @@
+import { getCompatFallbackHandler } from './../utils/setup';
+import { calculateSafeMessageHash, signHash, buildContractSignature } from './../../src/utils/execution';
 import { expect } from "chai";
 import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
+import crypto from "crypto"
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import { safeSignTypedData, executeTx, safeSignMessage, calculateSafeTransactionHash, safeApproveHash, buildSafeTransaction, logGas, calculateSafeDomainSeparator, preimageSafeTransactionHash, buildSignatureBytes } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("Safe", async () => {
 
-    const [user1, user2, user3, user4] = waffle.provider.getWallets()
+    const [user1, user2, user3, user4, user5] = waffle.provider.getWallets()
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -427,20 +430,31 @@ describe("Safe", async () => {
             ).to.be.revertedWith("GS026")
         })
 
-        it('should be able to mix all signature types', async () => {
+        it.only('should be able to mix all signature types', async () => {
             await setupTests()
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
+            const compatFallbackHandler = await getCompatFallbackHandler()
+            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address)
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address])
+            console.log(await safe.isOwner(signerSafe.address))
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHash, await chainId())
+            const signerSafeOwnerSignature = await signHash(user5, safeMessageHash)
+            const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
+
             const signatures = buildSignatureBytes([
                 await safeApproveHash(user1, safe, tx, true),
                 await safeApproveHash(user4, safe, tx),
                 await safeSignTypedData(user2, safe, tx),
-                await safeSignTypedData(user3, safe, tx)
+                await safeSignTypedData(user3, safe, tx),
+                signerSafeSig,
             ])
+            
+            console.log({address: signerSafe.address, signature: signerSafeSig.data })
+            console.log({signatures})
 
-            await safe.checkNSignatures(txHash, txHashData, signatures, 3)
+            await safe.checkNSignatures(txHash, txHashData, signatures, 4)
         })
 
         it('should be able to require no signatures', async () => {
@@ -489,7 +503,7 @@ describe("Safe", async () => {
             await setupTests()
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2)
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
-            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
+            const randomBytes = crypto.pseudoRandomBytes(128).toString('hex')
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
             const signatures = buildSignatureBytes([
                 await safeApproveHash(user1, safe, tx, true),
@@ -497,8 +511,8 @@ describe("Safe", async () => {
                 await safeSignTypedData(user2, safe, tx)
             ])
             await expect(
-                safe.checkNSignatures(txHash, "0x", signatures, 3)
-            ).to.be.revertedWith("GS021")
+                safe.checkNSignatures(txHash, randomBytes, signatures, 3)
+            ).to.be.revertedWith("GS027")
         })
     })
 })

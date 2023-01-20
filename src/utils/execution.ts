@@ -51,6 +51,8 @@ export interface SafeTransaction extends MetaTransaction {
 export interface SafeSignature {
     signer: string,
     data: string
+    // data to append to the signature bytes for contract signatures
+    signatureData?: string
 }
 
 export const calculateSafeDomainSeparator = (safe: Contract, chainId: BigNumberish): string => {
@@ -108,13 +110,46 @@ export const safeSignMessage = async (signer: Signer, safe: Contract, safeTx: Sa
     return signHash(signer, calculateSafeTransactionHash(safe, safeTx, cid))
 }
 
+export const buildContractSignature = (signerAddress: string, signatureData: string, signatureOffset?: number): SafeSignature => {
+    // the signature format is
+    // signature type == 0
+    // Constant part: 65 bytes
+    // {32-bytes signature verifier}{32-bytes data position}{1-byte signature type}
+    // Dynamic part (solidity bytes): 32 + signature data length
+    // {32-bytes signature length}{bytes signature data}
+
+    const offset = (signatureOffset || 65).toString(16)
+    const signature = "0x" + signerAddress.slice(2).padStart(64, "0") + offset.padStart(64, '0') + "00"
+
+    return {
+        signer: signerAddress,
+        data: signature,
+        signatureData,
+    }
+}
+
 export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
     let signatureBytes = "0x"
-    for (const sig of signatures) {
-        signatureBytes += sig.data.slice(2)
+
+    let signatureDataToAppend = ""
+    let currentOffset = 65 * signatures.length
+    for (let i = 0; i < signatures.length; i++) {
+        const sig = signatures[i]
+        if (sig.signatureData) {
+            const signatureWithOffset = buildContractSignature(sig.signer, sig.signatureData, currentOffset)
+            const signatureDataLength = (sig.signatureData.slice(2).length / 2).toString(16).padStart(64, '0')
+            const signatureDataWithLength = `${signatureDataLength}${sig.signatureData.slice(2)}`
+            signatureBytes += signatureWithOffset.data.slice(2, 132)
+            signatureDataToAppend += signatureDataWithLength
+
+            currentOffset += signatureDataWithLength.length / 2
+        } else {
+            signatureBytes += sig.data.slice(2)
+        }
     }
-    return signatureBytes
+    
+    return signatureBytes + signatureDataToAppend
 }
 
 export const logGas = async (message: string, tx: Promise<any>, skip?: boolean): Promise<any> => {
