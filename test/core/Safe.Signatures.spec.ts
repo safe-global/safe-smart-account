@@ -484,5 +484,21 @@ describe("Safe", async () => {
 
             await safe.checkNSignatures(txHash, txHashData, signatures, 3)
         })
+
+        it('should revert if the hash of the pre-image data and dataHash do not match', async () =>{
+            await setupTests()
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2)
+            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
+            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
+            const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
+            const signatures = buildSignatureBytes([
+                await safeApproveHash(user1, safe, tx, true),
+                await safeApproveHash(user4, safe, tx),
+                await safeSignTypedData(user2, safe, tx)
+            ])
+            await expect(
+                safe.checkNSignatures(txHash, "0x", signatures, 3)
+            ).to.be.revertedWith("GS021")
+        })
     })
 })
