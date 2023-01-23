@@ -451,7 +451,7 @@ describe("Safe", async () => {
                 signerSafeSig,
             ])
             
-            console.log({address: signerSafe.address, signature: signerSafeSig.data })
+            console.log({safeMessageHash, signerSafe: signerSafe.address, signature: signerSafeSig.data, signerSafeOwner: user5.address })
             console.log({signatures})
 
             await safe.checkNSignatures(txHash, txHashData, signatures, 4)

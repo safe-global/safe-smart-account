@@ -254,6 +254,13 @@ contract Safe is
         bytes32 r;
         bytes32 s;
         uint256 i;
+        console.log("Starting signature check");
+        console.log("dataHash");
+        console.logBytes32(dataHash);
+        console.log("data");
+        console.logBytes(data);
+        console.log("signatures");
+        console.logBytes(signatures);
         for (i = 0; i < requiredSignatures; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
@@ -261,7 +268,8 @@ contract Safe is
                 // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
-
+                console.log("currentOwner");
+                console.log(currentOwner);
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
@@ -285,10 +293,12 @@ contract Safe is
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                console.logBytes(data);
+                console.log("contractSignature");
                 console.logBytes(contractSignature);
-                console.log(currentOwner);
+
+                console.log("checking eip-1271 signature");
                 require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+                console.log("checked eip-1271 signature");
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
@@ -304,7 +314,8 @@ contract Safe is
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            console.log(owners[currentOwner]);
+            console.log("Owner from the sig");
+            console.log(currentOwner);
             require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
         }
