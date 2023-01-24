@@ -51,8 +51,8 @@ export interface SafeTransaction extends MetaTransaction {
 export interface SafeSignature {
     signer: string,
     data: string
-    // data to append to the signature bytes for contract signatures
-    signatureData?: string
+    // a flag to indicate if the signature is a contract signature and the data has to be appended to the dynamic part of signature bytes
+    dynamic?: true
 }
 
 export const calculateSafeDomainSeparator = (safe: Contract, chainId: BigNumberish): string => {
@@ -110,46 +110,45 @@ export const safeSignMessage = async (signer: Signer, safe: Contract, safeTx: Sa
     return signHash(signer, calculateSafeTransactionHash(safe, safeTx, cid))
 }
 
-export const buildContractSignature = (signerAddress: string, signatureData: string, signatureOffset?: number): SafeSignature => {
-    // the signature format is
-    // signature type == 0
-    // Constant part: 65 bytes
-    // {32-bytes signature verifier}{32-bytes data position}{1-byte signature type}
-    // Dynamic part (solidity bytes): 32 + signature data length
-    // {32-bytes signature length}{bytes signature data}
-
-    const offset = (signatureOffset || 65).toString(16)
-    const signature = "0x" + signerAddress.slice(2).padStart(64, "0") + offset.padStart(64, '0') + "00"
-
+export const buildContractSignature = (signerAddress: string, signature: string): SafeSignature => {
     return {
         signer: signerAddress,
         data: signature,
-        signatureData,
+        dynamic: true,
     }
 }
 
 export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
+    const SIGNATURE_LENGTH_BYTES = 65
     signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
+
     let signatureBytes = "0x"
-
-    let signatureDataToAppend = ""
-    let currentOffset = 65 * signatures.length
-    for (let i = 0; i < signatures.length; i++) {
-        const sig = signatures[i]
-        if (sig.signatureData) {
-            const signatureWithOffset = buildContractSignature(sig.signer, sig.signatureData, currentOffset)
-            const signatureDataLength = (sig.signatureData.slice(2).length / 2).toString(16).padStart(64, '0')
-            const signatureDataWithLength = `${signatureDataLength}${sig.signatureData.slice(2)}`
-            signatureBytes += signatureWithOffset.data.slice(2, 132)
-            signatureDataToAppend += signatureDataWithLength
-
-            currentOffset += signatureDataWithLength.length / 2
+    let dynamicBytes = ""
+    for (const sig of signatures) {
+        if (sig.dynamic) {
+            /* 
+                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended at the end of 
+                end signature bytes.
+                The signature format is
+                Signature type == 0
+                Constant part: 65 bytes
+                {32-bytes signature verifier}{32-bytes dynamic data position}{1-byte signature type}
+                Dynamic part (solidity bytes): 32 bytes + signature data length
+                {32-bytes signature length}{bytes signature data}
+            */
+            const dynamicPartPosition = (signatures.length * SIGNATURE_LENGTH_BYTES + dynamicBytes.length / 2).toString(16).padStart(64, "0")
+            const dynamicPartLength = (sig.data.slice(2).length / 2).toString(16).padStart(64, "0")
+            const staticSignature = `${sig.signer.slice(2).padStart(64, "0")}${dynamicPartPosition}00`
+            const dynamicPartWithLength = `${dynamicPartLength}${sig.data.slice(2)}`
+            
+            signatureBytes += staticSignature
+            dynamicBytes += dynamicPartWithLength
         } else {
             signatureBytes += sig.data.slice(2)
         }
     }
-    
-    return signatureBytes + signatureDataToAppend
+
+    return signatureBytes + dynamicBytes
 }
 
 export const logGas = async (message: string, tx: Promise<any>, skip?: boolean): Promise<any> => {

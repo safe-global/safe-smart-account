@@ -204,16 +204,28 @@ describe("Safe", async () => {
 
         it('should be able to mix all signature types', async () => {
             await setupTests()
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
+            const compatFallbackHandler = await getCompatFallbackHandler()
+            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address)
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address])
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
+            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
+
+            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
+            // we need to use the pre-image of the transaction hash to calculate the message hash
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId())
+            const signerSafeOwnerSignature = await signHash(user5, safeMessageHash)
+            const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
+
+
             await expect(
                 logGas(
-                    "Execute cancel transaction with 4 owners",
+                    "Execute cancel transaction with 5 owners (1 owner is another Safe)",
                     executeTx(safe, tx, [
                         await safeApproveHash(user1, safe, tx, true),
                         await safeApproveHash(user4, safe, tx),
                         await safeSignTypedData(user2, safe, tx),
-                        await safeSignTypedData(user3, safe, tx)
+                        await safeSignTypedData(user3, safe, tx),
+                        signerSafeSig
                     ])
                 )
             ).to.emit(safe, "ExecutionSuccess")
@@ -324,15 +336,25 @@ describe("Safe", async () => {
 
         it('should be able to mix all signature types', async () => {
             await setupTests()
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address])
+            const compatFallbackHandler = await getCompatFallbackHandler()
+            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address)
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address])
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
+
+            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
+            // we need to use the pre-image of the transaction hash to calculate the message hash
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId())
+            const signerSafeOwnerSignature = await signHash(user5, safeMessageHash)
+            const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
+
             const signatures = buildSignatureBytes([
                 await safeApproveHash(user1, safe, tx, true),
                 await safeApproveHash(user4, safe, tx),
                 await safeSignTypedData(user2, safe, tx),
-                await safeSignTypedData(user3, safe, tx)
+                await safeSignTypedData(user3, safe, tx),
+                signerSafeSig
             ])
 
             await safe.checkSignatures(txHash, txHashData, signatures)
@@ -430,16 +452,18 @@ describe("Safe", async () => {
             ).to.be.revertedWith("GS026")
         })
 
-        it.only('should be able to mix all signature types', async () => {
+        it('should be able to mix all signature types', async () => {
             await setupTests()
             const compatFallbackHandler = await getCompatFallbackHandler()
             const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address)
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address])
-            console.log(await safe.isOwner(signerSafe.address))
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
             const txHashData = preimageSafeTransactionHash(safe, tx, await chainId())
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHash, await chainId())
+
+            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
+            // we need to use the pre-image of the transaction hash to calculate the message hash
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId())
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash)
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
 
@@ -450,11 +474,8 @@ describe("Safe", async () => {
                 await safeSignTypedData(user3, safe, tx),
                 signerSafeSig,
             ])
-            
-            console.log({safeMessageHash, signerSafe: signerSafe.address, signature: signerSafeSig.data, signerSafeOwner: user5.address })
-            console.log({signatures})
 
-            await safe.checkNSignatures(txHash, txHashData, signatures, 4)
+            await safe.checkNSignatures(txHash, txHashData, signatures, 5)
         })
 
         it('should be able to require no signatures', async () => {
@@ -491,7 +512,7 @@ describe("Safe", async () => {
                 await safeApproveHash(user4, safe, tx),
                 await safeSignTypedData(user2, safe, tx)
             ])
-            // Should fail as only 3 signaures are provided
+            // Should fail as only 3 signatures are provided
             await expect(
                 safe.checkNSignatures(txHash, txHashData, signatures, 4)
             ).to.be.revertedWith("GS020")
@@ -499,19 +520,18 @@ describe("Safe", async () => {
             await safe.checkNSignatures(txHash, txHashData, signatures, 3)
         })
 
-        it('should revert if the hash of the pre-image data and dataHash do not match', async () =>{
+        it('should revert if the hash of the pre-image data and dataHash do not match for EIP-1271 signature', async () =>{
             await setupTests()
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2)
-            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() })
-            const randomBytes = crypto.pseudoRandomBytes(128).toString('hex')
-            const txHash = calculateSafeTransactionHash(safe, tx, await chainId())
-            const signatures = buildSignatureBytes([
-                await safeApproveHash(user1, safe, tx, true),
-                await safeApproveHash(user4, safe, tx),
-                await safeSignTypedData(user2, safe, tx)
-            ])
+            const randomHash = `0x${crypto.pseudoRandomBytes(32).toString('hex')}`
+            const randomBytes = `0x${crypto.pseudoRandomBytes(128).toString('hex')}`
+            const randomAddress = `0x${crypto.pseudoRandomBytes(20).toString('hex')}`
+            const randomSignature = `0x${crypto.pseudoRandomBytes(65).toString('hex')}`
+
+            const eip1271Sig = buildContractSignature(randomAddress, randomSignature)
+            const signatures = buildSignatureBytes([eip1271Sig])
             await expect(
-                safe.checkNSignatures(txHash, randomBytes, signatures, 3)
+                safe.checkNSignatures(randomHash, randomBytes, signatures, 1)
             ).to.be.revertedWith("GS027")
         })
     })
