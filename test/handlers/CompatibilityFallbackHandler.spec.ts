@@ -4,7 +4,7 @@ import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
-import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../../src/utils/execution";
+import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, preimageSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 import { BigNumber } from "ethers";
 import { killLibContract } from "../utils/contracts";
@@ -101,8 +101,9 @@ describe("CompatibilityFallbackHandler", async () => {
             const validator = (await compatFallbackHandlerContract()).attach(safe.address)
 
             const randomBytes32 = ethers.utils.hexlify(ethers.utils.randomBytes(32))
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, randomBytes32, await chainId())
-            const signerSafeOwnerSignature = await signHash(user1, safeMessageHash)
+            const validatorPreImageMessage = preimageSafeMessageHash(validator, randomBytes32, await chainId())
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId())
+            const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash)
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
             const signatureBytes = buildSignatureBytes([signerSafeSig])
 
@@ -155,16 +156,17 @@ describe("CompatibilityFallbackHandler", async () => {
             const signerSafe = await getSafeWithOwners([user1.address], 1, handler.address)
             const safe = await getSafeWithOwners([signerSafe.address], 1, handler.address)
             const validator = (await compatFallbackHandlerContract()).attach(safe.address)
-            const randomBytes32 = ethers.utils.hexlify(ethers.utils.randomBytes(32))
 
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, randomBytes32, await chainId())
-            const signerSafeOwnerSignature = await signHash(user1, safeMessageHash)
+            const randomBytes32 = ethers.utils.hexlify(ethers.utils.randomBytes(32))
+            const validatorPreImageMessage = preimageSafeMessageHash(validator, randomBytes32, await chainId())
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId())
+            const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash)
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
             const signatureBytes = buildSignatureBytes([signerSafeSig])
 
             expect(
                 await validator.callStatic['isValidSignature(bytes32,bytes)'](randomBytes32, signatureBytes)
-            ).to.be.eq("0x20c13b0b")
+            ).to.be.eq("0x1626ba7e")
         })
     })
 
