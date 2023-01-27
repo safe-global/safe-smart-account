@@ -9,7 +9,7 @@ describe("Safe", async () => {
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        let source = `
+        const source = `
         contract Test {
             function transferEth(address payable safe) public payable returns (bool success) {
                 safe.transfer(msg.value);

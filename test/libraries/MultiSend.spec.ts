@@ -43,7 +43,7 @@ describe("MultiSend", async () => {
 
             const nestedTransactionData = encodeMultiSend([buildContractCall(killLib, "killme", [], 0)]);
 
-            let multiSendCode = await hre.ethers.provider.getCode(multiSend.address);
+            const multiSendCode = await hre.ethers.provider.getCode(multiSend.address);
             await expect(multiSend.multiSend(nestedTransactionData)).to.be.revertedWith("MultiSend should only be called via delegatecall");
 
             expect(await hre.ethers.provider.getCode(multiSend.address)).to.be.eq(multiSendCode);

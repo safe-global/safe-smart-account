@@ -178,7 +178,7 @@ describe("ProxyFactory", async () => {
 
         it("check callback is invoked", async () => {
             const { factory, mock, singleton } = await setupTests();
-            let callback = await hre.ethers.getContractAt("IProxyCreationCallback", mock.address);
+            const callback = await hre.ethers.getContractAt("IProxyCreationCallback", mock.address);
             const initCode = singleton.interface.encodeFunctionData("init", []);
 
             const proxyAddress = await calculateProxyAddressWithCallback(factory, singleton.address, initCode, saltNonce, mock.address);
@@ -188,7 +188,12 @@ describe("ProxyFactory", async () => {
 
             expect(await mock.callStatic.invocationCount()).to.be.deep.equal(BigNumber.from(1));
 
-            let callbackData = callback.interface.encodeFunctionData("proxyCreated", [proxyAddress, factory.address, initCode, saltNonce]);
+            const callbackData = callback.interface.encodeFunctionData("proxyCreated", [
+                proxyAddress,
+                factory.address,
+                initCode,
+                saltNonce,
+            ]);
             expect(await mock.callStatic.invocationCountForMethod(callbackData)).to.be.deep.equal(BigNumber.from(1));
         });
 

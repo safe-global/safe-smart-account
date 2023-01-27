@@ -185,7 +185,7 @@ describe("Safe", async () => {
                     return tx;
                 }),
             ).to.emit(safe, "ExecutionSuccess");
-            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash);
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const logIndex = receipt.logs.length - 1;
             const successEvent = safe.interface.decodeEventLog(
                 "ExecutionSuccess",
@@ -222,7 +222,7 @@ describe("Safe", async () => {
                     return tx;
                 }),
             ).to.emit(safe, "ExecutionFailure");
-            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash);
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const logIndex = receipt.logs.length - 1;
             const successEvent = safe.interface.decodeEventLog(
                 "ExecutionFailure",

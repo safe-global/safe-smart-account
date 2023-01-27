@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
-import { buildContractCall, executeTx, executeTxWithSigners } from "../../src/utils/execution";
+import { buildContractCall, executeTxWithSigners } from "../../src/utils/execution";
 import { parseEther } from "ethers/lib/utils";
 
 describe("SimulateTxAccessor", async () => {
@@ -43,7 +43,7 @@ describe("SimulateTxAccessor", async () => {
             const killLib = await deployContract(user1, killLibSource);
             const tx = buildContractCall(killLib, "killme", [], 0);
 
-            let code = await hre.ethers.provider.getCode(accessor.address);
+            const code = await hre.ethers.provider.getCode(accessor.address);
             await expect(accessor.simulate(tx.to, tx.value, tx.data, tx.operation)).to.be.revertedWith(
                 "SimulateTxAccessor should only be called via delegatecall",
             );
@@ -78,7 +78,7 @@ describe("SimulateTxAccessor", async () => {
         });
 
         it("simulate selfdestruct", async () => {
-            const { safe, accessor, interactor, simulator } = await setupTests();
+            const { safe, accessor, simulator } = await setupTests();
             const expectedCode = await hre.ethers.provider.getCode(safe.address);
             await user1.sendTransaction({ to: safe.address, value: parseEther("1") });
             const killLib = await deployContract(user1, killLibSource);
