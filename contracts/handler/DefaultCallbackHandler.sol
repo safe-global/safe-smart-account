@@ -12,13 +12,7 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
     string public constant NAME = "Default Callback Handler";
     string public constant VERSION = "1.0.0";
 
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes calldata
-    ) external pure override returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure override returns (bytes4) {
         return 0xf23a6e61;
     }
 
@@ -32,23 +26,11 @@ contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, 
         return 0xbc197c81;
     }
 
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes calldata
-    ) external pure override returns (bytes4) {
+    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
         return 0x150b7a02;
     }
 
-    function tokensReceived(
-        address,
-        address,
-        address,
-        uint256,
-        bytes calldata,
-        bytes calldata
-    ) external pure override {
+    function tokensReceived(address, address, address, uint256, bytes calldata, bytes calldata) external pure override {
         // We implement this for completeness, doesn't really have any value
     }
 

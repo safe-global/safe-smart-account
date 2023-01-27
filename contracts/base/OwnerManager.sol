@@ -67,11 +67,7 @@ contract OwnerManager is SelfAuthorized {
     /// @param prevOwner Owner that pointed to the owner to be removed in the linked list
     /// @param owner Owner address to be removed.
     /// @param _threshold New threshold.
-    function removeOwner(
-        address prevOwner,
-        address owner,
-        uint256 _threshold
-    ) public authorized {
+    function removeOwner(address prevOwner, address owner, uint256 _threshold) public authorized {
         // Only allow to remove an owner, if threshold can still be reached.
         require(ownerCount - 1 >= _threshold, "GS201");
         // Validate owner address and check that it corresponds to owner index.
@@ -91,11 +87,7 @@ contract OwnerManager is SelfAuthorized {
     /// @param prevOwner Owner that pointed to the owner to be replaced in the linked list
     /// @param oldOwner Owner address to be replaced.
     /// @param newOwner New owner address.
-    function swapOwner(
-        address prevOwner,
-        address oldOwner,
-        address newOwner
-    ) public authorized {
+    function swapOwner(address prevOwner, address oldOwner, address newOwner) public authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
         require(newOwner != address(0) && newOwner != SENTINEL_OWNERS && newOwner != address(this), "GS203");
         // No duplicate owners allowed.

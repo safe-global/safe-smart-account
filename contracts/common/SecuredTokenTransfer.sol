@@ -8,11 +8,7 @@ contract SecuredTokenTransfer {
     /// @param token Token that should be transferred
     /// @param receiver Receiver to whom the token should be transferred
     /// @param amount The amount of tokens that should be transferred
-    function transferToken(
-        address token,
-        address receiver,
-        uint256 amount
-    ) internal returns (bool transferred) {
+    function transferToken(address token, address receiver, uint256 amount) internal returns (bool transferred) {
         // 0xa9059cbb - keccack("transfer(address,uint256)")
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
         // solhint-disable-next-line no-inline-assembly
@@ -21,15 +17,15 @@ contract SecuredTokenTransfer {
             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
             let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0x20)
             switch returndatasize()
-                case 0 {
-                    transferred := success
-                }
-                case 0x20 {
-                    transferred := iszero(or(iszero(success), iszero(mload(0))))
-                }
-                default {
-                    transferred := 0
-                }
+            case 0 {
+                transferred := success
+            }
+            case 0x20 {
+                transferred := iszero(or(iszero(success), iszero(mload(0))))
+            }
+            default {
+                transferred := 0
+            }
         }
     }
 }
