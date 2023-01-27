@@ -123,22 +123,21 @@ contract Safe is
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            bytes memory txHashData =
-                encodeTransactionData(
-                    // Transaction info
-                    to,
-                    value,
-                    data,
-                    operation,
-                    safeTxGas,
-                    // Payment info
-                    baseGas,
-                    gasPrice,
-                    gasToken,
-                    refundReceiver,
-                    // Signature info
-                    nonce
-                );
+            bytes memory txHashData = encodeTransactionData(
+                // Transaction info
+                to,
+                value,
+                data,
+                operation,
+                safeTxGas,
+                // Payment info
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                // Signature info
+                nonce
+            );
             // Increase nonce and execute transaction.
             nonce++;
             txHash = keccak256(txHashData);
@@ -218,11 +217,7 @@ contract Safe is
      * @param data That should be signed (this is passed to an external validator contract)
      * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
      */
-    function checkSignatures(
-        bytes32 dataHash,
-        bytes memory data,
-        bytes memory signatures
-    ) public view {
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
@@ -237,12 +232,7 @@ contract Safe is
      * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(
-        bytes32 dataHash,
-        bytes memory data,
-        bytes memory signatures,
-        uint256 requiredSignatures
-    ) public view {
+    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
@@ -352,22 +342,21 @@ contract Safe is
         address refundReceiver,
         uint256 _nonce
     ) public view returns (bytes memory) {
-        bytes32 safeTxHash =
-            keccak256(
-                abi.encode(
-                    SAFE_TX_TYPEHASH,
-                    to,
-                    value,
-                    keccak256(data),
-                    operation,
-                    safeTxGas,
-                    baseGas,
-                    gasPrice,
-                    gasToken,
-                    refundReceiver,
-                    _nonce
-                )
-            );
+        bytes32 safeTxHash = keccak256(
+            abi.encode(
+                SAFE_TX_TYPEHASH,
+                to,
+                value,
+                keccak256(data),
+                operation,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                _nonce
+            )
+        );
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
     }
 
