@@ -22,15 +22,7 @@ contract SimulateTxAccessor is Executor {
         uint256 value,
         bytes calldata data,
         Enum.Operation operation
-    )
-        external
-        onlyDelegateCall()
-        returns (
-            uint256 estimate,
-            bool success,
-            bytes memory returnData
-        )
-    {
+    ) external onlyDelegateCall returns (uint256 estimate, bool success, bytes memory returnData) {
         uint256 startGas = gasleft();
         success = execute(to, value, data, operation, gasleft());
         estimate = startGas - gasleft();

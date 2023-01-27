@@ -34,13 +34,7 @@ contract ERC1155Token {
         @param value Transfer amount
         @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external {
+    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes calldata data) external {
         require(to != address(0), "ERC1155: target address must be non-zero");
         require(
             from == msg.sender || _operatorApprovals[from][msg.sender] == true,
@@ -60,12 +54,7 @@ contract ERC1155Token {
      * @param value Amount of the token to be minted
      * @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
      */
-    function mint(
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external {
+    function mint(address to, uint256 id, uint256 value, bytes calldata data) external {
         require(to != address(0), "ERC1155: mint to the zero address");
 
         _balances[id][to] = value + _balances[id][to];
