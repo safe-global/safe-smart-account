@@ -26,6 +26,7 @@
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",
     "fmt:sol": "prettier 'contracts/**/*.sol' -w",
+    "fmt:ts": "prettier 'src/**/*.ts' 'test/**/*.ts' -w",
     "prepack": "yarn build",
     "prepare": "husky install",
     "prepublish": "yarn rimraf build && yarn build && yarn build:ts"
