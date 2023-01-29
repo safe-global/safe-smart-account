@@ -289,7 +289,7 @@ contract Safe is
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
+            require(currentOwner > lastOwner && owners[currentOwner] != address(0), "GS026");
             lastOwner = currentOwner;
         }
     }
