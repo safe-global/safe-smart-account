@@ -45,7 +45,7 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         return getMessageHashForSafe(Safe(payable(msg.sender)), message);
     }
 
-    /// @dev returns the pre-image of the message hash (see getMessageHashForSafe)
+    /// @dev Returns the pre-image of the message hash (see getMessageHashForSafe)
     /// @param safe Safe to which the message is targeted
     /// @param message Message that should be encoded
     /// @return Encoded message.

@@ -17,7 +17,8 @@ describe("CompatibilityFallbackHandler", async () => {
         await deployments.fixture();
         const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler()
-        const safe = await getSafeWithOwners([user1.address, user2.address], 2, handler.address)
+        const signerSafe = await getSafeWithOwners([user1.address], 1, handler.address)
+        const safe = await getSafeWithOwners([user1.address, user2.address, signerSafe.address], 2, handler.address)
         const validator = (await compatFallbackHandlerContract()).attach(safe.address)
         const killLib = await killLibContract(user1);
         return {
@@ -25,7 +26,8 @@ describe("CompatibilityFallbackHandler", async () => {
             validator,
             handler,
             killLib,
-            signLib
+            signLib,
+            signerSafe
         }
     })
 
@@ -84,32 +86,19 @@ describe("CompatibilityFallbackHandler", async () => {
             expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.eq("0x20c13b0b")
         })
 
-        it('should return magic value if enough owners signed', async () => {
-            const { validator } = await setupTests()
+        it('should return magic value if enough owners signed and allow a mix different signature types', async () => {
+            const { validator, signerSafe } = await setupTests()
             const sig1 = {
                 signer: user1.address,
                 data: await user1._signTypedData({ verifyingContract: validator.address, chainId: await chainId() }, EIP712_SAFE_MESSAGE_TYPE, { message: "0xbaddad" })
             }
             const sig2 = await signHash(user2, calculateSafeMessageHash(validator, "0xbaddad", await chainId()))
-            expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", buildSignatureBytes([sig1, sig2]))).to.be.eq("0x20c13b0b")
-        })
-
-        it('should pass a keccak256 hash of the pre-image message to support contract signatures', async () => {
-            const {handler} = await setupTests()
-            const signerSafe = await getSafeWithOwners([user1.address], 1, handler.address)
-            const safe = await getSafeWithOwners([signerSafe.address], 1, handler.address)
-            const validator = (await compatFallbackHandlerContract()).attach(safe.address)
-
-            const randomBytes32 = ethers.utils.hexlify(ethers.utils.randomBytes(32))
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, randomBytes32, await chainId())
+            const validatorPreImageMessage = preimageSafeMessageHash(validator, '0xbaddad', await chainId())
             const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId())
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash)
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
-            const signatureBytes = buildSignatureBytes([signerSafeSig])
 
-            expect(
-                await validator.callStatic['isValidSignature(bytes,bytes)'](randomBytes32, signatureBytes)
-            ).to.be.eq("0x20c13b0b")
+            expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", buildSignatureBytes([sig1, sig2, signerSafeSig]))).to.be.eq("0x20c13b0b")
         })
     })
     
@@ -140,33 +129,20 @@ describe("CompatibilityFallbackHandler", async () => {
             expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.eq("0x1626ba7e")
         })
 
-        it('should return magic value if enough owners signed', async () => {
-            const { validator } = await setupTests()
+        it('should return magic value if enough owners signed and allow a mix different signature types', async () => {
+            const { validator, signerSafe } = await setupTests()
             const dataHash = ethers.utils.keccak256("0xbaddad")
-            const sig1 = {
+            const typedDataSig = {
                 signer: user1.address,
                 data: await user1._signTypedData({ verifyingContract: validator.address, chainId: await chainId() }, EIP712_SAFE_MESSAGE_TYPE, { message: dataHash })
             }
-            const sig2 = await signHash(user2, calculateSafeMessageHash(validator,dataHash, await chainId()))
-            expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, buildSignatureBytes([sig1, sig2]))).to.be.eq("0x1626ba7e")
-        })
-
-        it('should pass a keccak256 hash of the pre-image message to support contract signatures', async () => {
-            const {handler} = await setupTests()
-            const signerSafe = await getSafeWithOwners([user1.address], 1, handler.address)
-            const safe = await getSafeWithOwners([signerSafe.address], 1, handler.address)
-            const validator = (await compatFallbackHandlerContract()).attach(safe.address)
-
-            const randomBytes32 = ethers.utils.hexlify(ethers.utils.randomBytes(32))
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, randomBytes32, await chainId())
+            const ethSignSig = await signHash(user2, calculateSafeMessageHash(validator,dataHash, await chainId()))
+            const validatorPreImageMessage = preimageSafeMessageHash(validator, dataHash, await chainId())
             const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId())
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash)
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data)
-            const signatureBytes = buildSignatureBytes([signerSafeSig])
 
-            expect(
-                await validator.callStatic['isValidSignature(bytes32,bytes)'](randomBytes32, signatureBytes)
-            ).to.be.eq("0x1626ba7e")
+            expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, buildSignatureBytes([typedDataSig, ethSignSig, signerSafeSig]))).to.be.eq("0x1626ba7e")
         })
     })
 
