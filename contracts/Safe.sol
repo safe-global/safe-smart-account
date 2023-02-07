@@ -318,7 +318,7 @@ contract Safe is
         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
     }
 
-    /// @dev Returns the bytes that are hashed to be signed by owners.
+    /// @dev Returns the pre-image of the transaction hash (see getTransactionHash).
     /// @param to Destination address.
     /// @param value Ether value.
     /// @param data Data payload.

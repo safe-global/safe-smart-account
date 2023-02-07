@@ -28,11 +28,12 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
     function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         Safe safe = Safe(payable(msg.sender));
-        bytes32 messageHash = getMessageHashForSafe(safe, _data);
+        bytes memory messageData = encodeMessageDataForSafe(safe, _data);
+        bytes32 messageHash = keccak256(messageData);
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
-            safe.checkSignatures(messageHash, _data, _signature);
+            safe.checkSignatures(messageHash, messageData, _signature);
         }
         return EIP1271_MAGIC_VALUE;
     }
@@ -44,13 +45,21 @@ contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValid
         return getMessageHashForSafe(Safe(payable(msg.sender)), message);
     }
 
+    /// @dev Returns the pre-image of the message hash (see getMessageHashForSafe)
+    /// @param safe Safe to which the message is targeted
+    /// @param message Message that should be encoded
+    /// @return Encoded message.
+    function encodeMessageDataForSafe(Safe safe, bytes memory message) public view returns (bytes memory) {
+        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        return abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash);
+    }
+
     /// @dev Returns hash of a message that can be signed by owners.
     /// @param safe Safe to which the message is targeted
     /// @param message Message that should be hashed
     /// @return Message hash.
     function getMessageHashForSafe(Safe safe, bytes memory message) public view returns (bytes32) {
-        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
-        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash));
+        return keccak256(encodeMessageDataForSafe(safe, message));
     }
 
     /**
