@@ -32,7 +32,7 @@ describe("NestedSafes", async () => {
 
     it('should use EIP-1271 (contract signatures)', async () => {
         const { safe1, safe2, parentSafe, handlerSafe1, handlerSafe2, staticPart} = await setupTests()
-        // Deposit some spare money for execution to parent safe
+        // Deposit some spare money to test transfer 
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(0)
         await user1.sendTransaction({to: parentSafe.address, value: parseEther("1")})
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(parseEther("1"))
@@ -45,7 +45,7 @@ describe("NestedSafes", async () => {
         const nonce = await parentSafe.nonce()
         const messageData = await parentSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, nonce)
         
-        // Get hash transaction for each safe
+        // Get message hash for each safe
         const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address, messageData)
         const messageHashSafe2 = await handlerSafe2.getMessageHashForSafe(safe2.address, messageData)
         
@@ -72,9 +72,9 @@ describe("NestedSafes", async () => {
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.deep.eq(parseEther("0"))
     })
 
-    it('should revert with hash not approved ', async () => {
+    it('should revert with hash not approved', async () => {
         const { safe1, safe2, parentSafe, handlerSafe1, signLib} = await setupTests()
-        // Deposit some spare money for execution to parent safe
+        // Deposit some spare money to test transfer 
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(0)
         await user1.sendTransaction({to: parentSafe.address, value: parseEther("1")})
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(parseEther("1"))
@@ -87,7 +87,7 @@ describe("NestedSafes", async () => {
         const nonce = await parentSafe.nonce()
         const messageData = await parentSafe.encodeTransactionData(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, nonce)
         
-        // Get hash transaction for each safe
+        // Get message hash for safe
         const messageHashSafe1 = await handlerSafe1.getMessageHashForSafe(safe1.address, messageData)
 
         // Get all signs for each owner Safe1 (user1, user2) Safe2 (user3, user4)
