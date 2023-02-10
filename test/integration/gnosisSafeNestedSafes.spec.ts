@@ -5,7 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { parseEther } from "@ethersproject/units";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
-import { buildSignatureBytes, signHash, executeContractCallWithSigners} from "../../src/utils/execution";
+import { buildSignatureBytes, signHash, executeContractCallWithSigners, buildContractSignature, SafeSignature} from "../../src/utils/execution";
 
 
 describe("NestedSafes", async () => {
@@ -20,36 +20,19 @@ describe("NestedSafes", async () => {
         const parentSafe = await getSafeWithOwners([safe1.address, safe2.address], 2, handler.address)
         const handlerSafe1 = handler.attach(safe1.address)
         const handlerSafe2 = handler.attach(safe2.address)
-        let staticPart = "0x"
-        const staticPartSafe1 = "000000000000000000000000" + safe1.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000082" + "00" // r, s, v
-        const staticPartSafe2 = "000000000000000000000000" + safe2.address.slice(2) + "0000000000000000000000000000000000000000000000000000000000000142" + "00" // r, s, v
-        if (safe1.address < safe2.address) {
-            staticPart += staticPartSafe1 + staticPartSafe2
-        } else {
-            staticPart += staticPartSafe2 + staticPartSafe1
-        }
         return {
             safe1,
             safe2,
             parentSafe, 
             handlerSafe1,
             handlerSafe2,
-            signLib, 
-            staticPart
+            signLib
         }
     })
 
     it('should use EIP-1271 (contract signatures)', async () => {
         const { safe1, safe2, parentSafe, handlerSafe1, handlerSafe2, staticPart} = await setupTests()
-        // Deposit some spare money for execution to owner safes
-        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(0)
-        await user1.sendTransaction({to: safe1.address, value: parseEther("1")})
-        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(parseEther("1"))
-        
-        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(0)
-        await user1.sendTransaction({to: safe2.address, value: parseEther("1")})
-        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(parseEther("1"))
-
+        // Deposit some spare money for execution to parent safe
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(0)
         await user1.sendTransaction({to: parentSafe.address, value: parseEther("1")})
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(parseEther("1"))
@@ -71,19 +54,17 @@ describe("NestedSafes", async () => {
         const sig2 = await signHash(user2, messageHashSafe1)
         const sig3 = await signHash(user3, messageHashSafe2)
         const sig4 = await signHash(user4, messageHashSafe2)
-        const signSafe1 =  buildSignatureBytes([sig1, sig2])
-        const signSafe2 =  buildSignatureBytes([sig3, sig4])
+
+        const ownersSignSafe1 =  buildSignatureBytes([sig1, sig2])
+        const ownersSignSafe2 =  buildSignatureBytes([sig3, sig4])
         
-       
         // Check if signature for each safe is correct
-        expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe1)).to.be.eq("0x20c13b0b")
-        expect(await handlerSafe2.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe2)).to.be.eq("0x20c13b0b")
+        expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, ownersSignSafe1)).to.be.eq("0x20c13b0b")
+        expect(await handlerSafe2.callStatic['isValidSignature(bytes,bytes)'](messageData, ownersSignSafe2)).to.be.eq("0x20c13b0b")
 
-        const dynamicPart = 
-        defaultAbiCoder.encode(['bytes'], [signSafe1]).slice(66)+
-        defaultAbiCoder.encode(['bytes'], [signSafe2]).slice(66)
-        const signature = staticPart + dynamicPart
-
+        const signerSafe1 = buildContractSignature(safe1.address, ownersSignSafe1)
+        const signerSafe2 = buildContractSignature(safe2.address, ownersSignSafe2)
+        const signature = buildSignatureBytes([signerSafe1, signerSafe2])
         // Should execute transaction withdraw 1 ether
         expect(await parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature)).to.be.ok
         
@@ -92,16 +73,8 @@ describe("NestedSafes", async () => {
     })
 
     it('should revert with hash not approved ', async () => {
-        const { safe1, safe2, parentSafe, handlerSafe1, signLib, staticPart} = await setupTests()
-        // Deposit some spare money for execution to owner safes
-        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(0)
-        await user1.sendTransaction({to: safe1.address, value: parseEther("1")})
-        await expect(await hre.ethers.provider.getBalance(safe1.address)).to.be.equal(parseEther("1"))
-        
-        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(0)
-        await user1.sendTransaction({to: safe2.address, value: parseEther("1")})
-        await expect(await hre.ethers.provider.getBalance(safe2.address)).to.be.equal(parseEther("1"))
-
+        const { safe1, safe2, parentSafe, handlerSafe1, signLib} = await setupTests()
+        // Deposit some spare money for execution to parent safe
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(0)
         await user1.sendTransaction({to: parentSafe.address, value: parseEther("1")})
         await expect(await hre.ethers.provider.getBalance(parentSafe.address)).to.be.equal(parseEther("1"))
@@ -120,16 +93,19 @@ describe("NestedSafes", async () => {
         // Get all signs for each owner Safe1 (user1, user2) Safe2 (user3, user4)
         const sig1 = await signHash(user1, messageHashSafe1)
         const sig2 = await signHash(user2, messageHashSafe1)
-        const signSafe1 =  buildSignatureBytes([sig1, sig2])
+        const ownersSignSafe1 =  buildSignatureBytes([sig1, sig2])
          
         // Check if signature for each safe is correct
-        expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, signSafe1)).to.be.eq("0x20c13b0b")
+        expect(await handlerSafe1.callStatic['isValidSignature(bytes,bytes)'](messageData, ownersSignSafe1)).to.be.eq("0x20c13b0b")
 
-        const dynamicPart = 
-        defaultAbiCoder.encode(['bytes'], [signSafe1]).slice(66)+
-        "0000000000000000000000000000000000000000000000000000000000000000"
-        const signature = staticPart + dynamicPart
-
+        const signerSafe1 = buildContractSignature(safe1.address, ownersSignSafe1)
+        //Create an empty signature to with dynamic true to include this address in the staticpart
+        const emptySignSafe2: SafeSignature = {
+            signer: safe2.address,
+            data: "",
+            dynamic: true,
+        };
+        const signature = buildSignatureBytes([signerSafe1, emptySignSafe2])
         // Should revert with message hash not approved
         await expect(parentSafe.execTransaction(to, value, data, operation, 0, 0, 0, AddressZero, AddressZero, signature),
         "Transaction should fail because hash is not approved").to.be.revertedWith("Hash not approved");
