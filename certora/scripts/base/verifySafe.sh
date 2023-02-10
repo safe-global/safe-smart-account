@@ -1,6 +1,4 @@
-solc-select use 0.8.9
-
-certoraRun  certora/harnesses/SafeHarness.sol ComplexityCheck/DummyERC20A.sol ComplexityCheck/DummyERC20B.sol \
+certoraRun  certora/harnesses/SafeHarness.sol \
     --verify SafeHarness:certora/specs/Safe.spec \
     --staging master \
     --optimistic_loop \
