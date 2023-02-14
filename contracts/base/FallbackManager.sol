@@ -23,7 +23,8 @@ contract FallbackManager is SelfAuthorized {
         }
     }
 
-    /**  @notice Allows to add a contract to handle fallback calls.
+    /**
+     * @notice Allows to add a contract to handle fallback calls.
      *           Only fallback calls without value and with data will be forwarded.
      * @dev This can only be done via a Safe transaction.
      * @param handler contract to handle fallback calls.

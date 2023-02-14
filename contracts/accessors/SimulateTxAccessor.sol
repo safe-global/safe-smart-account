@@ -3,7 +3,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../base/Executor.sol";
 
-/** @title Simulate Transaction Accessor
+/**
+ * @title Simulate Transaction Accessor
  * @notice Can be used with StorageAccessible to simulate Safe transactions
  * @author Richard Meissner - <richard@gnosis.pm>
  */

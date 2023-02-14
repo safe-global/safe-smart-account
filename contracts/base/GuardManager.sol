@@ -38,8 +38,10 @@ contract GuardManager is SelfAuthorized {
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
-    /// @dev Set a guard that checks transactions before execution
-    /// @param guard The address of the guard to be used or the 0 address to disable the guard
+    /**
+     * @dev Set a guard that checks transactions before execution
+     * @param guard The address of the guard to be used or the 0 address to disable the guard
+     */
     function setGuard(address guard) external authorized {
         if (guard != address(0)) {
             require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
@@ -52,6 +54,13 @@ contract GuardManager is SelfAuthorized {
         emit ChangedGuard(guard);
     }
 
+    /**
+     * @dev Internal method to retrieve the current guard
+     *      We do not have a public method because we're short on bytecode size limit,
+     *      to retrieve the guard address, one can use `getStorageAt` from `StorageAccessible` contract
+     *      with the slot `GUARD_STORAGE_SLOT`
+     * @return guard The address of the guard
+     */
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly

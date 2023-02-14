@@ -6,7 +6,8 @@ import "../common/Enum.sol";
  * @author Richard Meissner - <richard@gnosis.pm>
  */
 contract Executor {
-    /**  @dev Executes either a delegatecall or a call with provided parameters
+    /**
+     * @dev Executes either a delegatecall or a call with provided parameters
      * @param to Destination address.
      * @param value Ether value.
      * @param data Data payload.
