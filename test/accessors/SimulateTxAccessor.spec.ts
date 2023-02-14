@@ -51,8 +51,11 @@ describe("SimulateTxAccessor", async () => {
             expect(await hre.ethers.provider.getCode(accessor.address)).to.be.eq(code);
         });
 
-        it("simulate call", async () => {
+        it.only("simulate call", async () => {
             const { safe, accessor, simulator } = await setupTests();
+            console.log("safe address: ", safe.address);
+            console.log("simulator address: ", simulator.address);
+            console.log("accessor address: ", accessor.address);
             const tx = buildContractCall(safe, "getOwners", [], 0);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
             const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData);
