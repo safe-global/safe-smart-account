@@ -16,7 +16,7 @@ contract SimulateTxAccessor is Executor {
     }
 
     /**
-     * @dev Modifier to make a function callable via delegatecall only.
+     * @notice Modifier to make a function callable via delegatecall only.
      * If the function is called via a regular call, it will revert.
      */
     modifier onlyDelegateCall() {

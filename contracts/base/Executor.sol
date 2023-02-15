@@ -8,7 +8,7 @@ import "../common/Enum.sol";
  */
 contract Executor {
     /**
-     * @dev Executes either a delegatecall or a call with provided parameters.
+     * @notice Executes either a delegatecall or a call with provided parameters.
      * @param to Destination address.
      * @param value Ether value.
      * @param data Data payload.

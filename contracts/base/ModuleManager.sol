@@ -23,8 +23,8 @@ contract ModuleManager is SelfAuthorized, Executor {
     mapping(address => address) internal modules;
 
     /**
-     * @notice Setup function sets initial storage of the contract.
-     *         Optionally can make a delegate call to another contract to setup the modules.
+     * @notice Setup function sets the initial storage of the contract.
+     *         Optionally executes a delegate call to another contract to setup the modules.
      * @param to Optional destination address of call to execute.
      * @param data Optional data of call to execute.
      */
@@ -69,7 +69,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     }
 
     /**
-     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `data` and `value` (Native Token)
+     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `value` (Native Token)
      * @dev Function is virtual to allow overriding for L2 singleton to emit an event for indexing.
      * @param to Destination address of module transaction.
      * @param value Ether value of module transaction.
@@ -92,7 +92,7 @@ contract ModuleManager is SelfAuthorized, Executor {
     }
 
     /**
-     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `data` and `value` (Native Token) and return data
+     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `value` (Native Token) and return data
      * @param to Destination address of module transaction.
      * @param value Ether value of module transaction.
      * @param data Data payload of module transaction.

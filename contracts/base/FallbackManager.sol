@@ -14,7 +14,7 @@ contract FallbackManager is SelfAuthorized {
     bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
 
     /**
-     *  @dev Internal function to set the fallback handler.
+     *  @notice Internal function to set the fallback handler.
      *  @param handler contract to handle fallback calls.
      */
     function internalSetFallbackHandler(address handler) internal {
@@ -26,10 +26,9 @@ contract FallbackManager is SelfAuthorized {
     }
 
     /**
-     * @dev Allows to add a contract to handle fallback calls.
-     *      Only fallback calls without value and with data will be forwarded.
-     *      This can only be done via a Safe transaction.
      * @notice Set Fallback Handler to `handler` for the Safe.
+     * @dev Only fallback calls without value and with data will be forwarded.
+     *      This can only be done via a Safe transaction.
      * @param handler contract to handle fallback calls.
      */
     function setFallbackHandler(address handler) public authorized {
@@ -37,7 +36,7 @@ contract FallbackManager is SelfAuthorized {
         emit ChangedFallbackHandler(handler);
     }
 
-    // @dev Forwards all calls to the fallback handler if set. Returns 0 if no handler is set.
+    // @notice Forwards all calls to the fallback handler if set. Returns 0 if no handler is set.
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
