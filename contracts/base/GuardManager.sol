@@ -31,15 +31,20 @@ abstract contract BaseGuard is Guard {
     }
 }
 
-/// @title Guard Manager - A contract that manages transaction guards which perform pre and post-checks on execution by multisig owners
-/// @author Richard Meissner - <richard@gnosis.pm>
+/**
+ * @title Guard Manager - A contract managing transaction guards which perform pre and post-checks on Safe transactions.
+ * @author Richard Meissner - <richard@gnosis.pm>
+ */
 contract GuardManager is SelfAuthorized {
     event ChangedGuard(address guard);
+
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     /**
      * @dev Set a guard that checks transactions before execution
+     *      This can only be done via a Safe transaction.
+     * @notice Set Transaction Guard `guard` for the Safe.
      * @param guard The address of the guard to be used or the 0 address to disable the guard
      */
     function setGuard(address guard) external authorized {

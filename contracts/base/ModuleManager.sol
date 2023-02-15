@@ -4,9 +4,14 @@ import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
 
-/// @title Module Manager - A contract that manages modules that can execute transactions via this contract
-/// @author Stefan George - <stefan@gnosis.pm>
-/// @author Richard Meissner - <richard@gnosis.pm>
+/**
+ * @title Module Manager - A contract managing Safe modules
+ * @notice Modules are pluggable extensions to the Safe that can be added to the Safe by the owner.
+           Modules are a security risk since they can execute arbitrary transactions, so only trusted
+           and audited modules should be added to the Safe. 
+ * @author Stefan George - <stefan@gnosis.pm>
+ * @author Richard Meissner - <richard@gnosis.pm>
+ */
 contract ModuleManager is SelfAuthorized, Executor {
     event EnabledModule(address module);
     event DisabledModule(address module);
@@ -17,6 +22,12 @@ contract ModuleManager is SelfAuthorized, Executor {
 
     mapping(address => address) internal modules;
 
+    /**
+     * @dev Setup function sets initial storage of the contract.
+     *      Optionally can make a delegate call to another contract to setup the modules.
+     * @param to Optional destination address of call to execute
+     * @param data Optional data of call to execute
+     */
     function setupModules(address to, bytes memory data) internal {
         require(modules[SENTINEL_MODULES] == address(0), "GS100");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
