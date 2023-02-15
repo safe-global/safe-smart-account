@@ -4,7 +4,7 @@ import "../common/Enum.sol";
 
 /**
  * @title Executor - A contract that can execute transactions
- * @author Richard Meissner - <richard@gnosis.pm>
+ * @author Richard Meissner - @rmeissner
  */
 contract Executor {
     /**

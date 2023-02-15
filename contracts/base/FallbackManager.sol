@@ -5,7 +5,7 @@ import "../common/SelfAuthorized.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
- * @author Richard Meissner - <richard@gnosis.pm>
+ * @author Richard Meissner - @rmeissner
  */
 contract FallbackManager is SelfAuthorized {
     event ChangedFallbackHandler(address handler);

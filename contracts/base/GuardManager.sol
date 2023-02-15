@@ -33,7 +33,7 @@ abstract contract BaseGuard is Guard {
 
 /**
  * @title Guard Manager - A contract managing transaction guards which perform pre and post-checks on Safe transactions.
- * @author Richard Meissner - <richard@gnosis.pm>
+ * @author Richard Meissner - @rmeissner
  */
 contract GuardManager is SelfAuthorized {
     event ChangedGuard(address guard);
