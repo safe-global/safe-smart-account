@@ -1,13 +1,9 @@
+import { signHash } from "./../../src/utils/execution";
 import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import {
-    buildSafeTransaction,
-    calculateSafeTransactionHash,
-    executeContractCallWithSigners,
-    executeTxWithSigners,
-} from "../../src/utils/execution";
+import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("DebugTransactionGuard", async () => {
@@ -54,8 +50,9 @@ describe("DebugTransactionGuard", async () => {
             const nonce = await safe.nonce();
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce });
             const safeTxHash = calculateSafeTransactionHash(safe, safeTx, await chainId());
+            const signature = await signHash(user1, safeTxHash);
 
-            await expect(executeTxWithSigners(safe, safeTx, [user1]))
+            await expect(executeTx(safe, safeTx, [signature]))
                 .to.emit(guard, "TransactionDetails")
                 .withArgs(
                     safe.address,
@@ -67,6 +64,8 @@ describe("DebugTransactionGuard", async () => {
                     safeTx.safeTxGas,
                     false,
                     safeTx.nonce,
+                    signature.data,
+                    user1.address,
                 )
                 .and.to.emit(guard, "GasUsage")
                 .withArgs(safe.address, safeTxHash, nonce, true);
