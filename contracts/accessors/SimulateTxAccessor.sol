@@ -3,8 +3,11 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../base/Executor.sol";
 
-/// @title Simulate Transaction Accessor - can be used with StorageAccessible to simulate Safe transactions
-/// @author Richard Meissner - <richard@gnosis.pm>
+/**
+ * @title Simulate Transaction Accessor.
+ * @notice Can be used with StorageAccessible to simulate Safe transactions.
+ * @author Richard Meissner - @rmeissner
+ */
 contract SimulateTxAccessor is Executor {
     address private immutable accessorSingleton;
 
@@ -12,11 +15,30 @@ contract SimulateTxAccessor is Executor {
         accessorSingleton = address(this);
     }
 
+    /**
+     * @notice Modifier to make a function callable via delegatecall only.
+     * If the function is called via a regular call, it will revert.
+     */
     modifier onlyDelegateCall() {
         require(address(this) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
         _;
     }
 
+    /**
+     * @notice Simulates a Safe transaction and returns the used gas, success boolean and the return data.
+     * @dev Executes the specified operation {Call, DelegateCall} and returns operation-specific data.
+     *      Has to be called via delegatecall.
+     *      This returns the data equal to `abi.encode(uint256(etimate), bool(success), bytes(returnData))`.
+     *      Specifically, the returndata will be:
+     *      `estimate:uint256 || success:bool || returnData.length:uint256 || returnData:bytes`.
+     * @param to Destination address .
+     * @param value Native token value.
+     * @param data Data payload.
+     * @param operation Operation type {Call, DelegateCall}.
+     * @return estimate Gas used.
+     * @return success Success boolean value.
+     * @return returnData Return data.
+     */
     function simulate(
         address to,
         uint256 value,
