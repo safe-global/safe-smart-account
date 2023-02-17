@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title SelfAuthorized - authorizes current contract to perform actions to itself.
+ * @title SelfAuthorized - Authorizes current contract to perform actions to itself.
  * @author Richard Meissner - @rmeissner
  */
 contract SelfAuthorized {

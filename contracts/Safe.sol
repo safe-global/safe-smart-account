@@ -17,8 +17,8 @@ import "./external/SafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract Safe is
-    EtherPaymentFallback,
     Singleton,
+    EtherPaymentFallback,
     ModuleManager,
     OwnerManager,
     SignatureDecoder,
