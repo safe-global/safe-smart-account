@@ -5,7 +5,7 @@ import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
 import "./base/GuardManager.sol";
-import "./common/EtherPaymentFallback.sol";
+import "./common/NativeCurrencyPaymentFallback.sol";
 import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
@@ -17,8 +17,8 @@ import "./external/SafeMath.sol";
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
 contract Safe is
-    EtherPaymentFallback,
     Singleton,
+    NativeCurrencyPaymentFallback,
     ModuleManager,
     OwnerManager,
     SignatureDecoder,
