@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title Singleton - Base for singleton contracts (should always be first super contract)
+ * @title Singleton - Base for singleton contracts (should always be the first super contract)
  *        This contract is tightly coupled to our proxy contract (see `proxies/SafeProxy.sol`)
  * @author Richard Meissner - @rmeissner
  */

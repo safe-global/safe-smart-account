@@ -2,15 +2,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title EtherPaymentFallback - A contract that has a fallback to accept ether payments.
+ * @title EtherPaymentFallback - A contract that has a fallback to accept native currency payments.
  * @author Richard Meissner - @rmeissner
  */
 contract EtherPaymentFallback {
     event SafeReceived(address indexed sender, uint256 value);
 
     /**
-     * @notice Receive function accepts Ether transactions.
-     * @dev Emits an event for indexing purposes.
+     * @notice Receive function accepts native currency transactions.
+     * @dev Emits an event with sender and received value.
      */
     receive() external payable {
         emit SafeReceived(msg.sender, msg.value);
