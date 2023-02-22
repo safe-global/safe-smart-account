@@ -10,7 +10,7 @@ interface ISafe {
 }
 
 /**
- * @title OnlyOwnersGuard - A guard that only allows owners to execute transactions.
+ * @title OnlyOwnersGuard - Only allows owners to execute transactions.
  * @author Richard Meissner - @rmeissner
  */
 contract OnlyOwnersGuard is BaseGuard {

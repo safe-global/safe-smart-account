@@ -6,7 +6,7 @@ import "../../base/GuardManager.sol";
 import "../../Safe.sol";
 
 /**
- * @title ReentrancyTransactionGuard - A transaction guard that prevents reentrancy into the transaction execution function.
+ * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
  * @author Richard Meissner - @rmeissner
  */
 contract ReentrancyTransactionGuard is BaseGuard {

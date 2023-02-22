@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../../libraries/SafeStorage.sol";
 
 /**
- * @title Migration - migrates a Safe contract from 1.3.0 to 1.2.0
+ * @title Migration - Migrates a Safe contract from 1.3.0 to 1.2.0
  * @author Richard Meissner - @rmeissner
  */
 contract Migration is SafeStorage {
@@ -13,7 +13,7 @@ contract Migration is SafeStorage {
     address public immutable safe120Singleton;
 
     constructor(address targetSingleton) {
-        // Singleton address cannot be null.
+        // Singleton address cannot be zero address.
         require(targetSingleton != address(0), "Invalid singleton address provided");
         safe120Singleton = targetSingleton;
         migrationSingleton = address(this);

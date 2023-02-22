@@ -6,7 +6,7 @@ import "../../base/GuardManager.sol";
 import "../../Safe.sol";
 
 /**
- * @title Debug Transaction Guard - A guard that will emit events with extended information.
+ * @title Debug Transaction Guard - Emits transaction events with extended information.
  * @dev This guard is only meant as a development tool and example
  * @author Richard Meissner - @rmeissner
  */
@@ -46,7 +46,7 @@ contract DebugTransactionGuard is BaseGuard {
      * @param gasPrice Gas price that should be used for the payment calculation.
      * @param gasToken Token address (or 0 if ETH) that is used for the payment.
      * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+     * @param signatures Signature data that should be verified. Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param executor Account executing the transaction.
      */
     function checkTransaction(

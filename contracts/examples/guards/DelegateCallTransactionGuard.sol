@@ -6,7 +6,7 @@ import "../../base/GuardManager.sol";
 import "../../Safe.sol";
 
 /**
- * @title DelegateCallTransactionGuard - A transaction guard that limits delegate calls to a specific target.
+ * @title DelegateCallTransactionGuard - Limits delegate calls to a specific target.
  * @author Richard Meissner - @rmeissner
  */
 contract DelegateCallTransactionGuard is BaseGuard {
