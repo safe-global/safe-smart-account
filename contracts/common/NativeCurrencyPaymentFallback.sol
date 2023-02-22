@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title EtherPaymentFallback - A contract that has a fallback to accept native currency payments.
  * @author Richard Meissner - @rmeissner
  */
-contract EtherPaymentFallback {
+contract NativeCurrencyPaymentFallback {
     event SafeReceived(address indexed sender, uint256 value);
 
     /**
