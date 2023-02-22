@@ -9,11 +9,26 @@ interface ISafe {
     function getOwners() external view returns (address[] memory);
 }
 
+/**
+ * @title OnlyOwnersGuard - Only allows owners to execute transactions.
+ * @author Richard Meissner - @rmeissner
+ */
 contract OnlyOwnersGuard is BaseGuard {
     ISafe public safe;
 
     constructor() {}
 
+    // solhint-disable-next-line payable-fallback
+    fallback() external {
+        // We don't revert on fallback to avoid issues in case of a Safe upgrade
+        // E.g. The expected check method might change and then the Safe would be locked.
+    }
+
+    /**
+     * @notice Called by the Safe contract before a transaction is executed.
+     * @dev Reverts if the transaction is not executed by an owner.
+     * @param msgSender Executor of the transaction.
+     */
     function checkTransaction(
         address,
         uint256,
@@ -27,7 +42,7 @@ contract OnlyOwnersGuard is BaseGuard {
         address payable,
         bytes memory,
         address msgSender
-    ) external override {
+    ) external view override {
         // Only owners can exec
         address[] memory owners = ISafe(msg.sender).getOwners();
         for (uint256 i = 0; i < owners.length; i++) {

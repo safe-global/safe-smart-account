@@ -5,6 +5,10 @@ import "../../common/Enum.sol";
 import "../../base/GuardManager.sol";
 import "../../Safe.sol";
 
+/**
+ * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
+ * @author Richard Meissner - @rmeissner
+ */
 contract ReentrancyTransactionGuard is BaseGuard {
     bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrancy_guard.guard.struct");
 
@@ -18,6 +22,11 @@ contract ReentrancyTransactionGuard is BaseGuard {
         // E.g. The expected check method might change and then the Safe would be locked.
     }
 
+    /**
+     * @notice Returns the guard value for the current context.
+     * @dev The guard value is stored in a slot that is unique to the contract instance and the function in which it is called.
+     * @return guard The guard value.
+     */
     function getGuard() internal pure returns (GuardValue storage guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
@@ -26,6 +35,10 @@ contract ReentrancyTransactionGuard is BaseGuard {
         }
     }
 
+    /**
+     * @notice Called by the Safe contract before a transaction is executed.
+     * @dev Reverts if reentrancy is detected.
+     */
     function checkTransaction(
         address,
         uint256,
@@ -45,6 +58,10 @@ contract ReentrancyTransactionGuard is BaseGuard {
         guard.active = true;
     }
 
+    /**
+     * @notice Called by the Safe contract after a transaction is executed.
+     * @dev Resets the guard value.
+     */
     function checkAfterExecution(bytes32, bool) external override {
         getGuard().active = false;
     }
