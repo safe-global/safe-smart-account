@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./DefaultCallbackHandler.sol";
+import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
 
@@ -9,7 +9,7 @@ import "../Safe.sol";
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
  */
-contract CompatibilityFallbackHandler is DefaultCallbackHandler, ISignatureValidator {
+contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator {
     // keccak256("SafeMessage(bytes message)");
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
