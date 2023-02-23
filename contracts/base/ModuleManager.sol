@@ -12,7 +12,7 @@ import "./Executor.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-contract ModuleManager is SelfAuthorized, Executor {
+abstract contract ModuleManager is SelfAuthorized, Executor {
     event EnabledModule(address module);
     event DisabledModule(address module);
     event ExecutionFromModuleSuccess(address indexed module);

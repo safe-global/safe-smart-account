@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title SecuredTokenTransfer - Secure token transfer.
  * @author Richard Meissner - @rmeissner
  */
-contract SecuredTokenTransfer {
+abstract contract SecuredTokenTransfer {
     /**
      * @notice Transfers a token and returns a boolean if it was a success
      * @dev It checks the return data of the transfer call and returns true if the transfer was successful.

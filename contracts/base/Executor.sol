@@ -6,7 +6,7 @@ import "../common/Enum.sol";
  * @title Executor - A contract that can execute transactions
  * @author Richard Meissner - @rmeissner
  */
-contract Executor {
+abstract contract Executor {
     /**
      * @notice Executes either a delegatecall or a call with provided parameters.
      * @param to Destination address.

@@ -9,7 +9,7 @@ import "../common/SelfAuthorized.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-contract OwnerManager is SelfAuthorized {
+abstract contract OwnerManager is SelfAuthorized {
     event AddedOwner(address owner);
     event RemovedOwner(address owner);
     event ChangedThreshold(uint256 threshold);
