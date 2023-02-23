@@ -3,7 +3,7 @@ import hre, { deployments, waffle } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
+import { defaultTokenCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
 
 describe("Safe", async () => {
     const mockErc1155 = async () => {
@@ -42,7 +42,7 @@ describe("Safe", async () => {
 
         it("should not reject if callback is accepted", async () => {
             const { safe, token } = await setupWithTemplate();
-            const handler = await defaultCallbackHandlerDeployment();
+            const handler = await defaultTokenCallbackHandlerDeployment();
 
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);

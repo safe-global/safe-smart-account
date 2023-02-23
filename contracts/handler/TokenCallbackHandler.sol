@@ -10,7 +10,7 @@ import "../interfaces/IERC165.sol";
  * @title Default Callback Handler - Handles supported tokens' callbacks, allowing Safes receiving these tokens.
  * @author Richard Meissner - @rmeissner
  */
-contract DefaultCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver, IERC165 {
+contract TokenCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver, IERC165 {
     string public constant NAME = "Default Callback Handler";
     string public constant VERSION = "1.0.0";
 
