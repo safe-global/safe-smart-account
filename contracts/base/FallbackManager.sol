@@ -37,6 +37,10 @@ contract FallbackManager is SelfAuthorized {
     }
 
     // @notice Forwards all calls to the fallback handler if set. Returns 0 if no handler is set.
+    // @dev Appends the non-padded caller address to the calldata to be optionally used in the handler
+    //      The handler can make us of `HandlerContext.sol` to extract the address.
+    //      This is done because in the next call frame the `msg.sender` will be FallbackManager's address
+    //      and having the original caller address may enable additional verification scenarios.
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
