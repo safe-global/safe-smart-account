@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title SelfAuthorized - Authorizes current contract to perform actions to itself.
  * @author Richard Meissner - @rmeissner
  */
-contract SelfAuthorized {
+abstract contract SelfAuthorized {
     function requireSelfCall() private view {
         require(msg.sender == address(this), "GS031");
     }

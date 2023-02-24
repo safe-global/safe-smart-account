@@ -7,7 +7,7 @@ pragma solidity >=0.7.0 <0.9.0;
  *         It removes a method from the original contract not needed for the Safe contracts.
  * @author Gnosis Developers
  */
-contract StorageAccessible {
+abstract contract StorageAccessible {
     /**
      * @notice Reads `length` bytes of storage in the currents contract
      * @param offset - the offset in the current contract's storage in words to start reading from
