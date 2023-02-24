@@ -18,7 +18,7 @@ describe("Upgrade from Safe 1.2.0", () => {
         await deployments.fixture();
         const mock = await getMock();
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait()).contractAddress;
-        const singleton130 = (await getSafeSingleton()).address;
+        const singleton140 = (await getSafeSingleton()).address;
         const factory = await getFactory();
         const saltNonce = 42;
         const proxyAddress = await calculateProxyAddress(factory, singleton120, "0x", saltNonce);
@@ -30,10 +30,10 @@ describe("Upgrade from Safe 1.2.0", () => {
 
         expect(await safe.VERSION()).to.be.eq("1.2.0");
         const nonce = await safe.callStatic.nonce();
-        const data = ChangeMasterCopyInterface.encodeFunctionData("changeMasterCopy", [singleton130]);
+        const data = ChangeMasterCopyInterface.encodeFunctionData("changeMasterCopy", [singleton140]);
         const tx = buildSafeTransaction({ to: safe.address, data, nonce });
         await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);
-        expect(await safe.VERSION()).to.be.eq("1.3.0");
+        expect(await safe.VERSION()).to.be.eq("1.4.0");
 
         return {
             migratedSafe: safe,
