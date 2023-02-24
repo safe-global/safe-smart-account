@@ -8,7 +8,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8cc8b844a9f92f63dc55aa581f7d643a1bc5ac1/contracts/metatx/ERC2771Context.sol
  * @author Richard Meissner - @rmeissner
  */
-contract HandlerContext {
+abstract contract HandlerContext {
     /**
      * @notice Allows fetching the original caller address.
      * @dev This is only reliable in combination with a FallbackManager that supports this (e.g. Safe contract >=1.3.0).
