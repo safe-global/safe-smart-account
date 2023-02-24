@@ -44,7 +44,7 @@ contract Safe is
 {
     using SafeMath for uint256;
 
-    string public constant VERSION = "1.3.0";
+    string public constant VERSION = "1.4.0";
 
     // keccak256(
     //     "EIP712Domain(uint256 chainId,address verifyingContract)"
