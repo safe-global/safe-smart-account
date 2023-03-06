@@ -29,13 +29,13 @@ describe("Safe", async () => {
     });
 
     describe("fallback", async () => {
-        it("should be able to receive ETH via transfer", async () => {
+        it("should throw when receiving ETH via transfer", async () => {
             const { safe, caller } = await setupTests();
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
             await expect(caller.transferEth(safe.address, { value: parseEther("1") })).to.be.reverted;
         });
 
-        it("should be able to receive ETH via send", async () => {
+        it("should throw when receiving ETH via send", async () => {
             const { safe, caller } = await setupTests();
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
             await expect(caller.sendEth(safe.address, { value: parseEther("1") })).to.be.reverted;
