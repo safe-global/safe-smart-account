@@ -9,7 +9,7 @@ import "./IProxyCreationCallback.sol";
  * @author Stefan George - @Georgi87
  */
 contract SafeProxyFactory {
-    event ProxyCreation(SafeProxy proxy, address singleton);
+    event ProxyCreation(SafeProxy indexed proxy, address singleton);
 
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
