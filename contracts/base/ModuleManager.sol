@@ -156,13 +156,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         }
 
         /**
-          Because of the argument validation we can assume that
-          the `currentModule` will always be either a module address
-          or sentinel address (aka the end). If we haven't reached the end
-          inside the loop, we need to set the next pointer to the last element
-          because it skipped over to the next module which is neither included
-          in the current page nor won't be included in the next one
-          if you pass it as a start. 
+          Because of the argument validation, we can assume that the loop will always iterate over the valid module list values
+          and the `next` variable will either be an enabled module or a sentinel address (signalling the end). 
+          
+          If we haven't reached the end inside the loop, we need to set the next pointer to the last element of the modules array
+          because the `next` variable (which is a module by itself) acting as a pointer to the start of the next page is neither 
+          included to the current page, nor will it be included in the next one if you pass it as a start.
         */
         if (next != SENTINEL_MODULES) {
             next = array[moduleCount - 1];
