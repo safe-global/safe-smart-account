@@ -158,7 +158,9 @@ describe("FallbackManager", async () => {
             await safe.setup([user1.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
 
             // The transaction execution function doesn't bubble up revert messages so we check for a generic transaction fail code GS013
-            expect(executeContractCallWithSigners(safe, safe, "setFallbackHandler", [safe.address], [user1])).to.be.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, safe, "setFallbackHandler", [safe.address], [user1])).to.be.revertedWith(
+                "GS013",
+            );
         });
     });
 });
