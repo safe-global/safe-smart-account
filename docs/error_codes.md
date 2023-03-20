@@ -44,3 +44,6 @@
 
 ### Guard management related
 - `GS300`: `Guard does not implement IERC165`
+
+### Fallback handler related
+-   `GS400`: `Fallback handler cannot be set to self`

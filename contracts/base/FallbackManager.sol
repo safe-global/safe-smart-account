@@ -18,6 +18,8 @@ abstract contract FallbackManager is SelfAuthorized {
      *  @param handler contract to handle fallback calls.
      */
     function internalSetFallbackHandler(address handler) internal {
+        require(handler != address(this), "GS400");
+
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -29,6 +31,7 @@ abstract contract FallbackManager is SelfAuthorized {
      * @notice Set Fallback Handler to `handler` for the Safe.
      * @dev Only fallback calls without value and with data will be forwarded.
      *      This can only be done via a Safe transaction.
+     *      Cannot be set to the Safe itself.
      * @param handler contract to handle fallback calls.
      */
     function setFallbackHandler(address handler) public authorized {
