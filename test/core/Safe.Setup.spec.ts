@@ -385,5 +385,13 @@ describe("Safe", async () => {
                 template.setup([user1.address], 1, user2.address, "0xbeef73", AddressZero, AddressZero, 0, AddressZero),
             ).to.be.revertedWith("GS002");
         });
+
+        it("should fail if tried to set the fallback handler address to self", async () => {
+            const { template } = await setupTests();
+
+            await expect(
+                template.setup([user1.address], 1, AddressZero, "0x", template.address, AddressZero, 0, AddressZero),
+            ).to.be.revertedWith("GS400");
+        });
     });
 });
