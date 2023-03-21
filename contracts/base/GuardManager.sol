@@ -44,7 +44,10 @@ abstract contract GuardManager is SelfAuthorized {
     /**
      * @dev Set a guard that checks transactions before execution
      *      This can only be done via a Safe transaction.
-     * @notice Set Transaction Guard `guard` for the Safe.
+     *      ⚠️ IMPORTANT: Since a guard has full power to block Safe transaction execution,
+     *        a broken guard can cause a denial of service for the Safe. Make sure to carefully
+     *        audit the guard code and design recovery mechanisms.
+     * @notice Set Transaction Guard `guard` for the Safe. Make sure you trust the guard.
      * @param guard The address of the guard to be used or the 0 address to disable the guard
      */
     function setGuard(address guard) external authorized {
