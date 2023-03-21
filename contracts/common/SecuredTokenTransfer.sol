@@ -9,6 +9,7 @@ abstract contract SecuredTokenTransfer {
     /**
      * @notice Transfers a token and returns a boolean if it was a success
      * @dev It checks the return data of the transfer call and returns true if the transfer was successful.
+     *      It doesn't check if the token address is a contract or not.
      * @param token Token that should be transferred
      * @param receiver Receiver to whom the token should be transferred
      * @param amount The amount of tokens that should be transferred

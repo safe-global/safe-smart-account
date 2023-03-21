@@ -9,6 +9,9 @@ import "../common/Enum.sol";
 abstract contract Executor {
     /**
      * @notice Executes either a delegatecall or a call with provided parameters.
+     * @dev The method doesn't perform any sanity check of the transaction, such as:
+     *      - checking if the contract at `to` address has code or not
+     *      It is the responsibility of the caller to perform such checks.
      * @param to Destination address.
      * @param value Ether value.
      * @param data Data payload.
