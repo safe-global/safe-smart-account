@@ -44,6 +44,9 @@ Modules are very security-critical since they allow the execution of transaction
 Transaction guards can make checks before and after a Safe transaction.
 The check before a transaction can e.g. programmatically check all of the parameters of the respective transaction prior to execution. The check after a transaction execution can be used to e.g. perform checks on the final state of the Safe.
 
+> ⚠️ IMPORTANT: Since a guard has full power to block Safe transaction execution,
+> a broken guard can cause a denial of service for the Safe. Make sure to carefully audit the guard code and design recovery mechanisms.
+
 ### Technical Overview
 
 #### Safe Domain Separator
