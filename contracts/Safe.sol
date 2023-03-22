@@ -119,6 +119,10 @@ contract Safe is
     /** @notice Executes a `operation` {0: Call, 1: DelegateCall}} transaction to `to` with `value` (Native Currency)
      *          and pays `gasPrice` * `gasLimit` in `gasToken` token to `refundReceiver`.
      * @dev The fees are always transferred, even if the user transaction fails.
+     *      This method doesn't perform any sanity check of the transaction, such as:
+     *      - if the contract at `to` address has code or not
+     *      - if the `gasToken` is a contract or not
+     *      It is the responsibility of the caller to perform such checks.
      * @param to Destination address of Safe transaction.
      * @param value Ether value of Safe transaction.
      * @param data Data payload of Safe transaction.
