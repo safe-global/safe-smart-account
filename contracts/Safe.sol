@@ -336,6 +336,7 @@ contract Safe is
     /**
      * @notice Marks hash `hashToApprove` as approved.
      * @dev This can be used with a pre-approved hash transaction signature.
+     *      IMPORTANT: The approved hash stays approved forever. There's no revocation mechanism, so it behaves similarly to ECDSA signatures
      * @param hashToApprove The hash to mark as approved for signatures that are verified by this contract.
      */
     function approveHash(bytes32 hashToApprove) external {
