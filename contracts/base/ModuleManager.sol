@@ -6,9 +6,10 @@ import "./Executor.sol";
 
 /**
  * @title Module Manager - A contract managing Safe modules
- * @notice Modules are pluggable extensions to the Safe that can be added to the Safe by the owner.
-           Modules are a security risk since they can execute arbitrary transactions, so only trusted
-           and audited modules should be added to the Safe. 
+ * @notice Modules are extensions with unlimited access to a Safe that can be added to a Safe by its owners.
+           ⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions, 
+           so only trusted and audited modules should be added to a Safe. A malicious module can
+           completely takeover a Safe.
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */

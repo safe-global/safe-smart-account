@@ -37,7 +37,10 @@ The message can be signed two ways on-chain and off-chain.
 
 Modules add additional functionalities to the Safe contracts. They are smart contracts that implement the Safe’s functionality while separating module logic from the Safe’s core contract.
 
-Modules are very security-critical since they allow the execution of transactions without requiring any confirmation from the owners. A basic Safe does not require any modules. Adding and removing a module requires confirmation from all owners. Events are emitted whenever a module is added or removed and also whenever a module transaction was successful or failed.
+A basic Safe does not require any modules. Adding and removing a module requires confirmation from all owners. Events are emitted whenever a module is added or removed and also whenever a module transaction was successful or failed.
+
+> ⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
+> so only trusted and audited modules should be added to a Safe. A malicious module can completely takeover a Safe
 
 #### Transaction guards
 
