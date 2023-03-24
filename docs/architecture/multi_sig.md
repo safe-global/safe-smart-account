@@ -1,0 +1,11 @@
+TODO:
+- [ ] Outline multisig flow
+  - Compare to Shamir (and other DKGs)
+- [ ] Explain why multisig
+  - Increased security and is flexible
+  - Works for teams and individuals
+  - Default to be used by modules to not have a reimplementation of access checks
+- [ ] Explaind nonce implementation
+  - Strict order increases security
+  - Modules for alternative flows
+- [ ] How to "disable" multisig flow

@@ -28,6 +28,12 @@ assembly {
 
 Note: Make sure to use a unique identifier else unexpected behaviour will occur
 
+### Error Codes
+
+As Solidity 0.7.5 does not support custom errors, to minimize the bytecodesize of the contracts and still provide meaningful insights [error codes](../architecture/error_codes.md) should be used.
+
+When creating a new error code ensure that it is in the correct section and if possible provide a way how to resolve the error in the docs.
+
 ### Code comments
 
 Use `/** */` for multiline comments and `//` for single-line comments.

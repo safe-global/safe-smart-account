@@ -87,16 +87,17 @@ yarn hardhat --network <network> etherscan-verify
 Documentation
 -------------
 - [Safe developer portal](http://docs.safe.global)
-- [Error codes](docs/error_codes.md)
-- [Coding guidelines](docs/guidelines.md)
+- [Architecture Overview](docs/architecture/overview.md)
+  - [Error codes](docs/architecture/error_codes.md)
+- [Coding guidelines](docs/contribution/guidelines.md)
 
 Audits/ Formal Verification
 ---------
-- [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
-- [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
-- [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
-- [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
-- [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
+- [for Version 1.3.0 by G0 Group](docs/audits/audit_1_3_0.md)
+- [for Version 1.2.0 by G0 Group](docs/audits/audit_1_2_0.md)
+- [for Version 1.1.1 by G0 Group](docs/audits/audit_1_1_1.md)
+- [for Version 1.0.0 by Runtime Verification](docs/audits/rv_1_0_0.md)
+- [for Version 0.0.1 by Alexey Akhunov](docs/audits/alexey_audit.md)
 
 Security and Liability
 ----------------------
