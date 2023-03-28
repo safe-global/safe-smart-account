@@ -14,8 +14,8 @@ import "./Executor.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract ModuleManager is SelfAuthorized, Executor {
-    event EnabledModule(address module);
-    event DisabledModule(address module);
+    event EnabledModule(address indexed module);
+    event DisabledModule(address indexed module);
     event ExecutionFromModuleSuccess(address indexed module);
     event ExecutionFromModuleFailure(address indexed module);
 

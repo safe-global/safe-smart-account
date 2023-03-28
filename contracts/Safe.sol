@@ -59,8 +59,8 @@ contract Safe is
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
     event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
     event SignMsg(bytes32 indexed msgHash);
-    event ExecutionFailure(bytes32 txHash, uint256 payment);
-    event ExecutionSuccess(bytes32 txHash, uint256 payment);
+    event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
+    event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
 
     uint256 public nonce;
     bytes32 private _deprecatedDomainSeparator;

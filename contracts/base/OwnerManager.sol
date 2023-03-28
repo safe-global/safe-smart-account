@@ -10,8 +10,8 @@ import "../common/SelfAuthorized.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract OwnerManager is SelfAuthorized {
-    event AddedOwner(address owner);
-    event RemovedOwner(address owner);
+    event AddedOwner(address indexed owner);
+    event RemovedOwner(address indexed owner);
     event ChangedThreshold(uint256 threshold);
 
     address internal constant SENTINEL_OWNERS = address(0x1);
