@@ -1,6 +1,6 @@
 certoraRun  certora/harnesses/SafeHarness.sol \
     --verify SafeHarness:certora/specs/Safe.spec \
-    --staging master \
+    --solc solc7.6 \
     --optimistic_loop \
     --settings -optimisticFallback=true \
     --loop_iter 3 \
