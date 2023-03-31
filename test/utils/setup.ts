@@ -6,12 +6,12 @@ import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
 
-export const defaultCallbackHandlerDeployment = async () => {
-    return await deployments.get("DefaultCallbackHandler");
+export const defaultTokenCallbackHandlerDeployment = async () => {
+    return await deployments.get("TokenCallbackHandler");
 };
 
-export const defaultCallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("DefaultCallbackHandler");
+export const defaultTokenCallbackHandlerContract = async () => {
+    return await hre.ethers.getContractFactory("TokenCallbackHandler");
 };
 
 export const compatFallbackHandlerDeployment = async () => {
@@ -92,8 +92,8 @@ export const getSafeWithOwners = async (
     return template;
 };
 
-export const getDefaultCallbackHandler = async () => {
-    return (await defaultCallbackHandlerContract()).attach((await defaultCallbackHandlerDeployment()).address);
+export const getTokenCallbackHandler = async () => {
+    return (await defaultTokenCallbackHandlerContract()).attach((await defaultTokenCallbackHandlerDeployment()).address);
 };
 
 export const getCompatFallbackHandler = async () => {

@@ -1,22 +1,28 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-/// @title IProxy - Helper interface to access masterCopy of the Proxy on-chain
-/// @author Richard Meissner - <richard@gnosis.io>
+/**
+ * @title IProxy - Helper interface to access the singleton address of the Proxy on-chain.
+ * @author Richard Meissner - @rmeissner
+ */
 interface IProxy {
     function masterCopy() external view returns (address);
 }
 
-/// @title SafeProxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
-/// @author Stefan George - <stefan@gnosis.io>
-/// @author Richard Meissner - <richard@gnosis.io>
+/**
+ * @title SafeProxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
+ * @author Stefan George - <stefan@gnosis.io>
+ * @author Richard Meissner - <richard@gnosis.io>
+ */
 contract SafeProxy {
-    // singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
+    // Singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
     address internal singleton;
 
-    /// @dev Constructor function sets address of singleton contract.
-    /// @param _singleton Singleton address.
+    /**
+     * @notice Constructor function sets address of singleton contract.
+     * @param _singleton Singleton address.
+     */
     constructor(address _singleton) {
         require(_singleton != address(0), "Invalid singleton address provided");
         singleton = _singleton;

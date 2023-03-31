@@ -4,21 +4,25 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./SafeProxy.sol";
 import "./IProxyCreationCallback.sol";
 
-/// @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
-/// @author Stefan George - <stefan@gnosis.pm>
+/**
+ * @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
+ * @author Stefan George - @Georgi87
+ */
 contract SafeProxyFactory {
-    event ProxyCreation(SafeProxy proxy, address singleton);
+    event ProxyCreation(SafeProxy indexed proxy, address singleton);
 
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
         return type(SafeProxy).creationCode;
     }
 
-    /// @dev Allows to create a new proxy contract using CREATE2. Optionally executes an initializer call to a new proxy.
-    ///      This method is only meant as an utility to be called from other methods
-    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-    /// @param initializer Payload for a message call to be sent to a new proxy contract.
-    /// @param salt Create2 salt to use for calculating the address of the new proxy contract.
+    /**
+     * @notice Internal method to create a new proxy contract using CREATE2. Optionally executes an initializer call to a new proxy.
+     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+     * @param initializer (Optional) Payload for a message call to be sent to a new proxy contract.
+     * @param salt Create2 salt to use for calculating the address of the new proxy contract.
+     * @return proxy Address of the new proxy contract.
+     */
     function deployProxy(address _singleton, bytes memory initializer, bytes32 salt) internal returns (SafeProxy proxy) {
         require(isContract(_singleton), "Singleton contract not deployed");
 
@@ -39,10 +43,12 @@ contract SafeProxyFactory {
         }
     }
 
-    /// @dev Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
-    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-    /// @param initializer Payload for a message call to be sent to a new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    /**
+     * @notice Deploys a new proxy with `_singleton` singleton and `saltNonce` salt. Optionally executes an initializer call to a new proxy.
+     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+     * @param initializer Payload for a message call to be sent to a new proxy contract.
+     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+     */
     function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce) public returns (SafeProxy proxy) {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
@@ -50,11 +56,14 @@ contract SafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create a new proxy contract that should exist only on 1 network (e.g. specific governance or admin accounts)
-    ///      by including the chain id in the create2 salt. Such proxies cannot be created on other networks by replaying the transaction.
-    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-    /// @param initializer Payload for a message call to be sent to a new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+    /**
+     * @notice Deploys a new chain-specific proxy with `_singleton` singleton and `saltNonce` salt. Optionally executes an initializer call to a new proxy.
+     * @dev Allows to create a new proxy contract that should exist only on 1 network (e.g. specific governance or admin accounts)
+     *      by including the chain id in the create2 salt. Such proxies cannot be created on other networks by replaying the transaction.
+     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+     * @param initializer Payload for a message call to be sent to a new proxy contract.
+     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+     */
     function createChainSpecificProxyWithNonce(
         address _singleton,
         bytes memory initializer,
@@ -66,11 +75,14 @@ contract SafeProxyFactory {
         emit ProxyCreation(proxy, _singleton);
     }
 
-    /// @dev Allows to create a new proxy contract, execute a message call to the new proxy and call a specified callback within one transaction
-    /// @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-    /// @param initializer Payload for a message call to be sent to a new proxy contract.
-    /// @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-    /// @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
+    /**
+     * @notice Deploy a new proxy with `_singleton` singleton and `saltNonce` salt.
+     *         Optionally executes an initializer call to a new proxy and calls a specified callback address `callback`.
+     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+     * @param initializer Payload for a message call to be sent to a new proxy contract.
+     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+     * @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
+     */
     function createProxyWithCallback(
         address _singleton,
         bytes memory initializer,
@@ -82,8 +94,13 @@ contract SafeProxyFactory {
         if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);
     }
 
-    /// @dev Returns true if `account` is a contract.
-    /// @param account The address being queried
+    /**
+     * @notice Returns true if `account` is a contract.
+     * @dev This function will return false if invoked during the constructor of a contract,
+     *      as the code is not actually created until after the constructor finishes.
+     * @param account The address being queried
+     * @return True if `account` is a contract
+     */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
@@ -93,7 +110,10 @@ contract SafeProxyFactory {
         return size > 0;
     }
 
-    /// @dev Returns the chain id used by this contract.
+    /**
+     * @notice Returns the ID of the chain the contract is currently deployed on.
+     * @return The ID of the current chain as a uint256.
+     */
     function getChainId() public view returns (uint256) {
         uint256 id;
         // solhint-disable-next-line no-inline-assembly

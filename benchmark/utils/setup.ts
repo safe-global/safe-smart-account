@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getDefaultCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
+import { getTokenCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
 import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, executeContractCallWithSigners } from "../../src/utils/execution";
 import { Wallet, Contract } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
@@ -14,7 +14,7 @@ export interface Contracts {
 }
 
 const generateTarget = async (owners: Wallet[], threshold: number, guardAddress: string, logGasUsage?: boolean) => {
-    const fallbackHandler = await getDefaultCallbackHandler()
+    const fallbackHandler = await getTokenCallbackHandler()
     const safe = await getSafeWithOwners(owners.map((owner) => owner.address), threshold, fallbackHandler.address, logGasUsage)
     await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], owners)
     return safe

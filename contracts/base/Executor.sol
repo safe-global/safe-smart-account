@@ -2,15 +2,22 @@
 pragma solidity >=0.7.0 <0.9.0;
 import "../common/Enum.sol";
 
-/// @title Executor - A contract that can execute transactions
-/// @author Richard Meissner - <richard@gnosis.pm>
-contract Executor {
-    /// @dev Executes either a delegatecall or a call with provided parameters
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @return success boolean flag indicating if the call succeeded
+/**
+ * @title Executor - A contract that can execute transactions
+ * @author Richard Meissner - @rmeissner
+ */
+abstract contract Executor {
+    /**
+     * @notice Executes either a delegatecall or a call with provided parameters.
+     * @dev This method doesn't perform any sanity check of the transaction, such as:
+     *      - if the contract at `to` address has code or not
+     *      It is the responsibility of the caller to perform such checks.
+     * @param to Destination address.
+     * @param value Ether value.
+     * @param data Data payload.
+     * @param operation Operation type.
+     * @return success boolean flag indicating if the call succeeded.
+     */
     function execute(
         address to,
         uint256 value,

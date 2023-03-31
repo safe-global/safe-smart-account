@@ -3,7 +3,12 @@ import hre, { deployments, waffle } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, deployContract, getMock, getSafeTemplate } from "../utils/setup";
+import {
+    defaultTokenCallbackHandlerContract,
+    defaultTokenCallbackHandlerDeployment,
+    deployContract,
+    getSafeTemplate,
+} from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("FallbackManager", async () => {
@@ -31,7 +36,7 @@ describe("FallbackManager", async () => {
     describe("setFallbackManager", async () => {
         it("is correctly set on deployment", async () => {
             const { safe } = await setupWithTemplate();
-            const handler = await defaultCallbackHandlerDeployment();
+            const handler = await defaultTokenCallbackHandlerDeployment();
 
             // Check fallback handler
             await expect(
@@ -49,7 +54,7 @@ describe("FallbackManager", async () => {
 
         it("is correctly set", async () => {
             const { safe } = await setupWithTemplate();
-            const handler = await defaultCallbackHandlerDeployment();
+            const handler = await defaultTokenCallbackHandlerDeployment();
 
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
@@ -71,7 +76,7 @@ describe("FallbackManager", async () => {
 
         it("emits event when is set", async () => {
             const { safe } = await setupWithTemplate();
-            const handler = await defaultCallbackHandlerDeployment();
+            const handler = await defaultTokenCallbackHandlerDeployment();
 
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
@@ -84,8 +89,8 @@ describe("FallbackManager", async () => {
 
         it("is called when set", async () => {
             const { safe } = await setupWithTemplate();
-            const handler = await defaultCallbackHandlerDeployment();
-            const safeHandler = (await defaultCallbackHandlerContract()).attach(safe.address);
+            const handler = await defaultTokenCallbackHandlerDeployment();
+            const safeHandler = (await defaultTokenCallbackHandlerContract()).attach(safe.address);
             // Check that Safe is NOT setup
             await expect(await safe.getThreshold()).to.be.deep.eq(BigNumber.from(0));
 
@@ -144,6 +149,17 @@ describe("FallbackManager", async () => {
                     "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
                     user1.address.slice(2).toLowerCase() +
                     "0000000000000000",
+            );
+        });
+
+        it("cannot be set to self", async () => {
+            const { safe } = await setupWithTemplate();
+            // Setup Safe
+            await safe.setup([user1.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
+
+            // The transaction execution function doesn't bubble up revert messages so we check for a generic transaction fail code GS013
+            await expect(executeContractCallWithSigners(safe, safe, "setFallbackHandler", [safe.address], [user1])).to.be.revertedWith(
+                "GS013",
             );
         });
     });

@@ -5,7 +5,7 @@ import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./base/FallbackManager.sol";
 import "./base/GuardManager.sol";
-import "./common/EtherPaymentFallback.sol";
+import "./common/NativeCurrencyPaymentFallback.sol";
 import "./common/Singleton.sol";
 import "./common/SignatureDecoder.sol";
 import "./common/SecuredTokenTransfer.sol";
@@ -13,12 +13,26 @@ import "./common/StorageAccessible.sol";
 import "./interfaces/ISignatureValidator.sol";
 import "./external/SafeMath.sol";
 
-/// @title Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
-/// @author Stefan George - <stefan@gnosis.io>
-/// @author Richard Meissner - <richard@gnosis.io>
+/**
+ * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
+ * @dev Most important concepts:
+ *      - Threshold: Number of required confirmations for a Safe transaction.
+ *      - Owners: List of addresses that control the Safe. They are the only ones that can add/remove owners, change the threshold and
+ *        approve transactions. Managed in `OwnerManager`.
+ *      - Transaction Hash: Hash of a transaction is calculated using the EIP-712 typed structured data hashing scheme.
+ *      - Nonce: Each transaction should have a different nonce to prevent replay attacks.
+ *      - Signature: A valid signature of an owner of the Safe for a transaction hash.
+ *      - Guard: Guard is a contract that can execute pre- and post- transaction checks. Managed in `GuardManager`.
+ *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
+ *      - Fallback: Fallback handler is a contract that can provide additional read-only functional for Safe. Managed in `FallbackManager`.
+ *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
+ *      For the events-based implementation see `SafeL2.sol`.
+ * @author Stefan George - @Georgi87
+ * @author Richard Meissner - @rmeissner
+ */
 contract Safe is
-    EtherPaymentFallback,
     Singleton,
+    NativeCurrencyPaymentFallback,
     ModuleManager,
     OwnerManager,
     SignatureDecoder,
@@ -30,7 +44,7 @@ contract Safe is
 {
     using SafeMath for uint256;
 
-    string public constant VERSION = "1.3.0";
+    string public constant VERSION = "1.4.0";
 
     // keccak256(
     //     "EIP712Domain(uint256 chainId,address verifyingContract)"
@@ -45,8 +59,8 @@ contract Safe is
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
     event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
     event SignMsg(bytes32 indexed msgHash);
-    event ExecutionFailure(bytes32 txHash, uint256 payment);
-    event ExecutionSuccess(bytes32 txHash, uint256 payment);
+    event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
+    event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
 
     uint256 public nonce;
     bytes32 private _deprecatedDomainSeparator;
@@ -55,23 +69,29 @@ contract Safe is
     // Mapping to keep track of all hashes (message or transaction) that have been approved by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
 
-    // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
+    // This constructor ensures that this contract can only be used as a singleton for Proxy contracts
     constructor() {
-        // By setting the threshold it is not possible to call setup anymore,
-        // so we create a Safe with 0 owners and threshold 1.
-        // This is an unusable Safe, perfect for the singleton
+        /**
+         * By setting the threshold it is not possible to call setup anymore,
+         * so we create a Safe with 0 owners and threshold 1.
+         * This is an unusable Safe, perfect for the singleton
+         */
         threshold = 1;
     }
 
-    /// @dev Setup function sets initial storage of contract.
-    /// @param _owners List of Safe owners.
-    /// @param _threshold Number of required confirmations for a Safe transaction.
-    /// @param to Contract address for optional delegate call.
-    /// @param data Data payload for optional delegate call.
-    /// @param fallbackHandler Handler for fallback calls to this contract
-    /// @param paymentToken Token that should be used for the payment (0 is ETH)
-    /// @param payment Value that should be paid
-    /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
+    /**
+     * @notice Sets an initial storage of the Safe contract.
+     * @dev This method can only be called once.
+     *      If a proxy was created without setting up, anyone can call setup and claim the proxy.
+     * @param _owners List of Safe owners.
+     * @param _threshold Number of required confirmations for a Safe transaction.
+     * @param to Contract address for optional delegate call.
+     * @param data Data payload for optional delegate call.
+     * @param fallbackHandler Handler for fallback calls to this contract
+     * @param paymentToken Token that should be used for the payment (0 is ETH)
+     * @param payment Value that should be paid
+     * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
+     */
     function setup(
         address[] calldata _owners,
         uint256 _threshold,
@@ -96,18 +116,26 @@ contract Safe is
         emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
     }
 
-    /// @dev Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that submitted the transaction.
-    ///      Note: The fees are always transferred, even if the user transaction fails.
-    /// @param to Destination address of Safe transaction.
-    /// @param value Ether value of Safe transaction.
-    /// @param data Data payload of Safe transaction.
-    /// @param operation Operation type of Safe transaction.
-    /// @param safeTxGas Gas that should be used for the Safe transaction.
-    /// @param baseGas Gas costs that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
-    /// @param gasPrice Gas price that should be used for the payment calculation.
-    /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
-    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-    /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+    /** @notice Executes a `operation` {0: Call, 1: DelegateCall}} transaction to `to` with `value` (Native Currency)
+     *          and pays `gasPrice` * `gasLimit` in `gasToken` token to `refundReceiver`.
+     * @dev The fees are always transferred, even if the user transaction fails.
+     *      This method doesn't perform any sanity check of the transaction, such as:
+     *      - if the contract at `to` address has code or not
+     *      - if the `gasToken` is a contract or not
+     *      It is the responsibility of the caller to perform such checks.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param safeTxGas Gas that should be used for the Safe transaction.
+     * @param baseGas Gas costs that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+     * @param gasPrice Gas price that should be used for the payment calculation.
+     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
+     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @return success Boolean indicating transaction's success.
+     */
     function execTransaction(
         address to,
         uint256 value,
@@ -192,6 +220,14 @@ contract Safe is
         }
     }
 
+    /**
+     * @notice Handles the payment for a Safe transaction.
+     * @param gasUsed Gas used by the Safe transaction.
+     * @param baseGas Gas costs that are independent of the transaction execution (e.g. base transaction fee, signature check, payment of the refund).
+     * @param gasPrice Gas price that should be used for the payment calculation.
+     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
+     * @return payment The amount of payment made in the specified token.
+     */
     function handlePayment(
         uint256 gasUsed,
         uint256 baseGas,
@@ -212,10 +248,11 @@ contract Safe is
     }
 
     /**
-     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data That should be signed (this is passed to an external validator contract)
-     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
     function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
@@ -226,10 +263,12 @@ contract Safe is
     }
 
     /**
-     * @dev Checks whether the signature provided is valid for the provided data, hash. Will revert otherwise.
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data That should be signed (this is passed to an external validator contract)
-     * @param signatures Signature data that should be verified. Can be ECDSA signature, contract signature (EIP-1271) or approved hash.
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
     function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
@@ -295,8 +334,10 @@ contract Safe is
     }
 
     /**
-     * @dev Marks a hash as approved. This can be used to validate a hash that is used by a signature.
-     * @param hashToApprove The hash that should be marked as approved for signatures that are verified by this contract.
+     * @notice Marks hash `hashToApprove` as approved.
+     * @dev This can be used with a pre-approved hash transaction signature.
+     *      IMPORTANT: The approved hash stays approved forever. There's no revocation mechanism, so it behaves similarly to ECDSA signatures
+     * @param hashToApprove The hash to mark as approved for signatures that are verified by this contract.
      */
     function approveHash(bytes32 hashToApprove) external {
         require(owners[msg.sender] != address(0), "GS030");
@@ -304,7 +345,10 @@ contract Safe is
         emit ApproveHash(hashToApprove, msg.sender);
     }
 
-    /// @dev Returns the chain id used by this contract.
+    /**
+     * @notice Returns the ID of the chain the contract is currently deployed on.
+     * @return The ID of the current chain as a uint256.
+     */
     function getChainId() public view returns (uint256) {
         uint256 id;
         // solhint-disable-next-line no-inline-assembly
@@ -314,22 +358,28 @@ contract Safe is
         return id;
     }
 
+    /**
+     * @dev Returns the domain separator for this contract, as defined in the EIP-712 standard.
+     * @return bytes32 The domain separator hash.
+     */
     function domainSeparator() public view returns (bytes32) {
         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
     }
 
-    /// @dev Returns the pre-image of the transaction hash (see getTransactionHash).
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @param safeTxGas Gas that should be used for the safe transaction.
-    /// @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
-    /// @param gasPrice Maximum gas price that should be used for this transaction.
-    /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
-    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-    /// @param _nonce Transaction nonce.
-    /// @return Transaction hash bytes.
+    /**
+     * @notice Returns the pre-image of the transaction hash (see getTransactionHash).
+     * @param to Destination address.
+     * @param value Ether value.
+     * @param data Data payload.
+     * @param operation Operation type.
+     * @param safeTxGas Gas that should be used for the safe transaction.
+     * @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+     * @param gasPrice Maximum gas price that should be used for this transaction.
+     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
+     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
+     * @param _nonce Transaction nonce.
+     * @return Transaction hash bytes.
+     */
     function encodeTransactionData(
         address to,
         uint256 value,
@@ -360,18 +410,20 @@ contract Safe is
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
     }
 
-    /// @dev Returns hash to be signed by owners.
-    /// @param to Destination address.
-    /// @param value Ether value.
-    /// @param data Data payload.
-    /// @param operation Operation type.
-    /// @param safeTxGas Fas that should be used for the safe transaction.
-    /// @param baseGas Gas costs for data used to trigger the safe transaction.
-    /// @param gasPrice Maximum gas price that should be used for this transaction.
-    /// @param gasToken Token address (or 0 if ETH) that is used for the payment.
-    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-    /// @param _nonce Transaction nonce.
-    /// @return Transaction hash.
+    /**
+     * @notice Returns transaction hash to be signed by owners.
+     * @param to Destination address.
+     * @param value Ether value.
+     * @param data Data payload.
+     * @param operation Operation type.
+     * @param safeTxGas Fas that should be used for the safe transaction.
+     * @param baseGas Gas costs for data used to trigger the safe transaction.
+     * @param gasPrice Maximum gas price that should be used for this transaction.
+     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
+     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
+     * @param _nonce Transaction nonce.
+     * @return Transaction hash.
+     */
     function getTransactionHash(
         address to,
         uint256 value,
