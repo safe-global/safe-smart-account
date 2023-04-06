@@ -35,6 +35,7 @@ abstract contract FallbackManager is SelfAuthorized {
 
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, handler)
         }
@@ -61,6 +62,7 @@ abstract contract FallbackManager is SelfAuthorized {
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             let handler := sload(slot)
             if iszero(handler) {

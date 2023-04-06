@@ -20,6 +20,7 @@ contract CreateCall {
      */
     function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns (address newContract) {
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)
         }
@@ -35,6 +36,7 @@ contract CreateCall {
      */
     function performCreate(uint256 value, bytes memory deploymentData) public returns (address newContract) {
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))
         }
