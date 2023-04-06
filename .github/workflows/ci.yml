@@ -62,9 +62,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        solidity: ["0.7.6", "0.8.2"]
+        solidity: ["0.7.6", "0.8.19"]
         include:
-        - solidity: "0.8.2"
+        - solidity: "0.8.19"
           settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":10000}}'
     env:
       SOLIDITY_VERSION: ${{ matrix.solidity }}
