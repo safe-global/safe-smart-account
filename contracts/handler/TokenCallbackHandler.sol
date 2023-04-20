@@ -11,9 +11,6 @@ import "../interfaces/IERC165.sol";
  * @author Richard Meissner - @rmeissner
  */
 contract TokenCallbackHandler is ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver, IERC165 {
-    string public constant NAME = "Default Callback Handler";
-    string public constant VERSION = "1.0.0";
-
     /**
      * @notice Handles ERC1155 Token callback.
      * return Standardized onERC1155Received return value.
