@@ -24,6 +24,8 @@ The categories are based on Certora's workshop [notes](https://github.com/Certor
 
 ## Safe Contract Properties
 
+Verification doesn't hold for the `DELEGATECALL` operation.
+
 ### Valid states
 
 ### State transitions
@@ -36,30 +38,29 @@ The categories are based on Certora's workshop [notes](https://github.com/Certor
 
 ### Risk assessment
 
-only permissioned address can do permissioned activities.
+- nonce monotonicity, it can only increase by 1 after execTransaction call
+
+- consistency of owner and module lists
+
+verify that `ownerCount` is in sync with the linked list. 
+always circular - each address for which `isModuleEnabled` returns true should be a part of the list
+
+
+- configuration changes to safe can only be done by the safe
 who can swap owner?
+module management
 who should be able to?
 
 who should be allowed to make contract do delegate calls?
 contract creator
 address specified by contract creator
 
-setup only be done once
-
-check signature validation?
-can't sign a signature that isn't yours...
-not really something we can prove
+- setup only be done once
 
 module states
 enabled
 cancelled
-always circular
-checkNSignatures same as checkSignature N times
-
-properties about approved hashes
-who can approve hashes?
-Can hashes do more than one thing?
-
-getStorageAt gets storage at
+checkNSignatures same as checkSignature N times - ?
 
 execTransactionFromModuleReturnData
+
