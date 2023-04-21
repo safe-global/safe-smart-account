@@ -2,6 +2,165 @@
 
 This changelog only contains changes starting from version 1.3.0
 
+# Version 1.4.0
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
+
+### Core contracts
+
+-   `Safe` at `0xc962E67D9490E154D81181879ddf4CD3b65D2132`
+-   `SafeL2` at `0x1eb4681c549d995AbdC4aB189cAbb9f00B508cAb`
+
+### Factory contracts
+
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+
+### Handler contracts
+
+-   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
+-   `CompatibilityFallbackHandler` at `0x2a15DE4410d4c8af0A7b6c12803120f43C42B820`
+
+### Lib contracts
+
+-   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
+-   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
+-   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
+-   `SignMessageLib` at `0x58FCe385Ed16beB4BCE49c8DF34c7d6975807520`
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+
+## Changes
+
+### General
+
+#### Drop "Gnosis" from contract names
+
+Removed the "Gnosis" prefix from all contract names.
+
+### Core contract
+
+File: [`contracts/SafeL2.sol`](https://github.com/safe-global/safe-contracts/blob/3c3fc80f7f9aef1d39aaae2b53db5f4490051b0d/contracts/SafeL2.sol)
+
+#### Remove usage of the `GAS` opcode in module execute flows
+
+Issue: [#459](https://github.com/safe-global/safe-contracts/issues/459)
+
+The following rule of usage of the `GAS` opcode in the ERC-4337 standard made it impossible to build a module to support ERC4337:
+
+> -   Must not use GAS opcode (unless followed immediately by one of { CALL, DELEGATECALL, CALLCODE, STATICCALL }.)
+
+We removed the `GAS` opcode usage in module transactions to forward all the available gas instead.
+
+#### Require the `to` address to be a contract in `setupModules`
+
+Issue: [#483](https://github.com/safe-global/safe-contracts/issues/483)
+
+The `setupModules` method was changed to require the `to` address to be a contract. If the `to` address is not a contract, the transaction will be reverted with a `GS002` error code.
+
+#### Enforce the `dataHash` is equal to `data` in the signature verification process for contract signatures
+
+Issue: [#497](https://github.com/safe-global/safe-contracts/issues/497)
+
+To prevent unexpected behaviour, the `dataHash` must now equal a hash of the `data` in the signature verification process for contract signatures. Otherwise, the transaction will be reverted with a `GS027` error code.
+
+#### Fix `getModulesPaginated` to return a correct `next` pointer
+
+Issue: [#461](https://github.com/safe-global/safe-contracts/issues/461)
+
+The `getModulesPaginated` method was fixed to return a correct `next` pointer. The `next` pointer now equals the last module in the returned array.
+
+#### Check the EIP-165 signature of the Guard before adding
+
+Issue: [#309](https://github.com/safe-global/safe-contracts/issues/309)
+
+When setting a guard, the core contract will check that the target address supports the Guard interface with an EIP-165 check. If it doesn't, the transaction will revert with the `GS300` error code.
+
+#### Index essential parameters when emitting events
+
+Issue: [#541](https://github.com/safe-global/safe-contracts/issues/541)
+
+Index essential parameters in the essential events, such as:
+
+-   Owner additions and removals (Indexed parameter - owner address)
+-   Fallback manager changes (Indexed parameter - fallback manager address)
+-   Module additions and removals (Indexed parameter - module address)
+-   Transaction guard changes (Indexed parameter - guard address)
+-   Transaction execution/failure (Indexed parameter - transaction hash)
+
+### Factory
+
+Umbrella issue: [#462](https://github.com/safe-global/safe-contracts/issues/462)
+
+#### Remove the `createProxy` method
+
+This method uses the `CREATE` opcode, which is not counterfactual for a specific deployment. This caused user errors and lost/stuck funds and is now removed.
+
+#### Add a check that singleton exists for the initializer call
+
+If the initializer data is provided, the factory now checks that the singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
+
+#### Add `createNetworkSpecificProxy`
+
+This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks will be impossible.
+This method should enable the creation of proxies that should exist only on one network (e.g. specific governance or admin accounts)
+
+#### Remove the `calculateProxyAddress` method
+
+Methods using the revert approach to return data only work well with some nodes, as they all return messages differently. Hence, we removed it, and the off-chain CREATE2 calculation is still possible.
+
+#### Remove the `proxyRuntimeCode` method
+
+The `.runtimeCode` method is not supported by the ZkSync compiler, so we removed it.
+
+### Fallback handlers
+
+Files:
+
+-   [CompatibilityFallbackHandler.sol](https://github.com/safe-global/safe-contracts/blob/3c3fc80f7f9aef1d39aaae2b53db5f4490051b0d/contracts/handler/CompatibilityFallbackHandler.sol)
+-   [TokenCallbackHandler](https://github.com/safe-global/safe-contracts/blob/3c3fc80f7f9aef1d39aaae2b53db5f4490051b0d/contracts/handler/TokenCallbackHandler.sol)
+
+#### Rename `DefaultCallbackHandler` to `TokenCallbackHandler`
+
+Since the `DefaultCallbackHandler` only handled token callbacks, it was renamed to `TokenCallbackHandler`.
+
+#### Remove `NAME` and `VERSION` constants
+
+The `NAME` and `VERSION` constants were removed from the `CompatibilityFallbackHandler` contract.
+
+#### Fix function signature mismatch for `isValidSignature`
+
+Issue: [#440](https://github.com/safe-global/safe-contracts/issues/440)
+
+Fixed mismatch between the function signature in the `isValidSignature` method and the `ISignatureValidator` interface.
+
+### Libraries
+
+#### CreateCall
+
+File: [`contracts/libraries/CreateCall.sol`](https://github.com/safe-global/safe-contracts/blob/3c3fc80f7f9aef1d39aaae2b53db5f4490051b0d/contracts/libraries/CreateCall.sol)
+
+#### Index the created contract address in the `ContractCreation` event
+
+Issue: [#541](https://github.com/safe-global/safe-contracts/issues/541)
+
+The deployed contract address in the `ContractCreation` event is now indexed.
+
+### Deployment process
+
+#### Use the Safe Singleton Factory for all deployments
+
+Issue: [#460](https://github.com/safe-global/safe-contracts/issues/460)
+
+Deployments with the [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory) are now the default deployment process to ensure the same addresses on all chains.
+
 # Version 1.3.0-libs.0
 
 ## Compiler settings

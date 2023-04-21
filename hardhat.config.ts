@@ -38,11 +38,12 @@ import "./src/tasks/local_verify";
 import "./src/tasks/deploy_contracts";
 import "./src/tasks/show_codesize";
 import { BigNumber } from "@ethersproject/bignumber";
+import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6";
 const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
 
-const deterministicDeployment = (network: string) => {
+const deterministicDeployment = (network: string): DeterministicDeploymentInfo => {
     const info = getSingletonFactoryInfo(parseInt(network));
     if (!info) {
         throw new Error(`
@@ -78,9 +79,9 @@ const userConfig: HardhatUserConfig = {
             ...sharedNetworkConfig,
             url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
         },
-        xdai: {
+        gnosis: {
             ...sharedNetworkConfig,
-            url: "https://xdai.poanetwork.dev",
+            url: "https://rpc.gnosischain.com",
         },
         ewc: {
             ...sharedNetworkConfig,
