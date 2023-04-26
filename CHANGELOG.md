@@ -6,7 +6,7 @@ This changelog only contains changes starting from version 1.3.0
 
 ## Compiler settings
 
-Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
 
 Solidity optimizer: `disabled`
 
