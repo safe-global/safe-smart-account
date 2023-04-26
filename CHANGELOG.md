@@ -114,7 +114,7 @@ This method should enable the creation of proxies that should exist only on one 
 
 #### Remove the `calculateProxyAddress` method
 
-Methods using the revert approach to return data only work well with some nodes, as they all return messages differently. Hence, we removed it, and the off-chain CREATE2 calculation is still possible.
+Method uses the revert approach to return data that only works well with some nodes, as they all return messages differently. Hence, we removed it, and the off-chain CREATE2 calculation is still possible.
 
 #### Remove the `proxyRuntimeCode` method
 
