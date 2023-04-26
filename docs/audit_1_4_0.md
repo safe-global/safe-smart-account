@@ -14,4 +14,4 @@ The final audit was performed on commit [eb93dbb0f62e2dc1b308ac4c110038062df0a8c
 
 ##### External links for Audit Reports
 
--   TBD
+-   Ackee Blockchain is working on a hosted repository for the audit reports. We will provide the link here as soon as it is available.
