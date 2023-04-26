@@ -63,7 +63,7 @@ We removed the `GAS` opcode usage in module transactions to forward all the avai
 
 Issue: [#483](https://github.com/safe-global/safe-contracts/issues/483)
 
-The `setupModules` method was changed to require the `to` address to be a contract. If the `to` address is not a contract, the transaction will be reverted with a `GS002` error code.
+The `setupModules` method was changed to require the `to` address to be a contract. If the `to` address is not a contract, the transaction will revert with a `GS002` error code.
 
 #### Enforce the `dataHash` is equal to `data` in the signature verification process for contract signatures
 
