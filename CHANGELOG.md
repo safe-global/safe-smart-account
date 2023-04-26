@@ -109,7 +109,7 @@ If the initializer data is provided, the Factory now checks that the Singleton c
 
 #### Add `createNetworkSpecificProxy`
 
-This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks will be impossible.
+This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks is impossible.
 This method should enable the creation of proxies that should exist only on one network (e.g. specific governance or admin accounts)
 
 #### Remove the `calculateProxyAddress` method
