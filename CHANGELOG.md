@@ -69,7 +69,7 @@ The `setupModules` method was changed to require the `to` address to be a contra
 
 Issue: [#497](https://github.com/safe-global/safe-contracts/issues/497)
 
-To prevent unexpected behaviour, the `dataHash` must now equal a hash of the `data` in the signature verification process for contract signatures. Otherwise, the transaction will be reverted with a `GS027` error code.
+To prevent unexpected behaviour, the `dataHash` must now equal a hash of the `data` in the signature verification process for contract signatures. Otherwise, the transaction will revert with a `GS027` error code.
 
 #### Fix `getModulesPaginated` to return a correct `next` pointer
 
