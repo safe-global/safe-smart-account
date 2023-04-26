@@ -6,7 +6,7 @@ This changelog only contains changes starting from version 1.3.0
 
 ## Compiler settings
 
-Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
 
 Solidity optimizer: `disabled`
 
@@ -63,13 +63,13 @@ We removed the `GAS` opcode usage in module transactions to forward all the avai
 
 Issue: [#483](https://github.com/safe-global/safe-contracts/issues/483)
 
-The `setupModules` method was changed to require the `to` address to be a contract. If the `to` address is not a contract, the transaction will be reverted with a `GS002` error code.
+The `setupModules` method was changed to require the `to` address to be a contract. If the `to` address is not a contract, the transaction will revert with a `GS002` error code.
 
 #### Enforce the `dataHash` is equal to `data` in the signature verification process for contract signatures
 
 Issue: [#497](https://github.com/safe-global/safe-contracts/issues/497)
 
-To prevent unexpected behaviour, the `dataHash` must now equal a hash of the `data` in the signature verification process for contract signatures. Otherwise, the transaction will be reverted with a `GS027` error code.
+To prevent unexpected behaviour, the `dataHash` must now equal a hash of the `data` in the signature verification process for contract signatures. Otherwise, the transaction will revert with a `GS027` error code.
 
 #### Fix `getModulesPaginated` to return a correct `next` pointer
 
@@ -103,18 +103,18 @@ Umbrella issue: [#462](https://github.com/safe-global/safe-contracts/issues/462)
 
 This method uses the `CREATE` opcode, which is not counterfactual for a specific deployment. This caused user errors and lost/stuck funds and is now removed.
 
-#### Add a check that singleton exists for the initializer call
+#### Add a check that Singleton exists for the initializer call
 
-If the initializer data is provided, the factory now checks that the singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
+If the initializer data is provided, the Factory now checks that the Singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
 
 #### Add `createNetworkSpecificProxy`
 
-This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks will be impossible.
+This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks is impossible.
 This method should enable the creation of proxies that should exist only on one network (e.g. specific governance or admin accounts)
 
 #### Remove the `calculateProxyAddress` method
 
-Methods using the revert approach to return data only work well with some nodes, as they all return messages differently. Hence, we removed it, and the off-chain CREATE2 calculation is still possible.
+Method uses the revert approach to return data that only works well with some nodes, as they all return messages differently. Hence, we removed it, and the off-chain CREATE2 calculation is still possible.
 
 #### Remove the `proxyRuntimeCode` method
 
