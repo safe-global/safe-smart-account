@@ -103,7 +103,7 @@ Umbrella issue: [#462](https://github.com/safe-global/safe-contracts/issues/462)
 
 This method uses the `CREATE` opcode, which is not counterfactual for a specific deployment. This caused user errors and lost/stuck funds and is now removed.
 
-#### Add a check that singleton exists for the initializer call
+#### Add a check that Singleton exists for the initializer call
 
 If the initializer data is provided, the factory now checks that the singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
 
