@@ -50,7 +50,7 @@
         "@nomiclabs/hardhat-ethers": "2.0.2",
         "@nomiclabs/hardhat-etherscan": "^3.1.7",
         "@nomiclabs/hardhat-waffle": "2.0.1",
-        "@openzeppelin/contracts": "^3.4.0",
+        "@openzeppelin/contracts": "^4.8.3",
         "@types/chai": "^4.2.14",
         "@types/mocha": "^8.2.0",
         "@types/node": "^14.14.21",
