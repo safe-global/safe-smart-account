@@ -105,7 +105,7 @@ This method uses the `CREATE` opcode, which is not counterfactual for a specific
 
 #### Add a check that Singleton exists for the initializer call
 
-If the initializer data is provided, the factory now checks that the singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
+If the initializer data is provided, the Factory now checks that the Singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
 
 #### Add `createNetworkSpecificProxy`
 
