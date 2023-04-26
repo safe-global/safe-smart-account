@@ -92,6 +92,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
+- [for Version 1.4.0 by Ackee Blockchain](docs/audit_1_4_0.md)
 - [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
 - [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
