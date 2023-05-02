@@ -44,10 +44,11 @@ abstract contract StorageAccessible {
         assembly {
             let success := delegatecall(gas(), targetContract, add(calldataPayload, 0x20), mload(calldataPayload), 0, 0)
 
-            mstore(0x00, success)
-            mstore(0x20, returndatasize())
-            returndatacopy(0x40, 0, returndatasize())
-            revert(0, add(returndatasize(), 0x40))
+            let freeMemoryPtr := mload(0x40)
+            mstore(freeMemoryPtr, success)
+            mstore(add(freeMemoryPtr, 0x20), returndatasize())
+            returndatacopy(add(freeMemoryPtr, 0x40), 0, returndatasize())
+            revert(freeMemoryPtr, add(returndatasize(), 0x40))
         }
     }
 }
