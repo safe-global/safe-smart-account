@@ -23,7 +23,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @dev Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
      * @param _data Arbitrary length data signed on the behalf of address(msg.sender).
      * @param _signature Signature byte array associated with _data.
-     * @return a bool upon valid or invalid signature with corresponding _data.
+     * @return The EIP-1271 magic value.
      */
     function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
