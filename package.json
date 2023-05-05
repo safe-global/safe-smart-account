@@ -16,7 +16,7 @@
   "scripts": {
     "build": "hardhat compile",
     "build:zk": "hardhat compile --network zkSyncLocal",
-    "build:ts": "tsc --noEmit",
+    "build:ts": "yarn rimraf dist && tsc --build tsconfig.lib.json",
     "test": "hardhat test",
     "test:zk": "hardhat test --network zkSyncLocal",
     "coverage": "hardhat coverage",
