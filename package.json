@@ -16,7 +16,7 @@
   "scripts": {
     "build": "hardhat compile",
     "build:zk": "hardhat compile --network zkSyncLocal",
-    "build:ts": "yarn rimraf dist && tsc",
+    "build:ts": "tsc --noEmit",
     "test": "hardhat test",
     "test:zk": "hardhat test --network zkSyncLocal",
     "coverage": "hardhat coverage",
@@ -86,8 +86,8 @@
     "typescript": "^4.2.4",
     "yargs": "^16.1.1",
     "zksync-web3": "^0.14.3"
-},
-"peerDependencies": {
+  },
+  "peerDependencies": {
     "ethers": "5.5.0"
-}
+  }
 }

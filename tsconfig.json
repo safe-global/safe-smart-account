@@ -15,8 +15,9 @@
       "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
       "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
       "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-      "resolveJsonModule": true
+      "resolveJsonModule": true,
+      "skipLibCheck": true
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["./src/index.ts", "./types", "./hardhat.config.ts", "./test"]
+    "include": ["./src", "./types", "./hardhat.config.ts", "./deploy"]
   }
