@@ -1,4 +1,5 @@
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import { ethers } from "ethers";
 import { HardhatRuntimeEnvironment, HttpNetworkConfig } from "hardhat/types";
 import { Provider, utils, Wallet } from "zksync-web3";
 
@@ -47,21 +48,21 @@ export default async function deployContracts(hre: HardhatRuntimeEnvironment) {
     console.log(`   create2 deployer contract already deployed at ${factoryAddress}`);
   }
 
-  const factory = await hre.ethers.getContractAt(factoryABI, factoryAddress, wallet);
+  const factory = new ethers.Contract(factoryAddress, factoryABI, wallet);
 
   const salt = hre.ethers.constants.HashZero;
   const deployer = new Deployer(hre, wallet);
   const artifacts = [
     await deployer.loadArtifact("SimulateTxAccessor"),
-    await deployer.loadArtifact("SafeProxyFactory"),
-    await deployer.loadArtifact("TokenCallbackHandler"),
+    await deployer.loadArtifact("GnosisSafeProxyFactory"),
+    await deployer.loadArtifact("DefaultCallbackHandler"),
     await deployer.loadArtifact("CompatibilityFallbackHandler"),
     await deployer.loadArtifact("CreateCall"),
     await deployer.loadArtifact("MultiSend"),
     await deployer.loadArtifact("MultiSendCallOnly"),
     await deployer.loadArtifact("SignMessageLib"),
-    await deployer.loadArtifact("SafeL2"),
-    await deployer.loadArtifact("Safe")
+    await deployer.loadArtifact("GnosisSafeL2"),
+    await deployer.loadArtifact("GnosisSafe")
   ];
 
   const deployments: Record<string, string> = {};
