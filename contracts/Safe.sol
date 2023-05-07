@@ -259,11 +259,11 @@ contract Safe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(dataHash, data, signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
     }
 
     /**
-     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @notice Checks whether the signature provided is valid for the provided data, hash and executor. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data That should be signed (this is passed to an external validator contract)
@@ -271,7 +271,7 @@ contract Safe is
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
+    function checkNSignatures(address executor, bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
@@ -318,7 +318,7 @@ contract Safe is
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
+                require(executor == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -331,6 +331,19 @@ contract Safe is
             require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
         }
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param data That should be signed (this is passed to an external validator contract)
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param requiredSignatures Amount of required valid signatures.
+     */
+    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
+        return checkNSignatures(msg.sender, dataHash, data, signatures, requiredSignatures);
     }
 
     /**
