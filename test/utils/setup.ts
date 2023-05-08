@@ -94,6 +94,12 @@ export const getCompatFallbackHandler = async () => {
     return (await compatFallbackHandlerContract()).attach((await compatFallbackHandlerDeployment()).address);
 }
 
+export const getSafeProxyRuntimeCode = async () => {
+    const proxyArtifact = await hre.artifacts.readArtifact("GnosisSafeProxy");
+
+    return proxyArtifact.deployedBytecode;
+};
+
 export const compile = async (source: string) => {
     const input = JSON.stringify({
         'language': 'Solidity',
