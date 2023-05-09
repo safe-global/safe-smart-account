@@ -38,29 +38,26 @@ Verification doesn't hold for the `DELEGATECALL` operation.
 
 ### Risk assessment
 
-- nonce monotonicity, it can only increase by 1 after execTransaction call
+-   nonce monotonicity, it can only increase by 1 after execTransaction call
 
-- consistency of owner and module lists
+-   consistency of owner and module lists
 
-verify that `ownerCount` is in sync with the linked list. 
+verify that `ownerCount` is in sync with the linked list.
 always circular - each address for which `isModuleEnabled` returns true should be a part of the list
 
-
-- configuration changes to safe can only be done by the safe
-who can swap owner?
-module management
-who should be able to?
+-   configuration changes to safe can only be done by the safe
+    who can swap owner?
+    module management
+    who should be able to?
 
 who should be allowed to make contract do delegate calls?
 contract creator
 address specified by contract creator
 
-- setup only be done once
+-   setup only be done once
 
 module states
 enabled
 cancelled
-checkNSignatures same as checkSignature N times - ?
 
 execTransactionFromModuleReturnData
-
