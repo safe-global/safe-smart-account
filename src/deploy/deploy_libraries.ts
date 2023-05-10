@@ -1,40 +1,41 @@
-import { DeployFunction } from "hardhat-deploy/types";
+import { DeployFunction } from "@elvis-krop/hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDeployer } from "../zk-utils/getDeployer";
 
 const deploy: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
 ) {
-  const { deployments, hardhatArguments, getNamedAccounts } = hre;
+  const { deployments, getNamedAccounts, network } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
 
   await deploy("CreateCall", {
-    from: deployer,
+    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: !network.zksync,
   });
 
   await deploy("MultiSend", {
-    from: deployer,
+    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: !network.zksync,
   });
 
   await deploy("MultiSendCallOnly", {
-    from: deployer,
+    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: !network.zksync,
   });
 
   await deploy("SignMessageLib", {
-    from: deployer,
+    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    deterministicDeployment: !network.zksync,
   });
 };
 

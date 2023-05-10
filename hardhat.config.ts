@@ -4,7 +4,7 @@ import "@matterlabs/hardhat-zksync-solc";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
-import "hardhat-deploy";
+import "@elvis-krop/hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { getSingletonFactoryInfo } from "@gnosis.pm/safe-singleton-factory";
@@ -38,10 +38,10 @@ if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].in
 
 import "./src/tasks/local_verify";
 import "./src/tasks/test";
-import "./src/tasks/deploy_zksync";
 import "./src/tasks/deploy_contracts";
 import "./src/tasks/show_codesize";
 import { BigNumber } from "@ethersproject/bignumber";
+import { LOCAL_NODE_RICH_WALLETS } from "./src/zk-utils/constants";
 
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6";
 const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
@@ -136,15 +136,12 @@ const userConfig: HardhatUserConfig = {
             zksync: true,
         },
         zkSyncLocal: {
-            /**
-             * @description One of the default available accounts on the local node
-             * @see https://github.com/matter-labs/local-setup/blob/main/rich-wallets.json
-             * @address 0x36615Cf349d7F6344891B1e7CA7C72883F5dc049
-             */
-            accounts: ["0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"],
+            chainId: 270,
+            accounts: LOCAL_NODE_RICH_WALLETS.map((account) => account.privateKey),
             url: "http://localhost:3050",
             ethNetwork: "http://localhost:8545",
             zksync: true,
+            saveDeployments: true,
         },
     },
     deterministicDeployment,

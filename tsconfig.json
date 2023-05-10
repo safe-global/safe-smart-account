@@ -16,7 +16,7 @@
     "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "exclude": ["dist", "node_modules"],
   "include": ["./src", "./deploy", "./test", "./hardhat.config.ts", "./types", "./benchmark"]

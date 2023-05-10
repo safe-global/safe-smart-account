@@ -1,18 +1,20 @@
-import { DeployFunction } from "hardhat-deploy/types";
+import { DeployFunction } from "@elvis-krop/hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDeployer } from "../zk-utils/getDeployer";
 
 const deploy: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
 ) {
-  const { deployments, getNamedAccounts } = hre;
+  const { deployments, getNamedAccounts, network } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
   await deploy("SimulateTxAccessor", {
-    from: deployer,
+    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
-    deterministicDeployment: true,
+    // FIXME: enable deterministicDeployment for zkSync after hardhat-deploy will support it
+    deterministicDeployment: !network.zksync,
   });
 };
 

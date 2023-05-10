@@ -24,7 +24,7 @@
     "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
     "deploy-all": "hardhat deploy-contracts --network",
     "deploy": "hardhat deploy --network",
-    "deploy:zk": "hardhat deploy-zksync --script deploy.ts --network zkSyncLocal",
+    "deploy:zk:deterministic": "hardhat run ./src/deploy-zk-deterministic.ts --network",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint 'src/**/*.ts' 'test/**/*.ts' --max-warnings 0 --fix",
