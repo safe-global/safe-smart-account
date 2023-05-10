@@ -1,12 +1,12 @@
 diff -druN Safe.sol Safe.sol
 --- Safe.sol	2023-04-11 15:01:13
-+++ Safe.sol	2023-04-11 15:01:54
++++ Safe.sol	2023-04-11 15:01:55
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
 -        threshold = 1;
-++        // threshold = 1; // MUNGED: remove and add to constructor of the harness
++        // threshold = 1; MUNGED: remove and add to constructor of the harness
      }
  
      /**

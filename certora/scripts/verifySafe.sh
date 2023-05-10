@@ -6,5 +6,4 @@ certoraRun  certora/harnesses/SafeHarness.sol \
     --loop_iter 3 \
     --optimistic_hashing \
     --rule_sanity \
-    --send_only \
     --msg "Safe $1 "
