@@ -1,4 +1,4 @@
-import "hardhat-deploy";
+import "@elvis-krop/hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import { task } from "hardhat/config";
 import { loadSolc } from "../utils/solc";

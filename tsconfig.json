@@ -18,6 +18,12 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "node_modules"],
-  "include": ["./src", "./deploy", "./test", "./hardhat.config.ts", "./types", "./benchmark"]
+  "exclude": ["dist","node_modules"],
+  "include": [
+    "./benchmark",
+    "./src",
+    "./test",
+    "./types",
+    "./hardhat.config.ts"
+  ]
 }
