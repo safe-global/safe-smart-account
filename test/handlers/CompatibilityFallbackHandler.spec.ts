@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
+import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 import { BigNumber } from "ethers";
@@ -10,7 +10,7 @@ import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

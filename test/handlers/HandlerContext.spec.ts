@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeTemplate } from "../utils/setup";
+import { getSafeTemplate, getWallets } from "../utils/setup";
 
 describe("HandlerContext", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setup = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

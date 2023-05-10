@@ -1,7 +1,9 @@
-import hre, { deployments } from "hardhat"
-import { Wallet, Contract } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
-import solc from "solc"
+import { Contract, ethers, Wallet } from "ethers";
+import hre, { deployments, waffle } from "hardhat";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import solc from "solc";
+import zk from "zksync-web3";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 
@@ -79,7 +81,7 @@ export const getSafeTemplate = async () => {
 export const getSafeWithOwners = async (owners: string[], threshold?: number, fallbackHandler?: string, logGasUsage?: boolean) => {
     const template = await getSafeTemplate()
     await logGas(
-        `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`, 
+        `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
         template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero),
         !logGasUsage
     )
@@ -137,4 +139,26 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
     const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 })
     const receipt = await transaction.wait()
     return new Contract(receipt.contractAddress, output.interface, deployer)
+}
+
+export const getWallets = (hre: HardhatRuntimeEnvironment): (ethers.Wallet | zk.Wallet)[] => {
+  if (hre.network.name === "hardhat") return waffle.provider.getWallets();
+  if (!hre.network.zksync) throw new Error("You can get wallets only on Hardhat or ZkSyncLocal networks!")
+
+  const { accounts } = hre.network.config;
+
+  if (typeof accounts === "string") throw new Error("Unsupported accounts config");
+
+  if (Array.isArray(accounts)) {
+    const wallets = [];
+
+    for (const account of accounts) {
+      if (typeof account === "string") wallets.push(new Wallet(account));
+      else if (typeof account === "object" && "privateKey" in account) wallets.push(new Wallet(account.privateKey));
+    }
+
+    return wallets
+  } else {
+    throw new Error("Unsupported accounts config");
+  }
 }

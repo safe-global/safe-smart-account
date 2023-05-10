@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getFactory, getMock, getSafeWithOwners, getSafeProxyRuntimeCode } from "../utils/setup";
+import { deployContract, getFactory, getMock, getSafeWithOwners, getSafeProxyRuntimeCode, getWallets } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber, Contract } from "ethers";
 import { calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
@@ -33,7 +33,7 @@ describe("ProxyFactory", async () => {
         }
     }`
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture()

@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getSafeWithOwners, getWallets } from "../utils/setup";
 import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

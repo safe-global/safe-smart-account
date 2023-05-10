@@ -1,15 +1,15 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, buildSignatureBytes, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

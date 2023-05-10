@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { safeApproveHash, buildSafeTransaction, buildSignatureBytes, executeTx, executeContractCallWithSigners } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 import { safeContractUnderTest } from "../utils/config";
@@ -14,7 +14,7 @@ describe("GnosisSafeL2", async () => {
         }
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

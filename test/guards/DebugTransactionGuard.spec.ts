@@ -1,13 +1,13 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("DebugTransactionGuard", async () => {
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
