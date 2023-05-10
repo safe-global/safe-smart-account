@@ -18,9 +18,7 @@ definition reachableOnly(method f) returns bool =
     && f.selector != simulateAndRevert(address,bytes).selector;
 
 /// Nonce must never decrease
-rule nonceMonotonicity(method f) filtered {
-    f -> noHavoc(f)
-} {
+rule nonceMonotonicity(method f) {
     uint256 nonceBefore = nonce();
 
     calldataarg args; env e;

@@ -2,8 +2,8 @@
 import "../munged/Safe.sol";
 
 contract SafeHarness is Safe {
-
-    constructor(address[] memory _owners,
+    constructor(
+        address[] memory _owners,
         uint256 _threshold,
         address to,
         bytes memory data,
@@ -12,7 +12,7 @@ contract SafeHarness is Safe {
         uint256 payment,
         address payable paymentReceiver
     ) {
-            this.setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
+        this.setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
     }
 
     // harnessed getters
