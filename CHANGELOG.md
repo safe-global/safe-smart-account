@@ -107,7 +107,7 @@ This method uses the `CREATE` opcode, which is not counterfactual for a specific
 
 If the initializer data is provided, the Factory now checks that the Singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
 
-#### Add `createNetworkSpecificProxy`
+#### Add `createChainSpecificProxyWithNonce`
 
 This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks is impossible.
 This method should enable the creation of proxies that should exist only on one network (e.g. specific governance or admin accounts)
