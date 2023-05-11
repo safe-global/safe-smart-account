@@ -31,8 +31,6 @@ export async function zkCompile(hre: HardhatRuntimeEnvironment, source: any): Pr
         }
     });
 
-    console.log(`${compilerPath} --standard-json --solc ${solcBuild.compilerPath} `, input);
-    
     const output: string = await new Promise((resolve, reject) => {
         const process = exec(
             `${compilerPath} --standard-json --solc ${solcBuild.compilerPath}`,

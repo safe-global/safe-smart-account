@@ -6,7 +6,6 @@ import solc from "solc";
 import * as zk from 'zksync-web3';
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
-import { getDeployer } from "../../src/zk-utils/getDeployer";
 import { zkCompile } from "../../src/zk-utils/zkcompiler";
 
 export const defaultCallbackHandlerDeployment = async () => {
@@ -144,8 +143,6 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
         return new Contract(receipt.contractAddress, output.interface, deployer)
     } else {
         const output = await zkCompile(hre, source);
-        console.log(output);
-        //const output = JSON.parse(zkSolcData);
         if (!output['contracts']) {
             console.log(output)
             throw Error("Could not compile contract")
@@ -160,7 +157,6 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
         // Encode and send the deploy transaction providing factory dependencies.
         const contract = await factory.deploy();
         await contract.deployed();
-        console.log("Contract deployed to:", contract.address);
 
         return contract;
     }
@@ -168,22 +164,27 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
 
 export const getWallets = (hre: HardhatRuntimeEnvironment): (ethers.Wallet | zk.Wallet)[] => {
   if (hre.network.name === "hardhat") return waffle.provider.getWallets();
-  if (!hre.network.zksync) throw new Error("You can get wallets only on Hardhat or ZkSyncLocal networks!")
+  if (!hre.network.zksync) throw new Error("You can get wallets only on Hardhat or ZkSyncLocal networks!");
 
   const { accounts } = hre.network.config;
 
   if (typeof accounts === "string") throw new Error("Unsupported accounts config");
 
+  const zkProvider = zk.Provider.getDefaultProvider();
   if (Array.isArray(accounts)) {
     const wallets = [];
 
     for (const account of accounts) {
-      if (typeof account === "string") wallets.push(new Wallet(account));
-      else if (typeof account === "object" && "privateKey" in account) wallets.push(new Wallet(account.privateKey));
+      if (typeof account === "string") {
+        wallets.push((new zk.Wallet(account)).connect(zkProvider));
+      }
+      else if (typeof account === "object" && "privateKey" in account) {
+        wallets.push((new zk.Wallet(account.privateKey)).connect(zkProvider));
+      }
     }
 
-    return wallets
+    return wallets;
   } else {
     throw new Error("Unsupported accounts config");
   }
-}
+};
