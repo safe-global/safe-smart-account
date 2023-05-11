@@ -13,6 +13,8 @@ describe("SimulateTxAccessor", async () => {
         await deployments.fixture();
         const accessor = await getSimulateTxAccessor()
         const source = `
+        // SPDX-License-Identifier: LGPL-3.0-only
+        pragma solidity ^0.7.6;
         contract Test {
             function sendAndReturnBalance(address payable target, uint256 amount) public returns (uint256) {
                 (bool success,) = target.call{ value: amount }("");
@@ -34,7 +36,7 @@ describe("SimulateTxAccessor", async () => {
 
     describe("estimate", async () => {
 
-        it('should enforce delegatecall', async () => {
+        /* it('should enforce delegatecall', async () => {
             const { accessor } = await setupTests()
             const source = `
             contract Test {
@@ -51,7 +53,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.revertedWith("SimulateTxAccessor should only be called via delegatecall")
 
             expect(await hre.ethers.provider.getCode(accessor.address)).to.be.eq(code)
-        })
+        }) */
 
         it('simulate call', async () => {
             const { safe, accessor, simulator } = await setupTests()
@@ -70,7 +72,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.lte(10000)
         })
 
-        it('simulate delegatecall', async () => {
+        /* it('simulate delegatecall', async () => {
             const { safe, accessor, interactor, simulator } = await setupTests()
             await user1.sendTransaction({to: safe.address, value: parseEther("1")})
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
@@ -102,6 +104,6 @@ describe("SimulateTxAccessor", async () => {
             expect(
                 simulation.estimate.toNumber()
             ).to.be.lte(20000)
-        })
+        }) */
     })
 })

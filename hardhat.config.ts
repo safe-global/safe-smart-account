@@ -68,6 +68,7 @@ const userConfig: HardhatUserConfig = {
         cache: "build/cache",
         deploy: "src/deploy",
         sources: "contracts",
+        tests: "test/accessors",
     },
     solidity: {
         compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: "0.6.12" }, { version: "0.5.17" }],

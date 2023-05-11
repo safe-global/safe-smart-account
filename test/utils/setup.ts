@@ -3,9 +3,11 @@ import { Contract, ethers, Wallet } from "ethers";
 import hre, { deployments, waffle } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import solc from "solc";
-import zk from "zksync-web3";
+import * as zk from 'zksync-web3';
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
+import { getDeployer } from "../../src/zk-utils/getDeployer";
+import { zkCompile } from "../../src/zk-utils/zkcompiler";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -135,10 +137,33 @@ export const compile = async (source: string) => {
 }
 
 export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
-    const output = await compile(source)
-    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 })
-    const receipt = await transaction.wait()
-    return new Contract(receipt.contractAddress, output.interface, deployer)
+    if (!hre.network.zksync) {
+        const output = await compile(source)
+        const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 })
+        const receipt = await transaction.wait()
+        return new Contract(receipt.contractAddress, output.interface, deployer)
+    } else {
+        const output = await zkCompile(hre, source);
+        console.log(output);
+        //const output = JSON.parse(zkSolcData);
+        if (!output['contracts']) {
+            console.log(output)
+            throw Error("Could not compile contract")
+        }
+        const fileOutput = output['contracts']['tmp.sol']
+        const contractOutput = fileOutput[Object.keys(fileOutput)[0]]
+        const abi = contractOutput['abi'];
+        const bytecode = contractOutput['evm']['bytecode']['object'];
+
+        const factory = new zk.ContractFactory(abi, bytecode, getWallets(hre)[0] as zk.Wallet, 'create');
+
+        // Encode and send the deploy transaction providing factory dependencies.
+        const contract = await factory.deploy();
+        await contract.deployed();
+        console.log("Contract deployed to:", contract.address);
+
+        return contract;
+    }
 }
 
 export const getWallets = (hre: HardhatRuntimeEnvironment): (ethers.Wallet | zk.Wallet)[] => {
