@@ -35,8 +35,11 @@ describe("SimulateTxAccessor", async () => {
     })
 
     describe("estimate", async () => {
+        
+        it('should enforce delegatecall', async () => {
+            // test not applicable for zkSync, therefore should pass (https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct)
+            if (hre.network.zksync) return;
 
-        /* it('should enforce delegatecall', async () => {
             const { accessor } = await setupTests()
             const source = `
             contract Test {
@@ -53,7 +56,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.revertedWith("SimulateTxAccessor should only be called via delegatecall")
 
             expect(await hre.ethers.provider.getCode(accessor.address)).to.be.eq(code)
-        }) */
+        })
 
         it('simulate call', async () => {
             const { safe, accessor, simulator } = await setupTests()
@@ -72,13 +75,14 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.lte(10000)
         })
 
-        /* it('simulate delegatecall', async () => {
+        it('simulate delegatecall', async () => {
             const { safe, accessor, interactor, simulator } = await setupTests()
-            await user1.sendTransaction({to: safe.address, value: parseEther("1")})
+            const sendTx = await user1.sendTransaction({to: safe.address, value: parseEther("1")})
+            await sendTx.wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             const tx = buildContractCall(interactor, "sendAndReturnBalance", [user2.address, parseEther("1")], 0, true)
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation])
-            const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData) 
+            const acccessibleData = await simulator.callStatic.simulate(accessor.address, simulationData)
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData)
             expect(
                 interactor.interface.decodeFunctionResult("sendAndReturnBalance", simulation.returnData)[0]
@@ -88,7 +92,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.true
             expect(
                 simulation.estimate.toNumber()
-            ).to.be.lte(15000)
+            ).to.be.lte(hre.network.zksync ? 30000 : 15000)
         })
 
         it('simulate revert', async () => {
@@ -103,7 +107,7 @@ describe("SimulateTxAccessor", async () => {
             ).to.be.false
             expect(
                 simulation.estimate.toNumber()
-            ).to.be.lte(20000)
-        }) */
+            ).to.be.lte(40000)
+        })
     })
 })
