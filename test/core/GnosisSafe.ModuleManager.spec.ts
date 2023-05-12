@@ -43,7 +43,7 @@ describe("ModuleManager", async () => {
         it('can not add module twice', async () => {
             const { safe } = await setupTests()
             // Use module for execution to see error 
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
@@ -131,9 +131,9 @@ describe("ModuleManager", async () => {
 
         it('emits event for disabled module', async () => {
             const { safe } = await setupTests()
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])).wait()
             await expect(await safe.isModuleEnabled(user1.address)).to.be.true
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
             await expect(await safe.isModuleEnabled(user2.address)).to.be.true
             await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address, user1.address], AddressOne])
 
@@ -167,7 +167,7 @@ describe("ModuleManager", async () => {
         it('emits event on execution success', async () => {
             const { safe, mock } = await setupTests()
             const user2Safe = safe.connect(user2)
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
 
             await expect(
                 user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
@@ -214,7 +214,7 @@ describe("ModuleManager", async () => {
         it('emits event on execution success', async () => {
             const { safe, mock } = await setupTests()
             const user2Safe = safe.connect(user2)
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
 
             await expect(
                 user2Safe.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
@@ -227,7 +227,7 @@ describe("ModuleManager", async () => {
             const user2Safe = safe.connect(user2)
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
 
-            await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed")
+            await (await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed")).wait()
             await expect(
                 await user2Safe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
             ).to.be.deep.eq([true, "0xdeaddeed"])
@@ -238,7 +238,7 @@ describe("ModuleManager", async () => {
             const user2Safe = safe.connect(user2)
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
 
-            await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message")
+            await (await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message")).wait()
             await expect(
                 await user2Safe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
             ).to.be.deep.eq([false, "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000"])
