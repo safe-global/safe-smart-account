@@ -69,11 +69,13 @@ export const migrationContract = async () => {
 export const getMock = async () => {
     if (!hre.network.zksync) {
         const Mock = await hre.ethers.getContractFactory("MockContract");
-        return await Mock.deploy();
+        return Mock.deploy();
     } else {
         const deployer = new Deployer(hre, getWallets(hre)[0] as zk.Wallet);
         const artifact = await deployer.loadArtifact("MockContract");
-        return await deployer.deploy(artifact);
+        const contract = await deployer.deploy(artifact);
+        await contract.deployTransaction.wait()
+        return contract
     }
 }
 
