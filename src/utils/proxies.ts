@@ -9,7 +9,7 @@ export const calculateProxyAddress = async (factory: Contract, singleton: string
         [ethers.utils.solidityKeccak256(["bytes"], [inititalizer]), nonce]
     )
     if (!hre.network.zksync){
-        const deploymentCode = ethers.utils.solidityPack(["bytes", "uint256"], [await getSafeProxyRuntimeCode(), singleton])
+        const deploymentCode = ethers.utils.solidityPack(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton])
         return ethers.utils.getCreate2Address(factory.address, salt, ethers.utils.keccak256(deploymentCode))
     } else {
         const bytecodehash = utils.hashBytecode(await getSafeProxyRuntimeCode())
