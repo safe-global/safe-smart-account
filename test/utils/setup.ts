@@ -7,6 +7,7 @@ import * as zk from 'zksync-web3';
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { zkCompile } from "../../src/zk-utils/zkcompiler";
+import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -66,8 +67,14 @@ export const migrationContract = async () => {
 
 
 export const getMock = async () => {
-    const Mock = await hre.ethers.getContractFactory("MockContract");
-    return await Mock.deploy();
+    if (!hre.network.zksync) {
+        const Mock = await hre.ethers.getContractFactory("MockContract");
+        return await Mock.deploy();
+    } else {
+        const deployer = new Deployer(hre, getWallets(hre)[0] as zk.Wallet);
+        const artifact = await deployer.loadArtifact("MockContract");
+        return await deployer.deploy(artifact);
+    }
 }
 
 export const getSafeTemplate = async () => {
