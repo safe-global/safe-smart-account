@@ -44,7 +44,7 @@ describe("GnosisSafe", async () => {
                     reverter.address, 0, data, 0,
                     { from: safe.address }
                 )
-            ).to.be.revertedWith("Transaction reverted without a reason")
+            ).to.be.revertedWith(hre.network.zksync ? "execution reverted" : "Transaction reverted without a reason")
         })
 
         it('should always revert', async () => {
