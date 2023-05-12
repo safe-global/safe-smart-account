@@ -49,7 +49,7 @@ describe("OwnerManager", async () => {
 
         it('can not add owner twice', async () => {
             const { safe } = await setupTests()
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).wait()
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
@@ -168,8 +168,8 @@ describe("OwnerManager", async () => {
 
         it('emits event for removed owner and threshold if changed', async () => {
             const { safe } = await setupTests()
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user3.address, 2], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).wait()
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user3.address, 2], [user1])).wait()
             await expect(await safe.getOwners()).to.be.deep.equal([user3.address, user2.address, user1.address])
             await expect(await safe.getThreshold()).to.be.deep.eq(BigNumber.from(2))
             await expect(await safe.isOwner(user1.address)).to.be.true
