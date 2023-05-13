@@ -8,6 +8,7 @@ import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { zkCompile } from "../../src/zk-utils/zkcompiler";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import { getZkContractFactoryByName } from "./zk";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -76,6 +77,14 @@ export const getMock = async () => {
         const contract = await deployer.deploy(artifact);
         await contract.deployTransaction.wait()
         return contract
+    }
+}
+
+export const getContractFactoryByName = async (contractName: string) => {
+    if (hre.network.zksync) {
+        return getZkContractFactoryByName(hre, contractName, getWallets(hre)[0] as zk.Wallet);
+    } else {
+        return hre.ethers.getContractFactory(contractName);
     }
 }
 

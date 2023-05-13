@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
+import { getContractFactoryByName, getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
@@ -12,10 +12,11 @@ describe("DebugTransactionGuard", async () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const safe = await getSafeWithOwners([user1.address])
-        const guardFactory = await hre.ethers.getContractFactory("DebugTransactionGuard");
+        const guardFactory = await getContractFactoryByName("DebugTransactionGuard")
         const guard = await guardFactory.deploy()
+        await guard.deployed()
         const mock = await getMock()
-        await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
+        await (await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])).wait()
         return {
             safe,
             mock,
