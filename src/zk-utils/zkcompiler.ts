@@ -31,7 +31,7 @@ export async function zkCompile(hre: HardhatRuntimeEnvironment, source: any): Pr
         }
     });
 
-    const output: string = await new Promise((resolve, reject) => {
+    const zkSolcData: string = await new Promise((resolve, reject) => {
         const process = exec(
             `${compilerPath} --standard-json --solc ${solcBuild.compilerPath}`,
             {
@@ -49,5 +49,17 @@ export async function zkCompile(hre: HardhatRuntimeEnvironment, source: any): Pr
         process.stdin!.end();
     });
 
-    return JSON.parse(output);
+    const output = JSON.parse(zkSolcData);
+    if (!output['contracts']) {
+        console.log(output)
+        throw Error("Could not compile contract")
+    }
+    const fileOutput = output['contracts']['tmp.sol']
+    const contractOutput = fileOutput[Object.keys(fileOutput)[0]]
+    const abi = contractOutput['abi']
+    const data = '0x' + contractOutput['evm']['bytecode']['object']
+    return {
+        "data": data,
+        "interface": abi
+    }
 }
