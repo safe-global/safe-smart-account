@@ -161,17 +161,8 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
         return new Contract(receipt.contractAddress, output.interface, deployer)
     } else {
         const output = await zkCompile(hre, source);
-        if (!output['contracts']) {
-            console.log(output)
-            throw Error("Could not compile contract")
-        }
-        const fileOutput = output['contracts']['tmp.sol']
-        const contractOutput = fileOutput[Object.keys(fileOutput)[0]]
-        const abi = contractOutput['abi'];
-        const bytecode = contractOutput['evm']['bytecode']['object'];
 
-        const factory = new zk.ContractFactory(abi, bytecode, getWallets(hre)[0] as zk.Wallet, 'create');
-
+        const factory = new zk.ContractFactory(output.abi, output.data, getWallets(hre)[0] as zk.Wallet, 'create');
         // Encode and send the deploy transaction providing factory dependencies.
         const contract = await factory.deploy();
         await contract.deployed();
