@@ -55,7 +55,7 @@ describe("GnosisSafe", async () => {
 
         it('should revert if called twice', async () => {
             const { template } = await setupTests()
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait()
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
             ).to.be.revertedWith("GS200")
@@ -217,9 +217,9 @@ describe("GnosisSafe", async () => {
             const payment = 133742
 
             const transferData = encodeTransfer(user1.address, payment)
-            await mock.givenCalldataReturnBool(transferData, true)
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, AddressZero)
-            
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait()
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, AddressZero)).wait()
+
             expect(await mock.callStatic.invocationCountForCalldata(transferData)).to.be.deep.equals(BigNumber.from(1));
 
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
@@ -230,8 +230,8 @@ describe("GnosisSafe", async () => {
             const payment = 133742
 
             const transferData = encodeTransfer(user2.address, payment)
-            await mock.givenCalldataReturnBool(transferData, true)
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, user2.address)
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait()
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, user2.address)).wait()
             
             expect(await mock.callStatic.invocationCountForCalldata(transferData)).to.be.deep.equals(BigNumber.from(1));
 
