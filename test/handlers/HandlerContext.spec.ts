@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeTemplate, getWallets } from "../utils/setup";
+import { getContractFactoryByName, getSafeTemplate, getWallets } from "../utils/setup";
 
 describe("HandlerContext", async () => {
 
@@ -10,8 +10,9 @@ describe("HandlerContext", async () => {
 
     const setup = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const TestHandler = await hre.ethers.getContractFactory("TestHandler");
+        const TestHandler = await getContractFactoryByName("TestHandler");
         const handler = await TestHandler.deploy();
+        await handler.deployed();
         return {
             safe: await getSafeTemplate(),
             handler
@@ -31,7 +32,7 @@ describe("HandlerContext", async () => {
 
     it('works with the Safe', async () => {
         const { safe, handler } = await setup();
-        await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+        await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)).wait()
         
         const response = await user1.call({
             to: safe.address,
