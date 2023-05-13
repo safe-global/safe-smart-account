@@ -49,6 +49,12 @@ export const getMultiSend = async () => {
     return MultiSend.attach(MultiSendDeployment.address);
 }
 
+export const getSignMessageLib = async () => {
+    const SignMessageLibDeployment = await deployments.get("SignMessageLib");
+    const SignMessageLib = await hre.ethers.getContractFactory("SignMessageLib");
+    return SignMessageLib.attach(SignMessageLibDeployment.address);
+}
+
 export const getMultiSendCallOnly = async () => {
     const MultiSendDeployment = await deployments.get("MultiSendCallOnly");
     const MultiSend = await hre.ethers.getContractFactory("MultiSendCallOnly");
