@@ -21,8 +21,10 @@ contract Test {
 describe("CreateCall", async () => {
 
     before(function () {
-        //  performCreate and performCreate2 functions of CreateCall.sol will not work on zkSync 
-        //  https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#create-create2
+        /**
+         * ## performCreate and performCreate2 functions of CreateCall.sol will not work on zkSync 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#create-create2
+         */
         if (hre.network.zksync) {
             this.skip()
         }

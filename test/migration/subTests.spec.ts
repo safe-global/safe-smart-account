@@ -17,7 +17,9 @@ interface TestSetup {
 export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
     before(function () {
-        //  There are no older versions of safe-contracts on zkSync, so safe to skip
+        /**
+         * Migration tests are not relevant for zkSync: there are no older versions of safe-contracts on zkSync
+         */
         if (hre.network.zksync) {
             this.skip()
         }
