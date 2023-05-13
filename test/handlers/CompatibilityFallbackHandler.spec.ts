@@ -191,17 +191,18 @@ describe("CompatibilityFallbackHandler", async () => {
         it.skip('can be called for any Safe', async () => {
         })
 
-        it('should revert changes', async () => {
+        it('should revert changes', async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { validator, killLib } = await setupTests()
             const code = await ethers.provider.getCode(validator.address)
-            const simulateCallPromise = validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("killme"))
-
-            if (!hre.network.zksync) {
-                expect(await simulateCallPromise).to.be.eq("0x")
-            } else {
-                await expect(simulateCallPromise).to.be.revertedWith("call revert exception")
-            }
-
+            expect(
+                await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("killme"))
+            ).to.be.eq("0x")
             expect(
                 await ethers.provider.getCode(validator.address)
             ).to.be.eq(code)

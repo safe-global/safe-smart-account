@@ -36,9 +36,12 @@ describe("SimulateTxAccessor", async () => {
 
     describe("estimate", async () => {
         
-        it('should enforce delegatecall', async () => {
-            // test not applicable for zkSync, therefore should pass (https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct)
-            if (hre.network.zksync) return;
+        it('should enforce delegatecall', async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
 
             const { accessor } = await setupTests()
             const source = `
