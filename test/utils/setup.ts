@@ -23,7 +23,7 @@ export const compatFallbackHandlerDeployment = async () => {
 }
 
 export const compatFallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("CompatibilityFallbackHandler");
+    return getContractFactoryByName("CompatibilityFallbackHandler");
 }
 
 export const getSafeSingleton = async () => {
