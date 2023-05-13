@@ -65,7 +65,7 @@ describe("MultiSendCallOnly", async () => {
 
         it('Can execute single ether transfer', async () => {
             const { safe, multiSend } = await setupTests()
-            await user1.sendTransaction({to: safe.address, value: parseEther("1")})
+            await (await user1.sendTransaction({to: safe.address, value: parseEther("1")})).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
@@ -81,7 +81,7 @@ describe("MultiSendCallOnly", async () => {
 
         it('reverts all tx if any fails', async () => {
             const { safe, multiSend } = await setupTests()
-            await user1.sendTransaction({to: safe.address, value: parseEther("1")})
+            await (await user1.sendTransaction({to: safe.address, value: parseEther("1")})).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
@@ -136,7 +136,7 @@ describe("MultiSendCallOnly", async () => {
 
         it('can execute combinations', async () => {
             const { safe, multiSend, storageSetter } = await setupTests()
-            await user1.sendTransaction({to: safe.address, value: parseEther("1")})
+            await (await user1.sendTransaction({to: safe.address, value: parseEther("1")})).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
