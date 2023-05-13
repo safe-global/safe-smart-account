@@ -6,9 +6,8 @@ import solc from "solc";
 import * as zk from 'zksync-web3';
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
-import { zkCompile } from "../../src/zk-utils/zkcompiler";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
-import { getZkContractFactoryByName } from "./zk";
+import { getZkContractFactoryByName, zkCompile } from "./zk";
 
 export const defaultCallbackHandlerDeployment = async () => {
     return await deployments.get("DefaultCallbackHandler");
@@ -162,7 +161,7 @@ export const deployContract = async (deployer: Wallet, source: string): Promise<
     } else {
         const output = await zkCompile(hre, source);
 
-        const factory = new zk.ContractFactory(output.abi, output.data, getWallets(hre)[0] as zk.Wallet, 'create');
+        const factory = new zk.ContractFactory(output.interface, output.data, getWallets(hre)[0] as zk.Wallet, 'create');
         // Encode and send the deploy transaction providing factory dependencies.
         const contract = await factory.deploy();
         await contract.deployed();
