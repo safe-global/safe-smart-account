@@ -28,9 +28,9 @@ describe("GnosisSafeL2", async () => {
     describe("execTransactions", async () => {
 
         /**
-         * ## In order not to trigger HandlePayment() in GnosisSafe.sol (which uses unsupported send() function)
-         * we don't set gasPrice and refundReceiver
-         * It should be possible to use HandlePayment() after a protocol upgrade (see link2) 
+         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
