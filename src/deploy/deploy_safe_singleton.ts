@@ -15,6 +15,17 @@ const deploy: DeployFunction = async function (
     log: true,
     deterministicDeployment: !network.zksync,
   });
+
+  // Deploy GnosisSafeZk with a fix for send() => call() to run tests
+  if (network.zksync)
+  {
+    await deploy("GnosisSafeZk", {
+      from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
+      args: [],
+      log: true,
+      deterministicDeployment: !network.zksync,
+    });
+  }
 };
 
 deploy.tags = ['singleton', 'main-suite']
