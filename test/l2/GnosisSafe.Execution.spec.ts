@@ -38,9 +38,9 @@ describe("GnosisSafeL2", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({
                 to: user1.address, nonce: await safe.nonce(), operation: 0, 
-                gasPrice: hre.network.zksync ? undefined : 1, 
+                gasPrice: 1, 
                 safeTxGas: 100000, 
-                refundReceiver: hre.network.zksync ? undefined : user2.address
+                refundReceiver: user2.address
             })
 
             await (await user1.sendTransaction({ to: safe.address, value: parseEther("1") })).wait()
