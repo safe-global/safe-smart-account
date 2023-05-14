@@ -9,7 +9,7 @@ import { safeContractUnderTest } from "../utils/config";
 describe("GnosisSafeL2", async () => {
 
     before(function () {
-        if (safeContractUnderTest() != "GnosisSafeL2") {
+        if (!new Set(["GnosisSafeL2", "GnosisSafeL2Zk"]).has(safeContractUnderTest())){
             this.skip()
         }
     });
