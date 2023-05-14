@@ -173,27 +173,45 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("GS011")
         })
 
+        /**
+         * ## This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
         it('should work with ether payment to deployer', async () => {
             const { template } = await setupTests()
             const payment = parseEther("10")
-            await user1.sendTransaction({ to: template.address, value: payment })
+            await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
             const userBalance = await hre.ethers.provider.getBalance(user1.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
-
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero)
+            
+            await template.setup(
+                [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero, 
+                { gasLimit: hre.network.zksync ? 500000 : undefined}
+            )
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(userBalance.lt(await hre.ethers.provider.getBalance(user1.address))).to.be.true
         })
 
+        /**
+         * ## This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
         it('should work with ether payment to account', async () => {
             const { template } = await setupTests()
             const payment = parseEther("10")
-            await user1.sendTransaction({ to: template.address, value: payment })
+            await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
 
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, user2.address)
+            await template.setup(
+                [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, user2.address,
+                { gasLimit: hre.network.zksync ? 500000 : undefined}
+            )
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(payment))
