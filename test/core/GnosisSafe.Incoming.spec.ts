@@ -71,9 +71,16 @@ describe("GnosisSafe", async () => {
 
         it('should throw for incoming eth with data', async () => {
             const { safe } = await setupTests()
-            await expect(
-                user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad" })
-            ).to.be.revertedWith("fallback function is not payable and was called with value 23")
+            if (hre.network.zksync) {
+                await expect(
+                    (await user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad", gasLimit: 150000 })).wait()
+                ).to.be.reverted
+            } else {
+
+                await expect(
+                    user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad" })
+                ).to.be.revertedWith("fallback function is not payable and was called with value 23")
+            }
         })
     })
 })
