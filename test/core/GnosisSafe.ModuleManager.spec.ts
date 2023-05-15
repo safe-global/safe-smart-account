@@ -169,8 +169,12 @@ describe("ModuleManager", async () => {
             const user2Safe = safe.connect(user2)
             await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
 
+            //Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
             await expect(
-                user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
+                user2Safe.execTransactionFromModule(
+                    mock.address, 0, "0xbaddad", 0, 
+                    { gasLimit: hre.network.zksync ? 500000 : undefined }
+                )
             ).to.emit(safe, "ExecutionFromModuleSuccess").withArgs(user2.address)
             expect(await mock.callStatic.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(BigNumber.from(1));
         })
@@ -180,9 +184,13 @@ describe("ModuleManager", async () => {
             const user2Safe = safe.connect(user2)
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
 
-            await mock.givenAnyRevert()
+            await (await mock.givenAnyRevert()).wait()
+            //Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
             await expect(
-                user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0)
+                user2Safe.execTransactionFromModule(
+                    mock.address, 0, "0xbaddad", 0,
+                    { gasLimit: hre.network.zksync ? 500000 : undefined }
+                )
             ).to.emit(safe, "ExecutionFromModuleFailure").withArgs(user2.address)
         })
     })
@@ -216,8 +224,12 @@ describe("ModuleManager", async () => {
             const user2Safe = safe.connect(user2)
             await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait()
 
+            //Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
             await expect(
-                user2Safe.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
+                user2Safe.execTransactionFromModuleReturnData(
+                    mock.address, 0, "0xbaddad", 0,
+                    { gasLimit: hre.network.zksync ? 500000 : undefined }
+                )
             ).to.emit(safe, "ExecutionFromModuleSuccess").withArgs(user2.address)
             expect(await mock.callStatic.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(BigNumber.from(1));
         })
@@ -228,8 +240,12 @@ describe("ModuleManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
 
             await (await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed")).wait()
+            //Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
             await expect(
-                await user2Safe.callStatic.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
+                await user2Safe.callStatic.execTransactionFromModuleReturnData(
+                    mock.address, 0, "0xbaddad", 0,
+                    { gasLimit: hre.network.zksync ? 500000 : undefined }
+                )
             ).to.be.deep.eq([true, "0xdeaddeed"])
         })
 
