@@ -186,10 +186,10 @@ describe("GnosisSafe", async () => {
             const userBalance = await hre.ethers.provider.getBalance(user1.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
             
-            await template.setup(
+            await (await template.setup(
                 [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero, 
                 { gasLimit: hre.network.zksync ? 500000 : undefined}
-            )
+            )).wait()
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(userBalance.lt(await hre.ethers.provider.getBalance(user1.address))).to.be.true
@@ -208,10 +208,10 @@ describe("GnosisSafe", async () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
 
-            await template.setup(
+            await (await template.setup(
                 [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, user2.address,
                 { gasLimit: hre.network.zksync ? 500000 : undefined}
-            )
+            )).wait()
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(payment))
