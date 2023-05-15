@@ -211,9 +211,9 @@ describe("ModuleManager", async () => {
         it('emits event on execution failure', async () => {
             const { safe, mock } = await setupTests()
             const user2Safe = safe.connect(user2)
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await mock.givenAnyRevert()
+            await (await mock.givenAnyRevert()).wait();
             await expect(
                 user2Safe.execTransactionFromModuleReturnData(mock.address, 0, "0xbaddad", 0)
             ).to.emit(safe, "ExecutionFromModuleFailure").withArgs(user2.address)
