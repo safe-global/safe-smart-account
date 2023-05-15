@@ -1,24 +1,31 @@
 methods {
     // 
-    getThreshold() returns (uint256) envfree
-    disableModule(address,address)
-    nonce() returns (uint256) envfree
+    function getThreshold() external returns (uint256) envfree;
+    function disableModule(address,address) external;
+    function nonce() external returns (uint256) envfree;
 
     // harnessed
-    getModule(address) returns (address) envfree
+    function getModule(address) external returns (address) envfree;
+
+    // optional
+    function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
+    function execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation) external returns (bool);
+    function execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
 }
 
 definition noHavoc(method f) returns bool =
-    f.selector != execTransactionFromModuleReturnData(address,uint256,bytes,uint8).selector
-    && f.selector != execTransactionFromModule(address,uint256,bytes,uint8).selector 
-    && f.selector != execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes).selector;
+    f.selector != sig:execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation).selector
+    && f.selector != sig:execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation).selector 
+    && f.selector != sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 
 definition reachableOnly(method f) returns bool =
-    f.selector != setup(address[],uint256,address,bytes,address,address,uint256,address).selector
-    && f.selector != simulateAndRevert(address,bytes).selector;
+    f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
+    && f.selector != sig:simulateAndRevert(address,bytes).selector;
 
 /// Nonce must never decrease
-rule nonceMonotonicity(method f) {
+rule nonceMonotonicity(method f) filtered {
+    f -> noHavoc(f) && reachableOnly(f)
+} {
     uint256 nonceBefore = nonce();
 
     calldataarg args; env e;
@@ -26,7 +33,7 @@ rule nonceMonotonicity(method f) {
 
     uint256 nonceAfter = nonce();
 
-    assert nonceAfter == nonceBefore || nonceAfter == nonceBefore + 1;
+    assert nonceAfter == nonceBefore || to_mathint(nonceAfter) == nonceBefore + 1;
 }
 
 
