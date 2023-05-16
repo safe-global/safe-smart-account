@@ -1,6 +1,6 @@
 import { DeployFunction } from "@elvis-krop/hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getDeployer } from "../zk-utils/getDeployer";
+import getZkDeployer from "../zk-utils/getZkDeployer";
 
 const deploy: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
@@ -10,17 +10,16 @@ const deploy: DeployFunction = async function (
   const { deploy } = deployments;
 
   await deploy("GnosisSafeL2", {
-    from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
+    from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
     args: [],
     log: true,
     deterministicDeployment: !network.zksync,
   });
 
   // Deploy GnosisSafeL2Zk with a fix for send() => call() to run tests
-  if (network.zksync)
-  {
+  if (network.zksync) {
     await deploy("GnosisSafeL2Zk", {
-      from: network.zksync ? getDeployer(hre).zkWallet.privateKey : deployer,
+      from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
       args: [],
       log: true,
       deterministicDeployment: !network.zksync,
