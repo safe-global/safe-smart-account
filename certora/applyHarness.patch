@@ -1,0 +1,24 @@
+diff -druN Safe.sol Safe.sol
+--- Safe.sol	2023-04-11 15:01:13
++++ Safe.sol	2023-04-11 15:01:55
+@@ -76,7 +76,7 @@
+          * so we create a Safe with 0 owners and threshold 1.
+          * This is an unusable Safe, perfect for the singleton
+          */
+-        threshold = 1;
++        // threshold = 1; MUNGED: remove and add to constructor of the harness
+     }
+ 
+     /**
+diff -druN base/Executor.sol base/Executor.sol
+--- base/Executor.sol	2023-04-11 15:01:13
++++ base/Executor.sol	2023-04-11 15:01:18
+@@ -25,6 +25,8 @@
+         Enum.Operation operation,
+         uint256 txGas
+     ) internal returns (bool success) {
++        // MUNGED lets just be a bit more optimistic, `execute` does nothing and always returns true
++        return true;
+         if (operation == Enum.Operation.DelegateCall) {
+             // solhint-disable-next-line no-inline-assembly
+             assembly {
