@@ -35,10 +35,10 @@
   resolved "https://registry.yarnpkg.com/@balena/dockerignore/-/dockerignore-1.0.2.tgz#9ffe4726915251e8eb69f44ef3547e0da2c03e0d"
   integrity sha512-wMue2Sy4GAVTk6Ic4tJVcnfdau+gx2EnG7S+uAEe+TWJFqE4YoWN4/H8MSLj4eYJKxGg26lZwboEniNiNwZQ6Q==
 
-"@elvis-krop/hardhat-deploy@0.11.28-f":
-  version "0.11.28-f"
-  resolved "https://registry.yarnpkg.com/@elvis-krop/hardhat-deploy/-/hardhat-deploy-0.11.28-f.tgz#8438ddec9e8adde9c3ac1e067d402fbe28f87f61"
-  integrity sha512-Z/80eX8Ep4LrcKfJ+KKSFGlM+Fkt1w8DW9wpp+ThF/b6dnQEJUC2Q+/d3v8D5x4YYzNwjbTi7/7pelxxAKWc5Q==
+"@elvis-krop/hardhat-deploy@0.11.29-ethers5.5.0":
+  version "0.11.29-ethers5.5.0"
+  resolved "https://registry.yarnpkg.com/@elvis-krop/hardhat-deploy/-/hardhat-deploy-0.11.29-ethers5.5.0.tgz#8f2d8569bdac1a24e969d752bcfa40f7f58ee4de"
+  integrity sha512-5HlCBk1alQm/q91Bc+TPTdNJbEe/HdVLTiEDQeArmAH294OAORjrrZgWCJf1z2qxAHd+IKHy0Xb/HX4GX4RfkA==
   dependencies:
     "@ethersproject/abi" "5.5.0"
     "@ethersproject/abstract-signer" "5.5.0"

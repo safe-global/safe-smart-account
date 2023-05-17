@@ -47,7 +47,7 @@
     "url": "https://github.com/gnosis/gnosis-safe/issues"
   },
   "devDependencies": {
-    "@elvis-krop/hardhat-deploy": "0.11.28-f",
+    "@elvis-krop/hardhat-deploy": "0.11.29-ethers5.5.0",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "@gnosis.pm/safe-singleton-factory": "git+https://github.com/protofire/safe-singleton-factory.git#zksync",
     "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
