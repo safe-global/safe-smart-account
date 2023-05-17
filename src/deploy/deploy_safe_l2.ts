@@ -17,7 +17,7 @@ const deploy: DeployFunction = async function (
   });
 
   // Deploy GnosisSafeL2Zk with a fix for send() => call() to run tests
-  if (network.zksync) {
+  if (network.name === "zkSyncLocal") {
     await deploy("GnosisSafeL2Zk", {
       from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
       args: [],

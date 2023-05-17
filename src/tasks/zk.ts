@@ -11,11 +11,9 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
         // due to problems with zkSyncLocal node we modify the mocha configuration
         hre.config.mocha.retries = 5;
         hre.config.mocha.timeout = 90_000;
+        hre.config.mocha.slow = 30_000;
 
-        await hre.run("deploy", {
-            nonDeterministicZk: true,
-            ...taskArgs
-        });
+        await hre.run("deploy", { nonDeterministicZk: true, ...taskArgs });
     } else {
         await runSuper(taskArgs);
     }
@@ -24,15 +22,9 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
 subtask(TASK_DEPLOY_RUN_DEPLOY, "deploy run only")
     .setAction(async (taskArgs: { nonDeterministicZk?: boolean }, hre, runSuper) => {
         if (hre.network.zksync && !taskArgs.nonDeterministicZk) {
-            await hre.run("run", {
-                ...taskArgs,
-                script: "./src/deploy-zk-deterministic.ts"
-            });
+            await hre.run("run", { ...taskArgs, script: "./src/deploy-zk-deterministic.ts" });
         } else {
-            await runSuper({
-                ...taskArgs,
-                ...(hre.network.zksync && { reset: true })
-            });
+            await runSuper({ ...taskArgs, ...(hre.network.zksync && { reset: true }) });
         }
     });
 

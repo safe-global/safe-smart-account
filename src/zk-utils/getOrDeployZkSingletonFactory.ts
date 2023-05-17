@@ -14,17 +14,17 @@ async function getOrDeployZkSingletonFactory(zkWallet: zk.Wallet, deploymentInfo
     const bytecode = await zkWallet.provider.getCode(factoryAddress);
 
     if (bytecode == "0x") {
-        console.log(`\tsending eth to create2 contract deployer address (${factoryDeployerAddress})`);
+        process.stdout.write(`\tsending eth to create2 contract deployer address (${factoryDeployerAddress})`);
         const transferTx = await zkWallet.sendTransaction({
             to: factoryDeployerAddress,
             value: ethers.utils.parseEther(ethers.utils.formatEther(funding.toString()))
         });
-        console.log(` (tx: ${transferTx.hash})...\n`);
+        process.stdout.write(` (tx: ${transferTx.hash})...\n`);
         await transferTx.wait();
 
-        console.log(`deploying create2 deployer contract (at ${factoryAddress}) using deterministic deployment`);
+        process.stdout.write(`deploying create2 deployer contract (at ${factoryAddress}) using deterministic deployment`);
         const sentTx = await zkWallet.provider.sendTransaction(signedTx);
-        console.log(` (tx: ${sentTx.hash})...\n`);
+        process.stdout.write(` (tx: ${sentTx.hash})...\n`);
         await sentTx.wait();
 
         const receipt = await zkWallet.provider.getTransactionReceipt(sentTx.hash);
@@ -35,7 +35,7 @@ async function getOrDeployZkSingletonFactory(zkWallet: zk.Wallet, deploymentInfo
             throw new Error("Failed to deploy deployer factory: deployed address is not the same as expected factory address");
         }
     } else {
-        console.log(`   create2 deployer contract already deployed at ${factoryAddress}`);
+        process.stdout.write(`   create2 deployer contract already deployed at ${factoryAddress}`);
     }
 
     return new zk.Contract(factoryAddress, factoryABI, zkWallet);

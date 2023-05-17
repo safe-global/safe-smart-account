@@ -15,7 +15,7 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
     "MultiSendCallOnly",
     "SignMessageLib",
     "GnosisSafe",
-    "GnosisSafeL2",
+    "GnosisSafeL2"
 ]);
 
 ;(async () => {
@@ -40,7 +40,9 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
                 console.log(`reusing ${contractName} at ${contractAddress}`);
 
                 if (!(await deploymentManager.deploymentsExtension.getOrNull(contractName))) {
+                    const extendedArtifact = await hre.deployments.getExtendedArtifact(contractName);
                     await deploymentManager.saveDeployment(contractName, {
+                        ...extendedArtifact,
                         address: contractAddress,
                         abi: artifact.abi,
                         bytecode,
@@ -51,13 +53,13 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
                 continue;
             }
 
-            console.log(`deploying ${contractName}`);
+            process.stdout.write(`deploying ${contractName}`);
             const tx = await singletonFactory.deployContract(salt, bytecodeHash, input, {
                 customData: {
                     factoryDeps: [artifact.bytecode]
                 }
             });
-            console.log(` (tx: ${tx.hash})...`);
+            process.stdout.write(` (tx: ${tx.hash})...`);
 
             await tx.wait();
             const receipt = await deployer.zkWallet.provider.getTransactionReceipt(tx.hash);
@@ -67,15 +69,17 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
                 throw new Error(`Failed to deploy ${contractName}`);
             }
 
-            console.log(`: deployed at ${receipt.contractAddress} with ${receipt.gasUsed} gas\n`);
+            process.stdout.write(`: deployed at ${receipt.contractAddress} with ${receipt.gasUsed} gas\n`);
+            const extendedArtifact = await hre.deployments.getExtendedArtifact(contractName);
             await deploymentManager.saveDeployment(contractName, {
+                ...extendedArtifact,
                 address: contractAddress,
                 abi: artifact.abi,
                 transactionHash: tx.hash,
                 receipt,
                 bytecode: artifact.bytecode,
-                deployedBytecode: artifact.deployedBytecode,
-            })
+                deployedBytecode: artifact.deployedBytecode
+            });
         }
 
         process.exit(0);
