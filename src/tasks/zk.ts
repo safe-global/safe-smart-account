@@ -36,4 +36,24 @@ subtask(TASK_DEPLOY_RUN_DEPLOY, "deploy run only")
         }
     });
 
+subtask("etherscan-verify").setAction(async (taskArgs, hre, runSuper) => {
+    if (hre.network.zksync) {
+        console.log("Running zk verification");
+        const deployedContracts = await hre.deployments.all()
+        for (const contract of Object.keys(deployedContracts)) {
+            const deployment = await hre.deployments.get(contract)
+            deployment.address
+            const verificationId = await hre.run("verify:verify", {
+                address: deployment.address
+            });
+            const verificationStatus = await hre.run("verify-status", { verificationId: verificationId });
+            if (verificationStatus != -1)
+                console.log(`${contract}: Successfuly verified on block explorer`);
+        }
+        
+    } else {
+        await runSuper(taskArgs);
+    }
+});
+
 export {};

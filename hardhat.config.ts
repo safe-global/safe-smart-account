@@ -1,6 +1,7 @@
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-verify";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
@@ -134,6 +135,7 @@ const userConfig: HardhatUserConfig = {
             url: "https://testnet.era.zksync.dev",
             ethNetwork: "goerli",
             zksync: true,
+            verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
         },
         zkSyncLocal: {
             chainId: 270,
