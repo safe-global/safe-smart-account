@@ -34,7 +34,7 @@ const TASK_VERIFY_ZK_ALL = "verify:verify-zk-all";
 subtask(TASK_VERIFY_ZK_ALL).setAction(async (_, hre) => {
     if (!hre.network.zksync) throw new Error("Current subtask works only for zk networks!");
 
-    console.log(`\nRunning zk verification on block explorer: ${hre.network.verifyURL}`);
+    console.log(`\nRunning zk verification on block explorer`);
     const deployedContracts = await hre.deployments.all();
 
     for (const contract of Object.keys(deployedContracts)) {
