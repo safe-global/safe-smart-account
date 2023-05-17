@@ -6,6 +6,7 @@ methods {
 
     // harnessed
     function getModule(address) external returns (address) envfree;
+    function getSafeGuard() external returns (address) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
@@ -82,3 +83,18 @@ invariant noDeadEnds(address dead, address lost)
             requireInvariant noDeadEnds(module, dead);
         }
     }
+
+
+rule guardAddressChange(method f) filtered {
+    f -> f.selector != sig:simulateAndRevert(address,bytes).selector
+} {
+    address guardBefore = getSafeGuard();
+
+    calldataarg args; env e;
+    f(e, args);
+
+    address guardAfter = getSafeGuard();
+
+    assert guardBefore != guardAfter => 
+        f.selector == sig:setGuard(address).selector;
+}
