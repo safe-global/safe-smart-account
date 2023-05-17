@@ -1,7 +1,8 @@
 import "@elvis-krop/hardhat-deploy";
 import { TASK_DEPLOY, TASK_DEPLOY_RUN_DEPLOY } from "@elvis-krop/hardhat-deploy";
+import { TASK_VERIFY_VERIFY } from "@matterlabs/hardhat-zksync-verify/dist/src/constants";
 import "@nomiclabs/hardhat-ethers";
-import { TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
+import { TASK_RUN, TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
 import { subtask, task } from "hardhat/config";
 
 task(TASK_DEPLOY).addFlag("nonDeterministicZk");
@@ -13,7 +14,7 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
         hre.config.mocha.timeout = 90_000;
         hre.config.mocha.slow = 30_000;
 
-        await hre.run("deploy", { nonDeterministicZk: true, ...taskArgs });
+        await hre.run(TASK_DEPLOY, { nonDeterministicZk: true, ...taskArgs });
     } else {
         await runSuper(taskArgs);
     }
@@ -22,30 +23,35 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
 subtask(TASK_DEPLOY_RUN_DEPLOY, "deploy run only")
     .setAction(async (taskArgs: { nonDeterministicZk?: boolean }, hre, runSuper) => {
         if (hre.network.zksync && !taskArgs.nonDeterministicZk) {
-            await hre.run("run", { ...taskArgs, script: "./src/deploy-zk-deterministic.ts" });
+            await hre.run(TASK_RUN, { ...taskArgs, script: "./src/deploy-zk-deterministic.ts" });
         } else {
             await runSuper({ ...taskArgs, ...(hre.network.zksync && { reset: true }) });
         }
     });
 
-subtask("etherscan-verify").setAction(async (taskArgs, hre, runSuper) => {
-    if (hre.network.zksync) {
-        console.log("Running zk verification");
-        const deployedContracts = await hre.deployments.all()
-        for (const contract of Object.keys(deployedContracts)) {
-            const deployment = await hre.deployments.get(contract)
-            deployment.address
-            const verificationId = await hre.run("verify:verify", {
-                address: deployment.address
-            });
-            const verificationStatus = await hre.run("verify-status", { verificationId: verificationId });
-            if (verificationStatus != -1)
-                console.log(`${contract}: Successfuly verified on block explorer`);
+const TASK_VERIFY_ZK_ALL = "verify:verify-zk-all";
+
+subtask(TASK_VERIFY_ZK_ALL).setAction(async (_, hre) => {
+    if (!hre.network.zksync) throw new Error("Current subtask works only for zk networks!");
+
+    console.log(`\nRunning zk verification on block explorer: ${hre.network.verifyURL}`);
+    const deployedContracts = await hre.deployments.all();
+
+    for (const contract of Object.keys(deployedContracts)) {
+        const deployment = await hre.deployments.get(contract);
+
+        try {
+            console.log(`\nVerifying ${contract} at ${deployment.address}...`);
+            await hre.run(TASK_VERIFY_VERIFY, { address: deployment.address });
+        } catch (error) {
+            if (error instanceof Error && error.message.includes("contract is already verified")) {
+                console.log(`\x1b[32m${contract} is already verified!\x1b[0m`);
+            } else {
+                // Re-throw error if it is not about verified issue
+                throw error;
+            }
         }
-        
-    } else {
-        await runSuper(taskArgs);
     }
 });
 
-export {};
+export { TASK_VERIFY_ZK_ALL };

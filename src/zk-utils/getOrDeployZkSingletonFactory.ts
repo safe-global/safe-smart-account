@@ -35,7 +35,7 @@ async function getOrDeployZkSingletonFactory(zkWallet: zk.Wallet, deploymentInfo
             throw new Error("Failed to deploy deployer factory: deployed address is not the same as expected factory address");
         }
     } else {
-        process.stdout.write(`   create2 deployer contract already deployed at ${factoryAddress}`);
+        process.stdout.write(`\tcreate2 deployer contract already deployed at ${factoryAddress}\n\n`);
     }
 
     return new zk.Contract(factoryAddress, factoryABI, zkWallet);

@@ -5,6 +5,8 @@ import { loadSolc } from "../utils/solc";
 
 task("local-verify", "Verifies that the local deployment files correspond to the on chain code")
     .setAction(async (_, hre) => {
+        console.log("\n\tVerify that the local deployment files correspond to the on chain code");
+
         if (!hre.network.zksync) {
             const allowedSourceKey = ['keccak256', 'content']
             const deployedContracts = await hre.deployments.all()
