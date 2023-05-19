@@ -3,6 +3,27 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
+import "../interfaces/IERC165.sol";
+
+interface ModuleGuard is IERC165 {
+    function checkTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address msgSender
+    ) external;
+
+    function checkAfterExecution(bytes32 txHash, bool success) external;
+}
+
+abstract contract BaseModuleGuard is ModuleGuard {
+    function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
+        return
+            interfaceId == type(ModuleGuard).interfaceId || // TODO
+            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
+    }
+}
 
 /**
  * @title Module Manager - A contract managing Safe modules
@@ -18,8 +39,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     event DisabledModule(address indexed module);
     event ExecutionFromModuleSuccess(address indexed module);
     event ExecutionFromModuleFailure(address indexed module);
+    event ChangedModuleGuard(address indexed guard);
 
     address internal constant SENTINEL_MODULES = address(0x1);
+
+    // keccak256("module_manager.module_guard.address")
+    bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
     mapping(address => address) internal modules;
 
@@ -86,10 +111,30 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     ) public virtual returns (bool success) {
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
+
+        address moduleGuard = getModuleGuard();
+        {
+            if (moduleGuard != address(0)) {
+                ModuleGuard(moduleGuard).checkTransaction(
+                    // Transaction info
+                    to,
+                    value,
+                    data,
+                    operation,
+                    msg.sender
+                );
+            }
+        }
+
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, type(uint256).max);
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
+
+        if (moduleGuard != address(0)) {
+            bytes32 dataHash = keccak256(data);
+            ModuleGuard(moduleGuard).checkAfterExecution(dataHash, success);
+        }
     }
 
     /**
@@ -187,5 +232,38 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
             size := extcodesize(account)
         }
         return size > 0;
+    }
+
+    /**
+     * @dev Set a module guard that checks transactions initiated by the module before execution
+     *      This can only be done via a Safe transaction.
+     *      ⚠️ IMPORTANT: Since a module guard has full power to block Safe transaction execution initiatied via a module,
+     *        a broken module guard can cause a denial of service for the Safe modules. Make sure to carefully
+     *        audit the module guard code and design recovery mechanisms.
+     * @notice Set Module Guard `moduleGuard` for the Safe. Make sure you trust the module guard.
+     * @param moduleGuard The address of the module guard to be used or the 0 address to disable the module guard.
+     */
+    function setModuleGuard(address moduleGuard) external authorized {
+        if (moduleGuard != address(0)) {
+            require(ModuleGuard(moduleGuard).supportsInterface(type(ModuleGuard).interfaceId), "GS300");
+        }
+        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            sstore(slot, moduleGuard)
+        }
+        emit ChangedModuleGuard(moduleGuard);
+    }
+
+    /**
+     * @dev Internal method to retrieve the current module guard
+     * @return moduleGuard The address of the guard
+     */
+    function getModuleGuard() internal view returns (address moduleGuard) {
+        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            moduleGuard := sload(slot)
+        }
     }
 }

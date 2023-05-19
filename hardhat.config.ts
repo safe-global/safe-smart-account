@@ -6,6 +6,7 @@ import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { getSingletonFactoryInfo } from "@gnosis.pm/safe-singleton-factory";
+import "hardhat-contract-sizer";
 
 const argv = yargs
     .option("network", {
