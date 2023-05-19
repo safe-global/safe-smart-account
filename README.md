@@ -15,12 +15,28 @@ Usage
 yarn
 ```
 
-### Run all tests:
+### Testing
+
+To run the tests:
 
 ```bash
 yarn build
 yarn test
 ```
+
+Optionally, if you want to run the ERC-4337 compatibility test, it uses a live bundler and node, so it contains some pre-requisites:
+
+1. Define the environment variables:
+
+```
+ERC4337_TEST_BUNDLER_URL=
+ERC4337_TEST_NODE_URL=
+ERC4337_TEST_SINGLETON_ADDRESS=
+ERC4337_TEST_SAFE_FACTORY_ADDRESS=
+MNEMONIC=
+```
+
+2. Pre-fund the executor account derived from the mnemonic with some Native Token to cover the deployment of an ERC4337 module and the pre-fund of the Safe for the test operation.
 
 ### Deployments
 
