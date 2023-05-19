@@ -18,5 +18,6 @@
       "resolveJsonModule": true
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["./src/index.ts", "./types"]
+    "include": ["./src/index.ts", "./types"],
+    "files": ["./hardhat.config.ts"]
   }
