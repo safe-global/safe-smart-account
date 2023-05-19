@@ -52,3 +52,14 @@ rule safeOwnerCountCannotBeUpdatedByNonOwnerUpdatingFunctions(method f) filtered
     assert ownerCountAfter == ownerCountBefore;
 }
 
+rule onlyEnableModuleFunctionCanAddModule(method f, address moduleAddress) filtered {
+  f -> f.selector != sig: enableModule(address).selector
+}
+{
+    requireInvariant safeIsSetup;
+    calldataarg args; env e;
+    require !isModuleEnabled(e, moduleAddress);
+    f(e, args);
+    assert !isModuleEnabled(e, moduleAddress);
+
+}
