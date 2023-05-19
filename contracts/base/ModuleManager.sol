@@ -6,13 +6,7 @@ import "./Executor.sol";
 import "../interfaces/IERC165.sol";
 
 interface ModuleGuard is IERC165 {
-    function checkTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address msgSender
-    ) external;
+    function checkTransaction(address to, uint256 value, bytes memory data, Enum.Operation operation, address msgSender) external;
 
     function checkAfterExecution(bytes32 txHash, bool success) external;
 }
@@ -113,17 +107,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         address moduleGuard = getModuleGuard();
-        {
-            if (moduleGuard != address(0)) {
-                ModuleGuard(moduleGuard).checkTransaction(
-                    // Transaction info
-                    to,
-                    value,
-                    data,
-                    operation,
-                    msg.sender
-                );
-            }
+
+        if (moduleGuard != address(0)) {
+            ModuleGuard(moduleGuard).checkTransaction(to, value, data, operation, msg.sender);
         }
 
         // Execute transaction without further confirmations.
