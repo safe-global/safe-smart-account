@@ -4,6 +4,7 @@ import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
 import "./GuardManager.sol";
+
 /**
  * @title Module Manager - A contract managing Safe modules
  * @notice Modules are extensions with unlimited access to a Safe that can be added to a Safe by its owners.
@@ -88,15 +89,15 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
         // Execute transaction without further confirmations.
         address guard = getGuard();
-        
-        if(guard!=address(0)) {
+
+        if (guard != address(0)) {
             Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
         }
         success = execute(to, value, data, operation, type(uint256).max);
 
         if (guard != address(0)) {
-                bytes32 dataHash = keccak256(data);
-                Guard(guard).checkAfterExecution(dataHash, success);
+            bytes32 dataHash = keccak256(data);
+            Guard(guard).checkAfterExecution(dataHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
