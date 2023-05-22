@@ -23,7 +23,7 @@ describe("GuardManager", async () => {
         const mock = await getMock();
 
         const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
-        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
+        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x945b8148"]);
         await mock.givenCalldataReturnBool(guardEip165Calldata, true);
         const safe = await getSafeWithOwners([user2.address]);
         await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2]);
