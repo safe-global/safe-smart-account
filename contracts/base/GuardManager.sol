@@ -20,6 +20,7 @@ interface Guard is IERC165 {
         address msgSender
     ) external;
 
+    function checkModuleTransaction(address to, uint256 value, bytes memory data, Enum.Operation operation, address msgSender) external;
     function checkAfterExecution(bytes32 txHash, bool success) external;
 }
 

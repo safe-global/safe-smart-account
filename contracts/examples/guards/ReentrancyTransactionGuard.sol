@@ -65,4 +65,20 @@ contract ReentrancyTransactionGuard is BaseGuard {
     function checkAfterExecution(bytes32, bool) external override {
         getGuard().active = false;
     }
+
+    /**
+     * @notice Called by the Safe contract before a transaction is executed via a module.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+    * @param msgSender Account executing the transaction.
+     */
+    function checkModuleTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address msgSender
+    ) external override {}
 }

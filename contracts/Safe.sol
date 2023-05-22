@@ -39,8 +39,7 @@ contract Safe is
     SecuredTokenTransfer,
     ISignatureValidatorConstants,
     FallbackManager,
-    StorageAccessible,
-    GuardManager
+    StorageAccessible
 {
     using SafeMath for uint256;
 
