@@ -6,6 +6,7 @@ methods {
 
     // harnessed
     function getModule(address) external returns (address) envfree;
+    function getNativeTokenBalance() external returns (uint256) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
@@ -89,3 +90,42 @@ invariant noDeadEnds(address dead, address lost)
             requireInvariant noDeadEnds(module, dead);
         }
     }
+
+rule nativeTokenBalanceSpending(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    uint256 balanceBefore = getNativeTokenBalance();
+
+    calldataarg args; env e;
+    f(e, args);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert balanceAfter < balanceBefore => 
+        f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector
+        || f.selector == sig:execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation).selector
+        || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation).selector;
+}
+
+rule nativeTokenBalanceSpendingExecTransaction(
+        address to,
+        uint256 value,
+        bytes data,
+        SafeHarness.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas, 
+        uint256 gasPrice, 
+        address gasToken, 
+        address refundReceiver, 
+        bytes signatures
+    ) {
+    uint256 balanceBefore = getNativeTokenBalance();
+
+    env e;
+    execTransaction(e, to, value, data , operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert balanceAfter < balanceBefore => 
+        to_mathint(balanceBefore) - to_mathint(value) == to_mathint(balanceAfter);
+}
