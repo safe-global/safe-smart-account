@@ -16,26 +16,23 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
     bytes4 internal constant SIMULATE_SELECTOR = bytes4(keccak256("simulate(address,bytes)"));
 
     address internal constant SENTINEL_MODULES = address(0x1);
-    bytes4 internal constant UPDATED_MAGIC_VALUE = 0x1626ba7e;
 
     /**
      * @notice Legacy EIP-1271 signature validation method.
      * @dev Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
-     * @param _data Arbitrary length data signed on the behalf of address(msg.sender).
+     * @param _dataHash Hash of the data signed on the behalf of address(msg.sender).
      * @param _signature Signature byte array associated with _data.
      * @return The EIP-1271 magic value.
      */
-    function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
+    function isValidSignature(bytes32 _dataHash, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         Safe safe = Safe(payable(msg.sender));
-        bytes memory messageData = encodeMessageDataForSafe(safe, _data);
-        bytes32 messageHash = keccak256(messageData);
         if (_signature.length == 0) {
-            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
+            require(safe.signedMessages(_dataHash) != 0, "Hash not approved");
         } else {
-            safe.checkSignatures(messageHash, messageData, _signature);
+            safe.checkSignatures(_dataHash, _signature);
         }
-        return EIP1271_MAGIC_VALUE;
+        return EIP1271_MAGIC_VALUE; // EIP-1271 MAGIC_VALUE
     }
 
     /**
@@ -66,18 +63,6 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      */
     function getMessageHashForSafe(Safe safe, bytes memory message) public view returns (bytes32) {
         return keccak256(encodeMessageDataForSafe(safe, message));
-    }
-
-    /**
-     * @notice Implementation of updated EIP-1271 signature validation method.
-     * @param _dataHash Hash of the data signed on the behalf of address(msg.sender)
-     * @param _signature Signature byte array associated with _dataHash
-     * @return Updated EIP1271 magic value if signature is valid, otherwise 0x0
-     */
-    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) external view returns (bytes4) {
-        ISignatureValidator validator = ISignatureValidator(msg.sender);
-        bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
-        return (value == EIP1271_MAGIC_VALUE) ? UPDATED_MAGIC_VALUE : bytes4(0);
     }
 
     /**
