@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build": "hardhat compile",
-        "build:ts": "yarn rimraf dist && tsc",
+        "build:ts": "yarn rimraf dist && tsc -p tsconfig.prod.json",
         "test": "hardhat test",
         "coverage": "hardhat coverage",
         "benchmark": "yarn test benchmark/*.ts",
