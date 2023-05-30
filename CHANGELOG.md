@@ -2,6 +2,52 @@
 
 This changelog only contains changes starting from version 1.3.0
 
+# Version 1.4.1
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
+
+### Core contracts
+
+-   `Safe` at `0xc962E67D9490E154D81181879ddf4CD3b65D2132`
+-   `SafeL2` at `0x1eb4681c549d995AbdC4aB189cAbb9f00B508cAb`
+
+### Factory contracts
+
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+
+### Handler contracts
+
+-   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
+-   `CompatibilityFallbackHandler` at `0x2a15DE4410d4c8af0A7b6c12803120f43C42B820`
+
+### Lib contracts
+
+-   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
+-   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
+-   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
+-   `SignMessageLib` at `0x58FCe385Ed16beB4BCE49c8DF34c7d6975807520`
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+
+## Changes
+
+### Bugfixes
+
+#### Remove `gasleft()` usage in `setupModules`
+
+Issue: [#568](https://github.com/safe-global/safe-contracts/issues/568)
+
+`setupModules` made a call to `gasleft()` that is invalid in the ERC-4337 standard. The call was replaced with `type(uint256).max` to forward all the available gas instead.
+
+
 # Version 1.4.0
 
 ## Compiler settings
