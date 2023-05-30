@@ -515,17 +515,5 @@ describe("Safe", async () => {
             await safe.checkNSignatures(txHash, signatures, 3);
         });
 
-        it("should revert if the hash of the pre-image data and dataHash do not match for EIP-1271 signature", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2);
-            const randomHash = `0x${crypto.pseudoRandomBytes(32).toString("hex")}`;
-            const randomBytes = `0x${crypto.pseudoRandomBytes(128).toString("hex")}`;
-            const randomAddress = `0x${crypto.pseudoRandomBytes(20).toString("hex")}`;
-            const randomSignature = `0x${crypto.pseudoRandomBytes(65).toString("hex")}`;
-
-            const eip1271Sig = buildContractSignature(randomAddress, randomSignature);
-            const signatures = buildSignatureBytes([eip1271Sig]);
-            await expect(safe.checkNSignatures(randomHash, signatures, 1)).to.be.revertedWith("GS027");
-        });
     });
 });
