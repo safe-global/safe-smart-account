@@ -23,20 +23,25 @@ definition reachableOnly(method f) returns bool =
     f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
     && f.selector != sig:simulateAndRevert(address,bytes).selector;
 
+definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
 
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
-    f -> noHavoc(f) && reachableOnly(f) &&
+    f -> reachableOnly(f) &&
          f.selector != sig:getStorageAt(uint256,uint256).selector
 } {
     uint256 nonceBefore = nonce();
+
+    // The nonce may overflow, but since it's increased only by 1 with each transaction, it is not realistically possible to overflow it.
+    require nonceBefore < MAX_UINT256();
 
     calldataarg args; env e;
     f(e, args);
 
     uint256 nonceAfter = nonce();
 
-    assert nonceAfter == nonceBefore || to_mathint(nonceAfter) == nonceBefore + 1;
+    assert nonceAfter != nonceBefore =>
+        to_mathint(nonceAfter) == nonceBefore + 1 && f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 }
 
 
@@ -129,7 +134,7 @@ rule fallbackHandlerAddressChange(method f) filtered {
 
     address fbHandlerAfter = fallbackHandlerAddress;
 
-    assert fbHandlerBefore != fbHandlerAfter => 
+    assert fbHandlerBefore != fbHandlerAfter =>
         f.selector == sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector || f.selector == sig:setFallbackHandler(address).selector;
 }
 
@@ -145,6 +150,6 @@ rule guardAddressChange(method f) filtered {
 
     address guardAfter = getSafeGuard();
 
-    assert guardBefore != guardAfter => 
+    assert guardBefore != guardAfter =>
         f.selector == sig:setGuard(address).selector;
 }
