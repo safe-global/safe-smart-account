@@ -90,7 +90,7 @@ abstract contract OwnerManager is SelfAuthorized {
     }
 
     /**
-     * @notice Replaces the owner `oldOwner` in the Safe with `newOwner`.
+     * @notice Replaces the owner `oldOwner` in the Safe with `newOwner`. For more details https://forum.openzeppelin.com/t/cant-swapowner/33994
      * @dev This can only be done via a Safe transaction.
      * @param prevOwner Owner that pointed to the owner to be replaced in the linked list
      * @param oldOwner Owner address to be replaced.
