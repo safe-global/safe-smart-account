@@ -6,6 +6,7 @@ methods {
 
     // harnessed
     function getModule(address) external returns (address) envfree;
+    function getSafeGuard() external returns (address) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
@@ -25,7 +26,8 @@ definition reachableOnly(method f) returns bool =
 
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
-    f -> noHavoc(f) && reachableOnly(f)
+    f -> noHavoc(f) && reachableOnly(f) &&
+         f.selector != sig:getStorageAt(uint256,uint256).selector
 } {
     uint256 nonceBefore = nonce();
 
@@ -105,3 +107,44 @@ invariant sigletonAddressNeverChanges()
     ghostSingletonAddress == 0
     filtered { f -> reachableOnly(f) && f.selector != sig:getStorageAt(uint256,uint256).selector }
 
+ghost address fallbackHandlerAddress {
+    init_state axiom fallbackHandlerAddress == 0;
+}
+
+// This is Safe's fallback handler storage slot:
+// 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5
+// converted to decimal because certora doesn't seem to support hex yet.
+hook Sstore SafeHarness.(slot 49122629484629529244014240937346711770925847994644146912111677022347558721749) address newFallbackHandlerAddress STORAGE {
+    fallbackHandlerAddress = newFallbackHandlerAddress;
+}
+
+rule fallbackHandlerAddressChange(method f) filtered {
+    f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
+         f.selector != sig:getStorageAt(uint256,uint256).selector
+} {
+    address fbHandlerBefore = fallbackHandlerAddress;
+
+    calldataarg args; env e;
+    f(e, args);
+
+    address fbHandlerAfter = fallbackHandlerAddress;
+
+    assert fbHandlerBefore != fbHandlerAfter => 
+        f.selector == sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector || f.selector == sig:setFallbackHandler(address).selector;
+}
+
+
+rule guardAddressChange(method f) filtered {
+    f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
+         f.selector != sig:getStorageAt(uint256,uint256).selector
+} {
+    address guardBefore = getSafeGuard();
+
+    calldataarg args; env e;
+    f(e, args);
+
+    address guardAfter = getSafeGuard();
+
+    assert guardBefore != guardAfter => 
+        f.selector == sig:setGuard(address).selector;
+}
