@@ -1,3 +1,4 @@
+import "@nomiclabs/hardhat-ethers";
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
@@ -41,7 +42,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6";
-const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
+const soliditySettings = SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
 
 const deterministicDeployment = (network: string): DeterministicDeploymentInfo => {
     const info = getSingletonFactoryInfo(parseInt(network));
@@ -132,7 +133,7 @@ const userConfig: HardhatUserConfig = {
     },
 };
 if (NODE_URL) {
-    userConfig.networks!!.custom = {
+    userConfig.networks!.custom = {
         ...sharedNetworkConfig,
         url: NODE_URL,
     };
