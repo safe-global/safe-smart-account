@@ -134,6 +134,16 @@ describe("CompatibilityFallbackHandler", async () => {
             const ethSignSig = await signHash(user2, calculateSafeMessageHash(validator, dataHash, await chainId()));
             const validatorPreImageMessage = preimageSafeMessageHash(validator, dataHash, await chainId());
             const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId());
+
+            console.log("//////////////////////////");
+            console.log("dataHash");
+            console.log(dataHash);
+            console.log("validatorPreImageMessage");
+            console.log(validatorPreImageMessage);
+            console.log("signerSafeMessageHash");
+            console.log(signerSafeMessageHash);
+            console.log("//////////////////////////");
+
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 

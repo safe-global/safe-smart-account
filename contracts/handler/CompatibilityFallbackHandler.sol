@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
-
+import "hardhat/console.sol";
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
@@ -27,8 +27,22 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
     function isValidSignature(bytes32 _dataHash, bytes memory _signature) public view override returns (bytes4) {
         // Caller should be a Safe
         Safe safe = Safe(payable(msg.sender));
+        bytes memory messageData = encodeMessageDataForSafe(safe, _dataHash);
+        bytes32 messageHash = keccak256(messageData);
+
+        console.log("====================");
+        console.log("_dataHash");
+        console.logBytes32(_dataHash);
+        console.log("messageData");
+        console.logBytes(messageData);
+        console.log("messageHash");
+        console.logBytes32(messageHash);
+        console.log("_signature");
+        console.logBytes(_signature);
+        console.log("====================");
+
         if (_signature.length == 0) {
-            require(safe.signedMessages(_dataHash) != 0, "Hash not approved");
+            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
             safe.checkSignatures(_dataHash, _signature);
         }
@@ -40,18 +54,18 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @param message Raw message bytes.
      * @return Message hash.
      */
-    function getMessageHash(bytes memory message) public view returns (bytes32) {
+    function getMessageHash(bytes32 message) public view returns (bytes32) {
         return getMessageHashForSafe(Safe(payable(msg.sender)), message);
     }
 
     /**
      * @dev Returns the pre-image of the message hash (see getMessageHashForSafe).
      * @param safe Safe to which the message is targeted.
-     * @param message Message that should be encoded.
+     * @param messageHash Hash of the message that should be encoded.
      * @return Encoded message.
      */
-    function encodeMessageDataForSafe(Safe safe, bytes memory message) public view returns (bytes memory) {
-        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+    function encodeMessageDataForSafe(Safe safe, bytes32 messageHash) public view returns (bytes memory) {
+        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, messageHash));
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash);
     }
 
@@ -61,7 +75,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @param message Message that should be hashed.
      * @return Message hash.
      */
-    function getMessageHashForSafe(Safe safe, bytes memory message) public view returns (bytes32) {
+    function getMessageHashForSafe(Safe safe, bytes32 message) public view returns (bytes32) {
         return keccak256(encodeMessageDataForSafe(safe, message));
     }
 

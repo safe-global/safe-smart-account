@@ -12,7 +12,7 @@ import "./common/SecuredTokenTransfer.sol";
 import "./common/StorageAccessible.sol";
 import "./interfaces/ISignatureValidator.sol";
 import "./external/SafeMath.sol";
-
+import "hardhat/console.sol";
 /**
  * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
  * @dev Most important concepts:
@@ -309,6 +309,13 @@ contract Safe is
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
+                console.log("------------valdating contract sig--------------");
+                console.log("dataHash");
+                console.logBytes32(dataHash);
+                console.log("contractSignature");
+                console.logBytes(contractSignature);
+                console.log("--------------------------");
+
                 require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
