@@ -23,6 +23,7 @@ definition reachableOnly(method f) returns bool =
     f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
     && f.selector != sig:simulateAndRevert(address,bytes).selector;
 
+
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
     f -> noHavoc(f) && reachableOnly(f) &&
@@ -84,6 +85,27 @@ invariant noDeadEnds(address dead, address lost)
             requireInvariant noDeadEnds(module, dead);
         }
     }
+
+
+// The singleton is a private variable, so we need to use a ghost variable to track it.
+ghost address ghostSingletonAddress {
+    init_state axiom ghostSingletonAddress == 0;
+}
+
+hook Sstore SafeHarness.(slot 0) address newSingletonAddress STORAGE {
+    ghostSingletonAddress = newSingletonAddress;
+}
+
+// This is EIP-1967's singleton storage slot:
+// 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
+// converted to decimal because certora doesn't seem to support hex yet.
+hook Sstore SafeHarness.(slot 24440054405305269366569402256811496959409073762505157381672968839269610695612) address newSingletonAddress STORAGE {
+    ghostSingletonAddress = newSingletonAddress;
+}
+
+invariant sigletonAddressNeverChanges()
+    ghostSingletonAddress == 0
+    filtered { f -> reachableOnly(f) && f.selector != sig:getStorageAt(uint256,uint256).selector }
 
 ghost address fallbackHandlerAddress {
     init_state axiom fallbackHandlerAddress == 0;
