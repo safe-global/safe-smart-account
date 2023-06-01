@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { Contract } from "@ethersproject/contracts";
+import { Contract } from "ethers";
 import { parseEther } from "@ethersproject/units";
 import { expect } from "chai";
 import hre, { ethers, waffle } from "hardhat";
