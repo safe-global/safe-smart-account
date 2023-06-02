@@ -5,6 +5,8 @@ import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
@@ -30,6 +32,10 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         Safe safe = Safe(payable(msg.sender));
         bytes memory messageData = encodeMessageDataForSafe(safe, _data);
         bytes32 messageHash = keccak256(messageData);
+        console.log("SOLIDITY");
+        console.logBytes(messageData);
+        console.logBytes32(messageHash);
+        console.log("SOLIDITY END");
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {

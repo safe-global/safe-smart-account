@@ -1,4 +1,4 @@
-import { buildContractSignature } from "./../../src/utils/execution";
+import { buildContractSignature, calculateSafeMessageHash } from "./../../src/utils/execution";
 import { expect } from "chai";
 import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
@@ -137,7 +137,7 @@ describe("CompatibilityFallbackHandler", async () => {
             expect(await validator.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0x")).to.be.eq("0x1626ba7e");
         });
 
-        it("should return magic value if enough owners signed and allow a mix different signature types", async () => {
+        it.only("should return magic value if enough owners signed and allow a mix different signature types", async () => {
             const { validator, signerSafe } = await setupTests();
             const dataHash = ethers.utils.keccak256("0xbaddad");
             const typedDataSig = {
@@ -149,8 +149,9 @@ describe("CompatibilityFallbackHandler", async () => {
                 ),
             };
             const ethSignSig = await signHash(user2, calculateSafeMessageHash(validator, dataHash, await chainId()));
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, dataHash, await chainId());
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId());
+            const validatorSafeMessageHash = calculateSafeMessageHash(validator, dataHash, await chainId());
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorSafeMessageHash, await chainId());
+
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
