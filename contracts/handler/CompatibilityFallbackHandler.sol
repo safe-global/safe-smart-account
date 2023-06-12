@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
-    
+
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
