@@ -98,8 +98,7 @@ describe("CompatibilityFallbackHandler", async () => {
                 ),
             };
             const sig2 = await signHash(user2, calculateSafeMessageHash(validator, "0xbaddad", await chainId()));
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, "0xbaddad", await chainId());
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId());
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, calculateSafeMessageHash(validator, "0xbaddad", await chainId()), await chainId());
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
@@ -137,7 +136,7 @@ describe("CompatibilityFallbackHandler", async () => {
             expect(await validator.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0x")).to.be.eq("0x1626ba7e");
         });
 
-        it.only("should return magic value if enough owners signed and allow a mix different signature types", async () => {
+        it("should return magic value if enough owners signed and allow a mix different signature types", async () => {
             const { validator, signerSafe } = await setupTests();
             const dataHash = ethers.utils.keccak256("0xbaddad");
             const typedDataSig = {

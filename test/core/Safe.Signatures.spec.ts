@@ -224,11 +224,8 @@ describe("Safe", async () => {
             const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address);
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address]);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
-            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId());
 
-            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
-            // we need to use the pre-image of the transaction hash to calculate the message hash
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId());
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, calculateSafeTransactionHash(safe, tx, await chainId()), await chainId());
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
@@ -354,12 +351,9 @@ describe("Safe", async () => {
             const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address);
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address]);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
-            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId());
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
 
-            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
-            // we need to use the pre-image of the transaction hash to calculate the message hash
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId());
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHash, await chainId());
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
@@ -371,7 +365,7 @@ describe("Safe", async () => {
                 signerSafeSig,
             ]);
 
-            await safe.checkSignatures(txHash, txHashData, signatures);
+            await safe.checkSignatures(txHash, "0x", signatures);
         });
     });
 
@@ -473,12 +467,9 @@ describe("Safe", async () => {
             const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address);
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address]);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
-            const txHashData = preimageSafeTransactionHash(safe, tx, await chainId());
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
 
-            // IMPORTANT: because the safe uses the old EIP-1271 interface which uses `bytes` instead of `bytes32` for the message
-            // we need to use the pre-image of the transaction hash to calculate the message hash
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHashData, await chainId());
+            const safeMessageHash = calculateSafeMessageHash(signerSafe, txHash, await chainId());
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
@@ -490,7 +481,7 @@ describe("Safe", async () => {
                 signerSafeSig,
             ]);
 
-            await safe.checkNSignatures(txHash, txHashData, signatures, 5);
+            await safe.checkNSignatures(txHash, "0x", signatures, 5);
         });
 
         it("should be able to require no signatures", async () => {
@@ -529,19 +520,6 @@ describe("Safe", async () => {
             await expect(safe.checkNSignatures(txHash, txHashData, signatures, 4)).to.be.revertedWith("GS020");
 
             await safe.checkNSignatures(txHash, txHashData, signatures, 3);
-        });
-
-        it("should revert if the hash of the pre-image data and dataHash do not match for EIP-1271 signature", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2);
-            const randomHash = `0x${crypto.pseudoRandomBytes(32).toString("hex")}`;
-            const randomBytes = `0x${crypto.pseudoRandomBytes(128).toString("hex")}`;
-            const randomAddress = `0x${crypto.pseudoRandomBytes(20).toString("hex")}`;
-            const randomSignature = `0x${crypto.pseudoRandomBytes(65).toString("hex")}`;
-
-            const eip1271Sig = buildContractSignature(randomAddress, randomSignature);
-            const signatures = buildSignatureBytes([eip1271Sig]);
-            await expect(safe.checkNSignatures(randomHash, randomBytes, signatures, 1)).to.be.revertedWith("GS027");
         });
     });
 });
