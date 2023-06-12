@@ -98,7 +98,11 @@ describe("CompatibilityFallbackHandler", async () => {
                 ),
             };
             const sig2 = await signHash(user2, calculateSafeMessageHash(validator, "0xbaddad", await chainId()));
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, calculateSafeMessageHash(validator, "0xbaddad", await chainId()), await chainId());
+            const signerSafeMessageHash = calculateSafeMessageHash(
+                signerSafe,
+                calculateSafeMessageHash(validator, "0xbaddad", await chainId()),
+                await chainId(),
+            );
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 

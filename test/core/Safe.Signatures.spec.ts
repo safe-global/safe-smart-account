@@ -225,7 +225,11 @@ describe("Safe", async () => {
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address]);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
 
-            const safeMessageHash = calculateSafeMessageHash(signerSafe, calculateSafeTransactionHash(safe, tx, await chainId()), await chainId());
+            const safeMessageHash = calculateSafeMessageHash(
+                signerSafe,
+                calculateSafeTransactionHash(safe, tx, await chainId()),
+                await chainId(),
+            );
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 

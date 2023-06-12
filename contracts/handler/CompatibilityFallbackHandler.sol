@@ -4,9 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
-
-import "hardhat/console.sol";
-
+    
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
@@ -76,7 +74,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @param _signature Signature byte array associated with _dataHash
      * @return Updated EIP1271 magic value if signature is valid, otherwise 0x0
      */
-    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) public view returns (bytes4) {
+    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) external view override returns (bytes4) {
         ISignatureValidator validator = ISignatureValidator(msg.sender);
         bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
         return (value == EIP1271_MAGIC_VALUE) ? UPDATED_MAGIC_VALUE : bytes4(0);
