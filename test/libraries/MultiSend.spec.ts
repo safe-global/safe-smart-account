@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import { deployContract, getMock, getMultiSend, getSafeWithOwners } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 
 describe("MultiSend", async () => {
@@ -174,5 +175,31 @@ describe("MultiSend", async () => {
                 ),
             ).to.be.eq("0x" + "baddad".padEnd(64, "0"));
         });
+
+        it("can bubble up revert message on call", async () => {
+            const { safe, multiSend, mock } = await setupTests();
+            await mock.givenCalldataRevertWithMessage("0x01", "Computer says Nah");
+            
+            const user2Safe = safe.connect(user2);
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
+            
+            const txs: MetaTransaction[] = [
+                buildSafeTransaction(
+                    Object.assign({
+                        to: mock.address,
+                        data: "0xbaddad",
+                        operation: 0
+                    })
+                )
+            ];
+            const safeTx = buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            
+            await expect(await user2Safe.callStatic.execTransactionFromModuleReturnData(safeTx.to, safeTx.value, safeTx.data, safeTx.operation)).to.be.deep.eq([
+                false,
+                "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
+            ]);
+        });
+        
     });
 });
