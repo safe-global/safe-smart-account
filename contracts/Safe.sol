@@ -310,10 +310,7 @@ contract Safe is
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                require(
-                    ISignatureValidator(currentOwner).isValidSignature(abi.encode(dataHash), contractSignature) == EIP1271_MAGIC_VALUE,
-                    "GS024"
-                );
+                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r

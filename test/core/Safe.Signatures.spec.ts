@@ -4,7 +4,6 @@ import { expect } from "chai";
 import { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import crypto from "crypto";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import {
     safeSignTypedData,
@@ -230,9 +229,9 @@ describe("Safe", async () => {
                 calculateSafeTransactionHash(safe, tx, await chainId()),
                 await chainId(),
             );
+
             const signerSafeOwnerSignature = await signHash(user5, safeMessageHash);
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
-
             await expect(
                 logGas(
                     "Execute cancel transaction with 5 owners (1 owner is another Safe)",
@@ -261,7 +260,7 @@ describe("Safe", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000020" +
                 "00" + // r, s, v
                 "0000000000000000000000000000000000000000000000000000000000000000"; // Some data to read
-            await expect(safe.checkSignatures(txHash, txHashData, signatures)).to.be.revertedWith("GS021");
+            await expect(safe.checkSignatures(txHash, "0x", signatures)).to.be.revertedWith("GS021");
         });
 
         it("should fail if signatures data is not present", async () => {
