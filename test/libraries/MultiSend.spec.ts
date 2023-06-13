@@ -199,5 +199,38 @@ describe("MultiSend", async () => {
                 "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
             ]);
         });
+
+        it("can bubble up revert message on delegatecall", async () => {
+            const { safe, multiSend, mock } = await setupTests();
+            
+            const user2Safe = safe.connect(user2);
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            const { data: setRevertMessageData } = await mock.populateTransaction.givenCalldataRevertWithMessage("0xbaddad", "Some random message")
+
+            const txs: MetaTransaction[] = [
+                buildSafeTransaction(
+                    Object.assign({
+                        to: mock.address,
+                        data: setRevertMessageData,
+                        operation: 1
+                    })
+                ),
+                buildSafeTransaction(
+                    Object.assign({
+                        to: mock.address,
+                        data: "0xbaddad",
+                        operation: 1
+                    })
+                )
+            ];
+            const { data } = buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            
+            await expect(await user2Safe.callStatic.execTransactionFromModuleReturnData(multiSend.address, 0, data, 1))
+            .to.be.deep.eq([
+                false,
+                "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
+            ]);
+        });
+
     });
 });
