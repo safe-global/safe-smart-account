@@ -34,6 +34,10 @@ contract Test {
     }
 }`
 
+/**
+ * ## Partially emulate selfdestruct behaviour (in terms of transfer funds) on zkSync to make related tests work rather than skip.
+ * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct
+ */
 export const killLibSourceZk = `
 contract Test {
     function killme() public {
