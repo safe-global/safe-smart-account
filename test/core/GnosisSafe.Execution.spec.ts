@@ -86,13 +86,16 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
          * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
          * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should emit event for failed call execution if gasPrice > 0', async () => {
+        it('should emit event for failed call execution if gasPrice > 0', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe, reverter } = await setupTests()
             // Fund refund
             const sendTx = await user1.sendTransaction({ to: safe.address, value: 10000000 });
@@ -133,13 +136,17 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
          * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
          * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should emit event for failed delegatecall execution if gasPrice > 0', async () => {
+        it('should emit event for failed delegatecall execution if gasPrice > 0', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
+            
             const { safe, reverter } = await setupTests()
             const sendTx = await user1.sendTransaction({ to: safe.address, value: 10000000 })
             await sendTx.wait();
@@ -164,13 +171,16 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
          * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
          * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should emit payment in success event', async () => {
+        it('should emit payment in success event', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({
                 to: user1.address, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 100000, refundReceiver: user2.address
@@ -197,13 +207,16 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
          * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
          * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should emit payment in failure event', async () => {
+        it('should emit payment in failure event', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe, storageSetter } = await setupTests()
             const data = storageSetter.interface.encodeFunctionData("setStorage", [0xbaddad])
             const tx = buildSafeTransaction({
@@ -230,13 +243,16 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
          * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
          * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should be possible to manually increase gas', async () => {
+        it('should be possible to manually increase gas', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe } = await setupTests()
             const gasUserSource = `
             contract GasUser {

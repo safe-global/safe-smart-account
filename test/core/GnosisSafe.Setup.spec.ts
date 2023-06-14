@@ -174,12 +174,15 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * Skip for zkSync: This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
          * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should work with ether payment to deployer', async () => {
+        it('should work with ether payment to deployer', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { template } = await setupTests()
             const payment = parseEther("10")
             await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
@@ -196,12 +199,15 @@ describe("GnosisSafe", async () => {
         })
 
         /**
-         * ## This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * Skip for zkSync: This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
          * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
          * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
          * @see https://twitter.com/zksync/status/1644459406828924934
          */
-        it('should work with ether payment to account', async () => {
+        it('should work with ether payment to account', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { template } = await setupTests()
             const payment = parseEther("10")
             await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
