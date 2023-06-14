@@ -15,16 +15,6 @@ const deploy: DeployFunction = async function (
     log: true,
     deterministicDeployment: !network.zksync,
   });
-
-  // Deploy GnosisSafeL2Zk with a fix for send() => call() to run tests
-  if (network.name === "zkSyncLocal") {
-    await deploy("GnosisSafeL2Zk", {
-      from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
-      args: [],
-      log: true,
-      deterministicDeployment: !network.zksync,
-    });
-  }
 };
 
 deploy.tags = ['l2', 'l2-suite']

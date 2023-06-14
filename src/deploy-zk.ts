@@ -12,10 +12,7 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
     "MultiSendCallOnly",
     "SignMessageLib",
     "GnosisSafe",
-    "GnosisSafeL2",
-    // Deploy GnosisSafeZk and GnosisSafeL2Zk with a fix for send() => call() to run tests
-    "GnosisSafeZk",
-    "GnosisSafeL2Zk"
+    "GnosisSafeL2"
 ]);
 
 ;(async () => {

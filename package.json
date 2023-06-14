@@ -18,7 +18,7 @@
     "build:zk": "hardhat compile --network zkSyncLocal",
     "build:ts": "yarn rimraf dist && tsc --build tsconfig.lib.json",
     "test": "hardhat test",
-    "test:zk": "cross-env SAFE_CONTRACT_UNDER_TEST=GnosisSafeL2Zk hardhat test --network zkSyncLocal",
+    "test:zk": "cross-env SAFE_CONTRACT_UNDER_TEST=GnosisSafeL2 hardhat test --network zkSyncLocal",
     "coverage": "hardhat coverage",
     "benchmark": "yarn test benchmark/*.ts",
     "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
