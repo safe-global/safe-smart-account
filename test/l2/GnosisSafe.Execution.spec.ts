@@ -38,7 +38,8 @@ describe("GnosisSafeL2", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({
                 to: user1.address, nonce: await safe.nonce(), operation: 0, 
-                gasPrice: 1, 
+                // Making gasPrice=0 fpr zkSync to skip send() function usage
+                gasPrice: hre.network.zksync ? 0 : 1, 
                 safeTxGas: 100000, 
                 refundReceiver: user2.address
             })
