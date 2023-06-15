@@ -14,8 +14,8 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `Safe` at `0xc962E67D9490E154D81181879ddf4CD3b65D2132`
--   `SafeL2` at `0x1eb4681c549d995AbdC4aB189cAbb9f00B508cAb`
+-   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
+-   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
 
 ### Factory contracts
 
@@ -24,14 +24,14 @@ Solidity optimizer: `disabled`
 ### Handler contracts
 
 -   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
--   `CompatibilityFallbackHandler` at `0x2a15DE4410d4c8af0A7b6c12803120f43C42B820`
+-   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
 
 ### Lib contracts
 
 -   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
 -   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
 -   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
--   `SignMessageLib` at `0x58FCe385Ed16beB4BCE49c8DF34c7d6975807520`
+-   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
 
 ### Storage reader contracts
 
