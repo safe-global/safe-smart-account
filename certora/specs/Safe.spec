@@ -7,6 +7,7 @@ methods {
     // harnessed
     function getModule(address) external returns (address) envfree;
     function getSafeGuard() external returns (address) envfree;
+    function getNativeTokenBalance() external returns (uint256) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
@@ -21,14 +22,17 @@ definition noHavoc(method f) returns bool =
 
 definition reachableOnly(method f) returns bool =
     f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
-    && f.selector != sig:simulateAndRevert(address,bytes).selector;
+    && f.selector != sig:simulateAndRevert(address,bytes).selector
+    // getStorageAt cannot be used because we have a hook to sstore
+    // A quote from the Certora team:
+    // "If it’s called from an internal context it is fine but as a public function that can be called with any argument it cannot have hooks applied on."
+    && f.selector != sig:getStorageAt(uint256,uint256).selector;
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
 
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
-    f -> reachableOnly(f) &&
-         f.selector != sig:getStorageAt(uint256,uint256).selector
+    f -> reachableOnly(f)
 } {
     uint256 nonceBefore = nonce();
 
@@ -40,7 +44,7 @@ rule nonceMonotonicity(method f) filtered {
 
     uint256 nonceAfter = nonce();
 
-    assert nonceAfter != nonceBefore =>
+    assert nonceAfter != nonceBefore => 
         to_mathint(nonceAfter) == nonceBefore + 1 && f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 }
 
@@ -152,4 +156,81 @@ rule guardAddressChange(method f) filtered {
 
     assert guardBefore != guardAfter =>
         f.selector == sig:setGuard(address).selector;
+}
+
+
+rule nativeTokenBalanceSpending(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    uint256 balanceBefore = getNativeTokenBalance();
+
+    calldataarg args; env e;
+    f(e, args);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert balanceAfter < balanceBefore => 
+        f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector
+        || f.selector == sig:execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation).selector
+        || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation).selector;
+}
+
+rule nativeTokenBalanceSpendingExecTransaction(
+        address to,
+        uint256 value,
+        bytes data,
+        SafeHarness.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas, 
+        uint256 gasPrice, 
+        address gasToken, 
+        address refundReceiver, 
+        bytes signatures
+    ) {
+    uint256 balanceBefore = getNativeTokenBalance();
+
+    env e;
+    execTransaction(e, to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert 
+        gasPrice == 0 => to_mathint(balanceBefore - value) <= to_mathint(balanceAfter)
+        // When the gas price is non-zero and the gas token is zero (zero = native token), the refund params should also be taken into account.
+        || gasPrice > 0 && gasToken == 0 => to_mathint(balanceBefore - value - (gasPrice * (baseGas + safeTxGas))) <= to_mathint(balanceAfter);
+}
+
+rule nativeTokenBalanceSpendingExecTransactionFromModule(
+        address to,
+        uint256 value,
+        bytes data,
+        SafeHarness.Operation operation
+    ) {
+    uint256 balanceBefore = getNativeTokenBalance();
+    env e;
+
+    execTransactionFromModule(e, to, value, data, operation);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert balanceAfter < balanceBefore => 
+        to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
+}
+
+
+rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
+        address to,
+        uint256 value,
+        bytes data,
+        SafeHarness.Operation operation
+) {
+    uint256 balanceBefore = getNativeTokenBalance();
+    env e;
+
+    execTransactionFromModuleReturnData(e, to, value, data, operation);
+
+    uint256 balanceAfter = getNativeTokenBalance();
+
+    assert balanceAfter < balanceBefore => 
+        to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
 }
