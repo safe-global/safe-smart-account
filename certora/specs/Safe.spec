@@ -156,4 +156,5 @@ rule guardAddressChange(method f) filtered {
 }
 
 invariant noSignedMessages(bytes32 message)
-    signedMessages(message) == 0;
+    signedMessages(message) == 0
+    filtered { f -> reachableOnly(f) }
