@@ -23,4 +23,8 @@ contract SafeHarness is Safe {
     function getSafeGuard() public view returns (address) {
         return getGuard();
     }
+
+    function getNativeTokenBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
 }
