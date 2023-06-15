@@ -1,4 +1,4 @@
-import { DeploymentsManager } from "@elvis-krop/hardhat-deploy/dist/src/DeploymentsManager";
+import { DeploymentsManager } from "hardhat-deploy/dist/src/DeploymentsManager";
 import hre from "hardhat";
 import * as zk from "zksync-web3";
 import getZkDeployer from "./zk-utils/getZkDeployer";

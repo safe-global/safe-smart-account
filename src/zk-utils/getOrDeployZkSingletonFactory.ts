@@ -1,4 +1,4 @@
-import { DeterministicDeploymentInfo } from "@elvis-krop/hardhat-deploy/dist/types";
+import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 import { ethers } from "ethers";
 import * as zk from "zksync-web3";
 import { factoryABI } from "./constants";

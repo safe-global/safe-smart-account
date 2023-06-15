@@ -1,5 +1,5 @@
-import "@elvis-krop/hardhat-deploy";
-import { TASK_DEPLOY, TASK_DEPLOY_RUN_DEPLOY } from "@elvis-krop/hardhat-deploy";
+import "hardhat-deploy";
+import { TASK_DEPLOY, TASK_DEPLOY_RUN_DEPLOY } from "hardhat-deploy";
 import { TASK_VERIFY_VERIFY } from "@matterlabs/hardhat-zksync-verify/dist/src/constants";
 import "@nomiclabs/hardhat-ethers";
 import { TASK_RUN, TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";

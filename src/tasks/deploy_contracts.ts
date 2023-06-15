@@ -1,4 +1,4 @@
-import "@elvis-krop/hardhat-deploy";
+import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import { task } from "hardhat/config";
 import { TASK_VERIFY_ZK_ALL } from "./zk";

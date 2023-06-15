@@ -47,7 +47,6 @@
     "url": "https://github.com/gnosis/gnosis-safe/issues"
   },
   "devDependencies": {
-    "@elvis-krop/hardhat-deploy": "0.11.29-ethers5.5.0",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "@gnosis.pm/safe-singleton-factory": "git+https://github.com/protofire/safe-singleton-factory.git#zksync",
     "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
@@ -77,6 +76,7 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "5.5.0",
     "hardhat": "^2.2.1",
+    "hardhat-deploy": "0.11.30",
     "husky": "^5.1.3",
     "prettier": "^2.1.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.60",
@@ -91,5 +91,8 @@
   },
   "peerDependencies": {
     "ethers": "5.5.0"
+  },
+  "resolutions": {
+    "hardhat-deploy/@ethersproject/contracts": "5.5.0"
   }
 }

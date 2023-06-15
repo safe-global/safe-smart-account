@@ -5,7 +5,7 @@ import "@matterlabs/hardhat-zksync-verify";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
-import "@elvis-krop/hardhat-deploy";
+import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { getSingletonFactoryInfo } from "@gnosis.pm/safe-singleton-factory";

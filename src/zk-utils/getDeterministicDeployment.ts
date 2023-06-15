@@ -1,4 +1,4 @@
-import { DeterministicDeploymentInfo } from "@elvis-krop/hardhat-deploy/dist/types";
+import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 async function getDeterministicDeployment(hre: HardhatRuntimeEnvironment): Promise<DeterministicDeploymentInfo> {
