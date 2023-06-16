@@ -3,6 +3,7 @@ methods {
     function getThreshold() external returns (uint256) envfree;
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
+    function signedMessages(bytes32) external returns (uint256) envfree;
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -158,6 +159,9 @@ rule guardAddressChange(method f) filtered {
         f.selector == sig:setGuard(address).selector;
 }
 
+invariant noSignedMessages(bytes32 message)
+    signedMessages(message) == 0
+    filtered { f -> reachableOnly(f) }
 
 rule nativeTokenBalanceSpending(method f) filtered {
     f -> reachableOnly(f)
