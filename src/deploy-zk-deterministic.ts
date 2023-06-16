@@ -54,7 +54,11 @@ const CONTRACTS_TO_DEPLOY = Object.freeze([
             }
 
             process.stdout.write(`deploying ${contractName}`);
-            const tx = await singletonFactory.deployContract(salt, bytecodeHash, input, {
+            const data = new hre.ethers.utils.AbiCoder().encode(["bytes32", "bytes32", "bytes"], [salt, bytecodeHash, input]);
+            const tx = await deployer.zkWallet.sendTransaction({
+                to: singletonFactory.address,
+                value: 0,
+                data: data,
                 customData: {
                     factoryDeps: [artifact.bytecode]
                 }

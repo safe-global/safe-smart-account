@@ -53,17 +53,10 @@ export const LOCAL_NODE_RICH_WALLETS = [
 ];
 
 export const factoryABI = `
-  [
-    {
-      "inputs":[
-        { "internalType":"bytes32", "name":"salt", "type":"bytes32" },
-        { "internalType":"bytes32", "name":"bytecodeHash", "type":"bytes32" },
-        { "internalType":"bytes", "name":"input", "type":"bytes" }
-      ],
-      "name":"deployContract",
-      "outputs":[{"internalType":"address","name":"contractAddress","type":"address"}],
-      "stateMutability":"payable",
-      "type":"function"
-    }
-  ]
+[
+  {
+    "stateMutability": "payable",
+    "type": "fallback"
+  }
+]
 `;
