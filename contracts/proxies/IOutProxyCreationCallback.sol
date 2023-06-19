@@ -6,7 +6,7 @@ import "./OutSafeProxy.sol";
  * @title IProxyCreationCallback
  * @dev An interface for a contract that implements a callback function to be executed after the creation of a proxy instance.
  */
-interface IProxyCreationCallback {
+interface IOutProxyCreationCallback {
     /**
      * @dev Function to be called after the creation of a SafeProxy instance.
      * @param proxy The newly created SafeProxy instance.

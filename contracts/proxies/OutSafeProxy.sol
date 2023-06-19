@@ -28,9 +28,6 @@ contract OutSafeProxy {
         singleton = _singleton;
     }
 
-    function deposit() external payable {
-    }
-
     /// @dev Fallback function forwards all transactions and returns all received return data.
     fallback() external payable {
         // solhint-disable-next-line no-inline-assembly
@@ -51,5 +48,7 @@ contract OutSafeProxy {
         }
     }
 
-    receive() external payable {}
+    receive() external payable {
+      revert();
+    }
 }

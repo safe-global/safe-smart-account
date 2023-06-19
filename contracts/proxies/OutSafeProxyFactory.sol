@@ -87,7 +87,7 @@ contract OutSafeProxyFactory {
         address _singleton,
         bytes memory initializer,
         uint256 saltNonce,
-        IProxyCreationCallback callback
+        IOutProxyCreationCallback callback
     ) public returns (OutSafeProxy proxy) {
         uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
         proxy = createProxyWithNonce(_singleton, initializer, saltNonceWithCallback);
