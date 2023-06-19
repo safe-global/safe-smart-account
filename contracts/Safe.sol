@@ -265,6 +265,9 @@ contract Safe is
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     *      The data parameter (bytes) is not used since v1.5.0 as it is not required anymore. Prior to v1.5.0,
+     *      data parameter was used in contract signature validation flow using legacy EIP-1271.
+     *      Version v1.5.0, uses dataHash parameter instead of data with updated EIP-1271 implementation.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
