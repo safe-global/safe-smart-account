@@ -178,7 +178,6 @@ describe("OutSafe - e2e", async () => {
         await erc20.connect(user1).transfer(outSafe.address, 1000);
 
         const data = erc20.interface.encodeFunctionData("transfer", [user2.address, 1000]);
-        // const data = gasUser.interface.encodeFunctionData("useGas", [80]);
         const tx = buildSafeTransaction({
             to: erc20.address,
             data,

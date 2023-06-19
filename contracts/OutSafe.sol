@@ -70,7 +70,7 @@ contract OutSafe is Safe {
       } else if (assetType == 1) {
         ERC20(asset).transfer(user, amount);
       } else {
-        revert("OS05");
+        revert("OS06");
       }
     }
 
