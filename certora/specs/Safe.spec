@@ -238,3 +238,5 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
     assert balanceAfter < balanceBefore => 
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
 }
+
+invariant safeOwnerCountConsistency() getOwnersCount() == getOwnersCountFromArray();
