@@ -370,7 +370,7 @@ describe("OutSafe - e2e", async () => {
                     hotWallet1.address,
                     sig2,
                 ),
-        ).to.be.revertedWith("OS05");
+        ).to.be.revertedWith("OS04");
     });
 
     it("should allow/disallow ERC20 withdrawal like ETH withdrawal", async () => {
@@ -486,7 +486,7 @@ describe("OutSafe - e2e", async () => {
                     admin1.address,
                     sig1,
                 ),
-        ).to.be.revertedWith("OS05");
+        ).to.be.revertedWith("OS04");
     });
 
     it("should not allow withdrawal from a invalid signature", async () => {
@@ -530,7 +530,7 @@ describe("OutSafe - e2e", async () => {
                     hotWallet1.address,
                     sig1,
                 ),
-        ).to.be.revertedWith("OS04");
+        ).to.be.revertedWith("OS05");
     });
 
     it("should not allow withdrawal with the same nonce", async () => {

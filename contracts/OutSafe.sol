@@ -59,16 +59,17 @@ contract OutSafe is Safe {
       require(nonces[user] < blockNonce, "OS01");
       require(blockNonce + expiry > block.number, "OS02");
       require(block.number >= blockNonce, "OS03");
+      require(limits[verifier][asset] >= amount, "OS04");
       bytes memory wData = encodeWithdrawal(user, asset, assetType, amount, blockNonce, expiry);
       bytes32 wHash = keccak256(wData);
+      require(verifier == checkNSignatures(wHash, wData, signature, 1, false), "OS05");
       nonces[user] = blockNonce;
-      require(verifier == checkNSignatures(wHash, wData, signature, 1, false), "OS04");
-      require(limits[verifier][asset] >= amount, "OS05");
       limits[verifier][asset] -= amount;
       if (assetType == 0) {
         payable(user).transfer(amount);
       } else if (assetType == 1) {
-        ERC20(asset).transfer(user, amount);
+        bool success = ERC20(asset).transfer(user, amount);
+        require(success, "OS07");
       } else {
         revert("OS06");
       }
