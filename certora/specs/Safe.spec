@@ -9,6 +9,8 @@ methods {
     function getModule(address) external returns (address) envfree;
     function getSafeGuard() external returns (address) envfree;
     function getNativeTokenBalance() external returns (uint256) envfree;
+    function getOwnersCount() external returns (uint256) envfree;
+    function getOwnersCountFromArray() external returns (uint256) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
