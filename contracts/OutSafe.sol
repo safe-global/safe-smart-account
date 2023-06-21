@@ -8,66 +8,79 @@ abstract contract ERC20 {
 }
 
 contract OutSafe is Safe {
-    // Mapping to keep track of hot wallets limits
+    // Mapping to keep track of hot wallets/verifier limits
     mapping(address => mapping(address => uint256)) public limits;
-    // Mapping to keep track of user nonces
+    // Mapping to keep track of wallet nonces
     mapping(address => uint256) public nonces;
+    // Mapping to keep track of asset type
+    // 1 - ERC20, allow for future expansion
+    mapping(address => uint8) public assetTypes;
 
     // keccak256(
-    //   "OutWithdrawal(address to,address asset,uint8 assetType,uint256 amount,uint256 blockNonce,uint32 expiry)"
+    //   "OutWithdrawal(address to,address asset,uint256 amount,uint256 nonce,uint256 expiry)"
     // );
-    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0x58d511d6ac1b4ac3b7e60f8a9929daf3fbcd0ca72a6d986bdf03e2b69333af10;
+    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0xb2830d38de4ffb8d95f281c56095abd1f5b13c05f2ecd8ab1a572c4304fdace9;
 
     function encodeWithdrawal(
         address to,
         address asset,
-        uint8 assetType,
         uint256 amount,
-        uint256 blockNonce,
-        uint32 expiry
+        uint256 nonce,
+        uint256 expiry
     ) public view returns (bytes memory) {
         bytes32 withdrawHash = keccak256(
             abi.encode(
                 OUT_WITHDRAWAL_TYPEHASH,
                 to,
                 asset,
-                assetType,
                 amount,
-                blockNonce,
+                nonce,
                 expiry
             )
         );
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), withdrawHash);
     }
 
-    function setHotWallet(address _hotWallet, address[] calldata assets, uint256[] calldata _limits) public authorized {
-      for (uint256 i = 0; i < assets.length; i++) {
-        if (_limits[i] == 0) {
-          delete limits[_hotWallet][assets[i]];
-        } else {
-          limits[_hotWallet][assets[i]] = _limits[i];
-        }
-      }
+    function setAsset(address asset, uint8 assetType) public authorized {
+      assetTypes[asset] = assetType;
     }
 
-    function getLimit(address _hotWallet, address asset) public view returns (uint256) {
-      return limits[_hotWallet][asset];
+    function getAsset(address asset) public view returns (uint8) {
+      return assetTypes[asset];
+    }
+
+    function setVerifier(address verifier, address[] calldata assets, uint256[] calldata _limits) public authorized {
+      for (uint256 i = 0; i < assets.length; i++) {
+        limits[verifier][assets[i]] = _limits[i];
+      }
+      nonces[verifier] = 1;
+    }
+
+    function getLimit(address verifier, address asset) public view returns (uint256) {
+      return limits[verifier][asset];
+    }
+
+    function getNonce(address verifier) public view returns (uint256) {
+      return nonces[verifier];
     }
 
     // Asset type: 0 - ETH, 1 - ERC20
-    function withdrawTo(address user, address asset, uint8 assetType, uint256 amount, uint256 blockNonce, uint32 expiry, address verifier, bytes memory signature) public {
-      require(nonces[user] < blockNonce, "OS01");
-      require(blockNonce + expiry > block.number, "OS02");
-      require(block.number >= blockNonce, "OS03");
+    function withdrawTo(address user, address asset, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+      uint8 v;
+      bytes32 r;
+      bytes32 s;
+      (v, r, s) = signatureSplit(signature, 0);
+      address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, amount, nonce, expiry)), v, r, s);
+      require(nonces[verifier] < nonce, "OS01");
+      require(expiry > block.number, "OS02");
+      require(limits[verifier][asset] > 0, "OS03");
       require(limits[verifier][asset] >= amount, "OS04");
-      bytes memory wData = encodeWithdrawal(user, asset, assetType, amount, blockNonce, expiry);
-      bytes32 wHash = keccak256(wData);
-      require(verifier == checkNSignatures(wHash, wData, signature, 1, false), "OS05");
-      nonces[user] = blockNonce;
+      require(asset == address(0) || assetTypes[asset] == 1, "OS05");
+      nonces[verifier] = nonce;
       limits[verifier][asset] -= amount;
-      if (assetType == 0) {
+      if (asset == address(0)) {
         payable(user).transfer(amount);
-      } else if (assetType == 1) {
+      } else if (assetTypes[asset] == 1) {
         bool success = ERC20(asset).transfer(user, amount);
         require(success, "OS07");
       } else {
@@ -75,8 +88,8 @@ contract OutSafe is Safe {
       }
     }
 
-    function withdraw(address asset, uint8 assetType, uint256 amount, uint256 blockNonce, uint32 expiry, address verifier, bytes memory signature) public {
-      withdrawTo(msg.sender, asset, assetType, amount, blockNonce, expiry, verifier, signature);
+    function withdraw(address asset, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+      withdrawTo(msg.sender, asset, amount, nonce, expiry, signature);
     }
 
     function deposit() external payable {

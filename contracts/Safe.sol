@@ -259,7 +259,7 @@ contract Safe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(dataHash, data, signatures, _threshold, true);
+        checkNSignatures(dataHash, data, signatures, _threshold);
     }
 
     /**
@@ -270,12 +270,8 @@ contract Safe is
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
-     * @param ownerCheck This is a HACK we, out.trade, added to repurpose this function to recover hot wallet signature address
-     *                      When the flag is off, using approved hash/contract signature as signature will revert
-     *                      True - Used to check whether all signatures provided are valid for this vault
-     *                      False - Used to recover the signer address of the last signature
      */
-    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures, bool ownerCheck) public view returns(address) {
+    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
@@ -288,8 +284,7 @@ contract Safe is
         for (i = 0; i < requiredSignatures; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
-                // Revert if ownerCheck is false, because this is not a computationally difficult signature
-                require(ownerCheck && keccak256(data) == dataHash, "GS027");
+                require(keccak256(data) == dataHash, "GS027");
                 // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
@@ -323,8 +318,7 @@ contract Safe is
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                // Revert if ownerCheck is false, because this is not a computationally difficult signature
-                require(ownerCheck && (msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0), "GS025");
+                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -334,10 +328,9 @@ contract Safe is
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, v, r, s);
             }
-            require(!ownerCheck || (currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS), "GS026");
+            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
         }
-        return lastOwner;
     }
 
     /**
