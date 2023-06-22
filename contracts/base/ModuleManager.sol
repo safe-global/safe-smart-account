@@ -35,7 +35,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         if (to != address(0)) {
             require(isContract(to), "GS002");
             // Setup has to complete successfully or transaction fails.
-            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "GS000");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, type(uint256).max), "GS000");
         }
     }
 
