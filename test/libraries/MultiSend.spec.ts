@@ -179,9 +179,7 @@ describe("MultiSend", async () => {
 
         it("can bubble up revert message on call", async () => {
             const { delegatecaller, multiSend, mock } = await setupTests();
-
-            // await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
-            await mock.givenAnyRevertWithMessage("Some random message");
+            await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
 
             const txs: MetaTransaction[] = [{
                 to: mock.address,
@@ -191,8 +189,7 @@ describe("MultiSend", async () => {
             }];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
             
-
-            const { success, returndata} = await delegatecaller.callStatic.makeDelegatecal(multiSend.address, data);
+            const { success, returndata } = await delegatecaller.callStatic.makeDelegatecal(multiSend.address, data);
             expect(success).to.be.false;
             expect(returndata).to.be.equal(
                 "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
