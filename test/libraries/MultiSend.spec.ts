@@ -1,10 +1,16 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegatecaller } from "../utils/setup";
-import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
+import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
+import {
+    buildContractCall,
+    buildSafeTransaction,
+    executeTx,
+    MetaTransaction,
+    safeApproveHash,
+    buildRawError,
+} from "../../src/utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
-import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 
 describe("MultiSend", async () => {
@@ -27,7 +33,7 @@ describe("MultiSend", async () => {
             safe: await getSafeWithOwners([user1.address]),
             multiSend: await getMultiSend(),
             mock: await getMock(),
-            delegatecaller: await getDelegatecaller(),
+            delegateCaller: await getDelegateCaller(),
             storageSetter,
         };
     });
@@ -46,7 +52,7 @@ describe("MultiSend", async () => {
             const nestedTransactionData = encodeMultiSend([buildContractCall(killLib, "killme", [], 0)]);
 
             const multiSendCode = await hre.ethers.provider.getCode(multiSend.address);
-            await expect(multiSend.multiSend(nestedTransactionData)).to.be.revertedWith("MultiSend should only be called via delegatecall");
+            await expect(multiSend.multiSend(nestedTransactionData)).to.be.revertedWith("MultiSend should be called via delegatecall");
 
             expect(await hre.ethers.provider.getCode(multiSend.address)).to.be.eq(multiSendCode);
         });
@@ -178,34 +184,40 @@ describe("MultiSend", async () => {
         });
 
         it("can bubble up revert message on call", async () => {
-            const { delegatecaller, multiSend, mock } = await setupTests();
-            await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
+            const { delegateCaller, multiSend, mock } = await setupTests();
+
+            const trigguerCalldata = "0xbaddad";
+            const errorMessage = "Some random message";
+
+            await mock.givenCalldataRevertWithMessage(trigguerCalldata, errorMessage);
+            const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
                     to: mock.address,
                     value: 0,
-                    data: "0xbaddad",
+                    data: trigguerCalldata,
                     operation: 0,
                 },
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            const { success, returndata } = await delegatecaller.callStatic.makeDelegatecal(multiSend.address, data);
+            const { success, returnData } = await delegateCaller.callStatic.makeDelegatecal(multiSend.address, data);
             expect(success).to.be.false;
-            expect(returndata).to.be.equal(
-                "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
-            );
+            expect(returnData).to.be.equal(rawError);
         });
 
         it("can bubble up revert message on delegatecall", async () => {
-            const { delegatecaller, multiSend, mock } = await setupTests();
+            const { delegateCaller, multiSend, mock } = await setupTests();
 
-            const { data: setRevertMessageData } = await mock.populateTransaction.givenCalldataRevertWithMessage(
-                "0xbaddad",
-                "Some random message",
-            );
-            expect(setRevertMessageData).is.not.equal(undefined);
+            const trigguerCalldata = "0xbaddad";
+            const errorMessage = "Some random message";
+
+            const setRevertMessageData = mock.interface.encodeFunctionData("givenCalldataRevertWithMessage", [
+                trigguerCalldata,
+                errorMessage,
+            ]);
+            const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
@@ -217,17 +229,15 @@ describe("MultiSend", async () => {
                 {
                     to: mock.address,
                     value: 0,
-                    data: "0xbaddad",
+                    data: trigguerCalldata,
                     operation: 1,
                 },
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            const { success, returndata } = await delegatecaller.callStatic.makeDelegatecal(multiSend.address, data);
+            const { success, returnData } = await delegateCaller.callStatic.makeDelegatecal(multiSend.address, data);
             expect(success).to.be.false;
-            expect(returndata).to.be.equal(
-                "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
-            );
+            expect(returnData).to.be.equal(rawError);
         });
     });
 });

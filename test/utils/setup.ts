@@ -118,9 +118,9 @@ export const getSafeProxyRuntimeCode = async () => {
     return proxyArtifact.deployedBytecode;
 };
 
-export const getDelegatecaller = async () => {
-    const Delegatecaller = await hre.ethers.getContractFactory("Delegatecaller");
-    return await Delegatecaller.deploy();
+export const getDelegateCaller = async () => {
+    const DelegateCaller = await hre.ethers.getContractFactory("DelegateCaller");
+    return await DelegateCaller.deploy();
 };
 
 export const compile = async (source: string) => {

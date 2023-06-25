@@ -286,3 +286,9 @@ export const buildSafeTransaction = (template: {
         nonce: template.nonce,
     };
 };
+
+export const buildRawError = (errorMessage: string) => {
+    const errorSelector = "0x08c379a0"; // ERC 838
+    const args = utils.defaultAbiCoder.encode(["string"], [errorMessage]);
+    return errorSelector.concat(args.substring(2));
+};
