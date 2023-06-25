@@ -118,6 +118,11 @@ export const getSafeProxyRuntimeCode = async () => {
     return proxyArtifact.deployedBytecode;
 };
 
+export const getDelegatecaller = async () => {
+    const Delegatecaller = await hre.ethers.getContractFactory("Delegatecaller");
+    return await Delegatecaller.deploy();
+};
+
 export const compile = async (source: string) => {
     const input = JSON.stringify({
         language: "Solidity",
