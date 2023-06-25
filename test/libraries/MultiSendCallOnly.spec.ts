@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners, getDelegatecaller } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
@@ -27,6 +27,7 @@ describe("MultiSendCallOnly", async () => {
             safe: await getSafeWithOwners([user1.address]),
             multiSend: await getMultiSendCallOnly(),
             mock: await getMock(),
+            delegatecaller: await getDelegatecaller(),
             storageSetter,
         };
     });
@@ -148,27 +149,24 @@ describe("MultiSendCallOnly", async () => {
         });
 
         it("can bubble up revert message on call", async () => {
-            const { safe, multiSend, mock } = await setupTests();
-
-            const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            const { delegatecaller, multiSend, mock } = await setupTests();
             await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
 
             const txs: MetaTransaction[] = [
-                buildSafeTransaction(
-                    Object.assign({
-                        to: mock.address,
-                        data: "0xbaddad",
-                        operation: 0,
-                    }),
-                ),
+                {
+                    to: mock.address,
+                    value: 0,
+                    data: "0xbaddad",
+                    operation: 0,
+                },
             ];
-            const { data } = buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
+            const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            await expect(await user2Safe.callStatic.execTransactionFromModuleReturnData(multiSend.address, 0, data, 1)).to.be.deep.eq([
-                false,
+            const { success, returndata } = await delegatecaller.callStatic.makeDelegatecal(multiSend.address, data);
+            expect(success).to.be.false;
+            expect(returndata).to.be.equal(
                 "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
-            ]);
+            );
         });
     });
 });
