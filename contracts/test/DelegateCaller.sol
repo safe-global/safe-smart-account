@@ -5,6 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title DelegateCaller - A test contract that executes delegatecalls
  */
 contract DelegateCaller {
+    event Here(bytes b);
     /**
      * @notice makes a delegatecall
      * @param _called The address to be delegate called
@@ -12,5 +13,13 @@ contract DelegateCaller {
      */
     function makeDelegatecal(address _called, bytes memory _calldata) external returns (bool success, bytes memory returnData) {
         (success, returnData) = _called.delegatecall(_calldata);
+        emit Here(returnData);
+        if(!success) {
+            assembly {
+                let length := returndatasize()
+                returndatacopy(0, 0, length)
+                revert(0, length)
+            }
+        }
     }
 }

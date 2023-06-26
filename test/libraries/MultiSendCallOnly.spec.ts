@@ -162,7 +162,6 @@ describe("MultiSendCallOnly", async () => {
             const errorMessage = "Some random message";
 
             await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
-            const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
@@ -174,9 +173,7 @@ describe("MultiSendCallOnly", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            const { success, returnData } = await delegateCaller.callStatic.makeDelegatecal(multiSend.address, data);
-            expect(success).to.be.false;
-            expect(returnData).to.be.equal(rawError);
+            await expect(delegateCaller.callStatic.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
     });
 });

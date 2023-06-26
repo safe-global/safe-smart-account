@@ -1,15 +1,8 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, waffle } from "hardhat";
+import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
-import {
-    buildContractCall,
-    buildSafeTransaction,
-    executeTx,
-    MetaTransaction,
-    safeApproveHash,
-    buildRawError,
-} from "../../src/utils/execution";
+import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
 import { parseEther } from "@ethersproject/units";
 
@@ -190,7 +183,6 @@ describe("MultiSend", async () => {
             const errorMessage = "Some random message";
 
             await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
-            const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
@@ -202,9 +194,7 @@ describe("MultiSend", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            const { success, returnData } = await delegateCaller.callStatic.makeDelegatecal(multiSend.address, data);
-            expect(success).to.be.false;
-            expect(returnData).to.be.equal(rawError);
+            await expect(delegateCaller.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
 
         it("can bubble up revert message on delegatecall", async () => {
@@ -217,7 +207,6 @@ describe("MultiSend", async () => {
                 triggerCalldata,
                 errorMessage,
             ]);
-            const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
@@ -235,9 +224,7 @@ describe("MultiSend", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            const { success, returnData } = await delegateCaller.callStatic.makeDelegatecal(multiSend.address, data);
-            expect(success).to.be.false;
-            expect(returnData).to.be.equal(rawError);
+            await expect(delegateCaller.callStatic.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
     });
 });
