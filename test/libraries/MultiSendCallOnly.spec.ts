@@ -158,17 +158,17 @@ describe("MultiSendCallOnly", async () => {
         it("can bubble up revert message on call", async () => {
             const { delegateCaller, multiSend, mock } = await setupTests();
 
-            const trigguerCalldata = "0xbaddad";
+            const triggerCalldata = "0xbaddad";
             const errorMessage = "Some random message";
 
-            await mock.givenCalldataRevertWithMessage(trigguerCalldata, errorMessage);
+            await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
             const rawError = buildRawError(errorMessage);
 
             const txs: MetaTransaction[] = [
                 {
                     to: mock.address,
                     value: 0,
-                    data: trigguerCalldata,
+                    data: triggerCalldata,
                     operation: 0,
                 },
             ];
