@@ -20,15 +20,6 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
     }
 });
 
-subtask(TASK_DEPLOY_RUN_DEPLOY, "deploy run only")
-    .setAction(async (taskArgs: { nonDeterministicZk?: boolean }, hre, runSuper) => {
-        if (hre.network.zksync && !taskArgs.nonDeterministicZk) {
-            await hre.run(TASK_RUN, { ...taskArgs, script: "./src/deploy-zk-deterministic.ts" });
-        } else {
-            await runSuper({ ...taskArgs, ...(hre.network.zksync && { reset: true }) });
-        }
-    });
-
 const TASK_VERIFY_ZK_ALL = "verify:verify-zk-all";
 
 subtask(TASK_VERIFY_ZK_ALL).setAction(async (_, hre) => {

@@ -11,31 +11,31 @@ const deploy: DeployFunction = async function (
 
 
   await deploy("CreateCall", {
-    from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
+    from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: !network.zksync,
+    deterministicDeployment: true,
   });
 
   await deploy("MultiSend", {
-    from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
+    from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: !network.zksync,
+    deterministicDeployment: true,
   });
 
   await deploy("MultiSendCallOnly", {
-    from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
+    from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: !network.zksync,
+    deterministicDeployment: true,
   });
 
   await deploy("SignMessageLib", {
-    from: network.zksync ? getZkDeployer(hre).zkWallet.privateKey : deployer,
+    from: deployer,
     args: [],
     log: true,
-    deterministicDeployment: !network.zksync,
+    deterministicDeployment: true,
   });
 };
 
