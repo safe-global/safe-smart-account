@@ -1,9 +1,17 @@
 import { expect } from "chai";
 import hre, { deployments, waffle } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners } from "../utils/setup";
-import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
+import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
+import {
+    buildContractCall,
+    buildSafeTransaction,
+    executeTx,
+    MetaTransaction,
+    safeApproveHash,
+    buildRawError,
+} from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 
 describe("MultiSendCallOnly", async () => {
@@ -26,6 +34,7 @@ describe("MultiSendCallOnly", async () => {
             safe: await getSafeWithOwners([user1.address]),
             multiSend: await getMultiSendCallOnly(),
             mock: await getMock(),
+            delegateCaller: await getDelegateCaller(),
             storageSetter,
         };
     });
@@ -144,6 +153,27 @@ describe("MultiSendCallOnly", async () => {
                     "0x4242424242424242424242424242424242424242424242424242424242424242",
                 ),
             ).to.be.eq("0x" + "baddad".padEnd(64, "0"));
+        });
+
+        it("can bubble up revert message on call", async () => {
+            const { delegateCaller, multiSend, mock } = await setupTests();
+
+            const triggerCalldata = "0xbaddad";
+            const errorMessage = "Some random message";
+
+            await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
+
+            const txs: MetaTransaction[] = [
+                {
+                    to: mock.address,
+                    value: 0,
+                    data: triggerCalldata,
+                    operation: 0,
+                },
+            ];
+            const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
+
+            await expect(delegateCaller.callStatic.makeDelegatecall(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
     });
 });
