@@ -173,7 +173,7 @@ describe("MultiSendCallOnly", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            await expect(delegateCaller.callStatic.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
+            await expect(delegateCaller.callStatic.makeDelegatecall(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
     });
 });

@@ -10,7 +10,7 @@ contract DelegateCaller {
      * @param _called The address to be delegate called
      * @param _calldata the calldata of the call
      */
-    function makeDelegatecal(address _called, bytes memory _calldata) external returns (bool success, bytes memory returnData) {
+    function makeDelegatecall(address _called, bytes memory _calldata) external returns (bool success, bytes memory returnData) {
         (success, returnData) = _called.delegatecall(_calldata);
         if (!success) {
             // solhint-disable-next-line no-inline-assembly

@@ -194,7 +194,7 @@ describe("MultiSend", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            await expect(delegateCaller.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
+            await expect(delegateCaller.makeDelegatecall(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
 
         it("can bubble up revert message on delegatecall", async () => {
@@ -224,7 +224,7 @@ describe("MultiSend", async () => {
             ];
             const { data } = buildMultiSendSafeTx(multiSend, txs, 0);
 
-            await expect(delegateCaller.callStatic.makeDelegatecal(multiSend.address, data)).to.be.revertedWith(errorMessage);
+            await expect(delegateCaller.callStatic.makeDelegatecall(multiSend.address, data)).to.be.revertedWith(errorMessage);
         });
     });
 });
