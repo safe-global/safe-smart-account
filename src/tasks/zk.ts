@@ -1,8 +1,8 @@
 import "hardhat-deploy";
-import { TASK_DEPLOY, TASK_DEPLOY_RUN_DEPLOY } from "hardhat-deploy";
+import { TASK_DEPLOY } from "hardhat-deploy";
 import { TASK_VERIFY_VERIFY } from "@matterlabs/hardhat-zksync-verify/dist/src/constants";
 import "@nomiclabs/hardhat-ethers";
-import { TASK_RUN, TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
+import { TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
 import { subtask, task } from "hardhat/config";
 
 task(TASK_DEPLOY).addFlag("nonDeterministicZk");

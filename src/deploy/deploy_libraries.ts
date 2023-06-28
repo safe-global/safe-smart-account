@@ -1,6 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import getZkDeployer from "../zk-utils/getZkDeployer";
 
 const deploy: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
