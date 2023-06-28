@@ -1,8 +1,8 @@
 import "hardhat-deploy";
-import { TASK_DEPLOY, TASK_DEPLOY_RUN_DEPLOY } from "hardhat-deploy";
+import { TASK_DEPLOY } from "hardhat-deploy";
 import { TASK_VERIFY_VERIFY } from "@matterlabs/hardhat-zksync-verify/dist/src/constants";
 import "@nomiclabs/hardhat-ethers";
-import { TASK_RUN, TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
+import { TASK_TEST_SETUP_TEST_ENVIRONMENT } from "hardhat/builtin-tasks/task-names";
 import { subtask, task } from "hardhat/config";
 
 task(TASK_DEPLOY).addFlag("nonDeterministicZk");
@@ -19,15 +19,6 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
         await runSuper(taskArgs);
     }
 });
-
-subtask(TASK_DEPLOY_RUN_DEPLOY, "deploy run only")
-    .setAction(async (taskArgs: { nonDeterministicZk?: boolean }, hre, runSuper) => {
-        if (hre.network.zksync && !taskArgs.nonDeterministicZk) {
-            await hre.run(TASK_RUN, { ...taskArgs, script: "./src/deploy-zk-deterministic.ts" });
-        } else {
-            await runSuper({ ...taskArgs, ...(hre.network.zksync && { reset: true }) });
-        }
-    });
 
 const TASK_VERIFY_ZK_ALL = "verify:verify-zk-all";
 
