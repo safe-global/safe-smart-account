@@ -47,12 +47,19 @@ import { LOCAL_NODE_RICH_WALLETS } from "./src/zk-utils/constants";
 const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6";
 const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
 
-const deterministicDeployment = () => {
+const deterministicDeployment = (network: string) => {
+    const info = getSingletonFactoryInfo(parseInt(network));
+    if (!info) {
+        throw new Error(`
+        Safe factory not found for network ${network}. You can request a new deployment at https://github.com/safe-global/safe-singleton-factory.
+        For more information, see https://github.com/safe-global/safe-contracts#replay-protection-eip-155
+      `);
+    }
     return {
-        factory: "0x08feB4fEb4530ea74E03036277a878e4c4290B8C",
-        deployer: "<invalid>",
-        funding: "<invalid>",
-        signedTx: "<invalid>",
+        factory: info.address,
+        deployer: info.signerAddress,
+        funding: BigNumber.from(info.gasLimit).mul(BigNumber.from(info.gasPrice)).toString(),
+        signedTx: info.transaction,
     };
 };
 
