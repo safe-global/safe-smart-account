@@ -30,6 +30,7 @@ contract ReentrancyTransactionGuard is BaseGuard {
     function getGuard() internal pure returns (GuardValue storage guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             guard.slot := slot
         }

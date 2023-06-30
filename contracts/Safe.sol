@@ -44,7 +44,7 @@ contract Safe is
 {
     using SafeMath for uint256;
 
-    string public constant VERSION = "1.4.0";
+    string public constant VERSION = "1.4.1";
 
     // keccak256(
     //     "EIP712Domain(uint256 chainId,address verifyingContract)"
@@ -192,6 +192,7 @@ contract Safe is
                 );
             }
         }
+
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
         require(gasleft() >= ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
@@ -301,6 +302,7 @@ contract Safe is
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
                 // solhint-disable-next-line no-inline-assembly
+                /// @solidity memory-safe-assembly
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
@@ -309,6 +311,7 @@ contract Safe is
                 // Check signature
                 bytes memory contractSignature;
                 // solhint-disable-next-line no-inline-assembly
+                /// @solidity memory-safe-assembly
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
@@ -353,6 +356,7 @@ contract Safe is
     function getChainId() public view returns (uint256) {
         uint256 id;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             id := chainid()
         }

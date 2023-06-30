@@ -1,0 +1,32 @@
+diff -druN base/Executor.sol base/Executor.sol
+--- base/Executor.sol	2023-06-22 14:42:39.769357540 +0200
++++ base/Executor.sol	2023-06-22 15:34:09.211725615 +0200
+@@ -26,11 +26,13 @@
+         uint256 txGas
+     ) internal returns (bool success) {
+         if (operation == Enum.Operation.DelegateCall) {
++            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
+             // solhint-disable-next-line no-inline-assembly
+             /// @solidity memory-safe-assembly
+-            assembly {
+-                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
+-            }
++            // assembly {
++            //     success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
++            // }
++            return true;
+         } else {
+             // solhint-disable-next-line no-inline-assembly
+             /// @solidity memory-safe-assembly
+diff -druN Safe.sol Safe.sol
+--- Safe.sol	2023-06-22 14:43:53.738861263 +0200
++++ Safe.sol	2023-06-22 15:28:00.436277677 +0200
+@@ -76,7 +76,7 @@
+          * so we create a Safe with 0 owners and threshold 1.
+          * This is an unusable Safe, perfect for the singleton
+          */
+-        threshold = 1;
++        // threshold = 1; MUNGED: remove and add to constructor of the harness
+     }
+ 
+     /**

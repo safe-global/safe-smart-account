@@ -1,6 +1,6 @@
 {
     "name": "@safe-global/safe-contracts",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "Ethereum multisig contract",
     "homepage": "https://github.com/safe-global/safe-contracts/",
     "license": "LGPL-3.0",
@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build": "hardhat compile",
-        "build:ts": "yarn rimraf dist && tsc",
+        "build:ts": "yarn rimraf dist && tsc -p tsconfig.prod.json",
         "test": "hardhat test",
         "coverage": "hardhat coverage",
         "benchmark": "yarn test benchmark/*.ts",
@@ -46,7 +46,7 @@
     },
     "devDependencies": {
         "@gnosis.pm/mock-contract": "^4.0.0",
-        "@gnosis.pm/safe-singleton-factory": "^1.0.3",
+        "@gnosis.pm/safe-singleton-factory": "^1.0.14",
         "@nomiclabs/hardhat-ethers": "2.0.2",
         "@nomiclabs/hardhat-etherscan": "^3.1.7",
         "@nomiclabs/hardhat-waffle": "2.0.1",
@@ -67,7 +67,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "ethereum-waffle": "^3.3.0",
         "ethers": "5.4.0",
-        "hardhat": "^2.2.1",
+        "hardhat": "^2.14.0",
         "hardhat-deploy": "0.11.26",
         "husky": "^5.1.3",
         "prettier": "^2.8.4",

@@ -66,8 +66,8 @@ export const calculateSafeTransactionHash = (safe: Contract, safeTx: SafeTransac
 };
 
 export const preimageSafeMessageHash = (safe: Contract, message: string, chainId: BigNumberish): string => {
-    return utils._TypedDataEncoder.encode({ verifyingContract: safe.address, chainId }, EIP712_SAFE_MESSAGE_TYPE, { message })
-}
+    return utils._TypedDataEncoder.encode({ verifyingContract: safe.address, chainId }, EIP712_SAFE_MESSAGE_TYPE, { message });
+};
 
 export const calculateSafeMessageHash = (safe: Contract, message: string, chainId: BigNumberish): string => {
     return utils._TypedDataEncoder.hash({ verifyingContract: safe.address, chainId }, EIP712_SAFE_MESSAGE_TYPE, { message });

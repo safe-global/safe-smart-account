@@ -15,12 +15,28 @@ Usage
 yarn
 ```
 
-### Run all tests:
+### Testing
+
+To run the tests:
 
 ```bash
 yarn build
 yarn test
 ```
+
+Optionally, if you want to run the ERC-4337 compatibility test, it uses a live bundler and node, so it contains some pre-requisites:
+
+1. Define the environment variables:
+
+```
+ERC4337_TEST_BUNDLER_URL=
+ERC4337_TEST_NODE_URL=
+ERC4337_TEST_SINGLETON_ADDRESS=
+ERC4337_TEST_SAFE_FACTORY_ADDRESS=
+MNEMONIC=
+```
+
+2. Pre-fund the executor account derived from the mnemonic with some Native Token to cover the deployment of an ERC4337 module and the pre-fund of the Safe for the test operation.
 
 ### Deployments
 
@@ -92,7 +108,7 @@ Documentation
 
 Audits/ Formal Verification
 ---------
-- [for Version 1.4.0 by Ackee Blockchain](docs/audit_1_4_0.md)
+- [for Version 1.4.0/1.4.1 by Ackee Blockchain](docs/audit_1_4_0.md)
 - [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
 - [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
 - [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)

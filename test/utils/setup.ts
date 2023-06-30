@@ -28,6 +28,18 @@ export const getSafeSingleton = async () => {
     return Safe.attach(SafeDeployment.address);
 };
 
+export const getSafeSingletonContract = async () => {
+    const safeSingleton = await hre.ethers.getContractFactory(safeContractUnderTest());
+
+    return safeSingleton;
+};
+
+export const getFactoryContract = async () => {
+    const factory = await hre.ethers.getContractFactory("SafeProxyFactory");
+
+    return factory;
+};
+
 export const getFactory = async () => {
     const FactoryDeployment = await deployments.get("SafeProxyFactory");
     const Factory = await hre.ethers.getContractFactory("SafeProxyFactory");

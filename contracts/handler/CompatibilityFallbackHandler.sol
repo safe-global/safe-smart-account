@@ -94,6 +94,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         calldataPayload;
 
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             let internalCalldata := mload(0x40)
             /**

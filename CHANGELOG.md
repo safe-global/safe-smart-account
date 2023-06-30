@@ -2,6 +2,52 @@
 
 This changelog only contains changes starting from version 1.3.0
 
+# Version 1.4.1
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
+
+### Core contracts
+
+-   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
+-   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+
+### Factory contracts
+
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+
+### Handler contracts
+
+-   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
+-   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
+
+### Lib contracts
+
+-   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
+-   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
+-   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
+-   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+
+## Changes
+
+### Bugfixes
+
+#### Remove `gasleft()` usage in `setupModules`
+
+Issue: [#568](https://github.com/safe-global/safe-contracts/issues/568)
+
+`setupModules` made a call to `gasleft()` that is invalid in the ERC-4337 standard. The call was replaced with `type(uint256).max` to forward all the available gas instead.
+
+
 # Version 1.4.0
 
 ## Compiler settings
@@ -107,7 +153,7 @@ This method uses the `CREATE` opcode, which is not counterfactual for a specific
 
 If the initializer data is provided, the Factory now checks that the Singleton contract exists and the success of the call to avoid a proxy being deployed uninitialized
 
-#### Add `createNetworkSpecificProxy`
+#### Add `createChainSpecificProxyWithNonce`
 
 This method will use the chain id in the `CREATE2` salt; therefore, deploying a proxy to the same address on other networks is impossible.
 This method should enable the creation of proxies that should exist only on one network (e.g. specific governance or admin accounts)

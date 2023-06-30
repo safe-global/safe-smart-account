@@ -35,7 +35,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         if (to != address(0)) {
             require(isContract(to), "GS002");
             // Setup has to complete successfully or transaction fails.
-            require(execute(to, 0, data, Enum.Operation.DelegateCall, gasleft()), "GS000");
+            require(execute(to, 0, data, Enum.Operation.DelegateCall, type(uint256).max), "GS000");
         }
     }
 
@@ -109,6 +109,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     ) public returns (bool success, bytes memory returnData) {
         success = execTransactionFromModule(to, value, data, operation);
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             // Load free memory location
             let ptr := mload(0x40)
@@ -169,6 +170,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         }
         // Set correct size of returned array
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             mstore(array, moduleCount)
         }
@@ -183,6 +185,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
