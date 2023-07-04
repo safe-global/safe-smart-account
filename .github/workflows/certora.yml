@@ -25,7 +25,7 @@ jobs:
               uses: actions/setup-java@v3
               with: { java-version: "17", java-package: jre, distribution: semeru }
 
-            - name: Install certora cli-beta
+            - name: Install certora cli
               run: pip install -Iv certora-cli
 
             - name: Install solc
