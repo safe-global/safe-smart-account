@@ -9,17 +9,19 @@ methods {
     function getModule(address) external returns (address) envfree;
     function getSafeGuard() external returns (address) envfree;
     function getNativeTokenBalance() external returns (uint256) envfree;
+    function getOwnersCount() external returns (uint256) envfree;
+    function getOwnersCountFromArray() external returns (uint256) envfree;
 
     // optional
-    function execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation) external returns (bool, bytes memory);
-    function execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation) external returns (bool);
-    function execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
+    function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
+    function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
+    function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
 }
 
 definition noHavoc(method f) returns bool =
-    f.selector != sig:execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation).selector
-    && f.selector != sig:execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation).selector 
-    && f.selector != sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector;
+    f.selector != sig:execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation).selector
+    && f.selector != sig:execTransactionFromModule(address,uint256,bytes,Enum.Operation).selector 
+    && f.selector != sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 
 definition reachableOnly(method f) returns bool =
     f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
@@ -46,7 +48,7 @@ rule nonceMonotonicity(method f) filtered {
     uint256 nonceAfter = nonce();
 
     assert nonceAfter != nonceBefore => 
-        to_mathint(nonceAfter) == nonceBefore + 1 && f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector;
+        to_mathint(nonceAfter) == nonceBefore + 1 && f.selector == sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 }
 
 
@@ -174,16 +176,16 @@ rule nativeTokenBalanceSpending(method f) filtered {
     uint256 balanceAfter = getNativeTokenBalance();
 
     assert balanceAfter < balanceBefore => 
-        f.selector == sig:execTransaction(address,uint256,bytes,SafeHarness.Operation,uint256,uint256,uint256,address,address,bytes).selector
-        || f.selector == sig:execTransactionFromModule(address,uint256,bytes,SafeHarness.Operation).selector
-        || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,SafeHarness.Operation).selector;
+        f.selector == sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector
+        || f.selector == sig:execTransactionFromModule(address,uint256,bytes,Enum.Operation).selector
+        || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation).selector;
 }
 
 rule nativeTokenBalanceSpendingExecTransaction(
         address to,
         uint256 value,
         bytes data,
-        SafeHarness.Operation operation,
+        Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas, 
         uint256 gasPrice, 
@@ -208,7 +210,7 @@ rule nativeTokenBalanceSpendingExecTransactionFromModule(
         address to,
         uint256 value,
         bytes data,
-        SafeHarness.Operation operation
+        Enum.Operation operation
     ) {
     uint256 balanceBefore = getNativeTokenBalance();
     env e;
@@ -226,7 +228,7 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
         address to,
         uint256 value,
         bytes data,
-        SafeHarness.Operation operation
+        Enum.Operation operation
 ) {
     uint256 balanceBefore = getNativeTokenBalance();
     env e;
@@ -237,4 +239,13 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
 
     assert balanceAfter < balanceBefore => 
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
+}
+
+rule safeOwnerCountConsistency(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    calldataarg args; env e;
+    f(e, args);
+
+    assert getOwnersCount() == getOwnersCountFromArray();
 }
