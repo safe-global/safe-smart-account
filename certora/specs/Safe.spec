@@ -8,6 +8,8 @@ methods {
     function getModule(address) external returns (address) envfree;
     function getSafeGuard() external returns (address) envfree;
     function getNativeTokenBalance() external returns (uint256) envfree;
+    function getOwnersCount() external returns (uint256) envfree;
+    function getOwnersCountFromArray() external returns (uint256) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
@@ -127,6 +129,28 @@ hook Sstore SafeHarness.(slot 49122629484629529244014240937346711770925847994644
     fallbackHandlerAddress = newFallbackHandlerAddress;
 }
 
+invariant threholdShouldBeLessThanOwners() getOwnersCount() >= getThreshold()
+    filtered { f -> reachableOnly(f) }
+    { preserved {
+        // The prover found a counterexample if the owners count is max uint256,
+        // but this is not a realistic scenario.
+        require getOwnersCount() >= 1 && getOwnersCount() < MAX_UINT256();
+      }
+    }
+
+invariant safeOwnerCannotBeItself(env e) !isOwner(e, currentContract)
+    filtered { f -> reachableOnly(f) }
+
+rule safeOwnerCannotBeSentinelAddress(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    calldataarg args; env e;
+    f(e, args);
+
+    assert isOwner(e, 1) == false;
+}
+
+
 rule fallbackHandlerAddressChange(method f) filtered {
     f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
          f.selector != sig:getStorageAt(uint256,uint256).selector
@@ -236,4 +260,13 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
 
     assert balanceAfter < balanceBefore => 
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
+}
+
+rule safeOwnerCountConsistency(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    calldataarg args; env e;
+    f(e, args);
+
+    assert getOwnersCount() == getOwnersCountFromArray();
 }
