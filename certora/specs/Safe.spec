@@ -10,6 +10,7 @@ methods {
     function getSafeGuard() external returns (address) envfree;
     function getNativeTokenBalance() external returns (uint256) envfree;
     function getOwnersCount() external returns (uint256) envfree;
+    function getOwnersCountFromArray() external returns (uint256) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
@@ -260,4 +261,13 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
 
     assert balanceAfter < balanceBefore => 
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
+}
+
+rule safeOwnerCountConsistency(method f) filtered {
+    f -> reachableOnly(f)
+} {
+    calldataarg args; env e;
+    f(e, args);
+
+    assert getOwnersCount() == getOwnersCountFromArray();
 }

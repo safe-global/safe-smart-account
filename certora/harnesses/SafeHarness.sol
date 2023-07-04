@@ -24,11 +24,15 @@ contract SafeHarness is Safe {
         return getGuard();
     }
 
+    function getNativeTokenBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
     function getOwnersCount() public view returns (uint256) {
         return ownerCount;
     }
 
-    function getNativeTokenBalance() public view returns (uint256) {
-        return address(this).balance;
+    function getOwnersCountFromArray() public view returns (uint256) {
+        return getOwners().length;
     }
 }
