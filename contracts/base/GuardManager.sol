@@ -23,6 +23,12 @@ interface Guard is IERC165 {
     function checkAfterExecution(bytes32 txHash, bool success) external;
 }
 
+interface ModuleGuard is IERC165 {
+    function checkTransaction(address to, uint256 value, bytes memory data, Enum.Operation operation, address module) external;
+
+    function checkAfterExecution(bytes32 txHash, bool success) external;
+}
+
 abstract contract BaseGuard is Guard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
@@ -36,10 +42,13 @@ abstract contract BaseGuard is Guard {
  * @author Richard Meissner - @rmeissner
  */
 abstract contract GuardManager is SelfAuthorized {
-    event ChangedGuard(address indexed guard);
+    event ChangedGuard(address indexed guard, bool moduleGuard);
 
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
+
+    // keccak256("module_manager.module_guard.address")
+    bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
     /**
      * @dev Set a guard that checks transactions before execution
@@ -49,18 +58,21 @@ abstract contract GuardManager is SelfAuthorized {
      *        audit the guard code and design recovery mechanisms.
      * @notice Set Transaction Guard `guard` for the Safe. Make sure you trust the guard.
      * @param guard The address of the guard to be used or the 0 address to disable the guard
+     * @param moduleGuard true if the guard is a module guard, false if it is a transaction guard
      */
-    function setGuard(address guard) external authorized {
+    function setGuard(address guard, bool moduleGuard) external authorized {
         if (guard != address(0)) {
-            require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
+            bytes4 interfaceId = moduleGuard ? type(ModuleGuard).interfaceId : type(Guard).interfaceId;
+
+            require(Guard(guard).supportsInterface(interfaceId), "GS300");
         }
-        bytes32 slot = GUARD_STORAGE_SLOT;
+        bytes32 slot = moduleGuard ? MODULE_GUARD_STORAGE_SLOT : GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
         /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, guard)
         }
-        emit ChangedGuard(guard);
+        emit ChangedGuard(guard, moduleGuard);
     }
 
     /**
@@ -72,6 +84,15 @@ abstract contract GuardManager is SelfAuthorized {
      */
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
+        assembly {
+            guard := sload(slot)
+        }
+    }
+
+    function getModuleGuard() internal view returns (address guard) {
+        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
         /// @solidity memory-safe-assembly
         assembly {
