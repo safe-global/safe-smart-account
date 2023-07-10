@@ -350,25 +350,18 @@ contract Safe is
     }
 
     /**
-     * @notice Returns the ID of the chain the contract is currently deployed on.
-     * @return The ID of the current chain as a uint256.
-     */
-    function getChainId() public view returns (uint256) {
-        uint256 id;
-        // solhint-disable-next-line no-inline-assembly
-        /// @solidity memory-safe-assembly
-        assembly {
-            id := chainid()
-        }
-        return id;
-    }
-
-    /**
      * @dev Returns the domain separator for this contract, as defined in the EIP-712 standard.
      * @return bytes32 The domain separator hash.
      */
     function domainSeparator() public view returns (bytes32) {
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
+        uint256 chainId;
+        // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
+        assembly {
+            chainId := chainid()
+        }
+
+        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }
 
     /**
@@ -396,7 +389,7 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) public view returns (bytes memory) {
+    ) private view returns (bytes memory) {
         bytes32 safeTxHash = keccak256(
             abi.encode(
                 SAFE_TX_TYPEHASH,

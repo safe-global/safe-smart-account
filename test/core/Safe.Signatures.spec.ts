@@ -58,13 +58,6 @@ describe("Safe", async () => {
         });
     });
 
-    describe("getChainId", async () => {
-        it("should return correct id", async () => {
-            const { safe } = await setupTests();
-            expect(await safe.getChainId()).to.be.eq(await chainId());
-        });
-    });
-
     describe("approveHash", async () => {
         it("approving should only be allowed for owners", async () => {
             const { safe } = await setupTests();
