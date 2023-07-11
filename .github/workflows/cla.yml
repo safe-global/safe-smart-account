@@ -19,7 +19,7 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
-          path-to-document: 'https://safe.global/cla/'
+          path-to-document: 'https://safe.global/cla'
           # branch should not be protected
           branch: 'cla-signatures'
           allowlist: rmeissner,Uxio0,*bot # may need to update this expression if we add new bots
