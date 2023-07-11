@@ -112,6 +112,7 @@ invariant reach_invariant()
     { 
         preserved with (env e2) {
             requireInvariant nextNull();
+            requireInvariant reach_null();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reachHeadNext();
@@ -120,7 +121,7 @@ invariant reach_invariant()
 
 // every element reaches its direct successor (except for the tail-SENTINEL).
 invariant reach_next()
-    forall address X. ghostOwners[X] != SENTINEL => reach(X, ghostOwners[X])
+    forall address X. reach_succ(X, ghostOwners[X])
     { 
         preserved with (env e2) {
             requireInvariant inListReachable();
@@ -157,7 +158,7 @@ hook Sstore currentContract.owners[KEY address key] address value STORAGE {
     address someKey;
     require someKey != NULL;
     require reach_succ(someKey, ghostOwners[someKey]);
-    assert reach(value, key) => value == SENTINEL;
+    assert reach(value, key) => value == SENTINEL, "list is cyclic";
     ghostOwners[key] = value;
     assert reach(key, NULL);
     assert reach(value, NULL);
@@ -168,7 +169,7 @@ hook Sstore currentContract.owners[KEY address key] address value STORAGE {
         valueOrNull = value;
     }
     havoc reach assuming updateSucc(key, valueOrNull);
-    assert reach_succ(someKey, ghostOwners[someKey]);
+    assert reach_succ(someKey, ghostOwners[someKey]), "reach_succ violated after owners update";
 }
 
 hook Sstore currentContract.ownerCount uint256 value STORAGE {
