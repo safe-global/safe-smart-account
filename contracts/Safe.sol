@@ -239,9 +239,10 @@ contract Safe is
         // solhint-disable-next-line avoid-tx-origin
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
-            // For ETH we will only adjust the gas price to not be higher than the actual used gas price
+            // For native tokens, we will only adjust the gas price to not be higher than the actually used gas price
             payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
-            require(receiver.send(payment), "GS011");
+            (bool refundSuccess, ) = receiver.call{value: payment}("");
+            require(refundSuccess, "GS011");
         } else {
             payment = gasUsed.add(baseGas).mul(gasPrice);
             require(transferToken(gasToken, receiver, payment), "GS012");
