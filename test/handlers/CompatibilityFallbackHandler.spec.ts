@@ -1,4 +1,4 @@
-import { buildContractSignature } from "./../../src/utils/execution";
+import { buildContractSignature, calculateSafeMessageHash } from "./../../src/utils/execution";
 import { expect } from "chai";
 import hre, { deployments, waffle, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
@@ -8,7 +8,6 @@ import {
     buildSignatureBytes,
     executeContractCallWithSigners,
     calculateSafeMessageHash,
-    preimageSafeMessageHash,
     EIP712_SAFE_MESSAGE_TYPE,
     signHash,
 } from "../../src/utils/execution";
@@ -63,52 +62,6 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("isValidSignature(bytes,bytes)", async () => {
-        it("should revert if called directly", async () => {
-            const { handler } = await setupTests();
-            await expect(handler.callStatic["isValidSignature(bytes,bytes)"]("0xbaddad", "0x")).to.be.revertedWith(
-                "function call to a non-contract account",
-            );
-        });
-
-        it("should revert if message was not signed", async () => {
-            const { validator } = await setupTests();
-            await expect(validator.callStatic["isValidSignature(bytes,bytes)"]("0xbaddad", "0x")).to.be.revertedWith("Hash not approved");
-        });
-
-        it("should revert if signature is not valid", async () => {
-            const { validator } = await setupTests();
-            await expect(validator.callStatic["isValidSignature(bytes,bytes)"]("0xbaddad", "0xdeaddeaddeaddead")).to.be.reverted;
-        });
-
-        it("should return magic value if message was signed", async () => {
-            const { safe, validator, signLib } = await setupTests();
-            await executeContractCallWithSigners(safe, signLib, "signMessage", ["0xbaddad"], [user1, user2], true);
-            expect(await validator.callStatic["isValidSignature(bytes,bytes)"]("0xbaddad", "0x")).to.be.eq("0x20c13b0b");
-        });
-
-        it("should return magic value if enough owners signed and allow a mix different signature types", async () => {
-            const { validator, signerSafe } = await setupTests();
-            const sig1 = {
-                signer: user1.address,
-                data: await user1._signTypedData(
-                    { verifyingContract: validator.address, chainId: await chainId() },
-                    EIP712_SAFE_MESSAGE_TYPE,
-                    { message: "0xbaddad" },
-                ),
-            };
-            const sig2 = await signHash(user2, calculateSafeMessageHash(validator, "0xbaddad", await chainId()));
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, "0xbaddad", await chainId());
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId());
-            const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
-            const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
-
-            expect(
-                await validator.callStatic["isValidSignature(bytes,bytes)"]("0xbaddad", buildSignatureBytes([sig1, sig2, signerSafeSig])),
-            ).to.be.eq("0x20c13b0b");
-        });
-    });
-
     describe("isValidSignature(bytes32,bytes)", async () => {
         it("should revert if called directly", async () => {
             const { handler } = await setupTests();
@@ -149,9 +102,11 @@ describe("CompatibilityFallbackHandler", async () => {
                 ),
             };
             const ethSignSig = await signHash(user2, calculateSafeMessageHash(validator, dataHash, await chainId()));
-            const validatorPreImageMessage = preimageSafeMessageHash(validator, dataHash, await chainId());
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorPreImageMessage, await chainId());
+            const validatorSafeMessageHash = calculateSafeMessageHash(validator, dataHash, await chainId());
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorSafeMessageHash, await chainId());
+
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
+
             const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
 
             expect(

@@ -19,7 +19,6 @@
 - `GS024`: `Invalid contract signature provided`
 - `GS025`: `Hash has not been approved`
 - `GS026`: `Invalid owner provided`
-- `GS027`: `Data Hash and hash of the pre-image data do not match`
 
 ### General auth related
 - `GS030`: `Only owners can approve a hash`

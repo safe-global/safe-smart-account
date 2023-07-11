@@ -28,6 +28,18 @@ export const getSafeSingleton = async () => {
     return Safe.attach(SafeDeployment.address);
 };
 
+export const getSafeSingletonContract = async () => {
+    const safeSingleton = await hre.ethers.getContractFactory(safeContractUnderTest());
+
+    return safeSingleton;
+};
+
+export const getFactoryContract = async () => {
+    const factory = await hre.ethers.getContractFactory("SafeProxyFactory");
+
+    return factory;
+};
+
 export const getFactory = async () => {
     const FactoryDeployment = await deployments.get("SafeProxyFactory");
     const Factory = await hre.ethers.getContractFactory("SafeProxyFactory");
@@ -104,6 +116,11 @@ export const getSafeProxyRuntimeCode = async () => {
     const proxyArtifact = await hre.artifacts.readArtifact("SafeProxy");
 
     return proxyArtifact.deployedBytecode;
+};
+
+export const getDelegateCaller = async () => {
+    const DelegateCaller = await hre.ethers.getContractFactory("DelegateCaller");
+    return await DelegateCaller.deploy();
 };
 
 export const compile = async (source: string) => {

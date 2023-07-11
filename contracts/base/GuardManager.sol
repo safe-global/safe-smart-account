@@ -58,6 +58,7 @@ abstract contract GuardManager is SelfAuthorized {
         }
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, guard)
         }
@@ -74,6 +75,7 @@ abstract contract GuardManager is SelfAuthorized {
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             guard := sload(slot)
         }
