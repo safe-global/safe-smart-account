@@ -96,8 +96,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         success = execute(to, value, data, operation, type(uint256).max);
 
         if (guard != address(0)) {
-            bytes32 dataHash = keccak256(data);
-            Guard(guard).checkAfterExecution(dataHash, success);
+            Guard(guard).checkAfterExecution(keccak256(data), success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);

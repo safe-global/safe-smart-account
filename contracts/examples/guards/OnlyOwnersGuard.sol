@@ -63,13 +63,13 @@ contract OnlyOwnersGuard is BaseGuard {
      * @param value Ether value of Safe transaction.
      * @param data Data payload of Safe transaction.
      * @param operation Operation type of Safe transaction.
-     * @param msgSender Account executing the transaction.
+     * @param module Module executing the transaction.
      */
     function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
-        address msgSender
-    ) external override {}
+        address module
+    ) external override returns (bytes32) {}
 }

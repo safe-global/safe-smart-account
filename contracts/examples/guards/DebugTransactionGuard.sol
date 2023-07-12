@@ -31,6 +31,15 @@ contract DebugTransactionGuard is BaseGuard {
         address executor
     );
 
+    event ModuleTransasctionDetails(
+        bytes32 indexed txHash,
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        address module
+    );
+
     event GasUsage(address indexed safe, bytes32 indexed txHash, uint256 indexed nonce, bool success);
 
     mapping(bytes32 => uint256) public txNonces;
@@ -92,13 +101,18 @@ contract DebugTransactionGuard is BaseGuard {
      * @param value Ether value of Safe transaction.
      * @param data Data payload of Safe transaction.
      * @param operation Operation type of Safe transaction.
-     * @param msgSender Account executing the transaction.
+     * @param module Account executing the transaction.
+     * @return moduleTxHash Hash of the module transaction.
      */
     function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
-        address msgSender
-    ) external override {}
+        address module
+    ) external override returns (bytes32 moduleTxHash) {
+        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
+
+        emit ModuleTransasctionDetails(moduleTxHash, to, value, data, operation, module);
+    }
 }
