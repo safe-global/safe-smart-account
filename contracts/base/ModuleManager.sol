@@ -90,13 +90,14 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         // Execute transaction without further confirmations.
         address guard = getGuard();
 
+        bytes32 guardHash;
         if (guard != address(0)) {
-            Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
         }
         success = execute(to, value, data, operation, type(uint256).max);
 
         if (guard != address(0)) {
-            Guard(guard).checkAfterExecution(keccak256(data), success);
+            Guard(guard).checkAfterExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);

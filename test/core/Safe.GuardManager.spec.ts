@@ -13,6 +13,7 @@ import {
     executeTx,
     safeApproveHash,
 } from "../../src/utils/execution";
+import crypto from "crypto";
 import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
@@ -217,14 +218,34 @@ describe("GuardManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
 
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMock.address)).interface;
-            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [
-                hre.ethers.utils.keccak256("0xbeef73"),
-                true,
-            ]);
+            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [`0x${"0".repeat(64)}`, true]);
 
             await validGuardMock.givenCalldataRevertWithMessage(checkAfterExecutionTxData, "Computer says Nah");
 
             await expect(safe.execTransactionFromModule(user1.address, 0, "0xbeef73", 1)).to.be.reverted;
+        });
+
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
+            const { safe, validGuardMock } = await setupWithTemplate();
+            const hash = "0x" + crypto.randomBytes(32).toString("hex");
+
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
+
+            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMock.address)).interface;
+            const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
+                user1.address,
+                0,
+                "0xbeef73",
+                1,
+                user1.address,
+            ]);
+
+            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
+            await validGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
+
+            await safe.execTransactionFromModule(user1.address, 0, "0xbeef73", 1);
+
+            expect(await validGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
         });
     });
 
@@ -252,14 +273,34 @@ describe("GuardManager", async () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
 
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMock.address)).interface;
-            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [
-                hre.ethers.utils.keccak256("0xbeef73"),
-                true,
-            ]);
+            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [`0x${"0".repeat(64)}`, true]);
 
             await validGuardMock.givenCalldataRevertWithMessage(checkAfterExecutionTxData, "Computer says Nah");
 
             await expect(safe.execTransactionFromModuleReturnData(user1.address, 0, "0xbeef73", 1)).to.be.reverted;
+        });
+
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
+            const { safe, validGuardMock } = await setupWithTemplate();
+            const hash = "0x" + crypto.randomBytes(32).toString("hex");
+
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
+
+            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMock.address)).interface;
+            const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
+                user1.address,
+                0,
+                "0xbeef73",
+                1,
+                user1.address,
+            ]);
+
+            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
+            await validGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
+
+            await safe.execTransactionFromModuleReturnData(user1.address, 0, "0xbeef73", 1);
+
+            expect(await validGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
         });
     });
 });
