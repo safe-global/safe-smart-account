@@ -416,7 +416,7 @@ contract Safe is
      * @param value Ether value.
      * @param data Data payload.
      * @param operation Operation type.
-     * @param safeTxGas Fas that should be used for the safe transaction.
+     * @param safeTxGas Gas that should be used for the safe transaction.
      * @param baseGas Gas costs for data used to trigger the safe transaction.
      * @param gasPrice Maximum gas price that should be used for this transaction.
      * @param gasToken Token address (or 0 if ETH) that is used for the payment.
