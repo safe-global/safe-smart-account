@@ -4,12 +4,13 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
+import "./HandlerContext.sol";
 
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
  */
-contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator {
+contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator, HandlerContext {
     // keccak256("SafeMessage(bytes message)");
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
@@ -153,5 +154,20 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 revert(add(response, 0x20), mload(response))
             }
         }
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     *      The function was moved to the fallback handler as a part of
+     *      1.5.0 contract upgrade. It used to be a part of the Safe core contract, but
+     *      was replaced by the same function that accepts the executor as a parameter.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param requiredSignatures Amount of required valid signatures.
+     */
+    function checkNSignatures(bytes32 dataHash, bytes memory, bytes memory signatures, uint256 requiredSignatures) public view {
+        Safe(payable(_manager())).checkNSignatures(_msgSender(), dataHash, "", signatures, requiredSignatures);
     }
 }

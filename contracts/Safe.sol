@@ -257,20 +257,7 @@ contract Safe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(dataHash, data, signatures, _threshold);
-    }
-
-    /**
-     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
-     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
-     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param data That should be signed (this is passed to an external validator contract)
-     * @param signatures Signature data that should be verified.
-     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
-     * @param requiredSignatures Amount of required valid signatures.
-     */
-    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
-        return checkNSignatures(msg.sender, dataHash, data, signatures, requiredSignatures);
+        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
     }
 
     /**

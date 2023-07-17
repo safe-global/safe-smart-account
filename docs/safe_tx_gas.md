@@ -26,7 +26,7 @@ This also results in the `nonce` of this transaction being used, so it is not po
 
 #### Without gas refund
 
-If `gasPrice` is set to `0` then the Safe contracts will **not** issue a refund after the Safe transaction exection.
+If `gasPrice` is set to `0` then the Safe contracts will **not** issue a refund after the Safe transaction execution.
 
 Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, based on this the Safe contracts will send along all available case when no refund is used.
 
