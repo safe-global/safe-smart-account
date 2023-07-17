@@ -2,8 +2,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma abicoder v2;
 
-import "../../libraries/SafeStorage.sol";
-
 struct UserOperation {
     address sender;
     uint256 nonce;
@@ -19,6 +17,8 @@ struct UserOperation {
 }
 
 interface ISafe {
+    function enableModule(address module) external;
+
     function execTransactionFromModule(address to, uint256 value, bytes memory data, uint8 operation) external returns (bool success);
 }
 
@@ -26,7 +26,7 @@ interface ISafe {
 ///      ⚠️ ⚠️ ⚠️ DO NOT USE IN PRODUCTION ⚠️ ⚠️ ⚠️
 ///      The module does not perform ANY validation, it just executes validateUserOp and execTransaction
 ///      to perform the opcode level compliance by the bundler.
-contract Test4337ModuleAndHandler is SafeStorage {
+contract Test4337ModuleAndHandler {
     address public immutable myAddress;
     address public immutable entryPoint;
 
@@ -55,11 +55,6 @@ contract Test4337ModuleAndHandler is SafeStorage {
     }
 
     function enableMyself() public {
-        require(myAddress != address(this), "You need to DELEGATECALL, sir");
-
-        // Module cannot be added twice.
-        require(modules[myAddress] == address(0), "GS102");
-        modules[myAddress] = modules[SENTINEL_MODULES];
-        modules[SENTINEL_MODULES] = myAddress;
+        ISafe(address(this)).enableModule(myAddress);
     }
 }
