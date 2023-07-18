@@ -535,7 +535,7 @@ describe("Safe", async () => {
         });
     });
 
-    describe.only("checkNSignatures (legacy)", async () => {
+    describe("checkNSignatures (legacy)", async () => {
         it("should use msg.sender executing the check", async () => {
             // We attach the safe to user2 but the only owner of the safe is user1
             // If it fails to preserve the msg.sender, it will fail because user2 is not an owner
@@ -617,16 +617,18 @@ describe("Safe", async () => {
         });
 
         it("should revert if not the required amount of signature data is provided", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address]);
+            const { compatFallbackHandler } = await setupTests();
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address], 3, compatFallbackHandler.address);
+            const safeWithCompatFbHandlerIface = compatFallbackHandler.attach(safe.address);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
-            await expect(safe.checkNSignatures(txHash, "0x", "0x", 1)).to.be.revertedWith("GS020");
+            await expect(safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", "0x", 1)).to.be.revertedWith("GS020");
         });
 
         it("should not be able to use different signature type of same owner", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address]);
+            const { compatFallbackHandler } = await setupTests();
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address], 3, compatFallbackHandler.address);
+            const safeWithCompatFbHandlerIface = compatFallbackHandler.attach(safe.address);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
             const signatures = buildSignatureBytes([
@@ -634,14 +636,19 @@ describe("Safe", async () => {
                 await safeSignTypedData(user1, safe, tx),
                 await safeSignTypedData(user3, safe, tx),
             ]);
-            await expect(safe.checkNSignatures(txHash, "0x", signatures, 3)).to.be.revertedWith("GS026");
+            await expect(safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", signatures, 3)).to.be.revertedWith("GS026");
         });
 
         it("should be able to mix all signature types", async () => {
             await setupTests();
             const compatFallbackHandler = await getCompatFallbackHandler();
             const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandler.address);
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafe.address]);
+            const safe = await getSafeWithOwners(
+                [user1.address, user2.address, user3.address, user4.address, signerSafe.address],
+                5,
+                compatFallbackHandler.address,
+            );
+            const safeWithCompatFbHandlerIface = compatFallbackHandler.attach(safe.address);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
 
@@ -657,7 +664,7 @@ describe("Safe", async () => {
                 signerSafeSig,
             ]);
 
-            await safe.checkNSignatures(txHash, "0x", signatures, 5);
+            await safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", signatures, 5);
         });
 
         it("should be able to require no signatures", async () => {
@@ -665,22 +672,32 @@ describe("Safe", async () => {
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
 
-            await safe.safeWithCompatFbHandlerIface(txHash, "0x", "0x", 0);
+            await safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", "0x", 0);
         });
 
         it("should be able to require less signatures than the threshold", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address]);
+            const { compatFallbackHandler } = await setupTests();
+            const safe = await getSafeWithOwners(
+                [user1.address, user2.address, user3.address, user4.address],
+                4,
+                compatFallbackHandler.address,
+            );
+            const safeWithCompatFbHandlerIface = compatFallbackHandler.attach(safe.address);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
             const signatures = buildSignatureBytes([await safeSignTypedData(user3, safe, tx)]);
 
-            await safe.checkNSignatures(txHash, "0x", signatures, 1);
+            await safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", signatures, 1);
         });
 
         it("should be able to require more signatures than the threshold", async () => {
-            await setupTests();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address], 2);
+            const { compatFallbackHandler } = await setupTests();
+            const safe = await getSafeWithOwners(
+                [user1.address, user2.address, user3.address, user4.address],
+                2,
+                compatFallbackHandler.address,
+            );
+            const safeWithCompatFbHandlerIface = compatFallbackHandler.attach(safe.address);
             const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
             const signatures = buildSignatureBytes([
@@ -690,22 +707,9 @@ describe("Safe", async () => {
             ]);
 
             // Should fail as only 3 signatures are provided
-            await expect(safe.checkNSignatures(txHash, "0x", signatures, 4)).to.be.revertedWith("GS020");
+            await expect(safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", signatures, 4)).to.be.revertedWith("GS020");
 
-            await safe.checkNSignatures(txHash, "0x", signatures, 3);
-        });
-
-        it("Should accept an arbitrary msg.sender", async () => {
-            await setupTests();
-
-            const safe = await getSafeWithOwners([user1.address]);
-            const tx = buildSafeTransaction({ to: safe.address, nonce: await safe.nonce() });
-            const txHash = calculateSafeTransactionHash(safe, tx, await chainId());
-
-            const signatures = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true)]);
-            const safeConnectUser2 = safe.connect(user2);
-
-            await safeConnectUser2.checkNSignatures(txHash, "0x", signatures, 1);
+            await safeWithCompatFbHandlerIface.checkNSignatures(txHash, "0x", signatures, 3);
         });
     });
 });
