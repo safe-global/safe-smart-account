@@ -1,11 +1,11 @@
 {
     "name": "@safe-global/safe-contracts",
-    "version": "1.4.1",
+    "version": "1.4.1-build.0",
     "description": "Ethereum multisig contract",
     "homepage": "https://github.com/safe-global/safe-contracts/",
     "license": "LGPL-3.0",
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
+    "main": "dist/src/index.js",
+    "typings": "dist/src/index.d.ts",
     "files": [
         "contracts",
         "dist",
