@@ -163,6 +163,7 @@ contract Safe is
                 gasToken,
                 refundReceiver,
                 // Signature info
+                // We use the post-increment here, so the current nonce value is used and incremented afterwards.
                 nonce++
             );
             checkSignatures(txHash, "", signatures);
