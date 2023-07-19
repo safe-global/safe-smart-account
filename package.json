@@ -48,6 +48,9 @@
         "url": "https://github.com/safe-global/safe-contracts/issues"
     },
     "devDependencies": {
+        "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
+        "@matterlabs/hardhat-zksync-solc": "^0.4.1",
+        "@matterlabs/hardhat-zksync-verify": "^0.1.8",
         "@nomicfoundation/hardhat-toolbox": "^3.0.0",
         "@openzeppelin/contracts": "^3.4.0",
         "@safe-global/mock-contract": "^4.0.0",
@@ -73,6 +76,7 @@
         "solhint": "3.6.2",
         "ts-node": "^10.9.1",
         "typescript": "^5.1.6",
-        "yargs": "^17.7.2"
+        "yargs": "^17.7.2",
+        "zksync-web3": "^0.14.3"
     }
 }
