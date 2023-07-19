@@ -16,6 +16,7 @@
 
 methods {
     function isOwner(address) external returns (bool) envfree;
+    function getThreshold() external returns (uint256) envfree;
 }
 
 ghost reach(address, address) returns bool {
@@ -34,6 +35,17 @@ ghost address SENTINEL {
 ghost address NULL {
     axiom to_mathint(NULL) == 0;    
 }
+
+invariant thresholdSet() getThreshold() > 0
+    {
+        preserved {
+            requireInvariant reach_null();
+            requireInvariant reach_invariant();
+            requireInvariant inListReachable();
+            requireInvariant reachableInList();
+            requireInvariant reachHeadNext();
+        }
+    }
 
 // every element with 0 in the owners field can only reach the null pointer and itself
 invariant nextNull()
@@ -68,6 +80,7 @@ invariant inListReachable()
     (forall address key. ghostOwners[key] != 0 => reach(SENTINEL, key))
     {
         preserved with (env e2) {
+            requireInvariant thresholdSet();
             requireInvariant reach_invariant();
             requireInvariant reach_next();
             requireInvariant reach_null();
