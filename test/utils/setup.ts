@@ -1,9 +1,12 @@
-import hre, { deployments } from "hardhat";
-import { Contract, Signer } from "ethers";
+import hre, { deployments, waffle } from "hardhat";
+import { Contract, Signer, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";
+import * as zk from "zksync-web3";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
+import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import { getZkContractFactoryByName, zkCompile } from "./zk";
 import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2 } from "../../typechain-types";
 
@@ -100,8 +103,24 @@ export const migrationContract = async () => {
 };
 
 export const getMock = async () => {
-    const Mock = await hre.ethers.getContractFactory("MockContract");
-    return await Mock.deploy();
+    if (!hre.network.zksync) {
+        const Mock = await hre.ethers.getContractFactory("MockContract");
+        return Mock.deploy();
+    } else {
+        const deployer = new Deployer(hre, getWallets()[0] as zk.Wallet);
+        const artifact = await deployer.loadArtifact("MockContract");
+        const contract = await deployer.deploy(artifact);
+        await contract.deployTransaction.wait();
+        return contract;
+    }
+};
+
+export const getContractFactoryByName = async (contractName: string) => {
+    if (hre.network.zksync) {
+        return getZkContractFactoryByName(hre, contractName, getWallets()[0] as zk.Wallet);
+    } else {
+        return hre.ethers.getContractFactory(contractName);
+    }
 };
 
 export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString()) => {
@@ -192,13 +211,50 @@ export const compile = async (source: string) => {
 };
 
 export const deployContract = async (deployer: Signer, source: string): Promise<Contract> => {
-    const output = await compile(source);
-    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
-    const receipt = await transaction.wait();
+    if (!hre.network.zksync) {
+        const output = await compile(source);
+        const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
+        const receipt = await transaction.wait();
 
-    if (!receipt?.contractAddress) {
-        throw Error("Could not deploy contract");
+        if (!receipt?.contractAddress) {
+            throw Error("Could not deploy contract");
+        }
+
+        return new Contract(receipt.contractAddress, output.interface, deployer);
+    } else {
+        const output = await zkCompile(hre, source);
+
+        const factory = new zk.ContractFactory(output.abi, output.data, getWallets()[0] as zk.Wallet, "create");
+        // Encode and send the deploy transaction providing factory dependencies.
+        const contract = await factory.deploy();
+        await contract.deployed();
+
+        return contract;
     }
+};
 
-    return new Contract(receipt.contractAddress, output.interface, deployer);
+export const getWallets = (): (ethers.Wallet | zk.Wallet)[] => {
+    if (hre.network.name === "hardhat") return waffle.provider.getWallets();
+    if (!hre.network.zksync) throw new Error("You can get wallets only on Hardhat or ZkSyncLocal networks!");
+
+    const { accounts } = hre.network.config;
+
+    if (typeof accounts === "string") throw new Error("Unsupported accounts config");
+
+    const zkProvider = zk.Provider.getDefaultProvider();
+    if (Array.isArray(accounts)) {
+        const wallets = [];
+
+        for (const account of accounts) {
+            if (typeof account === "string") {
+                wallets.push(new zk.Wallet(account).connect(zkProvider));
+            } else if (typeof account === "object" && "privateKey" in account) {
+                wallets.push(new zk.Wallet(account.privateKey).connect(zkProvider));
+            }
+        }
+
+        return wallets;
+    } else {
+        throw new Error("Unsupported accounts config");
+    }
 };
