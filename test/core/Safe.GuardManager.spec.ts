@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import {
     buildContractCall,
     buildSafeTransaction,
@@ -17,18 +17,18 @@ import { chainId } from "../utils/encoding";
 describe("GuardManager", () => {
     const GUARD_STORAGE_SLOT = ethers.keccak256(ethers.toUtf8Bytes("guard_manager.guard.address"));
 
-    const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
+    const setupWithTemplate = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const validGuardMock = await getMock();
         const validGuardMockAddress = await validGuardMock.getAddress();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [, user2] = signers;
 
         const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x945b8148"]);
-        await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
+        await (await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true)).wait();
         const safe = await getSafeWithOwners([user2.address]);
-        await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user2]);
+        await (await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user2])).wait();
 
         return {
             safe,
@@ -73,7 +73,7 @@ describe("GuardManager", () => {
             const validGuardMockAddress = await validGuardMock.getAddress();
             const safe = await getSafeWithOwners([user1.address]);
 
-            await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user1])).wait();
 
             // Check guard
             await expect(await hre.ethers.provider.getStorage(await safe.getAddress(), GUARD_STORAGE_SLOT)).to.be.eq(
@@ -163,7 +163,7 @@ describe("GuardManager", () => {
                 signatureBytes,
                 user1.address,
             ]);
-            await validGuardMock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah");
+            await (await validGuardMock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah")).wait();
             const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [
                 calculateSafeTransactionHash(safeAddress, safeTx, await chainId()),
                 true,
@@ -171,7 +171,7 @@ describe("GuardManager", () => {
 
             await expect(executeTx(safe, safeTx, [signature])).to.be.revertedWith("Computer says Nah");
 
-            await validGuardMock.reset();
+            await (await validGuardMock.reset()).wait();
 
             await expect(executeTx(safe, safeTx, [signature])).to.emit(safe, "ExecutionSuccess");
 
@@ -211,11 +211,11 @@ describe("GuardManager", () => {
                 calculateSafeTransactionHash(safeAddress, safeTx, await chainId()),
                 true,
             ]);
-            await validGuardMock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah");
+            await (await validGuardMock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah")).wait();
 
             await expect(executeTx(safe, safeTx, [signature])).to.be.revertedWith("Computer says Nah");
 
-            await validGuardMock.reset();
+            await (await validGuardMock.reset()).wait();
 
             await expect(executeTx(safe, safeTx, [signature])).to.emit(safe, "ExecutionSuccess");
 
