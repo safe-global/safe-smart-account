@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { deployContract, getSimulateTxAccessor, getSafeWithOwners, getCompatFallbackHandler, getWallets } from "../utils/setup";
 import { buildContractCall, executeTxWithSigners } from "../../src/utils/execution";
 
 describe("SimulateTxAccessor", () => {
@@ -11,9 +11,9 @@ describe("SimulateTxAccessor", () => {
         }
     }`;
 
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = getWallets();
         const [user1] = signers;
         const accessor = await getSimulateTxAccessor();
         const source = `
@@ -40,7 +40,14 @@ describe("SimulateTxAccessor", () => {
     });
 
     describe("estimate", () => {
-        it("should enforce delegatecall", async () => {
+        it("should enforce delegatecall", async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * The `SELFDESTRUCT` instruction is not supported
+             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { accessor, signers } = await setupTests();
             const [user1] = signers;
             const killLib = await deployContract(user1, killLibSource);
@@ -73,7 +80,7 @@ describe("SimulateTxAccessor", () => {
             const [user1, user2] = signers;
             const accessorAddress = await accessor.getAddress();
             const safeAddress = await safe.getAddress();
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             const tx = await buildContractCall(interactor, "sendAndReturnBalance", [user2.address, ethers.parseEther("1")], 0, true);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
@@ -83,10 +90,17 @@ describe("SimulateTxAccessor", () => {
                 userBalance + ethers.parseEther("1"),
             );
             expect(simulation.success).to.be.true;
-            expect(simulation.estimate).to.be.lte(15000n);
+            expect(simulation.estimate.toNumber()).to.be.lte(hre.network.zksync ? 30000n : 15000n);
         });
 
-        it("simulate selfdestruct", async () => {
+        it("simulate selfdestruct", async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * The `SELFDESTRUCT` instruction is not supported
+             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { safe, accessor, simulator, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
