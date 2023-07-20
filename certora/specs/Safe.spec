@@ -271,3 +271,15 @@ rule safeOwnerCountConsistency(method f) filtered {
 
     assert getOwnersCount() == getOwnersCountFromArray();
 }
+
+rule moduleOnlyAddedThroughEnableModule(method f, address module) filtered {
+    f -> reachableOnly(f)
+} {
+    require getModule(module) == 0;
+
+    calldataarg args; env e;
+    f(e, args);
+
+    assert getModule(module) != 0 => 
+        f.selector == sig:enableModule(address).selector;
+}
