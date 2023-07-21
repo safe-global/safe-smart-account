@@ -1,7 +1,7 @@
-import { getCompatFallbackHandler } from "./../utils/setup";
+import { getCompatFallbackHandler, getWallets } from "./../utils/setup";
 import { calculateSafeMessageHash, signHash, buildContractSignature } from "./../../src/utils/execution";
 import { expect } from "chai";
-import { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafeWithOwners } from "../utils/setup";
 import {
@@ -23,7 +23,7 @@ describe("Safe", () => {
         await deployments.fixture();
         const compatFallbackHandler = await getCompatFallbackHandler();
         const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         const safe = await getSafeWithOwners([user1.address], 1, compatFallbackHandlerAddress);
         const safeAddress = await safe.getAddress();
