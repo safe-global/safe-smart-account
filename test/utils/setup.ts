@@ -5,7 +5,6 @@ import solc from "solc";
 import * as zk from "zksync-web3";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
-import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { getZkContractFactoryByName, zkCompile } from "./zk";
 import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2 } from "../../typechain-types";
@@ -103,16 +102,9 @@ export const migrationContract = async () => {
 };
 
 export const getMock = async () => {
-    if (!hre.network.zksync) {
-        const Mock = await hre.ethers.getContractFactory("MockContract");
-        return Mock.deploy();
-    } else {
-        const deployer = new Deployer(hre, getWallets()[0] as zk.Wallet);
-        const artifact = await deployer.loadArtifact("MockContract");
-        const contract = await deployer.deploy(artifact);
-        await contract.deployTransaction.wait();
-        return contract;
-    }
+    const contractFactory = await getContractFactoryByName("MockContract");
+    const contract = await contractFactory.deploy();
+    return contract.deployed();
 };
 
 export const getContractFactoryByName = async (contractName: string) => {
