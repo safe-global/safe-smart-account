@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { deployContract, getSafeWithOwners, getWallets } from "../utils/setup";
 
 describe("Safe", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const source = `
         contract Test {
@@ -18,7 +18,7 @@ describe("Safe", () => {
                 require(success);
             }
         }`;
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         return {
             safe: await getSafeWithOwners([user1.address]),
@@ -84,7 +84,14 @@ describe("Safe", () => {
             } = await setupTests();
             const safeAddress = await safe.getAddress();
 
-            await expect(user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad" })).to.be.reverted;
+            if (hre.network.zksync) {
+                await expect((await user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad", gasLimit: 150000 })).wait()).to
+                    .be.reverted;
+            } else {
+                await expect(user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad" })).to.be.revertedWith(
+                    "fallback function is not payable and was called with value 23",
+                );
+            }
         });
     });
 });
