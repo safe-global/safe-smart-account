@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners, getMock } from "../utils/setup";
+import { getSafeWithOwners, getMock, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("ModuleManager", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
 
         return {
@@ -50,7 +50,7 @@ describe("ModuleManager", () => {
                 signers: [user1, user2],
             } = await setupTests();
             // Use module for execution to see error
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
             await expect(executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).to.revertedWith("GS013");
         });
@@ -159,9 +159,9 @@ describe("ModuleManager", () => {
                 safe,
                 signers: [user1, user2],
             } = await setupTests();
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])).wait();
             await expect(await safe.isModuleEnabled(user1.address)).to.be.true;
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
             await expect(await safe.isModuleEnabled(user2.address)).to.be.true;
             await expect(await safe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address, user1.address], AddressOne]);
 
@@ -208,9 +208,12 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
+            // Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
+            await expect(
+                user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0, { gasLimit: hre.network.zksync ? 200_000 : undefined }),
+            )
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
             expect(await mock.invocationCountForCalldata.staticCall("0xbaddad")).to.equal(1n);
@@ -224,7 +227,7 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
             await mock.givenAnyRevert();
             await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
@@ -262,7 +265,7 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
             await mock.givenAnyRevert();
             await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
@@ -278,9 +281,14 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
+            // Use manual gasLimit for zkSync because gas estimation fails for this function on zkSync, though transaction executed successfully
+            await expect(
+                user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0, {
+                    gasLimit: hre.network.zksync ? 200_000 : undefined,
+                }),
+            )
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
             expect(await mock.invocationCountForCalldata.staticCall("0xbaddad")).to.equal(1n);
@@ -294,9 +302,9 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed");
+            await (await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed")).wait();
             await expect(await user2Safe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, "0xbaddad", 0)).to.be.deep.eq([
                 true,
                 "0xdeaddeed",
@@ -311,9 +319,9 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
+            await (await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message")).wait();
             await expect(await user2Safe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, "0xbaddad", 0)).to.be.deep.eq([
                 false,
                 "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
@@ -334,7 +342,7 @@ describe("ModuleManager", () => {
             } = await setupTests();
 
             await expect(safe.getModulesPaginated(AddressZero, 1)).to.be.reverted;
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])).wait();
             expect(await safe.getModulesPaginated(user1.address, 1)).to.be.deep.equal([[], AddressOne]);
             await expect(safe.getModulesPaginated(user2.address, 1)).to.be.revertedWith("GS105");
         });
