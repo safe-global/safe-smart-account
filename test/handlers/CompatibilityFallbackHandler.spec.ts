@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
+import { getCompatFallbackHandler, getContractFactoryByName, getSafeWithOwners, getWallets } from "../utils/setup";
 import {
     buildSignatureBytes,
     executeContractCallWithSigners,
@@ -14,9 +14,9 @@ import { chainId } from "../utils/encoding";
 import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
+        const signLib = await (await getContractFactoryByName("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler();
         const handlerAddress = await handler.getAddress();
         const signers = await ethers.getSigners();
@@ -26,7 +26,7 @@ describe("CompatibilityFallbackHandler", () => {
         const safe = await getSafeWithOwners([user1.address, user2.address, signerSafeAddress], 2, handlerAddress);
         const safeAddress = await safe.getAddress();
         const validator = await getCompatFallbackHandler(safeAddress);
-        const killLib = await killLibContract(user1);
+        const killLib = await killLibContract(user1, hre.network.zksync);
         return {
             safe,
             validator,
@@ -91,7 +91,7 @@ describe("CompatibilityFallbackHandler", () => {
                 signers: [user1, user2],
             } = await setupTests();
             const dataHash = ethers.keccak256("0xbaddad");
-            await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true);
+            await (await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true)).wait();
             expect(await validator.isValidSignature.staticCall(dataHash, "0x")).to.be.eq("0x1626ba7e");
         });
 
@@ -171,7 +171,14 @@ describe("CompatibilityFallbackHandler", () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         it.skip("can be called for any Safe", async () => {});
 
-        it("should revert changes", async () => {
+        it("should revert changes", async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * The `SELFDESTRUCT` instruction is not supported
+             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { validator, killLib } = await setupTests();
             const validatorAddress = await validator.getAddress();
             const killLibAddress = await killLib.getAddress();

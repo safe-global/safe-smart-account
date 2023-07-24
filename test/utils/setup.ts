@@ -10,19 +10,19 @@ import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2 } from "../../typechain-types";
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
-    return await deployments.get("TokenCallbackHandler");
+    return deployments.get("TokenCallbackHandler");
 };
 
 export const defaultTokenCallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("TokenCallbackHandler");
+    return getContractFactoryByName("TokenCallbackHandler");
 };
 
 export const compatFallbackHandlerDeployment = async () => {
-    return await deployments.get("CompatibilityFallbackHandler");
+    return deployments.get("CompatibilityFallbackHandler");
 };
 
 export const compatFallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("CompatibilityFallbackHandler");
+    return getContractFactoryByName("CompatibilityFallbackHandler");
 };
 
 export const getSafeSingleton = async () => {
@@ -32,13 +32,13 @@ export const getSafeSingleton = async () => {
 };
 
 export const getSafeSingletonContract = async () => {
-    const safeSingleton = await hre.ethers.getContractFactory("Safe");
+    const safeSingleton = await getContractFactoryByName("Safe");
 
     return safeSingleton;
 };
 
 export const getSafeL2SingletonContract = async () => {
-    const safeSingleton = await hre.ethers.getContractFactory("SafeL2");
+    const safeSingleton = await getContractFactoryByName("SafeL2");
 
     return safeSingleton;
 };
@@ -57,7 +57,7 @@ export const getSafeSingletonAt = async (address: string) => {
 };
 
 export const getFactoryContract = async () => {
-    const factory = await hre.ethers.getContractFactory("SafeProxyFactory");
+    const factory = await getContractFactoryByName("SafeProxyFactory");
 
     return factory;
 };
@@ -98,7 +98,7 @@ export const getCreateCall = async () => {
 };
 
 export const migrationContract = async () => {
-    return await hre.ethers.getContractFactory("Migration");
+    return await getContractFactoryByName("Migration");
 };
 
 export const getMock = async () => {
@@ -225,8 +225,8 @@ export const deployContract = async (deployer: Signer, source: string): Promise<
     }
 };
 
-export const getWallets = (): (ethers.Wallet | zk.Wallet)[] => {
-    if (hre.network.name === "hardhat") return waffle.provider.getWallets();
+export const getWallets = async (): (ethers.Signer | zk.Wallet)[] => {
+    if (hre.network.name === "hardhat") return ethers.getSigners();
     if (!hre.network.zksync) throw new Error("You can get wallets only on Hardhat or ZkSyncLocal networks!");
 
     const { accounts } = hre.network.config;
