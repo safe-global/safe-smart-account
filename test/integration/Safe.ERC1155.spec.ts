@@ -1,20 +1,19 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultTokenCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
+import { defaultTokenCallbackHandlerDeployment, getContractFactoryByName, getSafeTemplate, getWallets } from "../utils/setup";
 
 describe("Safe", () => {
-    const mockErc1155 = async () => {
-        const Erc1155 = await hre.ethers.getContractFactory("ERC1155Token");
-        return await Erc1155.deploy();
-    };
-
-    const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
+    const setupWithTemplate = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
+
+        const mockErc1155 = await (await getContractFactoryByName("ERC1155Token")).deploy();
+        await mockErc1155.deployed();
+
         return {
             safe: await getSafeTemplate(),
-            token: await mockErc1155(),
+            token: mockErc1155,
             signers,
         };
     });
@@ -29,10 +28,10 @@ describe("Safe", () => {
             const safeAddress = await safe.getAddress();
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait();
 
             // Mint test tokens
-            await token.mint(user1.address, 23, 1337, "0x");
+            await (await token.mint(user1.address, 23, 1337, "0x")).wait();
             await expect(await token.balanceOf(user1.address, 23)).to.be.deep.eq(1337n);
 
             await expect(token.mint(safeAddress, 23, 1337, "0x"), "Should not accept minted token if handler not set").to.be.reverted;
@@ -53,15 +52,17 @@ describe("Safe", () => {
             const handler = await defaultTokenCallbackHandlerDeployment();
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
+            await (
+                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            ).wait();
 
-            await token.mint(safeAddress, 23, 1337, "0x");
+            await (await token.mint(safeAddress, 23, 1337, "0x")).wait();
             await expect(await token.balanceOf(safeAddress, 23)).to.be.deep.eq(1337n);
 
-            await token.mint(user1.address, 23, 23, "0x");
+            await (await token.mint(user1.address, 23, 23, "0x")).wait();
             await expect(await token.balanceOf(user1.address, 23)).to.be.deep.eq(23n);
 
-            await token.safeTransferFrom(user1.address, safeAddress, 23, 23, "0x");
+            await (await token.safeTransferFrom(user1.address, safeAddress, 23, 23, "0x")).wait();
             await expect(await token.balanceOf(user1.address, 23)).to.be.deep.eq(0n);
             await expect(await token.balanceOf(safeAddress, 23)).to.be.deep.eq(1360n);
         });
