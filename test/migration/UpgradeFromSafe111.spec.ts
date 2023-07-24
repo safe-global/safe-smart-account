@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeSingleton, getFactory, getMock, getMultiSend } from "../utils/setup";
+import { getSafeSingleton, getFactory, getMock, getMultiSend, getWallets } from "../utils/setup";
 import { buildSafeTransaction, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { verificationTests } from "./subTests.spec";
 import deploymentData from "../json/safeDeployment.json";
@@ -12,7 +12,7 @@ describe("Upgrade from Safe 1.1.1", () => {
 
     // We migrate the Safe and run the verification tests
     const setupTests = deployments.createFixture(async ({ deployments }) => {
-        const [user1] = await ethers.getSigners();
+        const [user1] = await getWallets();
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();

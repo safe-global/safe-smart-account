@@ -4,6 +4,7 @@ import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
 import { MockContract, MultiSend, Safe } from "../../typechain-types";
+import { getWallets } from "../utils/setup";
 
 interface TestSetup {
     migratedSafe: Safe;
@@ -12,7 +13,14 @@ interface TestSetup {
 }
 
 export const verificationTests = async (setupTests: () => Promise<TestSetup>) => {
-    const [user1, user2, user3] = await ethers.getSigners();
+    before(function () {
+        /**
+         * ## Migration tests are not relevant for zkSync: there are no older versions of safe-contracts on zkSync
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
+    const [user1, user2, user3] = await getWallets();
 
     describe("execTransaction", () => {
         it("should be able to transfer ETH", async () => {
