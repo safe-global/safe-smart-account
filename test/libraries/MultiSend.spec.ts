@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCaller, getWallets } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
 
 describe("MultiSend", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const setterSource = `
             contract StorageSetter {
@@ -31,7 +31,14 @@ describe("MultiSend", () => {
     });
 
     describe("multiSend", () => {
-        it("should enforce delegatecall to MultiSend", async () => {
+        it("should enforce delegatecall to MultiSend", async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * The `SELFDESTRUCT` instruction is not supported
+             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const {
                 multiSend,
                 signers: [user1],
@@ -83,7 +90,7 @@ describe("MultiSend", () => {
                 multiSend,
                 signers: [user1, user2],
             } = await setupTests();
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
@@ -101,7 +108,7 @@ describe("MultiSend", () => {
                 multiSend,
                 signers: [user1, user2],
             } = await setupTests();
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
@@ -199,7 +206,7 @@ describe("MultiSend", () => {
             } = await setupTests();
             const storageSetterAddress = await storageSetter.getAddress();
 
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
