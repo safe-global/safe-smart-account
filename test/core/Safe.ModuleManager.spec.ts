@@ -147,8 +147,8 @@ describe("ModuleManager", () => {
                 safe,
                 signers: [user1, user2],
             } = await setupTests();
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1]);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user1])).wait();
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [user1.address, user2.address], [user1]),
             ).to.revertedWith("GS013");
