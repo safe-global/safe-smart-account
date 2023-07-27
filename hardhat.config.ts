@@ -126,6 +126,14 @@ const userConfig: HardhatUserConfig = {
             ...sharedNetworkConfig,
             url: `https://api.avax.network/ext/bc/C/rpc`,
         },
+        zkSyncMainnet: {
+            ...sharedNetworkConfig,
+            url: "https://mainnet.era.zksync.io",
+            ethNetwork: "mainnet",
+            zksync: true,
+            verifyURL:
+              "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
+        },
         zkSyncTestnet: {
             ...sharedNetworkConfig,
             url: "https://testnet.era.zksync.dev",
