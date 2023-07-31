@@ -229,8 +229,8 @@ rule addOwnerChangesOwners {
     bool isOwnerOtherBefore = isOwner(other);
     addOwnerWithThreshold(e, toAdd, threshold);
 
-    assert isOwner(toAdd);
-    assert isOwner(other) == isOwnerOtherBefore;
+    assert isOwner(toAdd), "addOwner should add the given owner";
+    assert isOwner(other) == isOwnerOtherBefore, "addOwner should not remove or add other owners";
 }
 
 rule removeOwnerChangesOwners {
@@ -248,8 +248,8 @@ rule removeOwnerChangesOwners {
     bool isOwnerOtherBefore = isOwner(other);
     removeOwner(e, prevOwner, toRemove, threshold);
 
-    assert !isOwner(toRemove);
-    assert isOwner(other) == isOwnerOtherBefore;
+    assert !isOwner(toRemove), "removeOwner should remove the given owner";
+    assert isOwner(other) == isOwnerOtherBefore, "removeOwner should not remove or add other owners";
 }
 
 rule swapOwnerChangesOwners {
@@ -269,7 +269,7 @@ rule swapOwnerChangesOwners {
     bool isOwnerNewBefore = isOwner(newOwner);
     swapOwner(e, prevOwner, oldOwner, newOwner);
 
-    assert isOwnerOldBefore && !isOwner(oldOwner);
-    assert !isOwnerNewBefore && isOwner(newOwner);
-    assert isOwner(other) == isOwnerOtherBefore;
+    assert isOwnerOldBefore && !isOwner(oldOwner), "swapOwner should remove old owner";
+    assert !isOwnerNewBefore && isOwner(newOwner), "swapOwner should add new owner";
+    assert isOwner(other) == isOwnerOtherBefore, "swapOwner should not remove or add other owners";
 }
