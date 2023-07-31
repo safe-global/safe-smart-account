@@ -36,14 +36,23 @@ ghost address NULL {
     axiom to_mathint(NULL) == 0;    
 }
 
-invariant thresholdSet() getThreshold() > 0
+invariant thresholdSet() getThreshold() > 0  && getThreshold() <= ghostOwnerCount
     {
         preserved {
             requireInvariant reach_null();
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
-            requireInvariant reachHeadNext();
+        }
+    }
+
+invariant self_not_owner() currentContract != SENTINEL => ghostOwners[currentContract] == 0
+    {
+        preserved {
+            requireInvariant reach_null();
+            requireInvariant reach_invariant();
+            requireInvariant inListReachable();
+            requireInvariant reachableInList();
         }
     }
 
@@ -56,9 +65,7 @@ invariant nextNull()
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
-            requireInvariant reachHeadNext();
             requireInvariant reach_null();
-            requireInvariant reach_next();
         }
     }
 
@@ -70,7 +77,6 @@ invariant reach_null()
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
-            requireInvariant reachHeadNext();
         }
     }
 
@@ -82,7 +88,6 @@ invariant inListReachable()
         preserved with (env e2) {
             requireInvariant thresholdSet();
             requireInvariant reach_invariant();
-            requireInvariant reach_next();
             requireInvariant reach_null();
             requireInvariant reachableInList();
         }
@@ -94,10 +99,10 @@ invariant reachableInList()
     {
         preserved with (env e2) {
             requireInvariant reach_invariant();
-            requireInvariant reach_next();
             requireInvariant reach_null();
-            requireInvariant nextNull();
             requireInvariant inListReachable();
+            requireInvariant reach_next();
+            requireInvariant nextNull();
         }
     }
 
@@ -106,7 +111,6 @@ invariant reachHeadNext()
            ghostOwners[SENTINEL] != SENTINEL && reach(ghostOwners[SENTINEL], X)
     { 
         preserved with (env e2) {
-            requireInvariant nextNull();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reach_invariant();
@@ -124,7 +128,6 @@ invariant reach_invariant()
     )
     { 
         preserved with (env e2) {
-            requireInvariant nextNull();
             requireInvariant reach_null();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
@@ -139,7 +142,6 @@ invariant reach_next()
         preserved with (env e2) {
             requireInvariant inListReachable();
             requireInvariant reachableInList();
-            requireInvariant nextNull();
             requireInvariant reach_null();
             requireInvariant reach_invariant();
         }
@@ -148,12 +150,13 @@ invariant reach_next()
 // Express the next relation from the reach relation by stating that it is reachable and there is no other element 
 // in between.
 // This is equivalent to P_next from Table 3.
-definition isSucc(address a, address b) returns bool = reach(a, b) && a != b && (forall address X. reach(a, X) && reach(X, b) => (a == X || b == X));
+definition isSucc(address a, address b) returns bool = reach(a, b) && a != b && (forall address Z. reach(a, Z) && reach(Z, b) => (a == Z || b == Z));
+definition next_or_null(address n) returns address = n == SENTINEL ? NULL : n;
 
 // Invariant stating that the owners storage pointers correspond to the next relation, except for the SENTINEL tail marker.
 definition reach_succ(address key, address next) returns bool =
-        (next == SENTINEL && isSucc(key, NULL)) || 
-        (next != SENTINEL && isSucc(key, next));
+        (isSucc(key, next_or_null(next))) ||
+        (next == NULL && key == NULL);
 
 // Update the reach relation when the next pointer of a is changed to b.
 // This corresponds to the first two equations in Table 3 [1] (destructive update to break previous paths through a and
@@ -169,19 +172,10 @@ definition updateSucc(address a, address b) returns bool = forall address X. for
 hook Sstore currentContract.owners[KEY address key] address value STORAGE {
     address valueOrNull;
     address someKey;
-    require someKey != NULL;
     require reach_succ(someKey, ghostOwners[someKey]);
     assert reach(value, key) => value == SENTINEL, "list is cyclic";
     ghostOwners[key] = value;
-    assert reach(key, NULL);
-    assert reach(value, NULL);
-    assert reach(NULL, NULL);
-    if (value == SENTINEL) {
-        valueOrNull = NULL;
-    } else {
-        valueOrNull = value;
-    }
-    havoc reach assuming updateSucc(key, valueOrNull);
+    havoc reach assuming updateSucc(key, next_or_null(value));
     assert reach_succ(someKey, ghostOwners[someKey]), "reach_succ violated after owners update";
 }
 
@@ -198,4 +192,84 @@ hook Sload address value currentContract.owners[KEY address key] STORAGE {
 
 hook Sload uint256 value currentContract.ownerCount STORAGE {
     require ghostOwnerCount == value;
+}
+
+rule isOwnerDoesNotRevert {
+    address addr;
+    isOwner@withrevert(addr);
+    assert !lastReverted, "isOwner should not revert";
+}
+
+rule isOwnerNotSelfOrSentinal {
+    address addr;
+    require addr == currentContract || addr == SENTINEL;
+    requireInvariant self_not_owner();
+    bool result = isOwner(addr);
+    assert result == false, "currentContract or SENTINEL must not be owners";
+}
+
+rule isOwnerInList {
+    address addr;
+    require addr != SENTINEL;
+    bool result = isOwner(addr);
+    assert result == (ghostOwners[addr] != NULL), "isOwner returns wrong result";
+}
+
+rule addOwnerChangesOwners {
+    address other;
+    address toAdd;
+    uint256 threshold;
+    env e;
+
+    requireInvariant reach_null();
+    requireInvariant reach_invariant();
+    requireInvariant inListReachable();
+    requireInvariant reachableInList();
+    require other != toAdd;
+    bool isOwnerOtherBefore = isOwner(other);
+    addOwnerWithThreshold(e, toAdd, threshold);
+
+    assert isOwner(toAdd), "addOwner should add the given owner";
+    assert isOwner(other) == isOwnerOtherBefore, "addOwner should not remove or add other owners";
+}
+
+rule removeOwnerChangesOwners {
+    address other;
+    address toRemove;
+    address prevOwner;
+    uint256 threshold;
+    env e;
+
+    requireInvariant reach_null();
+    requireInvariant reach_invariant();
+    requireInvariant inListReachable();
+    requireInvariant reachableInList();
+    require other != toRemove;
+    bool isOwnerOtherBefore = isOwner(other);
+    removeOwner(e, prevOwner, toRemove, threshold);
+
+    assert !isOwner(toRemove), "removeOwner should remove the given owner";
+    assert isOwner(other) == isOwnerOtherBefore, "removeOwner should not remove or add other owners";
+}
+
+rule swapOwnerChangesOwners {
+    address other;
+    address oldOwner;
+    address newOwner;
+    address prevOwner;
+    env e;
+
+    requireInvariant reach_null();
+    requireInvariant reach_invariant();
+    requireInvariant inListReachable();
+    requireInvariant reachableInList();
+    require other != oldOwner && other != newOwner;
+    bool isOwnerOtherBefore = isOwner(other);
+    bool isOwnerOldBefore = isOwner(oldOwner);
+    bool isOwnerNewBefore = isOwner(newOwner);
+    swapOwner(e, prevOwner, oldOwner, newOwner);
+
+    assert isOwnerOldBefore && !isOwner(oldOwner), "swapOwner should remove old owner";
+    assert !isOwnerNewBefore && isOwner(newOwner), "swapOwner should add new owner";
+    assert isOwner(other) == isOwnerOtherBefore, "swapOwner should not remove or add other owners";
 }
