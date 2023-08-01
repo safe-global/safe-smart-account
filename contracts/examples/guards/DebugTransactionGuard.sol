@@ -31,6 +31,15 @@ contract DebugTransactionGuard is BaseGuard {
         address executor
     );
 
+    event ModuleTransasctionDetails(
+        bytes32 indexed txHash,
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        address module
+    );
+
     event GasUsage(address indexed safe, bytes32 indexed txHash, uint256 indexed nonce, bool success);
 
     mapping(bytes32 => uint256) public txNonces;
@@ -84,5 +93,26 @@ contract DebugTransactionGuard is BaseGuard {
         require(nonce != 0, "Could not get nonce");
         txNonces[txHash] = 0;
         emit GasUsage(msg.sender, txHash, nonce, success);
+    }
+
+    /**
+     * @notice Called by the Safe contract before a transaction is executed via a module.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param module Account executing the transaction.
+     * @return moduleTxHash Hash of the module transaction.
+     */
+    function checkModuleTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address module
+    ) external override returns (bytes32 moduleTxHash) {
+        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
+
+        emit ModuleTransasctionDetails(moduleTxHash, to, value, data, operation, module);
     }
 }

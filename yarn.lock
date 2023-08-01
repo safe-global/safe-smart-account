@@ -871,11 +871,6 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@gnosis.pm/mock-contract@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/mock-contract/-/mock-contract-4.0.0.tgz#eaf500fddcab81b5f6c22280a7b22ff891dd6f87"
-  integrity sha512-SkRq2KwPx6vo0LAjSc8JhgQstrQFXRyn2yqquIfub7r2WHi5nUbF8beeSSXsd36hvBcQxQfmOIYNYRpj9JOhrQ==
-
 "@gnosis.pm/safe-singleton-factory@^1.0.14":
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-singleton-factory/-/safe-singleton-factory-1.0.14.tgz#42dae9a91fda21b605f94bfe310a7fccc6a4d738"
@@ -1217,6 +1212,11 @@
     hosted-git-info "^2.6.0"
     path-browserify "^1.0.0"
     url "^0.11.0"
+
+"@safe-global/mock-contract@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/mock-contract/-/mock-contract-4.1.0.tgz#6a8ee3afbe094c3a90a21af8e6a88b058acb327f"
+  integrity sha512-EGLpdNDdA1nx/DDjPmHSDZS2Zrlu3v4EsNw1zbM1Netk8Vf7oMwQetyqtfb8+ZYHhufkumVves3ED/jRlJPwLw==
 
 "@scure/base@~1.1.0":
   version "1.1.1"
@@ -9565,7 +9565,7 @@ underscore@1.9.1:
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
   integrity sha512-5/4etnCkd9c8gwgowi5/om/mYO5ajCaOgdzj/oW+0eQV9WxKBDZw5+ycmKmeaTXjInS/W0BzpGLo2xR2aBwZdg==
 
-undici@^5.14.0, undici@^5.4.0:
+undici@^5.14.0:
   version "5.21.2"
   resolved "https://registry.yarnpkg.com/undici/-/undici-5.21.2.tgz#329f628aaea3f1539a28b9325dccc72097d29acd"
   integrity sha512-f6pTQ9RF4DQtwoWSaC42P/NKlUjvezVvd9r155ohqkwFNRyBKM3f3pcty3ouusefNRyM25XhIQEbeQ46sZDJfQ==
