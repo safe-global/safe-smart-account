@@ -150,8 +150,7 @@ contract Safe is
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            bytes memory txHashData = encodeTransactionData(
-                // Transaction info
+            txHash = getTransactionHash( // Transaction info
                 to,
                 value,
                 data,
@@ -163,12 +162,10 @@ contract Safe is
                 gasToken,
                 refundReceiver,
                 // Signature info
-                nonce
+                // We use the post-increment here, so the current nonce value is used and incremented afterwards.
+                nonce++
             );
-            // Increase nonce and execute transaction.
-            nonce++;
-            txHash = keccak256(txHashData);
-            checkSignatures(txHash, txHashData, signatures);
+            checkSignatures(txHash, "", signatures);
         }
         address guard = getGuard();
         {
@@ -260,7 +257,7 @@ contract Safe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(dataHash, data, signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
     }
 
     /**
@@ -269,12 +266,21 @@ contract Safe is
      *      The data parameter (bytes) is not used since v1.5.0 as it is not required anymore. Prior to v1.5.0,
      *      data parameter was used in contract signature validation flow using legacy EIP-1271.
      *      Version v1.5.0, uses dataHash parameter instead of data with updated EIP-1271 implementation.
+     * @param executor Address that executing the transaction.
+     *        ⚠️⚠️⚠️ Make sure that the executor address is a legitmate executor.
+     *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(bytes32 dataHash, bytes memory /* data */, bytes memory signatures, uint256 requiredSignatures) public view {
+    function checkNSignatures(
+        address executor,
+        bytes32 dataHash,
+        bytes memory /* data */,
+        bytes memory signatures,
+        uint256 requiredSignatures
+    ) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
@@ -322,7 +328,7 @@ contract Safe is
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
+                require(executor == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
