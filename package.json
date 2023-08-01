@@ -45,8 +45,8 @@
         "url": "https://github.com/safe-global/safe-contracts/issues"
     },
     "devDependencies": {
-        "@safe-global/mock-contract": "^4.1.0",
-        "@gnosis.pm/safe-singleton-factory": "^1.0.14",
+        "@safe-global/mock-contract": "^4.0.0",
+        "@safe-global/safe-singleton-factory": "^1.0.14",
         "@nomiclabs/hardhat-ethers": "2.0.2",
         "@nomiclabs/hardhat-etherscan": "^3.1.7",
         "@nomiclabs/hardhat-waffle": "2.0.1",
