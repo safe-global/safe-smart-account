@@ -4,39 +4,19 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./TokenCallbackHandler.sol";
 import "../interfaces/ISignatureValidator.sol";
 import "../Safe.sol";
+import "./HandlerContext.sol";
 
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
  * @author Richard Meissner - @rmeissner
  */
-contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator {
+contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator, HandlerContext {
     // keccak256("SafeMessage(bytes message)");
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
     bytes4 internal constant SIMULATE_SELECTOR = bytes4(keccak256("simulate(address,bytes)"));
 
     address internal constant SENTINEL_MODULES = address(0x1);
-    bytes4 internal constant UPDATED_MAGIC_VALUE = 0x1626ba7e;
-
-    /**
-     * @notice Legacy EIP-1271 signature validation method.
-     * @dev Implementation of ISignatureValidator (see `interfaces/ISignatureValidator.sol`)
-     * @param _data Arbitrary length data signed on the behalf of address(msg.sender).
-     * @param _signature Signature byte array associated with _data.
-     * @return The EIP-1271 magic value.
-     */
-    function isValidSignature(bytes memory _data, bytes memory _signature) public view override returns (bytes4) {
-        // Caller should be a Safe
-        Safe safe = Safe(payable(msg.sender));
-        bytes memory messageData = encodeMessageDataForSafe(safe, _data);
-        bytes32 messageHash = keccak256(messageData);
-        if (_signature.length == 0) {
-            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
-        } else {
-            safe.checkSignatures(messageHash, messageData, _signature);
-        }
-        return EIP1271_MAGIC_VALUE;
-    }
 
     /**
      * @dev Returns the hash of a message to be signed by owners.
@@ -74,10 +54,17 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @param _signature Signature byte array associated with _dataHash
      * @return Updated EIP1271 magic value if signature is valid, otherwise 0x0
      */
-    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) external view returns (bytes4) {
-        ISignatureValidator validator = ISignatureValidator(msg.sender);
-        bytes4 value = validator.isValidSignature(abi.encode(_dataHash), _signature);
-        return (value == EIP1271_MAGIC_VALUE) ? UPDATED_MAGIC_VALUE : bytes4(0);
+    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) public view override returns (bytes4) {
+        // Caller should be a Safe
+        Safe safe = Safe(payable(msg.sender));
+        bytes memory messageData = encodeMessageDataForSafe(safe, abi.encode(_dataHash));
+        bytes32 messageHash = keccak256(messageData);
+        if (_signature.length == 0) {
+            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
+        } else {
+            safe.checkSignatures(messageHash, messageData, _signature);
+        }
+        return EIP1271_MAGIC_VALUE;
     }
 
     /**
@@ -108,6 +95,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         calldataPayload;
 
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             let internalCalldata := mload(0x40)
             /**
@@ -166,5 +154,20 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 revert(add(response, 0x20), mload(response))
             }
         }
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     *      The function was moved to the fallback handler as a part of
+     *      1.5.0 contract upgrade. It used to be a part of the Safe core contract, but
+     *      was replaced by the same function that accepts the executor as a parameter.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param requiredSignatures Amount of required valid signatures.
+     */
+    function checkNSignatures(bytes32 dataHash, bytes memory, bytes memory signatures, uint256 requiredSignatures) public view {
+        Safe(payable(_manager())).checkNSignatures(_msgSender(), dataHash, "", signatures, requiredSignatures);
     }
 }

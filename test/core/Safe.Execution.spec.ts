@@ -30,6 +30,9 @@ describe("Safe", async () => {
                 }
             }`;
         const storageSetter = await deployContract(user1, setterSource);
+        const TestNativeTokenReceiver = await hre.ethers.getContractFactory("TestNativeTokenReceiver");
+        const nativeTokenReceiver = await TestNativeTokenReceiver.deploy();
+
         const reverterSource = `
             contract Reverter {
                 function revert() public {
@@ -41,6 +44,7 @@ describe("Safe", async () => {
             safe: await getSafeWithOwners([user1.address]),
             reverter,
             storageSetter,
+            nativeTokenReceiver,
         };
     });
 
@@ -281,6 +285,35 @@ describe("Safe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
                 "Safe transaction should fail with gasPrice 1 and high gasLimit",
             ).to.emit(safe, "ExecutionFailure");
+        });
+
+        it("should forward all the gas to the native token refund receiver", async () => {
+            const { safe, nativeTokenReceiver } = await setupTests();
+
+            const tx = buildSafeTransaction({
+                to: user1.address,
+                nonce: await safe.nonce(),
+                operation: 0,
+                gasPrice: 1,
+                safeTxGas: 0,
+                refundReceiver: nativeTokenReceiver.address,
+            });
+
+            await user1.sendTransaction({ to: safe.address, value: parseEther("1") });
+            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"));
+
+            const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 500000 });
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx.hash);
+            const parsedLogs = [];
+            for (const log of receipt.logs) {
+                try {
+                    parsedLogs.push(nativeTokenReceiver.interface.decodeEventLog("BreadReceived", log.data, log.topics));
+                } catch (e) {
+                    continue;
+                }
+            }
+
+            expect(parsedLogs[0].forwardedGas.toNumber()).to.be.gte(400000);
         });
     });
 });

@@ -3,6 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../common/Enum.sol";
 import "../common/SelfAuthorized.sol";
 import "./Executor.sol";
+import "./GuardManager.sol";
 
 /**
  * @title Module Manager - A contract managing Safe modules
@@ -13,7 +14,7 @@ import "./Executor.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-abstract contract ModuleManager is SelfAuthorized, Executor {
+abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
     event EnabledModule(address indexed module);
     event DisabledModule(address indexed module);
     event ExecutionFromModuleSuccess(address indexed module);
@@ -87,7 +88,17 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
         // Execute transaction without further confirmations.
+        address guard = getGuard();
+
+        bytes32 guardHash;
+        if (guard != address(0)) {
+            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+        }
         success = execute(to, value, data, operation, type(uint256).max);
+
+        if (guard != address(0)) {
+            Guard(guard).checkAfterExecution(guardHash, success);
+        }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
     }
@@ -109,6 +120,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     ) public returns (bool success, bytes memory returnData) {
         success = execTransactionFromModule(to, value, data, operation);
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             // Load free memory location
             let ptr := mload(0x40)
@@ -169,6 +181,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
         }
         // Set correct size of returned array
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             mstore(array, moduleCount)
         }
@@ -183,6 +196,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }

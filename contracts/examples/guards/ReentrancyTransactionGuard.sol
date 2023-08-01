@@ -30,6 +30,7 @@ contract ReentrancyTransactionGuard is BaseGuard {
     function getGuard() internal pure returns (GuardValue storage guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             guard.slot := slot
         }
@@ -64,5 +65,27 @@ contract ReentrancyTransactionGuard is BaseGuard {
      */
     function checkAfterExecution(bytes32, bool) external override {
         getGuard().active = false;
+    }
+
+    /**
+     * @notice Called by the Safe contract before a transaction is executed via a module.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param module Account executing the transaction.
+     */
+    function checkModuleTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address module
+    ) external override returns (bytes32 moduleTxHash) {
+        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
+
+        GuardValue storage guard = getGuard();
+        require(!guard.active, "Reentrancy detected");
+        guard.active = true;
     }
 }

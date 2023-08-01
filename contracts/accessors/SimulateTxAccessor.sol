@@ -49,6 +49,7 @@ contract SimulateTxAccessor is Executor {
         success = execute(to, value, data, operation, gasleft());
         estimate = startGas - gasleft();
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             // Load free memory location
             let ptr := mload(0x40)

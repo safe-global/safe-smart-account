@@ -28,6 +28,7 @@ contract SafeProxyFactory {
 
         bytes memory deploymentData = abi.encodePacked(type(SafeProxy).creationCode, uint256(uint160(_singleton)));
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
         }
@@ -35,6 +36,7 @@ contract SafeProxyFactory {
 
         if (initializer.length > 0) {
             // solhint-disable-next-line no-inline-assembly
+            /// @solidity memory-safe-assembly
             assembly {
                 if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
                     revert(0, 0)
@@ -104,6 +106,7 @@ contract SafeProxyFactory {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
@@ -117,6 +120,7 @@ contract SafeProxyFactory {
     function getChainId() public view returns (uint256) {
         uint256 id;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             id := chainid()
         }

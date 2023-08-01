@@ -1,5 +1,4 @@
 methods {
-    // 
     function getThreshold() external returns (uint256) envfree;
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
@@ -270,4 +269,16 @@ rule safeOwnerCountConsistency(method f) filtered {
     f(e, args);
 
     assert getOwnersCount() == getOwnersCountFromArray();
+}
+
+rule moduleOnlyAddedThroughEnableModule(method f, address module) filtered {
+    f -> reachableOnly(f)
+} {
+    require getModule(module) == 0;
+
+    calldataarg args; env e;
+    f(e, args);
+
+    assert getModule(module) != 0 => 
+        f.selector == sig:enableModule(address).selector;
 }
