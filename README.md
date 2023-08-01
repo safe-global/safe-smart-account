@@ -1,7 +1,7 @@
 Safe Contracts
 ==============
 
-[![npm version](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts)
+[![npm version](https://badge.fury.io/js/%40safe-global%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40safe-global%2Fsafe-contracts)
 [![Build Status](https://github.com/safe-global/safe-contracts/workflows/safe-contracts/badge.svg?branch=main)](https://github.com/safe-global/safe-contracts/actions)
 [![Coverage Status](https://coveralls.io/repos/github/safe-global/safe-contracts/badge.svg?branch=main)](https://coveralls.io/github/safe-global/safe-contracts)
 
