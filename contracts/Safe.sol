@@ -39,8 +39,7 @@ contract Safe is
     SecuredTokenTransfer,
     ISignatureValidatorConstants,
     FallbackManager,
-    StorageAccessible,
-    GuardManager
+    StorageAccessible
 {
     using SafeMath for uint256;
 
@@ -151,8 +150,7 @@ contract Safe is
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            bytes memory txHashData = encodeTransactionData(
-                // Transaction info
+            txHash = getTransactionHash( // Transaction info
                 to,
                 value,
                 data,
@@ -164,12 +162,10 @@ contract Safe is
                 gasToken,
                 refundReceiver,
                 // Signature info
-                nonce
+                // We use the post-increment here, so the current nonce value is used and incremented afterwards.
+                nonce++
             );
-            // Increase nonce and execute transaction.
-            nonce++;
-            txHash = keccak256(txHashData);
-            checkSignatures(txHash, txHashData, signatures);
+            checkSignatures(txHash, "", signatures);
         }
         address guard = getGuard();
         {
@@ -192,6 +188,7 @@ contract Safe is
                 );
             }
         }
+
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
         require(gasleft() >= ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
@@ -238,9 +235,10 @@ contract Safe is
         // solhint-disable-next-line avoid-tx-origin
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
-            // For ETH we will only adjust the gas price to not be higher than the actual used gas price
+            // For native tokens, we will only adjust the gas price to not be higher than the actually used gas price
             payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
-            require(receiver.send(payment), "GS011");
+            (bool refundSuccess, ) = receiver.call{value: payment}("");
+            require(refundSuccess, "GS011");
         } else {
             payment = gasUsed.add(baseGas).mul(gasPrice);
             require(transferToken(gasToken, receiver, payment), "GS012");
@@ -259,19 +257,30 @@ contract Safe is
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(dataHash, data, signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
     }
 
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     *      The data parameter (bytes) is not used since v1.5.0 as it is not required anymore. Prior to v1.5.0,
+     *      data parameter was used in contract signature validation flow using legacy EIP-1271.
+     *      Version v1.5.0, uses dataHash parameter instead of data with updated EIP-1271 implementation.
+     * @param executor Address that executing the transaction.
+     *        ⚠️⚠️⚠️ Make sure that the executor address is a legitmate executor.
+     *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param data That should be signed (this is passed to an external validator contract)
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures, uint256 requiredSignatures) public view {
+    function checkNSignatures(
+        address executor,
+        bytes32 dataHash,
+        bytes memory /* data */,
+        bytes memory signatures,
+        uint256 requiredSignatures
+    ) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.
@@ -284,7 +293,6 @@ contract Safe is
         for (i = 0; i < requiredSignatures; i++) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
-                require(keccak256(data) == dataHash, "GS027");
                 // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
@@ -300,6 +308,7 @@ contract Safe is
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
                 // solhint-disable-next-line no-inline-assembly
+                /// @solidity memory-safe-assembly
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
@@ -308,17 +317,18 @@ contract Safe is
                 // Check signature
                 bytes memory contractSignature;
                 // solhint-disable-next-line no-inline-assembly
+                /// @solidity memory-safe-assembly
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
-                require(ISignatureValidator(currentOwner).isValidSignature(data, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                require(msg.sender == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
+                require(executor == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -346,24 +356,18 @@ contract Safe is
     }
 
     /**
-     * @notice Returns the ID of the chain the contract is currently deployed on.
-     * @return The ID of the current chain as a uint256.
-     */
-    function getChainId() public view returns (uint256) {
-        uint256 id;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            id := chainid()
-        }
-        return id;
-    }
-
-    /**
      * @dev Returns the domain separator for this contract, as defined in the EIP-712 standard.
      * @return bytes32 The domain separator hash.
      */
     function domainSeparator() public view returns (bytes32) {
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, getChainId(), this));
+        uint256 chainId;
+        // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
+        assembly {
+            chainId := chainid()
+        }
+
+        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }
 
     /**
@@ -391,7 +395,7 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) public view returns (bytes memory) {
+    ) private view returns (bytes memory) {
         bytes32 safeTxHash = keccak256(
             abi.encode(
                 SAFE_TX_TYPEHASH,

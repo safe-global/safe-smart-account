@@ -35,6 +35,7 @@ abstract contract FallbackManager is SelfAuthorized {
 
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, handler)
         }
@@ -61,22 +62,39 @@ abstract contract FallbackManager is SelfAuthorized {
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
+            // When compiled with the optimizer, the compiler relies on a certain assumptions on how the
+            // memory is used, therefore we need to guarantee memory safety (keeping the free memory point 0x40 slot intact,
+            // not going beyond the scratch space, etc)
+            // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
+            function allocate(length) -> pos {
+                pos := mload(0x40)
+                mstore(0x40, add(pos, length))
+            }
+
             let handler := sload(slot)
             if iszero(handler) {
                 return(0, 0)
             }
-            calldatacopy(0, 0, calldatasize())
+
+            let calldataPtr := allocate(calldatasize())
+            calldatacopy(calldataPtr, 0, calldatasize())
+
             // The msg.sender address is shifted to the left by 12 bytes to remove the padding
             // Then the address without padding is stored right after the calldata
-            mstore(calldatasize(), shl(96, caller()))
+            let senderPtr := allocate(20)
+            mstore(senderPtr, shl(96, caller()))
+
             // Add 20 bytes for the address appended add the end
-            let success := call(gas(), handler, 0, 0, add(calldatasize(), 20), 0, 0)
-            returndatacopy(0, 0, returndatasize())
+            let success := call(gas(), handler, 0, calldataPtr, add(calldatasize(), 20), 0, 0)
+
+            let returnDataPtr := allocate(returndatasize())
+            returndatacopy(returnDataPtr, 0, returndatasize())
             if iszero(success) {
-                revert(0, returndatasize())
+                revert(returnDataPtr, returndatasize())
             }
-            return(0, returndatasize())
+            return(returnDataPtr, returndatasize())
         }
     }
 }
