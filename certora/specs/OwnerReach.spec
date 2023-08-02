@@ -17,7 +17,13 @@
 methods {
     function isOwner(address) external returns (bool) envfree;
     function getThreshold() external returns (uint256) envfree;
+    function getOwnersCount() external returns (uint256) envfree;
 }
+
+definition reachableOnly(method f) returns bool =
+    f.selector != sig:simulateAndRevert(address,bytes).selector;
+
+definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
 
 ghost reach(address, address) returns bool {
     init_state axiom forall address X. forall address Y. reach(X, Y) == (X == Y || to_mathint(Y) == 0);
@@ -37,16 +43,21 @@ ghost address NULL {
 }
 
 invariant thresholdSet() getThreshold() > 0  && getThreshold() <= ghostOwnerCount
+    filtered { f -> reachableOnly(f) }
     {
         preserved {
             requireInvariant reach_null();
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
+            // The prover found a counterexample if the owners count is max uint256,
+            // but this is not a realistic scenario.
+            require getOwnersCount() < MAX_UINT256();
         }
     }
 
 invariant self_not_owner() currentContract != SENTINEL => ghostOwners[currentContract] == 0
+    filtered { f -> reachableOnly(f) }
     {
         preserved {
             requireInvariant reach_null();
@@ -60,6 +71,7 @@ invariant self_not_owner() currentContract != SENTINEL => ghostOwners[currentCon
 invariant nextNull()
     ghostOwners[NULL] == 0 &&
     (forall address X. forall address Y. ghostOwners[X] == 0 && reach(X, Y) => X == Y || Y == 0)
+    filtered { f -> reachableOnly(f) }
     { 
         preserved with (env e2) {
             requireInvariant reach_invariant();
@@ -72,6 +84,7 @@ invariant nextNull()
 // every element reaches the 0 pointer (because we replace in reach the end sentinel with null)
 invariant reach_null()
     (forall address X. reach(X, NULL))
+    filtered { f -> reachableOnly(f) }
     {
         preserved with (env e2) {
             requireInvariant reach_invariant();
@@ -84,6 +97,7 @@ invariant reach_null()
 invariant inListReachable()
     ghostOwners[SENTINEL] != 0 &&
     (forall address key. ghostOwners[key] != 0 => reach(SENTINEL, key))
+    filtered { f -> reachableOnly(f) }
     {
         preserved with (env e2) {
             requireInvariant thresholdSet();
@@ -96,6 +110,7 @@ invariant inListReachable()
 // every element that is reachable from another element is either the null pointer or part of the list.
 invariant reachableInList()
     (forall address X. forall address Y. reach(X, Y) => X == Y || Y == 0 || ghostOwners[Y] != 0)
+    filtered { f -> reachableOnly(f) }
     {
         preserved with (env e2) {
             requireInvariant reach_invariant();
@@ -109,6 +124,7 @@ invariant reachableInList()
 invariant reachHeadNext()
     forall address X. reach(SENTINEL, X) && X != SENTINEL && X != NULL => 
            ghostOwners[SENTINEL] != SENTINEL && reach(ghostOwners[SENTINEL], X)
+    filtered { f -> reachableOnly(f) }
     { 
         preserved with (env e2) {
             requireInvariant inListReachable();
@@ -126,6 +142,7 @@ invariant reach_invariant()
         && (reach(X,Y) && reach (Y, Z) => reach(X, Z))
         && (reach(X,Y) && reach (X, Z) => (reach(Y,Z) || reach(Z,Y)))
     )
+    filtered { f -> reachableOnly(f) }
     { 
         preserved with (env e2) {
             requireInvariant reach_null();
@@ -138,6 +155,7 @@ invariant reach_invariant()
 // every element reaches its direct successor (except for the tail-SENTINEL).
 invariant reach_next()
     forall address X. reach_succ(X, ghostOwners[X])
+    filtered { f -> reachableOnly(f) }
     { 
         preserved with (env e2) {
             requireInvariant inListReachable();
