@@ -53,15 +53,14 @@ contract OutSafe is Safe {
       for (uint256 i = 0; i < assets.length; i++) {
         limits[verifier][assets[i]] = _limits[i];
       }
-      nonces[verifier] = 1;
     }
 
     function getLimit(address verifier, address asset) public view returns (uint256) {
       return limits[verifier][asset];
     }
 
-    function getNonce(address verifier) public view returns (uint256) {
-      return nonces[verifier];
+    function getNonce(address user) public view returns (uint256) {
+      return nonces[user];
     }
 
     // Asset type: 0 - ETH, 1 - ERC20
@@ -71,12 +70,12 @@ contract OutSafe is Safe {
       bytes32 s;
       (v, r, s) = signatureSplit(signature, 0);
       address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, amount, nonce, expiry)), v, r, s);
-      require(nonces[verifier] < nonce, "OS01");
+      require(nonces[user] < nonce, "OS01");
       require(expiry > block.number, "OS02");
       require(limits[verifier][asset] > 0, "OS03");
       require(limits[verifier][asset] >= amount, "OS04");
       require(asset == address(0) || assetTypes[asset] == 1, "OS05");
-      nonces[verifier] = nonce;
+      nonces[user] = nonce;
       limits[verifier][asset] -= amount;
       if (asset == address(0)) {
         payable(user).transfer(amount);
