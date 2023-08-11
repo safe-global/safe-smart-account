@@ -54,7 +54,7 @@ The check before a transaction can e.g. programmatically check all of the parame
 
 #### Safe Domain Separator
 
-```json
+```js
 DomainSeparator {
     uint256 chainId;
     address verifyingContract;
@@ -67,7 +67,7 @@ The domain includes the chainId and the address of the Safe account to prevent r
 
 The Safe transaction is defined by the following EIP-712 typed structured data:
 
-```json
+```js
 SafeTx {
     bytes to;
     uint256 value;
@@ -111,7 +111,7 @@ For a detailed description of the Safe transaction gas, please refer to the [saf
 
 The Safe message is defined by the following EIP-712 typed structured data:
 
-```json
+```js
 SafeMessage {
     bytes message;
 }
