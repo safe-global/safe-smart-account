@@ -21,8 +21,6 @@ methods {
 definition reachableOnly(method f) returns bool =
     f.selector != sig:simulateAndRevert(address,bytes).selector;
 
-definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
-
 ghost reach(address, address) returns bool {
     init_state axiom forall address X. forall address Y. reach(X, Y) == (X == Y || to_mathint(Y) == 0);
 }
