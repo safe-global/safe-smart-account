@@ -13,6 +13,9 @@ on:
 jobs:
     verify:
         runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                rule: ["verifyOwners.sh", "verifySafe.sh"]
 
         steps:
             - uses: actions/checkout@v3
@@ -34,6 +37,10 @@ jobs:
                   chmod +x solc-static-linux
                   sudo mv solc-static-linux /usr/local/bin/solc7.6
 
+                  wget https://github.com/ethereum/solidity/releases/download/v0.8.19/solc-static-linux
+                  chmod +x solc-static-linux
+                  sudo mv solc-static-linux /usr/local/bin/solc8.19
+
             - name: Verify rule ${{ matrix.rule }}
               run: |
                   cd certora
@@ -44,10 +51,3 @@ jobs:
                   ./certora/scripts/${{ matrix.rule }}
               env:
                   CERTORAKEY: ${{ secrets.CERTORA_KEY }}
-
-        strategy:
-            fail-fast: false
-            max-parallel: 16
-            matrix:
-                rule:
-                    - verifySafe.sh
