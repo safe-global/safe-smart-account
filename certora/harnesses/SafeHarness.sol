@@ -15,6 +15,12 @@ contract SafeHarness is Safe {
         this.setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
     }
 
+    // harnessed functions
+
+    function signatureSplitPublic(bytes memory signatures, uint256 pos) public pure returns (uint8 v, bytes32 r, bytes32 s) {
+        return signatureSplit(signatures, pos);
+    }
+
     // harnessed getters
     function getModule(address module) public view returns (address) {
         return modules[module];

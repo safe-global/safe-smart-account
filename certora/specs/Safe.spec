@@ -3,6 +3,7 @@ methods {
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
+    function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -200,6 +201,36 @@ rule nativeTokenBalanceSpending(method f) filtered {
         f.selector == sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector
         || f.selector == sig:execTransactionFromModule(address,uint256,bytes,Enum.Operation).selector
         || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation).selector;
+}
+
+// checkSignatures called once is equivalent to checkSignatures called twice
+rule checkSignatures() {
+    bytes32 dataHash;
+    bytes data;
+    env e;
+    bytes signatures12;
+    bytes signatures1;
+    bytes signatures2;
+    uint8 v1; bytes32 r1; bytes32 s1;
+    uint8 v2; bytes32 r2; bytes32 s2;
+    uint8 v121; bytes32 r121; bytes32 s121;
+    uint8 v122; bytes32 r122; bytes32 s122;
+    v1, r1, s1 = signatureSplitPublic(signatures1, 0);
+    v2, r2, s2 = signatureSplitPublic(signatures2, 0);
+    v121, r121, s121 = signatureSplitPublic(signatures12, 0);
+    v122, r122, s122 = signatureSplitPublic(signatures12, 1);
+    require v1 == v121 && r1 == r121 && s1 == s121;
+    require v2 == v122 && r2 == r122 && s2 == s122;
+
+    checkNSignatures@withrevert(e, dataHash, data, signatures1, 1);
+    bool success1 = !lastReverted;
+    checkNSignatures@withrevert(e, dataHash, data, signatures2, 1);
+    bool success2 = !lastReverted;
+    
+    checkNSignatures@withrevert(e, dataHash, data, signatures12, 2);
+    bool success12 = !lastReverted;
+
+    assert (success1 && success2) == success12, "checkSignatures called must be equivalent to checkSignatures called twice";
 }
 
 rule nativeTokenBalanceSpendingExecTransaction(
