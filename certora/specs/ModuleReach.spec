@@ -175,6 +175,17 @@ hook Sload address value currentContract.modules[KEY address key] STORAGE {
     require reach_succ(key, value);
 }
 
+invariant sentinelIsNotAmodule() isModuleEnabled(SENTINEL) == false
+    filtered { f -> reachableOnly(f) }
+    {
+        preserved {
+            requireInvariant reach_null();
+            requireInvariant reach_invariant();
+            requireInvariant inListReachable();
+            requireInvariant reachableInList();
+        }
+    }
+
 rule isModuleEnabledDoesNotRevert {
     address addr;
     isModuleEnabled@withrevert(addr);
