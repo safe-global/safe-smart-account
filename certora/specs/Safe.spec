@@ -216,6 +216,7 @@ rule nativeTokenBalanceSpending(method f) filtered {
 rule checkSignatures() {
     bytes32 dataHash;
     bytes data;
+    address executor1; address executor2; address executor3;
     env e;
     bytes signatures12;
     bytes signatures1;
@@ -231,12 +232,12 @@ rule checkSignatures() {
     require v1 == v121 && r1 == r121 && s1 == s121;
     require v2 == v122 && r2 == r122 && s2 == s122;
 
-    checkNSignatures@withrevert(e, dataHash, data, signatures1, 1);
+    checkNSignatures@withrevert(e, executor1, dataHash, data, signatures1, 1);
     bool success1 = !lastReverted;
-    checkNSignatures@withrevert(e, dataHash, data, signatures2, 1);
+    checkNSignatures@withrevert(e, executor2, dataHash, data, signatures2, 1);
     bool success2 = !lastReverted;
     
-    checkNSignatures@withrevert(e, dataHash, data, signatures12, 2);
+    checkNSignatures@withrevert(e, executor3, dataHash, data, signatures12, 2);
     bool success12 = !lastReverted;
 
     assert (success1 && success2) == success12, "checkSignatures called must be equivalent to checkSignatures called twice";
