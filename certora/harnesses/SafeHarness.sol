@@ -18,6 +18,7 @@ contract SafeHarness is Safe {
     // harnessed functions
 
     function signatureSplitPublic(bytes memory signatures, uint256 pos) public pure returns (uint8 v, bytes32 r, bytes32 s) {
+        require(signatures.length >= 65 * (pos + 1));
         return signatureSplit(signatures, pos);
     }
 

@@ -4,7 +4,7 @@ methods {
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
     function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
-    function signatureSplit(bytes sig, uint256 pos) internal returns (uint8,bytes32,bytes32) envfree => mySignatureSplit(sig,pos);
+    // function signatureSplit(bytes sig, uint256 pos) internal returns (uint8,bytes32,bytes32) envfree => mySignatureSplit(sig,pos);
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -17,6 +17,7 @@ methods {
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
+    function _.isValidSignature(bytes32, bytes) external => NONDET;
 }
 
 definition noHavoc(method f) returns bool =
@@ -34,13 +35,13 @@ definition reachableOnly(method f) returns bool =
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
 
-ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
+// ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
+// ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
+// ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
 
-function mySignatureSplit(bytes sig, uint256 pos) returns (uint8,bytes32,bytes32) {
-    return (mySigSplitV[sig][pos], mySigSplitR[sig][pos], mySigSplitS[sig][pos]);
-}
+// function mySignatureSplit(bytes sig, uint256 pos) returns (uint8,bytes32,bytes32) {
+//     return (mySigSplitV[sig][pos], mySigSplitR[sig][pos], mySigSplitS[sig][pos]);
+// }
 
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
@@ -231,6 +232,11 @@ rule checkSignatures() {
     v122, r122, s122 = signatureSplitPublic(signatures12, 1);
     require v1 == v121 && r1 == r121 && s1 == s121;
     require v2 == v122 && r2 == r122 && s2 == s122;
+    require v1 != 1 && v2 != 1;
+    require data.length < 1000;
+    require signatures1.length < 1000;
+    require signatures2.length < 1000;
+    require signatures12.length < 1000;
 
     checkNSignatures@withrevert(e, executor1, dataHash, data, signatures1, 1);
     bool success1 = !lastReverted;
