@@ -148,8 +148,8 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     for (const sig of signatures) {
         if (sig.dynamic) {
             /* 
-                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended at the end of 
-                end signature bytes.
+                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended 
+                at the end of signature bytes.
                 The signature format is
                 Signature type == 0
                 Constant part: 65 bytes
