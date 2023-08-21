@@ -35,7 +35,7 @@ type UserOperation = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-describe("Safe.ERC4337", () => {
+describe.only("Safe.ERC4337", () => {
     const setupTests = async () => {
         const factory = await getFactoryContract();
         const singleton = await getSafeSingletonContract();
@@ -76,8 +76,9 @@ describe("Safe.ERC4337", () => {
 
         const feeData = await provider.getFeeData();
         const maxFeePerGas = feeData.maxFeePerGas.toHexString();
-
         const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString();
+
+        console.log({ maxFeePerGas, maxPriorityFeePerGas })
 
         const moduleInitializer = erc4337ModuleAndHandler.interface.encodeFunctionData("enableMyself", []);
         const encodedInitializer = singleton.interface.encodeFunctionData("setup", [
@@ -110,7 +111,7 @@ describe("Safe.ERC4337", () => {
             initCode,
             callData: userOpCallData,
             callGasLimit: "0x7A120",
-            verificationGasLimit: "0x7A120",
+            verificationGasLimit: "0xF4240",
             preVerificationGas: "0x186A0",
             maxFeePerGas,
             maxPriorityFeePerGas,

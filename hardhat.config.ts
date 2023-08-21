@@ -14,7 +14,9 @@ const argv = yargs
         default: "hardhat",
     })
     .help(false)
-    .version(false).argv;
+    .version(false)
+    .parseSync()
+
 
 // Load environment variables.
 dotenv.config();
