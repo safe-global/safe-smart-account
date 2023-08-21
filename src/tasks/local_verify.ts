@@ -1,5 +1,3 @@
-import "hardhat-deploy";
-import "@nomiclabs/hardhat-ethers";
 import { task } from "hardhat/config";
 import { loadSolc } from "../utils/solc";
 
@@ -39,4 +37,4 @@ task("local-verify", "Verifies that the local deployment files correspond to the
     }
 });
 
-export {};
+export { };

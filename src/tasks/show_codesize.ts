@@ -1,5 +1,3 @@
-import "hardhat-deploy";
-import "@nomiclabs/hardhat-ethers";
 import { task, types } from "hardhat/config";
 import { loadSolc } from "../utils/solc";
 
@@ -36,4 +34,4 @@ task("yulcode", "Outputs yul code for contracts")
         }
     });
 
-export {};
+export { };

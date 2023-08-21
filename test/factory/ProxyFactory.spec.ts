@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { deployContract, getFactory, getMock, getSafeWithOwners, getSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber } from "ethers";
@@ -32,7 +31,7 @@ describe("ProxyFactory", async () => {
         }
     }`;
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -58,7 +57,7 @@ describe("ProxyFactory", async () => {
 
         it("should revert with invalid initializer", async () => {
             const { factory, singleton } = await setupTests();
-            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith("");
+            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWithoutReason();
         });
 
         it("should emit event without initializing", async () => {
@@ -113,7 +112,7 @@ describe("ProxyFactory", async () => {
 
         it("should revert with invalid initializer", async () => {
             const { factory, singleton } = await setupTests();
-            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith("");
+            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWithoutReason();
         });
 
         it("should emit event without initializing", async () => {

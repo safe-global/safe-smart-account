@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { ethers, deployments, waffle } from "hardhat";
+import hre, { ethers, deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeSingleton, getFactory, getMock, getMultiSend } from "../utils/setup";
@@ -8,8 +8,8 @@ import { verificationTests } from "./subTests.spec";
 import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
-describe("Upgrade from Safe 1.2.0", () => {
-    const [user1] = waffle.provider.getWallets();
+describe("Upgrade from Safe 1.2.0", async () => {
+    const [user1] = await ethers.getSigners();
 
     const ChangeMasterCopyInterface = new ethers.utils.Interface(["function changeMasterCopy(address target)"]);
 

@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { deployContract, getSafeWithOwners } from "../utils/setup";
 import { parseEther } from "@ethersproject/units";
 
 describe("Safe", async () => {
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -68,9 +68,7 @@ describe("Safe", async () => {
 
         it("should throw for incoming eth with data", async () => {
             const { safe } = await setupTests();
-            await expect(user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad" })).to.be.revertedWith(
-                "fallback function is not payable and was called with value 23",
-            );
+            await expect(user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad" })).to.be.reverted;
         });
     });
 });

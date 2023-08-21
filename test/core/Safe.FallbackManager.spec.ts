@@ -1,7 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
-import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import {
     defaultTokenCallbackHandlerContract,
@@ -31,7 +30,7 @@ describe("FallbackManager", async () => {
         };
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     describe("setFallbackManager", async () => {
         it("is correctly set on deployment", async () => {
@@ -117,11 +116,11 @@ describe("FallbackManager", async () => {
             const response = await user1.call(tx);
             expect(response).to.be.eq(
                 "0x" +
-                    "0000000000000000000000000000000000000000000000000000000000000020" +
-                    "0000000000000000000000000000000000000000000000000000000000000018" +
-                    "7f8dc53c" +
-                    user1.address.slice(2).toLowerCase() +
-                    "0000000000000000",
+                "0000000000000000000000000000000000000000000000000000000000000020" +
+                "0000000000000000000000000000000000000000000000000000000000000018" +
+                "7f8dc53c" +
+                user1.address.slice(2).toLowerCase() +
+                "0000000000000000",
             );
         });
 
@@ -138,17 +137,17 @@ describe("FallbackManager", async () => {
             const response = await user1.call(tx);
             expect(response).to.be.eq(
                 "0x" +
-                    "0000000000000000000000000000000000000000000000000000000000000020" +
-                    "0000000000000000000000000000000000000000000000000000000000000098" +
-                    // Function call
-                    "b2a88d99" +
-                    "000000000000000000000000" +
-                    user2.address.slice(2).toLowerCase() +
-                    "0000000000000000000000000000000000000000000000000000000000000040" +
-                    "000000000000000000000000000000000000000000000000000000000000000b" +
-                    "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
-                    user1.address.slice(2).toLowerCase() +
-                    "0000000000000000",
+                "0000000000000000000000000000000000000000000000000000000000000020" +
+                "0000000000000000000000000000000000000000000000000000000000000098" +
+                // Function call
+                "b2a88d99" +
+                "000000000000000000000000" +
+                user2.address.slice(2).toLowerCase() +
+                "0000000000000000000000000000000000000000000000000000000000000040" +
+                "000000000000000000000000000000000000000000000000000000000000000b" +
+                "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
+                user1.address.slice(2).toLowerCase() +
+                "0000000000000000",
             );
         });
 

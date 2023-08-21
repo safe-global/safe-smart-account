@@ -1,7 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
-import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import {
@@ -17,7 +16,7 @@ import crypto from "crypto";
 import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
     const GUARD_STORAGE_SLOT = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"));
 
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {

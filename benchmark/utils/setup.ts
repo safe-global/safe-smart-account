@@ -6,7 +6,7 @@ import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, e
 import { Wallet, Contract } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 
-const [user1, user2, user3, user4, user5] = waffle.provider.getWallets();
+const [user1, user2, user3, user4, user5] = await ethers.getSigners();
 
 export interface Contracts {
     targets: Contract[],

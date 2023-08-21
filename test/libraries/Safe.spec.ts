@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import "@nomiclabs/hardhat-ethers";
 import { getContractStorageLayout } from "../utils/storage";
 
 const EXPECTED_LAYOUT = [

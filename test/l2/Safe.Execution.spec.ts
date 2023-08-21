@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import {
     safeApproveHash,
@@ -19,7 +18,7 @@ describe("SafeL2", async () => {
         }
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -48,13 +47,8 @@ describe("SafeL2", async () => {
             const additionalInfo = ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256"], [tx.nonce, user1.address, 1]);
             const signatures = [await safeApproveHash(user1, safe, tx, true)];
             const signatureBytes = buildSignatureBytes(signatures).toLowerCase();
-            let executedTx: any;
-            await expect(
-                executeTx(safe, tx, signatures).then((tx) => {
-                    executedTx = tx;
-                    return tx;
-                }),
-            )
+
+            await expect(executeTx(safe, tx, signatures))
                 .to.emit(safe, "ExecutionSuccess")
                 .to.emit(safe, "SafeMultiSigTransaction")
                 .withArgs(
