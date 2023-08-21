@@ -6,7 +6,7 @@ import { BigNumber } from "ethers";
 import { benchmark } from "./utils/setup"
 
 const testTarget = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
-const [user1] = waffle.provider.getWallets();
+const [user1] = await ethers.getSigners();
 
 benchmark("Ether", [{
     name: "transfer",

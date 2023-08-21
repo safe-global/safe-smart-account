@@ -5,7 +5,7 @@ import { buildSafeTransaction } from "../src/utils/execution";
 import { BigNumber } from "ethers";
 import { benchmark, Contracts } from "./utils/setup"
 
-const [, , , , user5] = waffle.provider.getWallets();
+const [, , , , user5] = await ethers.getSigners();
 
 benchmark("ERC20", [{
     name: "transfer",

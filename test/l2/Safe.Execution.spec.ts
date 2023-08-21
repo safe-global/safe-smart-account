@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import {
     safeApproveHash,
@@ -19,7 +18,7 @@ describe("SafeL2", async () => {
         }
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

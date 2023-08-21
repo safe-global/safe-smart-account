@@ -1,12 +1,11 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { getSafeWithOwners } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("SignMessageLib", async () => {
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -41,7 +40,7 @@ describe("SignMessageLib", async () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
-            expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
+            await expect(lib.signMessage("0xbaddad")).to.revertedWithoutReason;
         });
 
         it("changes the expected storage slot without touching the most important ones", async () => {

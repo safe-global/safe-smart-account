@@ -1,5 +1,6 @@
 import hre, { deployments } from "hardhat";
-import { Wallet, Contract } from "ethers";
+import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { Contract } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";
 import { logGas } from "../../src/utils/execution";
@@ -155,7 +156,7 @@ export const compile = async (source: string) => {
     };
 };
 
-export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
+export const deployContract = async (deployer: SignerWithAddress, source: string): Promise<Contract> => {
     const output = await compile(source);
     const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
     const receipt = await transaction.wait();

@@ -1,7 +1,7 @@
 import "@nomiclabs/hardhat-ethers";
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "@nomiclabs/hardhat-etherscan";
-import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
 import "solidity-coverage";
 import "hardhat-deploy";
 import dotenv from "dotenv";

@@ -1,14 +1,13 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
-import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners, getMock } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("ModuleManager", async () => {
-    const [user1, user2, user3] = waffle.provider.getWallets();
+    const [user1, user2, user3] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

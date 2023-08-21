@@ -1,13 +1,12 @@
-import { buildContractSignature, calculateSafeMessageHash } from "./../../src/utils/execution";
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
 import {
     buildSignatureBytes,
     executeContractCallWithSigners,
     calculateSafeMessageHash,
+    buildContractSignature,
     EIP712_SAFE_MESSAGE_TYPE,
     signHash,
 } from "../../src/utils/execution";
@@ -16,7 +15,7 @@ import { BigNumber } from "ethers";
 import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", async () => {
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -154,7 +153,7 @@ describe("CompatibilityFallbackHandler", async () => {
 
     describe("simulate", async () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        it.skip("can be called for any Safe", async () => {});
+        it.skip("can be called for any Safe", async () => { });
 
         it("should revert changes", async () => {
             const { validator, killLib } = await setupTests();

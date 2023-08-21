@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { getSafeWithOwners } from "../utils/setup";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("Safe", async () => {
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -27,14 +27,14 @@ describe("Safe", async () => {
                 "0000000000000000000000000000000000000000000000000000000000000000" +
                 "01";
             await expect(
-                readOnlySafe.callStatic.execTransaction("0x1", 0, "0x", 0, 0, 0, 0, 0, 0, sig, {
+                readOnlySafe.callStatic.execTransaction(AddressOne, 0, "0x", 0, 0, 0, 0, 0, 0, sig, {
                     from: "0x0000000000000000000000000000000000000001",
                 }),
                 "Should not be able to execute transaction from sentinel as owner",
             ).to.be.reverted;
 
             await expect(
-                readOnlySafe.callStatic.execTransactionFromModule("0x1", 0, "0x", 0, {
+                readOnlySafe.callStatic.execTransactionFromModule(AddressOne, 0, "0x", 0, {
                     from: "0x0000000000000000000000000000000000000001",
                 }),
                 "Should not be able to execute transaction from sentinel as module",

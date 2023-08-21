@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
@@ -19,7 +19,7 @@ describe("Safe", async () => {
         };
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = await ethers.getSigners();
 
     describe("ERC1155", async () => {
         it("should reject if callback not accepted", async () => {

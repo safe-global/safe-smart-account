@@ -1,13 +1,12 @@
 import { signHash } from "./../../src/utils/execution";
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("DebugTransactionGuard", async () => {
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = await ethers.getSigners();
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
