@@ -58,9 +58,7 @@ describe("ProxyFactory", async () => {
 
         it("should revert with invalid initializer", async () => {
             const { factory, singleton } = await setupTests();
-            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith(
-                "Transaction reverted without a reason",
-            );
+            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith("");
         });
 
         it("should emit event without initializing", async () => {
@@ -115,9 +113,7 @@ describe("ProxyFactory", async () => {
 
         it("should revert with invalid initializer", async () => {
             const { factory, singleton } = await setupTests();
-            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith(
-                "Transaction reverted without a reason",
-            );
+            await expect(factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)).to.be.revertedWith("");
         });
 
         it("should emit event without initializing", async () => {

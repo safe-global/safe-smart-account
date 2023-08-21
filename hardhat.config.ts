@@ -15,8 +15,7 @@ const argv = yargs
     })
     .help(false)
     .version(false)
-    .parseSync()
-
+    .parseSync();
 
 // Load environment variables.
 dotenv.config();

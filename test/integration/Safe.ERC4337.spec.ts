@@ -35,7 +35,7 @@ type UserOperation = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-describe.only("Safe.ERC4337", () => {
+describe("Safe.ERC4337", () => {
     const setupTests = async () => {
         const factory = await getFactoryContract();
         const singleton = await getSafeSingletonContract();
@@ -75,10 +75,12 @@ describe.only("Safe.ERC4337", () => {
         await sleep(10000);
 
         const feeData = await provider.getFeeData();
-        const maxFeePerGas = feeData.maxFeePerGas.toHexString();
-        const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString();
+        const maxFeePerGas = feeData.maxFeePerGas?.toHexString();
+        const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas?.toHexString();
 
-        console.log({ maxFeePerGas, maxPriorityFeePerGas })
+        if (!maxFeePerGas || !maxPriorityFeePerGas) {
+            throw new Error("Could not get fee data");
+        }
 
         const moduleInitializer = erc4337ModuleAndHandler.interface.encodeFunctionData("enableMyself", []);
         const encodedInitializer = singleton.interface.encodeFunctionData("setup", [
@@ -101,7 +103,7 @@ describe.only("Safe.ERC4337", () => {
         const userOpCallData = erc4337ModuleAndHandler.interface.encodeFunctionData("execTransaction", [userWallet.address, 0, 0]);
 
         // Native tokens for the pre-fund 💸
-        await userWallet.sendTransaction({ to: deployedAddress, value: hre.ethers.utils.parseEther("0.001") });
+        await userWallet.sendTransaction({ to: deployedAddress, value: hre.ethers.utils.parseEther("0.005") });
         // The bundler uses a different node, so we need to allow it sometime to sync
         await sleep(10000);
 
@@ -110,9 +112,9 @@ describe.only("Safe.ERC4337", () => {
             nonce: "0x0",
             initCode,
             callData: userOpCallData,
-            callGasLimit: "0x7A120",
-            verificationGasLimit: "0xF4240",
-            preVerificationGas: "0x186A0",
+            callGasLimit: "0x1",
+            verificationGasLimit: "0x1",
+            preVerificationGas: "0x1",
             maxFeePerGas,
             maxPriorityFeePerGas,
             paymasterAndData: "0x",
@@ -129,6 +131,7 @@ describe.only("Safe.ERC4337", () => {
         console.log(DEBUG_MESSAGE);
 
         const estimatedGas = await bundlerProvider.send("eth_estimateUserOperationGas", [userOperation, ENTRYPOINT_ADDRESS]);
+        console.log({ estimatedGas });
         expect(estimatedGas).to.not.be.undefined;
     });
 });

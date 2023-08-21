@@ -107,7 +107,9 @@ describe("CreateCall", async () => {
             const { createCall, testContract } = await setupTests();
             const address = ethers.utils.getCreate2Address(createCall.address, salt, ethers.utils.keccak256(testContract.data));
 
-            await expect(createCall.performCreate2(0, testContract.data, salt)).to.emit(createCall, "ContractCreation").withArgs(address);
+            await expect(createCall.performCreate2(0, testContract.data, salt))
+                .to.emit(createCall, "ContractCreation")
+                .withArgs(address);
 
             const newContract = new ethers.Contract(address, testContract.interface, user1);
             expect(await newContract.creator()).to.be.eq(createCall.address);
