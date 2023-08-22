@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
-import { deployContract, getSafeWithOwners, getWallets } from "../utils/setup";
+import { deployContract, getContractFactoryByName, getSafeWithOwners, getWallets } from "../utils/setup";
 import {
     safeApproveHash,
     buildSignatureBytes,
@@ -29,7 +29,7 @@ describe("Safe", () => {
                 }
             }`;
         const storageSetter = await deployContract(user1, setterSource);
-        const TestNativeTokenReceiver = await hre.ethers.getContractFactory("TestNativeTokenReceiver");
+        const TestNativeTokenReceiver = await getContractFactoryByName("TestNativeTokenReceiver");
         const nativeTokenReceiver = await TestNativeTokenReceiver.deploy();
 
         const reverterSource = `
@@ -171,7 +171,7 @@ describe("Safe", () => {
             const { safe, reverter, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
-            await user1.sendTransaction({ to: safeAddress, value: 10000000 });
+            await (await user1.sendTransaction({ to: safeAddress, value: 10000000 })).wait();
             await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true, { gasPrice: 1 })).to.emit(
                 safe,
                 "ExecutionFailure",
@@ -338,7 +338,7 @@ describe("Safe", () => {
                 refundReceiver: nativeTokenReceiverAddress,
             });
 
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") })).wait();
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
 
             const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 500000 });
@@ -353,7 +353,7 @@ describe("Safe", () => {
                 }
             }
 
-            expect(parsedLogs[0].forwardedGas).to.be.gte(400000n);
+            expect(parsedLogs[0].forwardedGas).to.be.gte(hre.network.zksync ? 340000n : 400000n);
         });
     });
 });
