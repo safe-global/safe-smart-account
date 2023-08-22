@@ -166,7 +166,7 @@ export const getSafeProxyRuntimeCode = async () => {
 };
 
 export const getDelegateCaller = async () => {
-    const DelegateCaller = await hre.ethers.getContractFactory("DelegateCaller");
+    const DelegateCaller = await getContractFactoryByName("DelegateCaller");
     return await DelegateCaller.deploy();
 };
 
