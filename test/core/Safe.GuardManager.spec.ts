@@ -277,7 +277,7 @@ describe("GuardManager", () => {
             const validGuardMockAddress = await validGuardMock.getAddress();
             const hash = "0x" + crypto.randomBytes(32).toString("hex");
 
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2])).wait();
 
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
             const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
@@ -291,7 +291,7 @@ describe("GuardManager", () => {
             const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
             await validGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
-            await safe.execTransactionFromModule(user1.address, 0, "0xbeef73", 1);
+            await (await safe.execTransactionFromModule(user1.address, 0, "0xbeef73", 1)).wait();
 
             expect(await validGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
         });
@@ -347,7 +347,7 @@ describe("GuardManager", () => {
             const validGuardMockAddress = await validGuardMock.getAddress();
             const hash = "0x" + crypto.randomBytes(32).toString("hex");
 
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2])).wait();
 
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
             const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
@@ -361,7 +361,7 @@ describe("GuardManager", () => {
             const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
             await validGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
-            await safe.execTransactionFromModuleReturnData(user1.address, 0, "0xbeef73", 1);
+            await (await safe.execTransactionFromModuleReturnData(user1.address, 0, "0xbeef73", 1)).wait();
 
             expect(await validGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
         });
