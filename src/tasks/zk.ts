@@ -12,10 +12,10 @@ subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(async (taskArgs, hre, runSup
         hre.config.mocha.timeout = 90_000;
         hre.config.mocha.slow = 30_000;
 
-        await hre.run(TASK_DEPLOY, { nonDeterministicZk: true, ...taskArgs });
-    } else {
-        await runSuper(taskArgs);
+        await hre.run(TASK_DEPLOY, taskArgs);
     }
+
+    await runSuper(taskArgs);
 });
 
 const TASK_VERIFY_ZK_ALL = "verify:verify-zk-all";
