@@ -306,71 +306,57 @@ describe("Safe", () => {
             ).to.be.revertedWith("GS011");
         });
 
-        /**
-         * ## Skip for zkSync, due to Expected to fail with official SafeL2.sol due to the use of the unsupported send() function in the handlePayment()
-         * ## Expected to pass when send() will be replaced with call()
-         * ## Or after a protocol upgrade (see link2)
-         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
-         * @see https://twitter.com/zksync/status/1644459406828924934
-         */
-        it("should work with ether payment to deployer", async function () {
-            if (hre.network.zksync) this.skip();
-
+        it("should work with ether payment to deployer", async () => {
             const {
                 template,
                 signers: [user1, user2, user3],
             } = await setupTests();
             const templateAddress = await template.getAddress();
             const payment = ethers.parseEther("10");
-            await user1.sendTransaction({ to: templateAddress, value: payment });
+            await (await user1.sendTransaction({ to: templateAddress, value: payment })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user1.address);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                AddressZero,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    AddressZero,
+                )
+            ).wait();
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
             await expect(userBalance < (await hre.ethers.provider.getBalance(user1.address))).to.be.true;
         });
 
-        /**
-         * ## Skip for zkSync, due to Expected to fail with official SafeL2.sol due to the use of the unsupported send() function in the handlePayment()
-         * ## Expected to pass when send() will be replaced with call()
-         * ## Or after a protocol upgrade (see link2)
-         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
-         * @see https://twitter.com/zksync/status/1644459406828924934
-         */
-        it("should work with ether payment to account", async function () {
-            if (hre.network.zksync) this.skip();
-
+        it("should work with ether payment to account", async () => {
             const {
                 template,
                 signers: [user1, user2, user3],
             } = await setupTests();
             const templateAddress = await template.getAddress();
             const payment = ethers.parseEther("10");
-            await user1.sendTransaction({ to: templateAddress, value: payment });
+            await (await user1.sendTransaction({ to: templateAddress, value: payment })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                user2.address,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    user2.address,
+                )
+            ).wait();
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + payment);
