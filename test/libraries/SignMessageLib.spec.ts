@@ -24,9 +24,10 @@ describe("SignMessageLib", async () => {
 
         it("should emit event", async () => {
             const { safe, lib } = await setupTests();
+            const safeAddress = await safe.getAddress();
             // Required to check that the event was emitted from the right address
-            const libSafe = lib.attach(safe.address);
-            const messageHash = calculateSafeMessageHash(safe, "0xbaddad", await chainId());
+            const libSafe = lib.attach(safeAddress);
+            const messageHash = calculateSafeMessageHash(safeAddress, "0xbaddad", await chainId());
 
             expect(await safe.signedMessages(messageHash)).to.be.eq(0);
 
@@ -46,22 +47,23 @@ describe("SignMessageLib", async () => {
         it("changes the expected storage slot without touching the most important ones", async () => {
             const { safe, lib } = await setupTests();
 
+            const safeAddress = await safe.getAddress();
             const SIGNED_MESSAGES_MAPPING_STORAGE_SLOT = 7;
             const message = "no rugpull, funds must be safu";
-            const eip191MessageHash = hre.ethers.utils.hashMessage(message);
-            const safeInternalMsgHash = calculateSafeMessageHash(safe, hre.ethers.utils.hashMessage(message), await chainId());
-            const expectedStorageSlot = hre.ethers.utils.keccak256(
-                hre.ethers.utils.defaultAbiCoder.encode(
+            const eip191MessageHash = hre.ethers.hashMessage(message);
+            const safeInternalMsgHash = calculateSafeMessageHash(safeAddress, hre.ethers.hashMessage(message), await chainId());
+            const expectedStorageSlot = hre.ethers.keccak256(
+                hre.ethers.AbiCoder.defaultAbiCoder().encode(
                     ["bytes32", "uint256"],
                     [safeInternalMsgHash, SIGNED_MESSAGES_MAPPING_STORAGE_SLOT],
                 ),
             );
 
-            const masterCopyAddressBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
-            const ownerCountBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
-            const thresholdBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
-            const nonceBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, 5);
-            const msgStorageSlotBeforeSigning = await hre.ethers.provider.getStorageAt(safe.address, expectedStorageSlot);
+            const masterCopyAddressBeforeSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 0);
+            const ownerCountBeforeSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 3);
+            const thresholdBeforeSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 4);
+            const nonceBeforeSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 5);
+            const msgStorageSlotBeforeSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), expectedStorageSlot);
 
             expect(nonceBeforeSigning).to.be.eq(`0x${"0".padStart(64, "0")}`);
             expect(await safe.signedMessages(safeInternalMsgHash)).to.be.eq(0);
@@ -69,11 +71,11 @@ describe("SignMessageLib", async () => {
 
             await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true);
 
-            const masterCopyAddressAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
-            const ownerCountAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
-            const thresholdAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 4);
-            const nonceAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 5);
-            const msgStorageSlotAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, expectedStorageSlot);
+            const masterCopyAddressAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 0);
+            const ownerCountAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 3);
+            const thresholdAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 4);
+            const nonceAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 5);
+            const msgStorageSlotAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), expectedStorageSlot);
 
             expect(await safe.signedMessages(safeInternalMsgHash)).to.be.eq(1);
             expect(masterCopyAddressBeforeSigning).to.be.eq(masterCopyAddressAfterSigning);

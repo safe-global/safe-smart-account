@@ -5,37 +5,47 @@ import { getMock, getSafeWithOwners } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
-describe("DebugTransactionGuard", async () => {
-    const [user1] = await ethers.getSigners();
-
+describe("DebugTransactionGuard", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         const safe = await getSafeWithOwners([user1.address]);
         const guardFactory = await hre.ethers.getContractFactory("DebugTransactionGuard");
         const guard = await guardFactory.deploy();
+        const guardAddress = await guard.getAddress();
         const mock = await getMock();
-        await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1]);
+        await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], [user1]);
         return {
             safe,
             mock,
             guardFactory,
             guard,
+            signers,
         };
     });
 
-    describe("fallback", async () => {
+    describe("fallback", () => {
         it("must NOT revert on fallback without value", async () => {
-            const { guard } = await setupTests();
+            const {
+                guard,
+                signers: [user1],
+            } = await setupTests();
+            const guardAddress = await guard.getAddress();
             await user1.sendTransaction({
-                to: guard.address,
+                to: guardAddress,
                 data: "0xbaddad",
             });
         });
         it("should revert on fallback with value", async () => {
-            const { guard } = await setupTests();
+            const {
+                guard,
+                signers: [user1],
+            } = await setupTests();
+            const guardAddress = await guard.getAddress();
             await expect(
                 user1.sendTransaction({
-                    to: guard.address,
+                    to: guardAddress,
                     data: "0xbaddad",
                     value: 1,
                 }),
@@ -43,18 +53,25 @@ describe("DebugTransactionGuard", async () => {
         });
     });
 
-    describe("checkTransaction", async () => {
+    describe("checkTransaction", () => {
         it("should emit debug events", async () => {
-            const { safe, mock, guard } = await setupTests();
+            const {
+                safe,
+                mock,
+                guard,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe.getAddress();
+            const mockAddress = await mock.getAddress();
             const nonce = await safe.nonce();
-            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce });
-            const safeTxHash = calculateSafeTransactionHash(safe, safeTx, await chainId());
+            const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
+            const safeTxHash = calculateSafeTransactionHash(safeAddress, safeTx, await chainId());
             const signature = await signHash(user1, safeTxHash);
 
             await expect(executeTx(safe, safeTx, [signature]))
                 .to.emit(guard, "TransactionDetails")
                 .withArgs(
-                    safe.address,
+                    safeAddress,
                     safeTxHash,
                     safeTx.to,
                     safeTx.value,
@@ -67,10 +84,10 @@ describe("DebugTransactionGuard", async () => {
                     user1.address,
                 )
                 .and.to.emit(guard, "GasUsage")
-                .withArgs(safe.address, safeTxHash, nonce, true);
+                .withArgs(safeAddress, safeTxHash, nonce, true);
 
-            expect(await mock.callStatic.invocationCount()).to.be.eq(1);
-            expect(await mock.callStatic.invocationCountForCalldata("0xbaddad42")).to.be.eq(1);
+            expect(await mock.invocationCount.staticCall()).to.be.eq(1);
+            expect(await mock.invocationCountForCalldata.staticCall("0xbaddad42")).to.be.eq(1);
         });
     });
 });

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
+import { getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
 import {
     buildSignatureBytes,
     executeContractCallWithSigners,
@@ -11,7 +11,6 @@ import {
     signHash,
 } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
-import { BigNumber } from "ethers";
 import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", async () => {
@@ -21,9 +20,12 @@ describe("CompatibilityFallbackHandler", async () => {
         await deployments.fixture();
         const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler();
-        const signerSafe = await getSafeWithOwners([user1.address], 1, handler.address);
-        const safe = await getSafeWithOwners([user1.address, user2.address, signerSafe.address], 2, handler.address);
-        const validator = (await compatFallbackHandlerContract()).attach(safe.address);
+        const handlerAddress = await handler.getAddress();
+        const signerSafe = await getSafeWithOwners([user1.address], 1, handlerAddress);
+        const signerSafeAddress = await signerSafe.getAddress();
+        const safe = await getSafeWithOwners([user1.address, user2.address, signerSafeAddress], 2, handlerAddress);
+        const safeAddress = await safe.getAddress();
+        const validator = await getCompatFallbackHandler(safeAddress);
         const killLib = await killLibContract(user1);
         return {
             safe,
@@ -38,81 +40,78 @@ describe("CompatibilityFallbackHandler", async () => {
     describe("ERC1155", async () => {
         it("to handle onERC1155Received", async () => {
             const { handler } = await setupTests();
-            await expect(await handler.callStatic.onERC1155Received(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
+            await expect(await handler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
         });
 
         it("to handle onERC1155BatchReceived", async () => {
             const { handler } = await setupTests();
-            await expect(await handler.callStatic.onERC1155BatchReceived(AddressZero, AddressZero, [], [], "0x")).to.be.eq("0xbc197c81");
+            await expect(await handler.onERC1155BatchReceived.staticCall(AddressZero, AddressZero, [], [], "0x")).to.be.eq("0xbc197c81");
         });
     });
 
     describe("ERC721", async () => {
         it("to handle onERC721Received", async () => {
             const { handler } = await setupTests();
-            await expect(await handler.callStatic.onERC721Received(AddressZero, AddressZero, 0, "0x")).to.be.eq("0x150b7a02");
+            await expect(await handler.onERC721Received.staticCall(AddressZero, AddressZero, 0, "0x")).to.be.eq("0x150b7a02");
         });
     });
 
     describe("ERC777", async () => {
         it("to handle tokensReceived", async () => {
             const { handler } = await setupTests();
-            await handler.callStatic.tokensReceived(AddressZero, AddressZero, AddressZero, 0, "0x", "0x");
+            await handler.tokensReceived.staticCall(AddressZero, AddressZero, AddressZero, 0, "0x", "0x");
         });
     });
 
     describe("isValidSignature(bytes32,bytes)", async () => {
         it("should revert if called directly", async () => {
             const { handler } = await setupTests();
-            const dataHash = ethers.utils.keccak256("0xbaddad");
-            await expect(handler.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0x")).to.be.revertedWith(
-                "function call to a non-contract account",
-            );
+            const dataHash = ethers.keccak256("0xbaddad");
+            await expect(handler.isValidSignature.staticCall(dataHash, "0x")).to.be.revertedWith("function call to a non-contract account");
         });
 
         it("should revert if message was not signed", async () => {
             const { validator } = await setupTests();
-            const dataHash = ethers.utils.keccak256("0xbaddad");
-            await expect(validator.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0x")).to.be.revertedWith("Hash not approved");
+            const dataHash = ethers.keccak256("0xbaddad");
+            await expect(validator.isValidSignature.staticCall(dataHash, "0x")).to.be.revertedWith("Hash not approved");
         });
 
         it("should revert if signature is not valid", async () => {
             const { validator } = await setupTests();
-            const dataHash = ethers.utils.keccak256("0xbaddad");
-            await expect(validator.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0xdeaddeaddeaddead")).to.be.reverted;
+            const dataHash = ethers.keccak256("0xbaddad");
+            await expect(validator.isValidSignature.staticCall(dataHash, "0xdeaddeaddeaddead")).to.be.reverted;
         });
 
         it("should return magic value if message was signed", async () => {
             const { safe, validator, signLib } = await setupTests();
-            const dataHash = ethers.utils.keccak256("0xbaddad");
+            const dataHash = ethers.keccak256("0xbaddad");
             await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true);
-            expect(await validator.callStatic["isValidSignature(bytes32,bytes)"](dataHash, "0x")).to.be.eq("0x1626ba7e");
+            expect(await validator.isValidSignature.staticCall(dataHash, "0x")).to.be.eq("0x1626ba7e");
         });
 
         it("should return magic value if enough owners signed and allow a mix different signature types", async () => {
             const { validator, signerSafe } = await setupTests();
-            const dataHash = ethers.utils.keccak256("0xbaddad");
+            const signerSafeAddress = await signerSafe.getAddress();
+            const validatorAddress = await validator.getAddress();
+            const dataHash = ethers.keccak256("0xbaddad");
             const typedDataSig = {
                 signer: user1.address,
-                data: await user1._signTypedData(
-                    { verifyingContract: validator.address, chainId: await chainId() },
+                data: await user1.signTypedData(
+                    { verifyingContract: validatorAddress, chainId: await chainId() },
                     EIP712_SAFE_MESSAGE_TYPE,
                     { message: dataHash },
                 ),
             };
-            const ethSignSig = await signHash(user2, calculateSafeMessageHash(validator, dataHash, await chainId()));
-            const validatorSafeMessageHash = calculateSafeMessageHash(validator, dataHash, await chainId());
-            const signerSafeMessageHash = calculateSafeMessageHash(signerSafe, validatorSafeMessageHash, await chainId());
+            const ethSignSig = await signHash(user2, calculateSafeMessageHash(validatorAddress, dataHash, await chainId()));
+            const validatorSafeMessageHash = calculateSafeMessageHash(validatorAddress, dataHash, await chainId());
+            const signerSafeMessageHash = calculateSafeMessageHash(signerSafeAddress, validatorSafeMessageHash, await chainId());
 
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
 
-            const signerSafeSig = buildContractSignature(signerSafe.address, signerSafeOwnerSignature.data);
+            const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
 
             expect(
-                await validator.callStatic["isValidSignature(bytes32,bytes)"](
-                    dataHash,
-                    buildSignatureBytes([typedDataSig, ethSignSig, signerSafeSig]),
-                ),
+                await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([typedDataSig, ethSignSig, signerSafeSig])),
             ).to.be.eq("0x1626ba7e");
         });
     });
@@ -133,20 +132,23 @@ describe("CompatibilityFallbackHandler", async () => {
     describe("getMessageHash", async () => {
         it("should generate the correct hash", async () => {
             const { safe, validator } = await setupTests();
-            expect(await validator.getMessageHash("0xdead")).to.be.eq(calculateSafeMessageHash(safe, "0xdead", await chainId()));
+            const safeAddress = await safe.getAddress();
+            expect(await validator.getMessageHash("0xdead")).to.be.eq(calculateSafeMessageHash(safeAddress, "0xdead", await chainId()));
         });
     });
 
     describe("getMessageHashForSafe", async () => {
         it("should revert if target does not return domain separator", async () => {
             const { handler } = await setupTests();
-            await expect(handler.getMessageHashForSafe(handler.address, "0xdead")).to.be.reverted;
+            const handlerAddress = await handler.getAddress();
+            await expect(handler.getMessageHashForSafe(handlerAddress, "0xdead")).to.be.reverted;
         });
 
         it("should generate the correct hash", async () => {
             const { handler, safe } = await setupTests();
-            expect(await handler.getMessageHashForSafe(safe.address, "0xdead")).to.be.eq(
-                calculateSafeMessageHash(safe, "0xdead", await chainId()),
+            const safeAddress = await safe.getAddress();
+            expect(await handler.getMessageHashForSafe(safeAddress, "0xdead")).to.be.eq(
+                calculateSafeMessageHash(safeAddress, "0xdead", await chainId()),
             );
         });
     });
@@ -157,39 +159,47 @@ describe("CompatibilityFallbackHandler", async () => {
 
         it("should revert changes", async () => {
             const { validator, killLib } = await setupTests();
-            const code = await ethers.provider.getCode(validator.address);
-            expect(await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("killme"))).to.be.eq("0x");
-            expect(await ethers.provider.getCode(validator.address)).to.be.eq(code);
+            const validatorAddress = await validator.getAddress();
+            const killLibAddress = await killLib.getAddress();
+            const code = await ethers.provider.getCode(validatorAddress);
+            expect(await validator.simulate.staticCall(killLibAddress, killLib.interface.encodeFunctionData("killme"))).to.be.eq("0x");
+            expect(await ethers.provider.getCode(validatorAddress)).to.be.eq(code);
         });
 
         it("should return result", async () => {
             const { validator, killLib, handler } = await setupTests();
-            expect(await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("expose"))).to.be.eq(
-                "0x000000000000000000000000" + handler.address.slice(2).toLowerCase(),
+            const killLibAddress = await killLib.getAddress();
+            const handlerAddress = await handler.getAddress();
+            expect(await validator.simulate.staticCall(killLibAddress, killLib.interface.encodeFunctionData("expose"))).to.be.eq(
+                "0x000000000000000000000000" + handlerAddress.slice(2).toLowerCase(),
             );
         });
 
         it("should propagate revert message", async () => {
             const { validator, killLib } = await setupTests();
-            await expect(validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("trever"))).to.revertedWith(
+            const killLibAddress = await killLib.getAddress();
+            await expect(validator.simulate.staticCall(killLibAddress, killLib.interface.encodeFunctionData("trever"))).to.revertedWith(
                 "Why are you doing this?",
             );
         });
 
         it("should simulate transaction", async () => {
             const { validator, killLib } = await setupTests();
-            const estimate = await validator.callStatic.simulate(
-                killLib.address,
-                killLib.interface.encodeFunctionData("estimate", [validator.address, "0x"]),
+            const validatorAddress = await validator.getAddress();
+            const killLibAddress = await killLib.getAddress();
+            const estimate = await validator.simulate.staticCall(
+                killLibAddress,
+                killLib.interface.encodeFunctionData("estimate", [validatorAddress, "0x"]),
             );
-            expect(BigNumber.from(estimate).toNumber()).to.be.lte(5000);
+            expect(estimate).to.be.lte(5000);
         });
 
         it("should return modified state", async () => {
             const { validator, killLib } = await setupTests();
-            const value = await validator.callStatic.simulate(killLib.address, killLib.interface.encodeFunctionData("updateAndGet", []));
-            expect(BigNumber.from(value).toNumber()).to.be.eq(1);
-            expect((await killLib.value()).toNumber()).to.be.eq(0);
+            const killLibAddress = await killLib.getAddress();
+            const value = await validator.simulate.staticCall(killLibAddress, killLib.interface.encodeFunctionData("updateAndGet", []));
+            expect(value).to.be.eq(1n);
+            expect(await killLib.value()).to.be.eq(0n);
         });
     });
 });

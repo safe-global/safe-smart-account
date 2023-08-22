@@ -16,6 +16,7 @@
     "scripts": {
         "build": "hardhat compile",
         "build:ts": "yarn rimraf dist && tsc -p tsconfig.prod.json",
+        "build:ts:dev": "yarn rimraf dist && tsc -p tsconfig.json",
         "test": "hardhat test",
         "coverage": "hardhat coverage",
         "benchmark": "yarn test benchmark/*.ts",
@@ -62,14 +63,14 @@
         "eslint-plugin-no-only-tests": "^3.1.0",
         "eslint-plugin-prettier": "^5.0.0",
         "hardhat": "^2.17.1",
-        "hardhat-deploy": "0.11.36",
+        "hardhat-deploy": "^0.11.37",
         "husky": "^8.0.3",
         "prettier": "^3.0.2",
         "prettier-plugin-solidity": "1.1.3",
         "solc": "0.7.6",
         "solhint": "3.6.2",
         "ts-node": "^10.9.1",
-        "typescript": "^5.1.6",
+        "typescript": "^4.9.4",
         "yargs": "^17.7.2"
     }
 }

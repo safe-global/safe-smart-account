@@ -65,6 +65,10 @@ const userConfig: HardhatUserConfig = {
         deploy: "src/deploy",
         sources: "contracts",
     },
+    typechain: {
+        outDir: "typechain-types",
+        target: "ethers-v6",
+    },
     solidity: {
         compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: "0.6.12" }, { version: "0.5.17" }],
     },

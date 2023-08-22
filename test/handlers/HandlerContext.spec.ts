@@ -18,8 +18,10 @@ describe("HandlerContext", async () => {
 
     it("parses information correctly", async () => {
         const { handler } = await setup();
+        const handlerAddress = await handler.getAddress();
+
         const response = await user1.call({
-            to: handler.address,
+            to: handlerAddress,
             data: handler.interface.encodeFunctionData("dudududu") + user2.address.slice(2),
         });
         expect(handler.interface.decodeFunctionResult("dudududu", response)).to.be.deep.eq([user2.address, user1.address]);
@@ -27,13 +29,15 @@ describe("HandlerContext", async () => {
 
     it("works with the Safe", async () => {
         const { safe, handler } = await setup();
-        await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
+        const handlerAddress = await handler.getAddress();
+        const safeAddress = await safe.getAddress();
+        await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handlerAddress, AddressZero, 0, AddressZero);
 
         const response = await user1.call({
-            to: safe.address,
+            to: safeAddress,
             data: handler.interface.encodeFunctionData("dudududu"),
         });
 
-        expect(handler.interface.decodeFunctionResult("dudududu", response)).to.be.deep.eq([user1.address, safe.address]);
+        expect(handler.interface.decodeFunctionResult("dudududu", response)).to.be.deep.eq([user1.address, safeAddress]);
     });
 });

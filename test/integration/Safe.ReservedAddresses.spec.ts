@@ -13,7 +13,7 @@ describe("Safe - Reserved Addresses", async () => {
         };
     });
 
-    it.only("sentinels should not be owners or modules", async () => {
+    it("sentinels should not be owners or modules", async () => {
         const { safe } = await setupTests();
         const readOnlySafe = safe.connect(hre.ethers.provider);
 
@@ -25,14 +25,14 @@ describe("Safe - Reserved Addresses", async () => {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "01";
         await expect(
-            readOnlySafe.callStatic.execTransaction(AddressOne, 0, "0x", 0, 0, 0, 0, 0, 0, sig, {
+            readOnlySafe.execTransaction.staticCall(AddressOne, 0, "0x", 0, 0, 0, 0, ethers.ZeroAddress, ethers.ZeroAddress, sig, {
                 from: "0x0000000000000000000000000000000000000001",
             }),
             "Should not be able to execute transaction from sentinel as owner",
         ).to.be.reverted;
 
         await expect(
-            readOnlySafe.callStatic.execTransactionFromModule(AddressOne, 0, "0x", 0, {
+            readOnlySafe.execTransactionFromModule.staticCall(AddressOne, 0, "0x", 0, {
                 from: "0x0000000000000000000000000000000000000001",
             }),
             "Should not be able to execute transaction from sentinel as module",
