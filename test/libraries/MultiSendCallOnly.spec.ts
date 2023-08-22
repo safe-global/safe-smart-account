@@ -197,7 +197,7 @@ describe("MultiSendCallOnly", () => {
             const triggerCalldata = "0xbaddad";
             const errorMessage = "Some random message";
 
-            await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
+            await (await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage)).wait();
 
             const txs: MetaTransaction[] = [
                 {
