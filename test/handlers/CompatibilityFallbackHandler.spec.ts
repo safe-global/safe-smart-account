@@ -3,6 +3,7 @@ import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getCompatFallbackHandler, getContractFactoryByName, getSafeWithOwners, getWallets } from "../utils/setup";
 import {
+    buildContractSignature,
     buildSignatureBytes,
     executeContractCallWithSigners,
     calculateSafeMessageHash,
