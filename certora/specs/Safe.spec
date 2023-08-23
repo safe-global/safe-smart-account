@@ -230,6 +230,8 @@ rule checkSignatures() {
     v2, r2, s2 = signatureSplitPublic(signatures2, 0);
     v121, r121, s121 = signatureSplitPublic(signatures12, 0);
     v122, r122, s122 = signatureSplitPublic(signatures12, 1);
+    require to_mathint(signatures12.length) == signatures1.length + signatures2.length;
+
     require v1 == v121 && r1 == r121 && s1 == s121;
     require v2 == v122 && r2 == r122 && s2 == s122;
     require v1 != 1 && v2 != 1;
@@ -237,6 +239,9 @@ rule checkSignatures() {
     require signatures1.length < 1000;
     require signatures2.length < 1000;
     require signatures12.length < 1000;
+    require signatures1.length >= 65;
+    require signatures2.length >= 65;
+    require signatures12.length >= 130;
 
     checkNSignatures@withrevert(e, executor1, dataHash, data, signatures1, 1);
     bool success1 = !lastReverted;
