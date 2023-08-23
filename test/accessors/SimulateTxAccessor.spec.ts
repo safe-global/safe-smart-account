@@ -39,7 +39,7 @@ describe("SimulateTxAccessor", () => {
         };
     });
 
-    describe("estimate", async () => {
+    describe("estimate", () => {
         it("should enforce delegatecall", async () => {
             const { accessor, signers } = await setupTests();
             const [user1] = signers;

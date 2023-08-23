@@ -48,7 +48,7 @@ describe("Safe", () => {
         };
     });
 
-    describe("execTransaction", async () => {
+    describe("execTransaction", () => {
         it("should revert if too little gas is provided", async () => {
             const { safe, signers } = await setupTests();
             const [user1] = signers;

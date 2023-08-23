@@ -18,7 +18,7 @@ describe("StorageAccessible", () => {
         it("can read singleton", async () => {
             await setupTests();
             const singleton = await getSafeSingleton();
-            expect(await singleton.getStorage(3, 2)).to.be.eq(ethers.solidityPacked(["uint256", "uint256"], [0, 1]));
+            expect(await singleton.getStorageAt(3, 2)).to.be.eq(ethers.solidityPacked(["uint256", "uint256"], [0, 1]));
         });
 
         it("can read instantiated Safe", async () => {

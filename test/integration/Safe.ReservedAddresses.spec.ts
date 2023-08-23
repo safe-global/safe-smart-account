@@ -3,11 +3,10 @@ import hre, { deployments, ethers } from "hardhat";
 import { getSafeWithOwners } from "../utils/setup";
 import { AddressOne } from "../../src/utils/constants";
 
-describe("Safe - Reserved Addresses", async () => {
-    const [user1] = await ethers.getSigners();
-
+describe("Safe - Reserved Addresses", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const [user1] = await ethers.getSigners();
         return {
             safe: await getSafeWithOwners([user1.address]),
         };

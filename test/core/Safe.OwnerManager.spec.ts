@@ -102,7 +102,7 @@ describe("OwnerManager", () => {
 
             await expect(await safe.getThreshold()).to.equal(1n);
             await expect(await safe.isOwner(user1.address)).to.be.true;
-            await expect(await safe.getOwners()).to.equal([user2.address, user1.address]);
+            await expect(await safe.getOwners()).to.deep.eq([user2.address, user1.address]);
         });
 
         it("emits event for new owner and threshold if changed", async () => {
@@ -255,7 +255,7 @@ describe("OwnerManager", () => {
             await expect(await safe.getOwners()).to.be.deep.equal([user1.address]);
         });
 
-        it.skip("Check internal ownercount state", async () => {
+        it("Check internal ownerCount state", async () => {
             const {
                 safe,
                 signers: [user1, user2],
@@ -366,7 +366,7 @@ describe("OwnerManager", () => {
         it("Invalid prevOwner, owner pair provided - Invalid source", async () => {
             const {
                 safe,
-                singers: [user1, user2],
+                signers: [user1, user2],
             } = await setupTests();
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user2.address, user1.address, user2.address], [user1]),
@@ -378,8 +378,8 @@ describe("OwnerManager", () => {
                 safe,
                 signers: [user1, user2],
             } = await setupTests();
-            await expect(await safe.getOwners()).to.be.deep.equal([user1.address]);
-            await expect(await safe.getThreshold()).to.be.deep.eq(1n);
+            await expect(await safe.getOwners()).to.be.deep.eq([user1.address]);
+            await expect(await safe.getThreshold()).to.eq(1n);
             await expect(await safe.isOwner(user1.address)).to.be.true;
             await expect(await safe.isOwner(user2.address)).to.be.false;
 
@@ -389,7 +389,7 @@ describe("OwnerManager", () => {
                 .and.to.emit(safe, "AddedOwner")
                 .withArgs(user2.address);
             await expect(await safe.getOwners()).to.be.deep.equal([user2.address]);
-            await expect(await safe.getThreshold()).to.be.deep.eq(1n);
+            await expect(await safe.getThreshold()).to.eq(1n);
             await expect(await safe.isOwner(user1.address)).to.be.false;
             await expect(await safe.isOwner(user2.address)).to.be.true;
         });

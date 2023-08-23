@@ -3,12 +3,12 @@ import { deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getTokenCallbackHandler } from "../utils/setup";
 
-describe("TokenCallbackHandler", async () => {
+describe("TokenCallbackHandler", () => {
     beforeEach(async () => {
         await deployments.fixture();
     });
 
-    describe("ERC1155", async () => {
+    describe("ERC1155", () => {
         it("should support ERC1155 interface", async () => {
             const handler = await getTokenCallbackHandler();
             await expect(await handler.supportsInterface.staticCall("0x4e2312e0")).to.be.eq(true);
@@ -25,7 +25,7 @@ describe("TokenCallbackHandler", async () => {
         });
     });
 
-    describe("ERC721", async () => {
+    describe("ERC721", () => {
         it("should support ERC721 interface", async () => {
             const handler = await getTokenCallbackHandler();
             await expect(await handler.supportsInterface.staticCall("0x150b7a02")).to.be.eq(true);
@@ -37,14 +37,14 @@ describe("TokenCallbackHandler", async () => {
         });
     });
 
-    describe("ERC777", async () => {
+    describe("ERC777", () => {
         it("to handle tokensReceived", async () => {
             const handler = await getTokenCallbackHandler();
             await handler.tokensReceived.staticCall(AddressZero, AddressZero, AddressZero, 0, "0x", "0x");
         });
     });
 
-    describe("ERC165", async () => {
+    describe("ERC165", () => {
         it("should support ERC165 interface", async () => {
             const handler = await getTokenCallbackHandler();
             await expect(await handler.supportsInterface.staticCall("0x01ffc9a7")).to.be.eq(true);

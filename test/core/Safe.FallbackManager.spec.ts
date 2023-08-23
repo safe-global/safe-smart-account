@@ -103,16 +103,17 @@ describe("FallbackManager", () => {
             const handler = await defaultTokenCallbackHandlerDeployment();
             const safeHandler = await getTokenCallbackHandler(safeAddress);
             // Check that Safe is NOT setup
-            await expect(await safe.getThreshold()).to.eq(0n);
+            expect(await safe.getThreshold()).to.eq(0n);
 
             // Check unset callbacks
-            await expect(safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.reverted;
+            // Ethers v6 throws an internal error when trying to call a non-existent function
+            await expect(safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.rejected;
 
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
 
             // Check callbacks
-            await expect(await safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
+            expect(await safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
         });
 
         it("sends along msg.sender on simple call", async () => {
@@ -130,11 +131,11 @@ describe("FallbackManager", () => {
             const response = await user1.call(tx);
             expect(response).to.be.eq(
                 "0x" +
-                "0000000000000000000000000000000000000000000000000000000000000020" +
-                "0000000000000000000000000000000000000000000000000000000000000018" +
-                "7f8dc53c" +
-                user1.address.slice(2).toLowerCase() +
-                "0000000000000000",
+                    "0000000000000000000000000000000000000000000000000000000000000020" +
+                    "0000000000000000000000000000000000000000000000000000000000000018" +
+                    "7f8dc53c" +
+                    user1.address.slice(2).toLowerCase() +
+                    "0000000000000000",
             );
         });
 
@@ -153,17 +154,17 @@ describe("FallbackManager", () => {
             const response = await user1.call(tx);
             expect(response).to.be.eq(
                 "0x" +
-                "0000000000000000000000000000000000000000000000000000000000000020" +
-                "0000000000000000000000000000000000000000000000000000000000000098" +
-                // Function call
-                "b2a88d99" +
-                "000000000000000000000000" +
-                user2.address.slice(2).toLowerCase() +
-                "0000000000000000000000000000000000000000000000000000000000000040" +
-                "000000000000000000000000000000000000000000000000000000000000000b" +
-                "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
-                user1.address.slice(2).toLowerCase() +
-                "0000000000000000",
+                    "0000000000000000000000000000000000000000000000000000000000000020" +
+                    "0000000000000000000000000000000000000000000000000000000000000098" +
+                    // Function call
+                    "b2a88d99" +
+                    "000000000000000000000000" +
+                    user2.address.slice(2).toLowerCase() +
+                    "0000000000000000000000000000000000000000000000000000000000000040" +
+                    "000000000000000000000000000000000000000000000000000000000000000b" +
+                    "70696e6b3c3e626c61636b000000000000000000000000000000000000000000" +
+                    user1.address.slice(2).toLowerCase() +
+                    "0000000000000000",
             );
         });
 

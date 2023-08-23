@@ -4,9 +4,7 @@ import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCa
 import { buildContractCall, buildSafeTransaction, executeTx, MetaTransaction, safeApproveHash } from "../../src/utils/execution";
 import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
 
-describe("MultiSend", async () => {
-    const [user1, user2] = await ethers.getSigners();
-
+describe("MultiSend", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const setterSource = `
@@ -19,6 +17,8 @@ describe("MultiSend", async () => {
                     }
                 }
             }`;
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         const storageSetter = await deployContract(user1, setterSource);
         return {
             safe: await getSafeWithOwners([user1.address]),
@@ -26,12 +26,16 @@ describe("MultiSend", async () => {
             mock: await getMock(),
             delegateCaller: await getDelegateCaller(),
             storageSetter,
+            signers,
         };
     });
 
-    describe("multiSend", async () => {
+    describe("multiSend", () => {
         it("should enforce delegatecall to MultiSend", async () => {
-            const { multiSend } = await setupTests();
+            const {
+                multiSend,
+                signers: [user1],
+            } = await setupTests();
             const source = `
             contract Test {
                 function killme() public {
@@ -50,7 +54,11 @@ describe("MultiSend", async () => {
         });
 
         it("Should fail when using invalid operation", async () => {
-            const { safe, multiSend } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                signers: [user1, user2],
+            } = await setupTests();
 
             const txs = [buildSafeTransaction({ to: user2.address, operation: 2, nonce: 0 })];
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
@@ -58,7 +66,11 @@ describe("MultiSend", async () => {
         });
 
         it("Can execute empty multisend", async () => {
-            const { safe, multiSend } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                signers: [user1],
+            } = await setupTests();
 
             const txs: MetaTransaction[] = [];
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
@@ -66,7 +78,11 @@ describe("MultiSend", async () => {
         });
 
         it("Can execute single ether transfer", async () => {
-            const { safe, multiSend } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                signers: [user1, user2],
+            } = await setupTests();
             await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
@@ -80,7 +96,11 @@ describe("MultiSend", async () => {
         });
 
         it("reverts all tx if any fails", async () => {
-            const { safe, multiSend } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                signers: [user1, user2],
+            } = await setupTests();
             await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
@@ -97,7 +117,12 @@ describe("MultiSend", async () => {
         });
 
         it("can be used when ETH is sent with execution", async () => {
-            const { safe, multiSend, storageSetter } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                storageSetter,
+                signers: [user1],
+            } = await setupTests();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0)];
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
@@ -112,7 +137,12 @@ describe("MultiSend", async () => {
         });
 
         it("can execute contract calls", async () => {
-            const { safe, multiSend, storageSetter } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                storageSetter,
+                signers: [user1],
+            } = await setupTests();
             const storageSetterAddress = await storageSetter.getAddress();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0)];
@@ -134,7 +164,12 @@ describe("MultiSend", async () => {
         });
 
         it("can execute contract delegatecalls", async () => {
-            const { safe, multiSend, storageSetter } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                storageSetter,
+                signers: [user1],
+            } = await setupTests();
             const storageSetterAddress = await storageSetter.getAddress();
 
             const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0, true)];
@@ -156,7 +191,12 @@ describe("MultiSend", async () => {
         });
 
         it("can execute all calls in combination", async () => {
-            const { safe, multiSend, storageSetter } = await setupTests();
+            const {
+                safe,
+                multiSend,
+                storageSetter,
+                signers: [user1, user2],
+            } = await setupTests();
             const storageSetterAddress = await storageSetter.getAddress();
 
             await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });

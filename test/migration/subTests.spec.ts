@@ -1,4 +1,3 @@
-
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
@@ -15,7 +14,7 @@ interface TestSetup {
 export const verificationTests = async (setupTests: () => Promise<TestSetup>) => {
     const [user1, user2, user3] = await ethers.getSigners();
 
-    describe("execTransaction", async () => {
+    describe("execTransaction", () => {
         it("should be able to transfer ETH", async () => {
             const { migratedSafe } = await setupTests();
             const migrateSafeAddress = await migratedSafe.getAddress();
@@ -24,7 +23,7 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
             const tx = buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce });
 
             const userBalance = await ethers.provider.getBalance(user2.address);
-            await expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(parseEther("1"));
+            await expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
             await executeTxWithSigners(migratedSafe, tx, [user1]);
 
@@ -33,7 +32,7 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
         });
     });
 
-    describe("addOwner", async () => {
+    describe("addOwner", () => {
         it("should add owner and change threshold", async () => {
             const { migratedSafe } = await setupTests();
 
@@ -61,7 +60,7 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
         });
     });
 
-    describe("enableModule", async () => {
+    describe("enableModule", () => {
         it("should enabled module and be able to use it", async () => {
             const { migratedSafe, mock } = await setupTests();
             const mockAddress = await mock.getAddress();
@@ -77,11 +76,11 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
             await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
                 .to.emit(migratedSafe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
-            expect(await mock.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(1n);
+            expect(await mock.invocationCountForCalldata("0xbaddad")).to.eq(1n);
         });
     });
 
-    describe("multiSend", async () => {
+    describe("multiSend", () => {
         it("execute multisend via delegatecall", async () => {
             const { migratedSafe, mock, multiSend } = await setupTests();
             const migratedSafeAddress = await migratedSafe.getAddress();
@@ -98,13 +97,13 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await migratedSafe.nonce());
             await expect(executeTxWithSigners(migratedSafe, safeTx, [user1])).to.emit(migratedSafe, "ExecutionSuccess");
 
-            await expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.be.deep.eq(parseEther("0"));
-            await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
-            expect(await mock.invocationCountForCalldata("0xbaddad")).to.be.deep.equals(1n);
+            await expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.eq(ethers.parseEther("0"));
+            await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + ethers.parseEther("1"));
+            expect(await mock.invocationCountForCalldata("0xbaddad")).to.eq(1n);
         });
     });
 
-    describe("fallbackHandler", async () => {
+    describe("fallbackHandler", () => {
         it("should be correctly set", async () => {
             const { migratedSafe, mock } = await setupTests();
             const migratedSafeAddress = await migratedSafe.getAddress();

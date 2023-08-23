@@ -9,13 +9,10 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: 18.17.1
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: yarn --frozen-lockfile
-            - run: yarn build
-            - run: yarn coverage
+                  cache: 'npm'
+            - run: npm ci 
+            - run: npm run build
+            - run: npm run coverage
             - name: Coveralls
               uses: coverallsapp/github-action@master
               with:
@@ -27,12 +24,9 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: 18.17.1
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: yarn --frozen-lockfile
-            - run: yarn lint:sol
+                  cache: 'npm'
+            - run: npm ci
+            - run: npm run lint:sol && npm run lint:ts && npm run lint:sol:prettier
     tests-other:
         runs-on: ubuntu-latest
         strategy:
@@ -46,13 +40,10 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: 18.17.1
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: yarn --frozen-lockfile
-            - run: yarn build
-            - run: yarn coverage
+                  cache: 'npm'
+            - run: npm ci 
+            - run: npm run build
+            - run: npm run coverage
             - name: Coveralls
               uses: coverallsapp/github-action@master
               with:
@@ -74,8 +65,5 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: 18.17.1
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: (yarn --frozen-lockfile && yarn build && yarn hardhat codesize --contractname Safe && yarn benchmark) || echo "Benchmark failed"
+                  cache: 'npm'
+            - run: (npm ci && npm run build && npx hardhat codesize --contractname Safe && npm run benchmark) || echo "Benchmark failed"

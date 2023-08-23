@@ -39,7 +39,7 @@ const EXPECTED_LAYOUT = [
     },
 ];
 
-describe("SafeStorage", async () => {
+describe("SafeStorage", () => {
     it("follows the expected storage layout", async () => {
         const safeStorageLayout = await getContractStorageLayout(hre, "SafeStorage");
 

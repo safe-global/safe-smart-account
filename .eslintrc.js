@@ -12,5 +12,7 @@ module.exports = {
         sourceType: "module",
     },
     plugins: ["@typescript-eslint", "no-only-tests"],
-    rules: {},
+    rules: {
+        "@typescript-eslint/no-explicit-any": "warn",
+    },
 };

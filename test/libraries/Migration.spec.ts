@@ -5,16 +5,16 @@ import { getSafeWithOwners, getSafeSingleton, migrationContract } from "../utils
 import deploymentData from "../json/safeDeployment.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
-describe("Migration", async () => {
+describe("Migration", () => {
     const MigratedInterface = new ethers.Interface([
         "function domainSeparator() view returns(bytes32)",
         "function masterCopy() view returns(address)",
     ]);
 
-    const [user1] = await ethers.getSigners();
-
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) {
             throw new Error("Could not deploy SafeSingleton120");
@@ -26,24 +26,32 @@ describe("Migration", async () => {
             singleton120,
             safe: await getSafeWithOwners([user1.address]),
             migration,
+            signers,
         };
     });
     describe("constructor", async () => {
         it("can not use 0 Address", async () => {
-            await setupTests();
+            const {
+                signers: [user1],
+            } = await setupTests();
             const tx = await (await migrationContract()).getDeployTransaction(AddressZero);
             await expect(user1.sendTransaction(tx)).to.be.revertedWith("Invalid singleton address provided");
         });
     });
 
-    describe("migrate", async () => {
+    describe("migrate", () => {
         it("can only be called from Safe itself", async () => {
             const { migration } = await setupTests();
             await expect(migration.migrate()).to.be.revertedWith("Migration should only be called via delegatecall");
         });
 
         it("can migrate", async () => {
-            const { safe, migration, singleton120 } = await setupTests();
+            const {
+                safe,
+                migration,
+                singleton120,
+                signers: [user1],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
             // The emit matcher checks the address, which is the Safe as delegatecall is used
             const migrationSafe = migration.attach(safeAddress);

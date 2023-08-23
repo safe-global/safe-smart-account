@@ -37,4 +37,4 @@ task("local-verify", "Verifies that the local deployment files correspond to the
     }
 });
 
-export { };
+export {};

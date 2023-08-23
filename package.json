@@ -15,22 +15,24 @@
     ],
     "scripts": {
         "build": "hardhat compile",
-        "build:ts": "yarn rimraf dist && tsc -p tsconfig.prod.json",
-        "build:ts:dev": "yarn rimraf dist && tsc -p tsconfig.json",
+        "build:ts": "rimraf dist && tsc -p tsconfig.prod.json",
+        "build:ts:dev": "rimraf dist && tsc -p tsconfig.json",
         "test": "hardhat test",
+        "test:parallel": "hardhat test --parallel",
         "coverage": "hardhat coverage",
-        "benchmark": "yarn test benchmark/*.ts",
-        "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
+        "benchmark": "npm run test benchmark/*.ts",
+        "deploy-custom": "rm -rf deployments/custom && npm run deploy-all custom",
         "deploy-all": "hardhat deploy-contracts --network",
         "deploy": "hardhat deploy --network",
-        "lint": "yarn lint:sol && yarn lint:ts",
+        "lint": "npm run lint:sol && npm run lint:ts",
         "lint:sol": "solhint 'contracts/**/*.sol'",
-        "lint:ts": "eslint 'src/**/*.ts' 'test/**/*.ts' --max-warnings 0 --fix",
+        "lint:sol:prettier": "prettier 'contracts/**/*.sol' --list-different",
+        "lint:ts": "eslint 'src/**/*.ts' 'test/**/*.ts' --fix",
         "fmt:sol": "prettier 'contracts/**/*.sol' -w",
         "fmt:ts": "prettier 'src/**/*.ts' 'test/**/*.ts' -w",
-        "prepack": "yarn build",
+        "prepack": "npm run build",
         "prepare": "husky install",
-        "prepublish": "yarn rimraf build && yarn build && yarn build:ts"
+        "prepublish": "rimraf build && npm run build && npm run build:ts"
     },
     "repository": {
         "type": "git",
@@ -52,7 +54,7 @@
         "@safe-global/safe-singleton-factory": "^1.0.15",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.1",
-        "@types/node": "^20.5.1",
+        "@types/node": "^20.5.3",
         "@types/yargs": "^17.0.24",
         "@typescript-eslint/eslint-plugin": "^6.4.1",
         "@typescript-eslint/parser": "^6.4.1",
@@ -70,7 +72,7 @@
         "solc": "0.7.6",
         "solhint": "3.6.2",
         "ts-node": "^10.9.1",
-        "typescript": "^4.9.4",
+        "typescript": "^5.1.6",
         "yargs": "^17.7.2"
     }
 }

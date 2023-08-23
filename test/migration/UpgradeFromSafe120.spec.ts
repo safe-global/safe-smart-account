@@ -7,9 +7,7 @@ import { verificationTests } from "./subTests.spec";
 import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
-describe("Upgrade from Safe 1.2.0", async () => {
-    const [user1] = await ethers.getSigners();
-
+describe("Upgrade from Safe 1.2.0", () => {
     const ChangeMasterCopyInterface = new ethers.Interface(["function changeMasterCopy(address target)"]);
 
     // We migrate the Safe and run the verification tests
@@ -17,10 +15,11 @@ describe("Upgrade from Safe 1.2.0", async () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
+        const [user1] = await ethers.getSigners();
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) throw new Error("Could not deploy Safe 1.2.0");
 
-        const singleton140 = (await getSafeSingleton()).address;
+        const singleton140 = await (await getSafeSingleton()).getAddress();
         const factory = await getFactory();
         const saltNonce = 42;
         const proxyAddress = await calculateProxyAddress(factory, singleton120, "0x", saltNonce);
@@ -42,5 +41,8 @@ describe("Upgrade from Safe 1.2.0", async () => {
             multiSend: await getMultiSend(),
         };
     });
-    verificationTests(setupTests);
+
+    it("passes the Safe 1.2.0 tests", async () => {
+        await verificationTests(setupTests);
+    });
 });

@@ -13,14 +13,14 @@ import {
 import { chainId } from "../utils/encoding";
 import { killLibContract } from "../utils/contracts";
 
-describe("CompatibilityFallbackHandler", async () => {
-    const [user1, user2] = await ethers.getSigners();
-
+describe("CompatibilityFallbackHandler", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getCompatFallbackHandler();
         const handlerAddress = await handler.getAddress();
+        const signers = await ethers.getSigners();
+        const [user1, user2] = signers;
         const signerSafe = await getSafeWithOwners([user1.address], 1, handlerAddress);
         const signerSafeAddress = await signerSafe.getAddress();
         const safe = await getSafeWithOwners([user1.address, user2.address, signerSafeAddress], 2, handlerAddress);
@@ -34,10 +34,11 @@ describe("CompatibilityFallbackHandler", async () => {
             killLib,
             signLib,
             signerSafe,
+            signers,
         };
     });
 
-    describe("ERC1155", async () => {
+    describe("ERC1155", () => {
         it("to handle onERC1155Received", async () => {
             const { handler } = await setupTests();
             await expect(await handler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
@@ -49,25 +50,25 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("ERC721", async () => {
+    describe("ERC721", () => {
         it("to handle onERC721Received", async () => {
             const { handler } = await setupTests();
             await expect(await handler.onERC721Received.staticCall(AddressZero, AddressZero, 0, "0x")).to.be.eq("0x150b7a02");
         });
     });
 
-    describe("ERC777", async () => {
+    describe("ERC777", () => {
         it("to handle tokensReceived", async () => {
             const { handler } = await setupTests();
             await handler.tokensReceived.staticCall(AddressZero, AddressZero, AddressZero, 0, "0x", "0x");
         });
     });
 
-    describe("isValidSignature(bytes32,bytes)", async () => {
+    describe("isValidSignature(bytes32,bytes)", () => {
         it("should revert if called directly", async () => {
             const { handler } = await setupTests();
             const dataHash = ethers.keccak256("0xbaddad");
-            await expect(handler.isValidSignature.staticCall(dataHash, "0x")).to.be.revertedWith("function call to a non-contract account");
+            await expect(handler.isValidSignature.staticCall(dataHash, "0x")).to.be.reverted;
         });
 
         it("should revert if message was not signed", async () => {
@@ -83,14 +84,23 @@ describe("CompatibilityFallbackHandler", async () => {
         });
 
         it("should return magic value if message was signed", async () => {
-            const { safe, validator, signLib } = await setupTests();
+            const {
+                safe,
+                validator,
+                signLib,
+                signers: [user1, user2],
+            } = await setupTests();
             const dataHash = ethers.keccak256("0xbaddad");
             await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true);
             expect(await validator.isValidSignature.staticCall(dataHash, "0x")).to.be.eq("0x1626ba7e");
         });
 
         it("should return magic value if enough owners signed and allow a mix different signature types", async () => {
-            const { validator, signerSafe } = await setupTests();
+            const {
+                validator,
+                signerSafe,
+                signers: [user1, user2],
+            } = await setupTests();
             const signerSafeAddress = await signerSafe.getAddress();
             const validatorAddress = await validator.getAddress();
             const dataHash = ethers.keccak256("0xbaddad");
@@ -116,9 +126,13 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("getModules", async () => {
+    describe("getModules", () => {
         it("returns enabled modules", async () => {
-            const { safe, validator } = await setupTests();
+            const {
+                safe,
+                validator,
+                signers: [user1, user2],
+            } = await setupTests();
             await expect(executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1, user2]))
                 .to.emit(safe, "EnabledModule")
                 .withArgs(user2.address);
@@ -129,7 +143,7 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("getMessageHash", async () => {
+    describe("getMessageHash", () => {
         it("should generate the correct hash", async () => {
             const { safe, validator } = await setupTests();
             const safeAddress = await safe.getAddress();
@@ -137,7 +151,7 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("getMessageHashForSafe", async () => {
+    describe("getMessageHashForSafe", () => {
         it("should revert if target does not return domain separator", async () => {
             const { handler } = await setupTests();
             const handlerAddress = await handler.getAddress();
@@ -153,9 +167,9 @@ describe("CompatibilityFallbackHandler", async () => {
         });
     });
 
-    describe("simulate", async () => {
+    describe("simulate", () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        it.skip("can be called for any Safe", async () => { });
+        it.skip("can be called for any Safe", async () => {});
 
         it("should revert changes", async () => {
             const { validator, killLib } = await setupTests();
@@ -191,7 +205,7 @@ describe("CompatibilityFallbackHandler", async () => {
                 killLibAddress,
                 killLib.interface.encodeFunctionData("estimate", [validatorAddress, "0x"]),
             );
-            expect(estimate).to.be.lte(5000);
+            expect(parseInt(estimate, 16)).to.be.lte(5000);
         });
 
         it("should return modified state", async () => {

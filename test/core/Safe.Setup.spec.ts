@@ -238,7 +238,7 @@ describe("Safe", () => {
                 ),
             )
                 .to.emit(template, "SafeSetup")
-                .withArgs(user1.address, [user1.address, user2.address, user3.address], 2, testIntializer.address, AddressOne);
+                .withArgs(user1.address, [user1.address, user2.address, user3.address], 2, testIntializerAddress, AddressOne);
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(templateAddress, await chainId()));
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address]);
             await expect(await template.getThreshold()).to.eq(2n);

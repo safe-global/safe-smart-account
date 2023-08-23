@@ -3,21 +3,24 @@ import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate } from "../utils/setup";
 
-describe("HandlerContext", async () => {
-    const [user1, user2] = await ethers.getSigners();
-
+describe("HandlerContext", () => {
     const setup = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const TestHandler = await hre.ethers.getContractFactory("TestHandler");
         const handler = await TestHandler.deploy();
+        const signers = await ethers.getSigners();
         return {
             safe: await getSafeTemplate(),
             handler,
+            signers,
         };
     });
 
     it("parses information correctly", async () => {
-        const { handler } = await setup();
+        const {
+            handler,
+            signers: [user1, user2],
+        } = await setup();
         const handlerAddress = await handler.getAddress();
 
         const response = await user1.call({
@@ -28,7 +31,11 @@ describe("HandlerContext", async () => {
     });
 
     it("works with the Safe", async () => {
-        const { safe, handler } = await setup();
+        const {
+            safe,
+            handler,
+            signers: [user1, user2],
+        } = await setup();
         const handlerAddress = await handler.getAddress();
         const safeAddress = await safe.getAddress();
         await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handlerAddress, AddressZero, 0, AddressZero);

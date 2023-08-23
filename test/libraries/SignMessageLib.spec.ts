@@ -4,26 +4,31 @@ import { getSafeWithOwners } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
-describe("SignMessageLib", async () => {
-    const [user1, user2] = await ethers.getSigners();
-
+describe("SignMessageLib", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const lib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
+        const signers = await ethers.getSigners();
+        const [user1, user2] = signers;
         return {
             safe: await getSafeWithOwners([user1.address, user2.address]),
             lib,
+            signers,
         };
     });
 
-    describe("signMessage", async () => {
+    describe("signMessage", () => {
         it("can only if msg.sender provides domain separator", async () => {
             const { lib } = await setupTests();
             await expect(lib.signMessage("0xbaddad")).to.be.reverted;
         });
 
         it("should emit event", async () => {
-            const { safe, lib } = await setupTests();
+            const {
+                safe,
+                lib,
+                signers: [user1, user2],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
             // Required to check that the event was emitted from the right address
             const libSafe = lib.attach(safeAddress);
@@ -41,11 +46,18 @@ describe("SignMessageLib", async () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
-            await expect(lib.signMessage("0xbaddad")).to.revertedWithoutReason;
+            // ethers v6 throws instead of reverting
+            await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith(
+                "function selector was not recognized and there's no fallback function",
+            );
         });
 
         it("changes the expected storage slot without touching the most important ones", async () => {
-            const { safe, lib } = await setupTests();
+            const {
+                safe,
+                lib,
+                signers: [user1, user2],
+            } = await setupTests();
 
             const safeAddress = await safe.getAddress();
             const SIGNED_MESSAGES_MAPPING_STORAGE_SLOT = 7;

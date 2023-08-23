@@ -47,6 +47,7 @@ describe("Safe", () => {
         it("should be able to receive ETH via call", async () => {
             const { safe, caller } = await setupTests();
             const safeAddress = await safe.getAddress();
+            const callerAddress = await caller.getAddress();
 
             await expect(
                 caller.callEth(safeAddress, {
@@ -54,7 +55,7 @@ describe("Safe", () => {
                 }),
             )
                 .to.emit(safe, "SafeReceived")
-                .withArgs(caller.address, ethers.parseEther("1"));
+                .withArgs(callerAddress, ethers.parseEther("1"));
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
         });
 

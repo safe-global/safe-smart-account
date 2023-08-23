@@ -10,27 +10,31 @@ import {
 } from "../../src/utils/execution";
 import { safeContractUnderTest } from "../utils/config";
 
-describe("SafeL2", async () => {
+describe("SafeL2", () => {
     before(function () {
         if (safeContractUnderTest() != "SafeL2") {
             this.skip();
         }
     });
 
-    const [user1, user2] = await ethers.getSigners();
-
     const setupTests = deployments.createFixture(async ({ deployments }) => {
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         await deployments.fixture();
         const mock = await getMock();
         return {
             safe: await getSafeWithOwners([user1.address]),
             mock,
+            signers,
         };
     });
 
     describe("execTransactions", async () => {
         it("should emit SafeMultiSigTransaction event", async () => {
-            const { safe } = await setupTests();
+            const {
+                safe,
+                signers: [user1, user2],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
                 to: user1.address,
@@ -70,7 +74,11 @@ describe("SafeL2", async () => {
         });
 
         it("should emit SafeModuleTransaction event", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);

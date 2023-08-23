@@ -34,4 +34,4 @@ task("yulcode", "Outputs yul code for contracts")
         }
     });
 
-export { };
+export {};

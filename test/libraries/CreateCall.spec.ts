@@ -15,27 +15,32 @@ contract Test {
     }
 }`;
 
-describe("CreateCall", async () => {
-    const [user1] = await ethers.getSigners();
-
+describe("CreateCall", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const testContract = await compile(CONTRACT_SOURCE);
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         return {
             safe: await getSafeWithOwners([user1.address]),
             createCall: await getCreateCall(),
             testContract,
+            signers,
         };
     });
 
-    describe("performCreate", async () => {
+    describe("performCreate", () => {
         it("should revert if called directly and no value is on the factory", async () => {
             const { createCall, testContract } = await setupTests();
             await expect(createCall.performCreate(1, testContract.data)).to.be.revertedWith("Could not deploy contract");
         });
 
         it("can call factory directly", async () => {
-            const { createCall, testContract } = await setupTests();
+            const {
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const createCallAddress = await createCall.getAddress();
             const createCallNonce = await ethers.provider.getTransactionCount(createCallAddress);
             const address = ethers.getCreateAddress({ from: createCallAddress, nonce: createCallNonce });
@@ -47,14 +52,24 @@ describe("CreateCall", async () => {
         });
 
         it("should fail if Safe does not have value to send along", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
 
             const tx = await buildContractCall(createCall, "performCreate", [1, testContract.data], await safe.nonce(), true);
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("GS013");
         });
 
         it("should successfully create contract and emit event", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
 
             const safeEthereumNonce = await ethers.provider.getTransactionCount(safeAddress);
@@ -73,7 +88,12 @@ describe("CreateCall", async () => {
         });
 
         it("should successfully create contract and send along ether", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
@@ -102,7 +122,7 @@ describe("CreateCall", async () => {
         });
     });
 
-    describe("performCreate2", async () => {
+    describe("performCreate2", () => {
         const salt = ethers.keccak256(ethers.toUtf8Bytes("createCall"));
 
         it("should revert if called directly and no value is on the factory", async () => {
@@ -111,7 +131,11 @@ describe("CreateCall", async () => {
         });
 
         it("can call factory directly", async () => {
-            const { createCall, testContract } = await setupTests();
+            const {
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const createCallAddress = await createCall.getAddress();
             const address = ethers.getCreate2Address(createCallAddress, salt, ethers.keccak256(testContract.data));
 
@@ -124,14 +148,24 @@ describe("CreateCall", async () => {
         });
 
         it("should fail if Safe does not have value to send along", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
 
             const tx = await buildContractCall(createCall, "performCreate2", [1, testContract.data, salt], await safe.nonce(), true);
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("GS013");
         });
 
         it("should successfully create contract and emit event", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
 
             const address = ethers.getCreate2Address(safeAddress, salt, ethers.keccak256(testContract.data));
@@ -149,7 +183,12 @@ describe("CreateCall", async () => {
         });
 
         it("should successfully create contract and send along ether", async () => {
-            const { safe, createCall, testContract } = await setupTests();
+            const {
+                safe,
+                createCall,
+                testContract,
+                signers: [user1],
+            } = await setupTests();
             const safeAddress = await safe.getAddress();
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
