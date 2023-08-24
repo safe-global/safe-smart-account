@@ -1,88 +1,114 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
+import { BigNumberish } from "ethers";
 import { getTokenCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
-import { logGas, executeTx, SafeTransaction, safeSignTypedData, SafeSignature, executeContractCallWithSigners } from "../../src/utils/execution";
-import { Wallet, Contract } from "ethers";
+import {
+    logGas,
+    executeTx,
+    SafeTransaction,
+    safeSignTypedData,
+    SafeSignature,
+    executeContractCallWithSigners,
+} from "../../src/utils/execution";
 import { AddressZero } from "@ethersproject/constants";
+import { Safe, SafeL2 } from "../../typechain-types";
 
-const [user1, user2, user3, user4, user5] = await ethers.getSigners();
+type SafeSingleton = Safe | SafeL2;
 
 export interface Contracts {
-    targets: Contract[],
-    additions: any | undefined
+    targets: SafeSingleton[];
+    additions: any | undefined;
 }
 
-const generateTarget = async (owners: Wallet[], threshold: number, guardAddress: string, logGasUsage?: boolean) => {
-    const fallbackHandler = await getTokenCallbackHandler()
-    const safe = await getSafeWithOwners(owners.map((owner) => owner.address), threshold, fallbackHandler.address, logGasUsage)
-    await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], owners)
-    return safe
-}
+const generateTarget = async (owners: number, threshold: number, guardAddress: string, logGasUsage?: boolean) => {
+    const fallbackHandler = await getTokenCallbackHandler();
+    const fallbackHandlerAddress = await fallbackHandler.getAddress();
+    const signers = (await ethers.getSigners()).slice(0, owners);
+    const safe = await getSafeWithOwners(
+        signers.map((owner) => owner.address),
+        threshold,
+        fallbackHandlerAddress,
+        logGasUsage,
+    );
+    await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], signers);
+    return safe;
+};
 
 export const configs = [
-    { name: "single owner", signers: [user1], threshold: 1 },
-    { name: "single owner and guard", signers: [user1], threshold: 1, useGuard: true },
-    { name: "2 out of 2", signers: [user1, user2], threshold: 2 },
-    { name: "3 out of 3", signers: [user1, user2, user3], threshold: 3 },
-    { name: "3 out of 5", signers: [user1, user2, user3, user4, user5], threshold: 3 },
-]
+    { name: "single owner", signers: 1, threshold: 1 },
+    { name: "single owner and guard", signers: 1, threshold: 1, useGuard: true },
+    { name: "2 out of 2", signers: 2, threshold: 2 },
+    { name: "3 out of 3", signers: 3, threshold: 3 },
+    { name: "3 out of 5", signers: 5, threshold: 3 },
+];
 
 export const setupBenchmarkContracts = (benchmarkFixture?: () => Promise<any>, logGasUsage?: boolean) => {
     return deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const guardFactory = await hre.ethers.getContractFactory("DelegateCallTransactionGuard");
-        const guard = await guardFactory.deploy(AddressZero)
-        const targets: Contract[] = []
+        const guard = await guardFactory.deploy(AddressZero);
+        const guardAddress = await guard.getAddress();
+        const targets: SafeSingleton[] = [];
         for (const config of configs) {
-            targets.push(await generateTarget(config.signers, config.threshold, config.useGuard ? guard.address : AddressZero, logGasUsage))
+            targets.push(await generateTarget(config.signers, config.threshold, config.useGuard ? guardAddress : AddressZero, logGasUsage));
         }
         return {
             targets,
-            additions: (benchmarkFixture ? await benchmarkFixture() : undefined)
-        }
-    })
-}
+            additions: benchmarkFixture ? await benchmarkFixture() : undefined,
+        };
+    });
+};
 
 export interface Benchmark {
-    name: string,
-    prepare: (contracts: Contracts, target: string, nonce: number) => Promise<SafeTransaction>,
-    after?: (contracts: Contracts) => Promise<void>,
-    fixture?: () => Promise<any>
+    name: string;
+    prepare: (contracts: Contracts, target: string, nonce: BigNumberish) => Promise<SafeTransaction>;
+    after?: (contracts: Contracts) => Promise<void>;
+    fixture?: () => Promise<any>;
 }
 
-export const benchmark = async (topic: string, benchmarks: Benchmark[]) => {
-    for (const benchmark of benchmarks) {
-        const { name, prepare, after, fixture } = benchmark
-        const contractSetup = setupBenchmarkContracts(fixture)
-        describe(`${topic} - ${name}`, async () => {
+type BenchmarkWithSetup = () => Promise<Benchmark[]>;
+
+export const benchmark = async (topic: string, benchmarks: BenchmarkWithSetup) => {
+    const setupBenchmarks = await benchmarks();
+
+    for (const benchmark of setupBenchmarks) {
+        const { name, prepare, after, fixture } = benchmark;
+        const contractSetup = setupBenchmarkContracts(fixture);
+        describe(`${topic} - ${name}`, () => {
             it("with an EOA", async () => {
-                const contracts = await contractSetup()
-                const tx = await prepare(contracts, user2.address, 0)
-                await logGas(name, user2.sendTransaction({
-                    to: tx.to,
-                    value: tx.value,
-                    data: tx.data
-                }))
-                if (after) await after(contracts)
-            })
+                const contracts = await contractSetup();
+                const [, , , , , user6] = await ethers.getSigners();
+                const tx = await prepare(contracts, user6.address, 0);
+                await logGas(
+                    name,
+                    user6.sendTransaction({
+                        to: tx.to,
+                        value: tx.value,
+                        data: tx.data,
+                    }),
+                );
+                if (after) await after(contracts);
+            });
             for (const i in configs) {
-                const config = configs[i]
+                const config = configs[i];
                 it(`with a ${config.name} Safe`, async () => {
-                    const contracts = await contractSetup()
-                    const target = contracts.targets[i]
+                    const contracts = await contractSetup();
+                    const target = contracts.targets[i];
+                    const targetAddress = await target.getAddress();
                     const nonce = await target.nonce();
-                    const tx = await prepare(contracts, target.address, nonce)
-                    const threshold = await target.getThreshold()
-                    const sigs: SafeSignature[] = await Promise.all(config.signers.slice(0, threshold).map(async (signer) => {
-                        return await safeSignTypedData(signer, target, tx)
-                    }))
-                    await expect(
-                        logGas(name, executeTx(target, tx, sigs))
-                    ).to.emit(target, "ExecutionSuccess")
-                    if (after) await after(contracts)
-                })
+                    const tx = await prepare(contracts, targetAddress, nonce);
+                    const threshold = await target.getThreshold();
+                    const signers = await ethers.getSigners();
+                    const sigs: SafeSignature[] = await Promise.all(
+                        signers.slice(0, Number(threshold)).map(async (signer) => {
+                            const targetAddress = await target.getAddress();
+                            return await safeSignTypedData(signer, targetAddress, tx);
+                        }),
+                    );
+                    await expect(logGas(name, executeTx(target, tx, sigs))).to.emit(target, "ExecutionSuccess");
+                    if (after) await after(contracts);
+                });
             }
-        })
+        });
     }
-}
+};
