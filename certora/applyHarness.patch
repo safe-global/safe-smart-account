@@ -1,6 +1,18 @@
+diff -druN Safe.sol Safe.sol
+--- Safe.sol	2023-08-16 17:09:10
++++ Safe.sol	2023-08-25 10:46:24
+@@ -75,7 +75,7 @@
+          * so we create a Safe with 0 owners and threshold 1.
+          * This is an unusable Safe, perfect for the singleton
+          */
+-        threshold = 1;
++        // threshold = 1; MUNGED: remove and add to constructor of the harness
+     }
+ 
+     /**
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-06-30 15:32:21.392860349 +0200
-+++ base/Executor.sol	2023-06-30 15:37:58.671801994 +0200
+--- base/Executor.sol	2023-08-16 17:09:10
++++ base/Executor.sol	2023-08-25 10:46:24
 @@ -26,11 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -15,15 +27,3 @@ diff -druN base/Executor.sol base/Executor.sol
          } else {
              // solhint-disable-next-line no-inline-assembly
              /// @solidity memory-safe-assembly
-diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-06-30 15:32:21.392860349 +0200
-+++ Safe.sol	2023-06-30 15:37:17.198953773 +0200
-@@ -76,7 +76,7 @@
-          * so we create a Safe with 0 owners and threshold 1.
-          * This is an unusable Safe, perfect for the singleton
-          */
--        threshold = 1;
-+        // threshold = 1; MUNGED: remove and add to constructor of the harness
-     }
- 
-     /**
