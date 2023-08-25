@@ -12,7 +12,7 @@ contract SafeHarness is Safe {
         uint256 payment,
         address payable paymentReceiver
     ) {
-        this.setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
+        setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
     }
 
     // harnessed getters

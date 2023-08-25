@@ -1,6 +1,40 @@
+diff -druN Safe.sol Safe.sol
+--- Safe.sol	2023-08-16 17:09:10
++++ Safe.sol	2023-08-25 11:14:11
+@@ -75,7 +75,7 @@
+          * so we create a Safe with 0 owners and threshold 1.
+          * This is an unusable Safe, perfect for the singleton
+          */
+-        threshold = 1;
++        // threshold = 1; MUNGED: remove and add to constructor of the harness
+     }
+ 
+     /**
+@@ -92,15 +92,18 @@
+      * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
+      */
+     function setup(
+-        address[] calldata _owners,
++        address[] memory _owners,
+         uint256 _threshold,
+         address to,
+-        bytes calldata data,
++        bytes memory data,
+         address fallbackHandler,
+         address paymentToken,
+         uint256 payment,
+         address payable paymentReceiver
+-    ) external {
++    ) public {
++        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
++        // constructor.
++         
+         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
+         setupOwners(_owners, _threshold);
+         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-06-30 15:32:21.392860349 +0200
-+++ base/Executor.sol	2023-06-30 15:37:58.671801994 +0200
+--- base/Executor.sol	2023-08-16 17:09:10
++++ base/Executor.sol	2023-08-25 11:11:53
 @@ -26,11 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -15,15 +49,3 @@ diff -druN base/Executor.sol base/Executor.sol
          } else {
              // solhint-disable-next-line no-inline-assembly
              /// @solidity memory-safe-assembly
-diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-06-30 15:32:21.392860349 +0200
-+++ Safe.sol	2023-06-30 15:37:17.198953773 +0200
-@@ -76,7 +76,7 @@
-          * so we create a Safe with 0 owners and threshold 1.
-          * This is an unusable Safe, perfect for the singleton
-          */
--        threshold = 1;
-+        // threshold = 1; MUNGED: remove and add to constructor of the harness
-     }
- 
-     /**
