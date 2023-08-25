@@ -12,6 +12,7 @@ methods {
     function getNativeTokenBalance() external returns (uint256) envfree;
     function getOwnersCount() external returns (uint256) envfree;
     function getOwnersCountFromArray() external returns (uint256) envfree;
+    function getCurrentOwner(bytes32, uint8, bytes32, bytes32) external returns (address) envfree;
 
     // optional
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
@@ -217,41 +218,46 @@ rule nativeTokenBalanceSpending(method f) filtered {
 rule checkSignatures() {
     bytes32 dataHash;
     bytes data;
-    address executor1; address executor2; address executor3;
+    address executorA; address executorB; address executor3;
     env e;
-    bytes signatures12;
-    bytes signatures1;
-    bytes signatures2;
-    uint8 v1; bytes32 r1; bytes32 s1;
-    uint8 v2; bytes32 r2; bytes32 s2;
-    uint8 v121; bytes32 r121; bytes32 s121;
-    uint8 v122; bytes32 r122; bytes32 s122;
-    v1, r1, s1 = signatureSplitPublic(signatures1, 0);
-    v2, r2, s2 = signatureSplitPublic(signatures2, 0);
-    v121, r121, s121 = signatureSplitPublic(signatures12, 0);
-    v122, r122, s122 = signatureSplitPublic(signatures12, 1);
-    require to_mathint(signatures12.length) == signatures1.length + signatures2.length;
+    bytes signaturesAB;
+    bytes signaturesA;
+    bytes signaturesB;
+    uint8 vA; bytes32 rA; bytes32 sA;
+    uint8 vB; bytes32 rB; bytes32 sB;
+    uint8 vAB1; bytes32 rAB1; bytes32 sAB1;
+    uint8 vAB2; bytes32 rAB2; bytes32 sAB2;
+    vA, rA, sA = signatureSplitPublic(signaturesA, 0);
+    vB, rB, sB = signatureSplitPublic(signaturesB, 0);
+    vAB1, rAB1, sAB1 = signatureSplitPublic(signaturesAB, 0);
+    vAB2, rAB2, sAB2 = signatureSplitPublic(signaturesAB, 1);
+    require to_mathint(signaturesAB.length) == signaturesA.length + signaturesB.length;
 
-    require v1 == v121 && r1 == r121 && s1 == s121;
-    require v2 == v122 && r2 == r122 && s2 == s122;
-    require v1 != 1 && v2 != 1;
+    require vA == vAB1 && rA == rAB1 && sA == sAB1;
+    require vB == vAB2 && rB == rAB2 && sB == sAB2;
+    require vA != 1 && vB != 1;
     require data.length < 1000;
-    require signatures1.length < 1000;
-    require signatures2.length < 1000;
-    require signatures12.length < 1000;
-    require signatures1.length >= 65;
-    require signatures2.length >= 65;
-    require signatures12.length >= 130;
+    require signaturesA.length < 1000;
+    require signaturesB.length < 1000;
+    require signaturesAB.length < 1000;
+    require signaturesA.length >= 65;
+    require signaturesB.length >= 65;
+    require signaturesAB.length >= 130;
+    requireInvariant safeOwnerCannotBeItself(e);
+    requireInvariant threholdShouldBeLessThanOwners();
+    require getCurrentOwner(dataHash, vA, rA, sA) < getCurrentOwner(dataHash, vB, rB, sB);
 
-    checkNSignatures@withrevert(e, executor1, dataHash, data, signatures1, 1);
-    bool success1 = !lastReverted;
-    checkNSignatures@withrevert(e, executor2, dataHash, data, signatures2, 1);
-    bool success2 = !lastReverted;
+    checkNSignatures@withrevert(e, executorA, dataHash, data, signaturesA, 1);
+    bool successA = !lastReverted;
+    checkNSignatures@withrevert(e, executorB, dataHash, data, signaturesB, 1);
+    bool successB = !lastReverted;
     
-    checkNSignatures@withrevert(e, executor3, dataHash, data, signatures12, 2);
-    bool success12 = !lastReverted;
+    checkNSignatures@withrevert(e, executor3, dataHash, data, signaturesAB, 2);
+    bool successA2 = !lastReverted;
+    address lastOwner = lastOwnerStore(e);
+    address currentOwner = currentOwnerStore(e);
 
-    assert (success1 && success2) == success12, "checkSignatures called must be equivalent to checkSignatures called twice";
+    assert (successA && successB) == successA2, "checkSignatures called must be equivalent to checkSignatures called twice";
 }
 
 rule nativeTokenBalanceSpendingExecTransaction(
