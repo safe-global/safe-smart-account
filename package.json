@@ -49,7 +49,7 @@
     },
     "devDependencies": {
         "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-        "@openzeppelin/contracts": "^3.4.0",
+        "@openzeppelin/contracts": "^4.9.3",
         "@safe-global/mock-contract": "^4.0.0",
         "@safe-global/safe-singleton-factory": "^1.0.15",
         "@types/chai": "^4.3.5",
