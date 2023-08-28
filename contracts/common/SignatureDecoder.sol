@@ -25,13 +25,7 @@ abstract contract SignatureDecoder {
             let signaturePos := mul(0x41, pos)
             r := mload(add(signatures, add(signaturePos, 0x20)))
             s := mload(add(signatures, add(signaturePos, 0x40)))
-            /**
-             * Here we are loading the last 32 bytes, including 31 bytes
-             * of 's'. There is no 'mload8' to do this.
-             * 'byte' is not working due to the Solidity parser, so lets
-             * use the second best option, 'and'
-             */
-            v := and(mload(add(signatures, add(signaturePos, 0x41))), 0xff)
+            v := byte(0, mload(add(signatures, add(signaturePos, 0x60))))
         }
     }
 }
