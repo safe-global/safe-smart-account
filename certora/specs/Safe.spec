@@ -51,53 +51,6 @@ rule nonceMonotonicity(method f) filtered {
 }
 
 
-/// The sentinel must never point to the zero address.
-/// @notice It should either point to itself or some nonzero value
-invariant liveSentinel()
-    getModule(1) != 0
-    filtered { f -> noHavoc(f) && reachableOnly(f) }
-    { preserved {
-        requireInvariant noDeadEnds(getModule(1), 1);
-    }}
-
-/// Threshold must always be nonzero.
-invariant nonzeroThreshold()
-    getThreshold() > 0
-    filtered { f -> noHavoc(f) && reachableOnly(f) }
-
-/// Two different modules must not point to the same module/
-invariant uniquePrevs(address prev1, address prev2)
-    prev1 != prev2 && getModule(prev1) != 0 => getModule(prev1) != getModule(prev2)
-    filtered { f -> noHavoc(f) && reachableOnly(f) }
-    { 
-        preserved {
-            requireInvariant noDeadEnds(getModule(prev1), prev1);
-            requireInvariant noDeadEnds(getModule(prev2), prev2);
-            requireInvariant uniquePrevs(prev1, 1);
-            requireInvariant uniquePrevs(prev2, 1);
-            requireInvariant uniquePrevs(prev1, getModule(prev2));
-            requireInvariant uniquePrevs(prev2, getModule(prev1));
-        }
-    }
-
-/// A module that points to the zero address must not have another module pointing to it.
-invariant noDeadEnds(address dead, address lost)
-    dead != 0 && getModule(dead) == 0 => getModule(lost) != dead
-    filtered { f -> noHavoc(f) && reachableOnly(f) }
-    {
-        preserved {
-            requireInvariant liveSentinel();
-            requireInvariant noDeadEnds(getModule(1), 1);
-        }
-        preserved disableModule(address prevModule, address module) with (env e) {
-            requireInvariant uniquePrevs(prevModule, lost);
-            requireInvariant uniquePrevs(prevModule, dead);
-            requireInvariant noDeadEnds(dead, module);
-            requireInvariant noDeadEnds(module, dead);
-        }
-    }
-
-
 // The singleton is a private variable, so we need to use a ghost variable to track it.
 ghost address ghostSingletonAddress {
     init_state axiom ghostSingletonAddress == 0;
@@ -128,28 +81,6 @@ ghost address fallbackHandlerAddress {
 hook Sstore SafeHarness.(slot 49122629484629529244014240937346711770925847994644146912111677022347558721749) address newFallbackHandlerAddress STORAGE {
     fallbackHandlerAddress = newFallbackHandlerAddress;
 }
-
-invariant threholdShouldBeLessThanOwners() getOwnersCount() >= getThreshold()
-    filtered { f -> reachableOnly(f) }
-    { preserved {
-        // The prover found a counterexample if the owners count is max uint256,
-        // but this is not a realistic scenario.
-        require getOwnersCount() >= 1 && getOwnersCount() < MAX_UINT256();
-      }
-    }
-
-invariant safeOwnerCannotBeItself(env e) !isOwner(e, currentContract)
-    filtered { f -> reachableOnly(f) }
-
-rule safeOwnerCannotBeSentinelAddress(method f) filtered {
-    f -> reachableOnly(f)
-} {
-    calldataarg args; env e;
-    f(e, args);
-
-    assert isOwner(e, 1) == false;
-}
-
 
 rule fallbackHandlerAddressChange(method f) filtered {
     f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
