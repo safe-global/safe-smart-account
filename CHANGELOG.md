@@ -2,6 +2,82 @@
 
 This changelog only contains changes starting from version 1.3.0
 
+# Version 1.5.0
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
+
+### Core contracts
+
+-   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
+-   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+
+### Factory contracts
+
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+
+### Handler contracts
+
+-   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
+-   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
+
+### Lib contracts
+
+-   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
+-   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
+-   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
+-   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+
+## Changes
+
+### General
+
+#### Use updated EIP-1271 function signature in the signature validation process
+
+Issue: [#391](https://github.com/safe-global/safe-contracts/issues/391)
+
+New function signature implemented and legacy function removed from compatibility fallback handler contract.
+
+#### Remove usage of `transfer` and `send`
+
+Issue: [#601](https://github.com/safe-global/safe-contracts/issues/601)
+
+Calls to `transfer` and `send` were removed to make the contract not depend on any potential gas cost changes. The calls were replaced with `call`, and that should be kept in mind when using the contract and designing extensions due to potential reentrancy vectors.
+
+#### Make assembly blocks memory safe
+
+Issue: [#544](https://github.com/safe-global/safe-contracts/issues/544)
+
+The contracts couldn't be compiled with the solidity compiler versions 0.8.19+ because of the compiler optimizations that copy stack variables to memory to prevent stack-too-deep errors. In some assembly blocks, the scratch space was used, and that's not
+considered safe, so all the assembly blocks were adjusted to use safe memory allocation.
+
+#### Add `checkModuleTransaction` method to the guard
+
+Issue: [#335](https://github.com/safe-global/safe-contracts/issues/335)
+
+The `checkModuleTransaction` method was added to the guard to allow checking the module transactions before execution. The method is called before the `checkAfterExecution` method. While migrating, it should be checked if a Safe has an existing guard and if it implements the `checkModuleTransaction` method. If it doesn't, module transactions will be blocked.
+
+#### Add overloaded `checkNSignatures` method
+
+Issues: 
+- [#557](https://github.com/safe-global/safe-contracts/pull/557)
+- [#589](https://github.com/safe-global/safe-contracts/pull/589)
+
+Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was moved from the core contract to the `CompatibilityFallbackHandler`.
+
+#### `encodeTransactionData` public method removal
+
+To fit all of the above changes into the bytecode size limit, the `encodeTransactionData` method was made private.
+
 # Version 1.4.1
 
 ## Compiler settings
