@@ -1,6 +1,6 @@
 {
     "extends": "solhint:recommended",
-    "plugins": ["prettier"],
+    "plugins": [],
     "rules": {
         "compiler-version": "off",
         "func-visibility": [
@@ -9,7 +9,6 @@
                 "ignoreConstructors": true
             }
         ],
-        "prettier/prettier": "error",
         "not-rely-on-time": "off",
         "reason-string": "off",
         "no-empty-blocks": "off",

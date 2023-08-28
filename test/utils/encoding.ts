@@ -8,7 +8,7 @@ export const Erc20 = [
     "event Approval(address indexed _owner, address indexed _spender, uint256 _value)",
 ];
 
-export const Erc20Interface = new hre.ethers.utils.Interface(Erc20);
+export const Erc20Interface = new hre.ethers.Interface(Erc20);
 
 export const encodeTransfer = (target: string, amount: string | number): string => {
     return Erc20Interface.encodeFunctionData("transfer", [target, amount]);

@@ -1,10 +1,11 @@
 import hre, { deployments } from "hardhat";
-import { Wallet, Contract } from "ethers";
+import { Contract, Signer } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
+import { Safe, SafeL2 } from "../../typechain-types";
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
@@ -24,14 +25,33 @@ export const compatFallbackHandlerContract = async () => {
 
 export const getSafeSingleton = async () => {
     const SafeDeployment = await deployments.get(safeContractUnderTest());
-    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
-    return Safe.attach(SafeDeployment.address);
+    const Safe = await hre.ethers.getContractAt(safeContractUnderTest(), SafeDeployment.address);
+    return Safe;
 };
 
 export const getSafeSingletonContract = async () => {
-    const safeSingleton = await hre.ethers.getContractFactory(safeContractUnderTest());
+    const safeSingleton = await hre.ethers.getContractFactory("Safe");
 
     return safeSingleton;
+};
+
+export const getSafeL2SingletonContract = async () => {
+    const safeSingleton = await hre.ethers.getContractFactory("SafeL2");
+
+    return safeSingleton;
+};
+
+export const getSafeSingletonContractFromEnvVariable = async () => {
+    if (safeContractUnderTest() === "SafeL2") {
+        return await getSafeL2SingletonContract();
+    }
+
+    return await getSafeSingletonContract();
+};
+
+export const getSafeSingletonAt = async (address: string) => {
+    const safe = await hre.ethers.getContractAt(safeContractUnderTest(), address);
+    return safe as unknown as Safe | SafeL2;
 };
 
 export const getFactoryContract = async () => {
@@ -42,32 +62,37 @@ export const getFactoryContract = async () => {
 
 export const getFactory = async () => {
     const FactoryDeployment = await deployments.get("SafeProxyFactory");
-    const Factory = await hre.ethers.getContractFactory("SafeProxyFactory");
-    return Factory.attach(FactoryDeployment.address);
+    const Factory = await hre.ethers.getContractAt("SafeProxyFactory", FactoryDeployment.address);
+    return Factory;
+};
+
+export const getFactoryAt = async (address: string) => {
+    const Factory = await hre.ethers.getContractAt("SafeProxyFactory", address);
+    return Factory;
 };
 
 export const getSimulateTxAccessor = async () => {
     const SimulateTxAccessorDeployment = await deployments.get("SimulateTxAccessor");
-    const SimulateTxAccessor = await hre.ethers.getContractFactory("SimulateTxAccessor");
-    return SimulateTxAccessor.attach(SimulateTxAccessorDeployment.address);
+    const SimulateTxAccessor = await hre.ethers.getContractAt("SimulateTxAccessor", SimulateTxAccessorDeployment.address);
+    return SimulateTxAccessor;
 };
 
 export const getMultiSend = async () => {
     const MultiSendDeployment = await deployments.get("MultiSend");
-    const MultiSend = await hre.ethers.getContractFactory("MultiSend");
-    return MultiSend.attach(MultiSendDeployment.address);
+    const MultiSend = await hre.ethers.getContractAt("MultiSend", MultiSendDeployment.address);
+    return MultiSend;
 };
 
 export const getMultiSendCallOnly = async () => {
     const MultiSendDeployment = await deployments.get("MultiSendCallOnly");
-    const MultiSend = await hre.ethers.getContractFactory("MultiSendCallOnly");
-    return MultiSend.attach(MultiSendDeployment.address);
+    const MultiSend = await hre.ethers.getContractAt("MultiSendCallOnly", MultiSendDeployment.address);
+    return MultiSend;
 };
 
 export const getCreateCall = async () => {
     const CreateCallDeployment = await deployments.get("CreateCall");
-    const CreateCall = await hre.ethers.getContractFactory("CreateCall");
-    return CreateCall.attach(CreateCallDeployment.address);
+    const CreateCall = await hre.ethers.getContractAt("CreateCall", CreateCallDeployment.address);
+    return CreateCall;
 };
 
 export const migrationContract = async () => {
@@ -81,11 +106,12 @@ export const getMock = async () => {
 
 export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString()) => {
     const singleton = await getSafeSingleton();
+    const singletonAddress = await singleton.getAddress();
     const factory = await getFactory();
-    const template = await factory.callStatic.createProxyWithNonce(singleton.address, "0x", saltNumber);
-    await factory.createProxyWithNonce(singleton.address, "0x", saltNumber).then((tx: any) => tx.wait());
-    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
-    return Safe.attach(template);
+    const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
+    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
+    const Safe = await getSafeSingletonContractFromEnvVariable();
+    return Safe.attach(template) as Safe | SafeL2;
 };
 
 export const getSafeWithOwners = async (
@@ -104,12 +130,22 @@ export const getSafeWithOwners = async (
     return template;
 };
 
-export const getTokenCallbackHandler = async () => {
-    return (await defaultTokenCallbackHandlerContract()).attach((await defaultTokenCallbackHandlerDeployment()).address);
+export const getTokenCallbackHandler = async (address?: string) => {
+    const tokenCallbackHandler = await hre.ethers.getContractAt(
+        "TokenCallbackHandler",
+        address || (await defaultTokenCallbackHandlerDeployment()).address,
+    );
+
+    return tokenCallbackHandler;
 };
 
-export const getCompatFallbackHandler = async () => {
-    return (await compatFallbackHandlerContract()).attach((await compatFallbackHandlerDeployment()).address);
+export const getCompatFallbackHandler = async (address?: string) => {
+    const fallbackHandler = await hre.ethers.getContractAt(
+        "CompatibilityFallbackHandler",
+        address || (await compatFallbackHandlerDeployment()).address,
+    );
+
+    return fallbackHandler;
 };
 
 export const getSafeProxyRuntimeCode = async () => {
@@ -155,9 +191,14 @@ export const compile = async (source: string) => {
     };
 };
 
-export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
+export const deployContract = async (deployer: Signer, source: string): Promise<Contract> => {
     const output = await compile(source);
     const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
     const receipt = await transaction.wait();
+
+    if (!receipt?.contractAddress) {
+        throw Error("Could not deploy contract");
+    }
+
     return new Contract(receipt.contractAddress, output.interface, deployer);
 };

@@ -1,8 +1,10 @@
 {
+    "plugins": ["prettier-plugin-solidity"],
     "overrides": [
         {
             "files": "*.sol",
             "options": {
+                "parser": "solidity-parse",
                 "printWidth": 140,
                 "tabWidth": 4,
                 "useTabs": false,

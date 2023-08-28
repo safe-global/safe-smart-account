@@ -1,8 +1,5 @@
-import "@nomiclabs/hardhat-ethers";
+import "@nomicfoundation/hardhat-toolbox";
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
-import "@nomiclabs/hardhat-etherscan";
-import "@nomiclabs/hardhat-waffle";
-import "solidity-coverage";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
@@ -14,7 +11,8 @@ const argv = yargs
         default: "hardhat",
     })
     .help(false)
-    .version(false).argv;
+    .version(false)
+    .parseSync();
 
 // Load environment variables.
 dotenv.config();
@@ -66,6 +64,10 @@ const userConfig: HardhatUserConfig = {
         cache: "build/cache",
         deploy: "src/deploy",
         sources: "contracts",
+    },
+    typechain: {
+        outDir: "typechain-types",
+        target: "ethers-v6",
     },
     solidity: {
         compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: "0.6.12" }, { version: "0.5.17" }],
