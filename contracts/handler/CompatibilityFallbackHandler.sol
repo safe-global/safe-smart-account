@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./TokenCallbackHandler.sol";
-import "../interfaces/ISignatureValidator.sol";
-import "../Safe.sol";
-import "./HandlerContext.sol";
+import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
+import {ISignatureValidator} from "../interfaces/ISignatureValidator.sol";
+import {Safe} from "../Safe.sol";
+import {HandlerContext} from "./HandlerContext.sol";
 
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
@@ -94,7 +94,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         targetContract;
         calldataPayload;
 
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             let internalCalldata := mload(0x40)
@@ -154,6 +154,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 revert(add(response, 0x20), mload(response))
             }
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**

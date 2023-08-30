@@ -9,10 +9,10 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author Richard Meissner - @rmeissner
  */
 contract MultiSend {
-    address private immutable multisendSingleton;
+    address private immutable MULTISEND_SINGLETON;
 
     constructor() {
-        multisendSingleton = address(this);
+        MULTISEND_SINGLETON = address(this);
     }
 
     /**
@@ -28,8 +28,8 @@ contract MultiSend {
      *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
      */
     function multiSend(bytes memory transactions) public payable {
-        require(address(this) != multisendSingleton, "MultiSend should only be called via delegatecall");
-        // solhint-disable-next-line no-inline-assembly
+        require(address(this) != MULTISEND_SINGLETON, "MultiSend should only be called via delegatecall");
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             let length := mload(transactions)
@@ -69,5 +69,6 @@ contract MultiSend {
                 i := add(i, add(0x55, dataLength))
             }
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

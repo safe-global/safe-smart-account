@@ -17,12 +17,13 @@ abstract contract StorageAccessible {
     function getStorageAt(uint256 offset, uint256 length) public view returns (bytes memory) {
         bytes memory result = new bytes(length * 32);
         for (uint256 index = 0; index < length; index++) {
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
                 let word := sload(add(offset, index))
                 mstore(add(add(result, 0x20), mul(index, 0x20)), word)
             }
+            /* solhint-enable no-inline-assembly */
         }
         return result;
     }
@@ -39,7 +40,7 @@ abstract contract StorageAccessible {
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
     function simulateAndRevert(address targetContract, bytes memory calldataPayload) external {
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             let success := delegatecall(gas(), targetContract, add(calldataPayload, 0x20), mload(calldataPayload), 0, 0)
@@ -50,5 +51,6 @@ abstract contract StorageAccessible {
             returndatacopy(add(ptr, 0x40), 0, returndatasize())
             revert(ptr, add(returndatasize(), 0x40))
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

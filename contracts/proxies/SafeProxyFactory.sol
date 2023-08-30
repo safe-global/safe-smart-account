@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./SafeProxy.sol";
-import "./IProxyCreationCallback.sol";
+import {SafeProxy} from "./SafeProxy.sol";
+import {IProxyCreationCallback} from "./IProxyCreationCallback.sol";
 
 /**
  * @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
@@ -27,21 +27,23 @@ contract SafeProxyFactory {
         require(isContract(_singleton), "Singleton contract not deployed");
 
         bytes memory deploymentData = abi.encodePacked(type(SafeProxy).creationCode, uint256(uint160(_singleton)));
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
         }
+        /* solhint-enable no-inline-assembly */
         require(address(proxy) != address(0), "Create2 call failed");
 
         if (initializer.length > 0) {
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
                 if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
                     revert(0, 0)
                 }
             }
+            /* solhint-enable no-inline-assembly */
         }
     }
 
@@ -105,11 +107,12 @@ contract SafeProxyFactory {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
+        /* solhint-enable no-inline-assembly */
         return size > 0;
     }
 
@@ -119,11 +122,12 @@ contract SafeProxyFactory {
      */
     function getChainId() public view returns (uint256) {
         uint256 id;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             id := chainid()
         }
+        /* solhint-enable no-inline-assembly */
         return id;
     }
 }
