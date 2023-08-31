@@ -54,6 +54,32 @@ export const getSafeSingletonAt = async (address: string) => {
     return safe as unknown as Safe | SafeL2;
 };
 
+export const getSafeWithSingleton = async (
+    singleton: Safe | SafeL2,
+    owners: string[],
+    threshold?: number,
+    fallbackHandler?: string,
+    saltNumber: string = getRandomIntAsString(),
+) => {
+    const factory = await getFactory();
+    const singletonAddress = await singleton.getAddress();
+    const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
+    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
+    const safeProxy = singleton.attach(template) as Safe | SafeL2;
+    await safeProxy.setup(
+        owners,
+        threshold || owners.length,
+        AddressZero,
+        "0x",
+        fallbackHandler || AddressZero,
+        AddressZero,
+        0,
+        AddressZero,
+    );
+
+    return safeProxy;
+};
+
 export const getFactoryContract = async () => {
     const factory = await hre.ethers.getContractFactory("SafeProxyFactory");
 
@@ -97,6 +123,10 @@ export const getCreateCall = async () => {
 
 export const migrationContract = async () => {
     return await hre.ethers.getContractFactory("Migration");
+};
+
+export const migrationContractTo150 = async () => {
+    return await hre.ethers.getContractFactory("Safe150Migration");
 };
 
 export const getMock = async () => {
