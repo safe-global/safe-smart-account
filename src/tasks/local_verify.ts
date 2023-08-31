@@ -41,9 +41,9 @@ task("local-verify", "Verifies that the local deployment files correspond to the
         for (const contract of Object.keys(deployedContracts)) {
             const deployment = await hre.deployments.get(contract);
             const onChainCode = await hre.ethers.provider.getCode(deployment.address);
-            const onchainBytecodeHash = hre.ethers.utils.keccak256(onChainCode);
+            const onchainBytecodeHash = hre.ethers.keccak256(onChainCode);
             // TODO: compile contract in realtime and compare the compiled bytecode with onchain bytecode
-            const localBytecodeHash = hre.ethers.utils.keccak256(deployment.deployedBytecode!);
+            const localBytecodeHash = hre.ethers.keccak256(deployment.deployedBytecode!);
             const verifySuccess = onchainBytecodeHash === localBytecodeHash ? "\x1b[32mSUCCESS\x1b[0m" : "\x1b[31mFAILURE\x1b[0m";
             console.log(`Verification status for ${contract}: ${verifySuccess}`);
         }

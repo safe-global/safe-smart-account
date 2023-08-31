@@ -1,4 +1,4 @@
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import { Contract, Signer, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";

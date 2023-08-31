@@ -5,15 +5,15 @@ import { SafeProxyFactory } from "../../typechain-types";
 
 export const calculateProxyAddress = async (factory: SafeProxyFactory, singleton: string, inititalizer: string, nonce: number | string) => {
     const salt = ethers.solidityPackedKeccak256(["bytes32", "uint256"], [ethers.solidityPackedKeccak256(["bytes"], [inititalizer]), nonce]);
+    const factoryAddress = await factory.getAddress();
 
     if (hre.network.zksync) {
         const proxyCreationCode = (await hre.artifacts.readArtifact("SafeProxy")).deployedBytecode;
         const bytecodehash = zk.utils.hashBytecode(proxyCreationCode);
-        const input = new ethers.utils.AbiCoder().encode(["address"], [singleton]);
-        return zk.utils.create2Address(factory.address, bytecodehash, salt, input);
+        const input = new ethers.AbiCoder().encode(["address"], [singleton]);
+        return zk.utils.create2Address(factoryAddress, bytecodehash, salt, input);
     }
 
-    const factoryAddress = await factory.getAddress();
     const deploymentCode = ethers.solidityPacked(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton]);
     return ethers.getCreate2Address(factoryAddress, salt, ethers.keccak256(deploymentCode));
 };
@@ -40,15 +40,15 @@ export const calculateChainSpecificProxyAddress = async (
         ["bytes32", "uint256", "uint256"],
         [ethers.solidityPackedKeccak256(["bytes"], [inititalizer]), nonce, chainId],
     );
+    const factoryAddress = await factory.getAddress();
 
     if (hre.network.zksync) {
         const proxyCreationCode = (await hre.artifacts.readArtifact("SafeProxy")).deployedBytecode;
         const bytecodehash = zk.utils.hashBytecode(proxyCreationCode);
-        const input = new ethers.utils.AbiCoder().encode(["address"], [singleton]);
-        return zk.utils.create2Address(factory.address, bytecodehash, salt, input);
+        const input = new ethers.AbiCoder().encode(["address"], [singleton]);
+        return zk.utils.create2Address(factoryAddress, bytecodehash, salt, input);
     }
 
-    const factoryAddress = await factory.getAddress();
     const deploymentCode = ethers.solidityPacked(["bytes", "uint256"], [await factory.proxyCreationCode(), singleton]);
     return ethers.getCreate2Address(factoryAddress, salt, ethers.keccak256(deploymentCode));
 };
