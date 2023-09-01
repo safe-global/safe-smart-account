@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./Safe.sol";
+import {Safe, Enum} from "./Safe.sol";
 
 /**
  * @title SafeL2 - An implementation of the Safe contract that emits additional events on transaction executions.

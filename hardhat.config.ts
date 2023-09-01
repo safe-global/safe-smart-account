@@ -86,10 +86,6 @@ const userConfig: HardhatUserConfig = {
             ...sharedNetworkConfig,
             url: "https://rpc.gnosischain.com",
         },
-        ewc: {
-            ...sharedNetworkConfig,
-            url: `https://rpc.energyweb.org`,
-        },
         goerli: {
             ...sharedNetworkConfig,
             url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
@@ -101,10 +97,6 @@ const userConfig: HardhatUserConfig = {
         polygon: {
             ...sharedNetworkConfig,
             url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
-        },
-        volta: {
-            ...sharedNetworkConfig,
-            url: `https://volta-rpc.energyweb.org`,
         },
         bsc: {
             ...sharedNetworkConfig,

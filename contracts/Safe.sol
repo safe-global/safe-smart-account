@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./base/ModuleManager.sol";
-import "./base/OwnerManager.sol";
-import "./base/FallbackManager.sol";
-import "./base/GuardManager.sol";
-import "./common/NativeCurrencyPaymentFallback.sol";
-import "./common/Singleton.sol";
-import "./common/SignatureDecoder.sol";
-import "./common/SecuredTokenTransfer.sol";
-import "./common/StorageAccessible.sol";
-import "./interfaces/ISignatureValidator.sol";
-import "./external/SafeMath.sol";
+import {Guard} from "./base/GuardManager.sol";
+import {ModuleManager} from "./base/ModuleManager.sol";
+import {OwnerManager} from "./base/OwnerManager.sol";
+import {FallbackManager} from "./base/FallbackManager.sol";
+import {NativeCurrencyPaymentFallback} from "./common/NativeCurrencyPaymentFallback.sol";
+import {Singleton} from "./common/Singleton.sol";
+import {SignatureDecoder} from "./common/SignatureDecoder.sol";
+import {SecuredTokenTransfer} from "./common/SecuredTokenTransfer.sol";
+import {StorageAccessible} from "./common/StorageAccessible.sol";
+import {Enum} from "./common/Enum.sol";
+import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
+import {SafeMath} from "./external/SafeMath.sol";
 
 /**
  * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
@@ -307,21 +308,23 @@ contract Safe is
 
                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
                 uint256 contractSignatureLen;
-                // solhint-disable-next-line no-inline-assembly
+                /* solhint-disable no-inline-assembly */
                 /// @solidity memory-safe-assembly
                 assembly {
                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
                 }
+                /* solhint-enable no-inline-assembly */
                 require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
 
                 // Check signature
                 bytes memory contractSignature;
-                // solhint-disable-next-line no-inline-assembly
+                /* solhint-disable no-inline-assembly */
                 /// @solidity memory-safe-assembly
                 assembly {
                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
                     contractSignature := add(add(signatures, s), 0x20)
                 }
+                /* solhint-enable no-inline-assembly */
                 require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
@@ -361,11 +364,12 @@ contract Safe is
      */
     function domainSeparator() public view returns (bytes32) {
         uint256 chainId;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             chainId := chainid()
         }
+        /* solhint-enable no-inline-assembly */
 
         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }

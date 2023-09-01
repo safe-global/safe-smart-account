@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
+/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 pragma abicoder v2;
 
@@ -27,14 +28,14 @@ interface ISafe {
 ///      The module does not perform ANY validation, it just executes validateUserOp and execTransaction
 ///      to perform the opcode level compliance by the bundler.
 contract Test4337ModuleAndHandler {
-    address public immutable myAddress;
-    address public immutable entryPoint;
+    address public immutable MY_ADDRESS;
+    address public immutable ENTRYPOINT;
 
     address internal constant SENTINEL_MODULES = address(0x1);
 
     constructor(address entryPointAddress) {
-        entryPoint = entryPointAddress;
-        myAddress = address(this);
+        ENTRYPOINT = entryPointAddress;
+        MY_ADDRESS = address(this);
     }
 
     function validateUserOp(UserOperation calldata userOp, bytes32, uint256 missingAccountFunds) external returns (uint256 validationData) {
@@ -42,7 +43,7 @@ contract Test4337ModuleAndHandler {
         ISafe senderSafe = ISafe(safeAddress);
 
         if (missingAccountFunds != 0) {
-            senderSafe.execTransactionFromModule(entryPoint, missingAccountFunds, "", 0);
+            senderSafe.execTransactionFromModule(ENTRYPOINT, missingAccountFunds, "", 0);
         }
 
         return 0;
@@ -55,6 +56,6 @@ contract Test4337ModuleAndHandler {
     }
 
     function enableMyself() public {
-        ISafe(address(this)).enableModule(myAddress);
+        ISafe(address(this)).enableModule(MY_ADDRESS);
     }
 }

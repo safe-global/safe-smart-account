@@ -19,7 +19,6 @@ abstract contract SecuredTokenTransfer {
         // 0xa9059cbb - keccack("transfer(address,uint256)")
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
         // solhint-disable-next-line no-inline-assembly
-        /// @solidity memory-safe-assembly
         assembly {
             // We write the return value to scratch space.
             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory

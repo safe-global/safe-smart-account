@@ -12,6 +12,7 @@
         "not-rely-on-time": "off",
         "reason-string": "off",
         "no-empty-blocks": "off",
-        "avoid-low-level-calls": "off"
+        "avoid-low-level-calls": "off",
+        "custom-errors": "off"
     }
 }

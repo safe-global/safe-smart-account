@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import "../common/Enum.sol";
-import "../common/SelfAuthorized.sol";
-import "./Executor.sol";
-import "./GuardManager.sol";
+import {Enum} from "../common/Enum.sol";
+import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+import {Executor} from "./Executor.sol";
+import {GuardManager, Guard} from "./GuardManager.sol";
 
 /**
  * @title Module Manager - A contract managing Safe modules
@@ -119,7 +119,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         Enum.Operation operation
     ) public returns (bool success, bytes memory returnData) {
         success = execTransactionFromModule(to, value, data, operation);
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             // Load free memory location
@@ -134,6 +134,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
             // Point the return data to the correct memory location
             returnData := ptr
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
@@ -180,11 +181,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
             next = array[moduleCount - 1];
         }
         // Set correct size of returned array
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             mstore(array, moduleCount)
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
@@ -195,11 +197,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
+        /* solhint-enable no-inline-assembly */
         return size > 0;
     }
 }

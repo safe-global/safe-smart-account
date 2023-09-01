@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../base/Executor.sol";
+import {Executor, Enum} from "../base/Executor.sol";
 
 /**
  * @title Simulate Transaction Accessor.
@@ -9,10 +9,10 @@ import "../base/Executor.sol";
  * @author Richard Meissner - @rmeissner
  */
 contract SimulateTxAccessor is Executor {
-    address private immutable accessorSingleton;
+    address private immutable ACCESSOR_SINGLETON;
 
     constructor() {
-        accessorSingleton = address(this);
+        ACCESSOR_SINGLETON = address(this);
     }
 
     /**
@@ -20,7 +20,7 @@ contract SimulateTxAccessor is Executor {
      * If the function is called via a regular call, it will revert.
      */
     modifier onlyDelegateCall() {
-        require(address(this) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
+        require(address(this) != ACCESSOR_SINGLETON, "SimulateTxAccessor should only be called via delegatecall");
         _;
     }
 
@@ -48,7 +48,7 @@ contract SimulateTxAccessor is Executor {
         uint256 startGas = gasleft();
         success = execute(to, value, data, operation, gasleft());
         estimate = startGas - gasleft();
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             // Load free memory location
@@ -63,5 +63,6 @@ contract SimulateTxAccessor is Executor {
             // Point the return data to the correct memory location
             returnData := ptr
         }
+        /* solhint-enable no-inline-assembly */
     }
 }
