@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./SafeStorage.sol";
-import "../Safe.sol";
+import {SafeStorage} from "./SafeStorage.sol";
+import {Safe} from "../Safe.sol";
 
 /**
  * @title SignMessageLib - Allows to sign messages on-chain by writing the signed message hashes on-chain.

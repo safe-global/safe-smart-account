@@ -19,7 +19,7 @@ abstract contract SignatureDecoder {
      * @return s Output value s of the signature.
      */
     function signatureSplit(bytes memory signatures, uint256 pos) internal pure returns (uint8 v, bytes32 r, bytes32 s) {
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             let signaturePos := mul(0x41, pos)
@@ -27,5 +27,6 @@ abstract contract SignatureDecoder {
             s := mload(add(signatures, add(signaturePos, 0x40)))
             v := byte(0, mload(add(signatures, add(signaturePos, 0x60))))
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

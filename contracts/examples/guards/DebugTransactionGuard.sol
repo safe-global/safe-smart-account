@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../common/Enum.sol";
-import "../../base/GuardManager.sol";
-import "../../Safe.sol";
+import {Enum} from "../../common/Enum.sol";
+import {BaseGuard} from "../../base/GuardManager.sol";
+import {Safe} from "../../Safe.sol";
 
 /**
  * @title Debug Transaction Guard - Emits transaction events with extended information.

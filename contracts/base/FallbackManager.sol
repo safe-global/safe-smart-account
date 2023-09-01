@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../common/SelfAuthorized.sol";
+import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
@@ -34,11 +34,12 @@ abstract contract FallbackManager is SelfAuthorized {
         require(handler != address(this), "GS400");
 
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, handler)
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
@@ -61,7 +62,7 @@ abstract contract FallbackManager is SelfAuthorized {
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             // When compiled with the optimizer, the compiler relies on a certain assumptions on how the
@@ -96,5 +97,6 @@ abstract contract FallbackManager is SelfAuthorized {
             }
             return(returnDataPtr, returndatasize())
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

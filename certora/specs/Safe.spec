@@ -213,3 +213,27 @@ rule moduleOnlyAddedThroughEnableModule(method f, address module) filtered {
     assert getModule(module) != 0 => 
         f.selector == sig:enableModule(address).selector;
 }
+
+rule onlyModuleCanExecuteModuleThransactions(
+    address to,
+    uint256 value,
+    bytes data,
+    Enum.Operation operation
+) {
+    env e;
+
+    execTransactionFromModule@withrevert(e, to, value, data, operation);
+    assert !lastReverted => getModule(e.msg.sender) != 0, "Only modules can execute module transactions";
+}
+
+rule onlyModuleCanExecuteModuleThransactionsWithReturnData(
+    address to,
+    uint256 value,
+    bytes data,
+    Enum.Operation operation
+) {
+    env e;
+
+    execTransactionFromModuleReturnData@withrevert(e, to, value, data, operation);
+    assert !lastReverted => getModule(e.msg.sender) != 0, "Only modules can execute module transactions";
+}

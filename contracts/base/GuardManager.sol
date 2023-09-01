@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
+/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../common/Enum.sol";
-import "../common/SelfAuthorized.sol";
-import "../interfaces/IERC165.sol";
+import {Enum} from "../common/Enum.sol";
+import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+import {IERC165} from "../interfaces/IERC165.sol";
 
 /// @title Guard Interface
 interface Guard is IERC165 {
@@ -89,11 +90,12 @@ abstract contract GuardManager is SelfAuthorized {
             require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
         }
         bytes32 slot = GUARD_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, guard)
         }
+        /* solhint-enable no-inline-assembly */
         emit ChangedGuard(guard);
     }
 
@@ -106,10 +108,11 @@ abstract contract GuardManager is SelfAuthorized {
      */
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             guard := sload(slot)
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

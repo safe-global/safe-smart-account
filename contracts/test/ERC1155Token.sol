@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../interfaces/ERC1155TokenReceiver.sol";
-import "../external/SafeMath.sol";
+import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
+import {SafeMath} from "../external/SafeMath.sol";
 
 /**
  * @title ERC1155Token - A test ERC1155 token contract
@@ -74,11 +74,12 @@ contract ERC1155Token {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
+        /* solhint-enable no-inline-assembly */
         return size > 0;
     }
 

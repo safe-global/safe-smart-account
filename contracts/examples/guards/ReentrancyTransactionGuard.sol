@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../common/Enum.sol";
-import "../../base/GuardManager.sol";
-import "../../Safe.sol";
+import {Enum} from "../../common/Enum.sol";
+import {BaseGuard} from "../../base/GuardManager.sol";
 
 /**
  * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
@@ -29,11 +28,12 @@ contract ReentrancyTransactionGuard is BaseGuard {
      */
     function getGuard() internal pure returns (GuardValue storage guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             guard.slot := slot
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**

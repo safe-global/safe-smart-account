@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
+/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Guard} from "../base/GuardManager.sol";
-import "hardhat/console.sol";
 
+// Interface for interacting with the Safe contract
 interface ISafe {
     function setFallbackHandler(address handler) external;
 
@@ -19,13 +20,16 @@ contract Safe150Migration is SafeStorage {
     // Address of this contract
     address public immutable MIGRATION_SINGLETON;
 
-    // Address of Safe contract version 1.5.0 Singleton
+    // Address of Safe contract version 1.5.0 Singleton (L1)
+    // TODO: Update this address when the Safe 1.5.0 Singleton is deployed
     address public constant SAFE_150_SINGLETON = address(0x88627c8904eCd9DF96A572Ef32A7ff13b199Ed8D);
 
     // Address of Safe contract version 1.5.0 Singleton (L2)
+    // TODO: Update this address when the Safe 1.5.0 Singleton (L2) is deployed
     address public constant SAFE_150_SINGLETON_L2 = address(0x0Ee37514644683f7EB9745a5726C722DeBa77e52);
 
     // Address of Safe contract version 1.5.0 Compatibility Fallback Handler
+    // TODO: Update this address when the Safe 1.5.0 Compatibility Fallback Handler is deployed
     address public constant SAFE_150_FALLBACK_HANDLER = address(0x8aa755cB169991fEDC3E306751dCb71964A041c7);
 
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
@@ -36,6 +40,10 @@ contract Safe150Migration is SafeStorage {
      */
     constructor() {
         MIGRATION_SINGLETON = address(this);
+
+        require(isContract(SAFE_150_SINGLETON), "Safe 1.4.1 Singleton is not deployed");
+        require(isContract(SAFE_150_SINGLETON_L2), "Safe 1.4.1 Singleton (L2) is not deployed");
+        require(isContract(SAFE_150_FALLBACK_HANDLER), "Safe 1.4.1 Fallback Handler is not deployed");
     }
 
     /**
@@ -44,74 +52,135 @@ contract Safe150Migration is SafeStorage {
      */
     event ChangedMasterCopy(address singleton);
 
+    /**
+     * @dev Private function to check if a guard is supported.
+     */
     function checkGuard() private view {
         address guard = getGuard();
-        console.log("guard: %s", guard);
+
         if (guard != address(0)) {
             require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
         }
     }
 
     /**
-     * @notice Migrate to Safe 1.5.0 Singleton (L1) at `safe150Singleton`
+     * @notice Migrate to Safe 1.5.0 Singleton (L1) at `SAFE_150_SINGLETON`
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
-    function migrate() public {
+    function migrateSingleton() public {
         require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
 
         checkGuard();
 
         singleton = SAFE_150_SINGLETON;
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-        emit ChangedMasterCopy(singleton);
-    }
-
-    function migrateWithSetGuard(address guard) public {
-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
-
-        ISafe safe = ISafe(address(this));
-
-        singleton = SAFE_150_SINGLETON;
-
-        safe.setGuard(guard);
-        safe.setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-
         emit ChangedMasterCopy(singleton);
     }
 
     /**
-     * @notice Migrate to Safe 1.5.0 Singleton (L2) at `safe150SingletonL2`
+     * @notice Migrate and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
+     */
+    function migrateWithFallbackHandler() public {
+        migrateSingleton();
+
+        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+    }
+
+    /**
+     * @notice Migrate and set the guard to the specified address.
+     * @param guard The address of the new guard contract.
+     */
+    function migrateWithSetGuard(address guard) public {
+        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
+
+        singleton = SAFE_150_SINGLETON;
+        emit ChangedMasterCopy(singleton);
+
+        ISafe(address(this)).setGuard(guard);
+    }
+
+    /**
+     * @notice Migrate, set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
+     * @param guard The address of the new guard contract.
+     */
+    function migrateWithSetGuardAndFallbackHandler(address guard) public {
+        migrateWithSetGuard(guard);
+
+        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+    }
+
+    /**
+     * @notice Migrate to Safe 1.5.0 Singleton (L2) at `SAFE_150_SINGLETON_L2`
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
-    function migrateL2() public {
+    function migrateL2Singleton() public {
         require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
 
         checkGuard();
 
         singleton = SAFE_150_SINGLETON_L2;
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
         emit ChangedMasterCopy(singleton);
     }
 
+    /**
+     * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
+     */
+    function migrateL2WithFallbackHandler() public {
+        migrateL2Singleton();
+
+        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+    }
+
+    /**
+     * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the guard to the specified address.
+     * @param guard The address of the new guard contract.
+     */
     function migrateL2WithSetGuard(address guard) public {
         require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
 
-        ISafe safe = ISafe(address(this));
-
         singleton = SAFE_150_SINGLETON_L2;
-
-        safe.setGuard(guard);
-        safe.setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-
         emit ChangedMasterCopy(singleton);
+
+        ISafe(address(this)).setGuard(guard);
     }
 
+    /**
+     * @notice Migrate to Safe 1.5.0 Singleton (L2), set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
+     * @param guard The address of the new guard contract.
+     */
+    function migrateL2WithSetGuardAndFallbackHandler(address guard) public {
+        migrateL2WithSetGuard(guard);
+
+        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+    }
+
+    /**
+     * @notice Get the address of the current guard.
+     * @return guard The address of the current guard contract.
+     */
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
-        /// @solidity memory-safe-assembly
         assembly {
             guard := sload(slot)
         }
+    }
+
+    /**
+     * @notice Checks whether an Ethereum address corresponds to a contract or an externally owned account (EOA).
+     * @param account The Ethereum address to be checked.
+     * @return A boolean value indicating whether the address is associated with a contract (true) or an EOA (false).
+     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address is a contract.
+     * It may return incorrect results in some edge cases (see documentation for details).
+     * Developers should use caution when relying on the results of this function for critical decision-making.
+     */
+    function isContract(address account) internal view returns (bool) {
+        uint256 size;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            size := extcodesize(account)
+        }
+
+        // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
+        return size > 0;
     }
 }

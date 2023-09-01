@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../interfaces/ERC1155TokenReceiver.sol";
-import "../interfaces/ERC721TokenReceiver.sol";
-import "../interfaces/ERC777TokensRecipient.sol";
-import "../interfaces/IERC165.sol";
+import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
+import {ERC721TokenReceiver} from "../interfaces/ERC721TokenReceiver.sol";
+import {ERC777TokensRecipient} from "../interfaces/ERC777TokensRecipient.sol";
+import {IERC165} from "../interfaces/IERC165.sol";
 
 /**
  * @title Default Callback Handler - Handles supported tokens' callbacks, allowing Safes receiving these tokens.
