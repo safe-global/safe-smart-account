@@ -1,0 +1,24 @@
+To run gambit you run ```certoraMutate``` with the prover conf file and the gambit conf file. A prover conf file is generated everytime you run the prover through your script. This auto generated prover conf file can be found in ```.certora_internal/latest/run.conf```. Copy this to a conf file in ```./certora/conf```. The gambit conf file points to the contract that you want to mutate and num_mutants specifies the number of mutations to be generated. Gambit runs the spec with the original code as well as the mutations generated. Analyzing which mutations your spec caught/ failed to catch, can give you a pretty good understanding of your spec coverage.
+
+Run the following command from the root:
+
+```bash
+certoraMutate --prover_conf path/to/conf/file.conf --mutation_conf path/to/gambit/file.conf
+```
+
+example
+```bash
+certoraMutate --prover_conf certora/conf/safe.conf --mutation_conf gambit.conf
+```
+
+After submitting all the mutation testing jobs to the server, gambit generates a ``collect.json`` file with all the information needed to collect the results of mutation testing. After a few hours, you can collect these results with the following command:
+
+```bash
+certoraMutate --collect_file collect.json
+```
+You will get a link to the mutation test report after all the results have been collected successfully.
+
+Optionally, you can also have the results of mutation testing dumped into a csv file as follows:
+```bash
+certoraMutate --collect_file collect.json --dump_csv path/to/csv/file.csv
+```
