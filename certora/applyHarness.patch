@@ -1,7 +1,7 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-08-16 17:09:10
-+++ Safe.sol	2023-08-25 11:14:11
-@@ -75,7 +75,7 @@
+--- Safe.sol	2023-08-30 20:37:09
++++ Safe.sol	2023-08-30 20:45:31
+@@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -10,7 +10,7 @@ diff -druN Safe.sol Safe.sol
      }
  
      /**
-@@ -92,15 +92,18 @@
+@@ -93,15 +93,18 @@
       * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
       */
      function setup(
@@ -33,19 +33,20 @@ diff -druN Safe.sol Safe.sol
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-08-16 17:09:10
-+++ base/Executor.sol	2023-08-25 11:11:53
-@@ -26,11 +26,8 @@
+--- base/Executor.sol	2023-08-30 20:06:21
++++ base/Executor.sol	2023-08-30 20:47:47
+@@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
          if (operation == Enum.Operation.DelegateCall) {
--            // solhint-disable-next-line no-inline-assembly
+-            /* solhint-disable no-inline-assembly */
 -            /// @solidity memory-safe-assembly
 -            assembly {
 -                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
 -            }
+-            /* solhint-enable no-inline-assembly */
 +            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
 +            return true;
          } else {
-             // solhint-disable-next-line no-inline-assembly
+             /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly

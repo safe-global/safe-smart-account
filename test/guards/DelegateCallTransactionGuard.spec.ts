@@ -120,7 +120,7 @@ describe("DelegateCallTransactionGuard", () => {
             const guardAddress = await guard.getAddress();
             await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], [user1]);
 
-            expect(await guard.allowedTarget()).to.be.eq(AddressOne);
+            expect(await guard.ALLOWED_TARGET()).to.be.eq(AddressOne);
             const allowedTarget = safe.attach(AddressOne);
             await expect(executeContractCallWithSigners(safe, safe, "setFallbackHandler", [AddressZero], [user1], true)).to.be.revertedWith(
                 "This call is restricted",
