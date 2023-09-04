@@ -4,22 +4,31 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./Safe.sol";
 
 abstract contract ERC20 {
-    function transfer(address to, uint tokens) virtual public returns (bool success);
+    function transfer(address to, uint tokens) virtual external returns (bool success);
 }
 
+abstract contract ERC721 {
+    function transferFrom(address _from, address _to, uint256 _tokenId) virtual external;
+}
+
+abstract contract ERC1155 {
+    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) virtual external;
+}
+
+// Asset Type
+// 1 - ERC20
+// 2 - ERC721
+// 3 - ERC1155
 contract OutSafe is Safe {
     // Mapping to keep track of hot wallets/verifier limits
     mapping(address => mapping(address => uint256)) public limits;
     // Mapping to keep track of wallet nonces
     mapping(address => uint256) public nonces;
-    // // Mapping to keep track of asset type
-    // // 1 - ERC20, allow for future expansion
-    // mapping(address => uint8) public assetTypes;
 
     bool public ownerWithdrawal = true;
 
     // keccak256(
-    //   "OutWithdrawal(address to,address asset,uint256 amount,uint256 nonce,uint256 expiry)"
+    //   "OutWithdrawal(address to,address asset, uint256 tokenId,uint256 amount,uint256 nonce,uint256 expiry)"
     // );
     bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0xb2830d38de4ffb8d95f281c56095abd1f5b13c05f2ecd8ab1a572c4304fdace9;
 
@@ -62,7 +71,7 @@ contract OutSafe is Safe {
     }
 
     // Asset type: 0 - ETH, 1 - ERC20
-    function withdrawTo(address user, address asset, uint256 assetType, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+    function withdrawTo(address user, address asset, uint256 assetType, uint256 tokenId, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
       if (!ownerWithdrawal || !isOwner(msg.sender)) {
         uint8 v;
         bytes32 r;
@@ -82,13 +91,17 @@ contract OutSafe is Safe {
       } else if (assetType == 1) {
         bool success = ERC20(asset).transfer(user, amount);
         require(success, "OS07");
+      } else if (assetType == 2) {
+        ERC721(asset).transferFrom(address(this), user, tokenId);
+      } else if (assetType == 3) {
+        ERC1155(asset).safeTransferFrom(address(this), user, tokenId, amount, "");
       } else {
         revert("OS06");
       }
     }
 
-    function withdraw(address asset, uint256 assetType, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
-      withdrawTo(msg.sender, asset, assetType, amount, nonce, expiry, signature);
+    function withdraw(address asset, uint256 assetType, uint256 tokenId, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+      withdrawTo(msg.sender, asset, assetType, tokenId , amount, nonce, expiry, signature);
     }
 
     function deposit() external payable {
