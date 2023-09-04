@@ -30,7 +30,7 @@ contract OutSafe is Safe {
     // keccak256(
     //   "OutWithdrawal(address to,address asset, uint256 tokenId,uint256 amount,uint256 nonce,uint256 expiry)"
     // );
-    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0xb2830d38de4ffb8d95f281c56095abd1f5b13c05f2ecd8ab1a572c4304fdace9;
+    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0x7fad3d126cab94d127a55c949343614874463ebd35675f86e7e74a7f0396fb7f;
 
     function encodeWithdrawal(
         address to,
