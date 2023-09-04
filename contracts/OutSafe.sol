@@ -12,9 +12,9 @@ contract OutSafe is Safe {
     mapping(address => mapping(address => uint256)) public limits;
     // Mapping to keep track of wallet nonces
     mapping(address => uint256) public nonces;
-    // Mapping to keep track of asset type
-    // 1 - ERC20, allow for future expansion
-    mapping(address => uint8) public assetTypes;
+    // // Mapping to keep track of asset type
+    // // 1 - ERC20, allow for future expansion
+    // mapping(address => uint8) public assetTypes;
 
     bool public ownerWithdrawal = false;
 
@@ -43,14 +43,6 @@ contract OutSafe is Safe {
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), withdrawHash);
     }
 
-    function setAsset(address asset, uint8 assetType) public authorized {
-      assetTypes[asset] = assetType;
-    }
-
-    function getAsset(address asset) public view returns (uint8) {
-      return assetTypes[asset];
-    }
-
     function setVerifier(address verifier, address[] calldata assets, uint256[] calldata _limits) public authorized {
       for (uint256 i = 0; i < assets.length; i++) {
         limits[verifier][assets[i]] = _limits[i];
@@ -70,7 +62,7 @@ contract OutSafe is Safe {
     }
 
     // Asset type: 0 - ETH, 1 - ERC20
-    function withdrawTo(address user, address asset, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+    function withdrawTo(address user, address asset, uint256 assetType, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
       if (!ownerWithdrawal || !isOwner(msg.sender)) {
         uint8 v;
         bytes32 r;
@@ -81,13 +73,13 @@ contract OutSafe is Safe {
         require(expiry > block.number, "OS02");
         require(limits[verifier][asset] > 0, "OS03");
         require(limits[verifier][asset] >= amount, "OS04");
-        require(asset == address(0) || assetTypes[asset] == 1, "OS05");
+        require(asset == address(0) || assetType == 1, "OS05");
         nonces[user] = nonce;
         limits[verifier][asset] -= amount;
       }
       if (asset == address(0)) {
         payable(user).transfer(amount);
-      } else if (assetTypes[asset] == 1) {
+      } else if (assetType == 1) {
         bool success = ERC20(asset).transfer(user, amount);
         require(success, "OS07");
       } else {
@@ -95,8 +87,8 @@ contract OutSafe is Safe {
       }
     }
 
-    function withdraw(address asset, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
-      withdrawTo(msg.sender, asset, amount, nonce, expiry, signature);
+    function withdraw(address asset, uint256 assetType, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
+      withdrawTo(msg.sender, asset, assetType, amount, nonce, expiry, signature);
     }
 
     function deposit() external payable {
