@@ -16,7 +16,7 @@ contract OutSafe is Safe {
     // // 1 - ERC20, allow for future expansion
     // mapping(address => uint8) public assetTypes;
 
-    bool public ownerWithdrawal = false;
+    bool public ownerWithdrawal = true;
 
     // keccak256(
     //   "OutWithdrawal(address to,address asset,uint256 amount,uint256 nonce,uint256 expiry)"
