@@ -16,6 +16,8 @@ contract OutSafe is Safe {
     // 1 - ERC20, allow for future expansion
     mapping(address => uint8) public assetTypes;
 
+    bool public ownerWithdrawal = false;
+
     // keccak256(
     //   "OutWithdrawal(address to,address asset,uint256 amount,uint256 nonce,uint256 expiry)"
     // );
@@ -55,6 +57,10 @@ contract OutSafe is Safe {
       }
     }
 
+    function setOwnerWithdrawal(bool val) public authorized {
+      ownerWithdrawal = val;
+    }
+
     function getLimit(address verifier, address asset) public view returns (uint256) {
       return limits[verifier][asset];
     }
@@ -65,18 +71,20 @@ contract OutSafe is Safe {
 
     // Asset type: 0 - ETH, 1 - ERC20
     function withdrawTo(address user, address asset, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
-      uint8 v;
-      bytes32 r;
-      bytes32 s;
-      (v, r, s) = signatureSplit(signature, 0);
-      address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, amount, nonce, expiry)), v, r, s);
-      require(nonces[user] < nonce, "OS01");
-      require(expiry > block.number, "OS02");
-      require(limits[verifier][asset] > 0, "OS03");
-      require(limits[verifier][asset] >= amount, "OS04");
-      require(asset == address(0) || assetTypes[asset] == 1, "OS05");
-      nonces[user] = nonce;
-      limits[verifier][asset] -= amount;
+      if (!ownerWithdrawal || !isOwner(msg.sender)) {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        (v, r, s) = signatureSplit(signature, 0);
+        address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, amount, nonce, expiry)), v, r, s);
+        require(nonces[user] < nonce, "OS01");
+        require(expiry > block.number, "OS02");
+        require(limits[verifier][asset] > 0, "OS03");
+        require(limits[verifier][asset] >= amount, "OS04");
+        require(asset == address(0) || assetTypes[asset] == 1, "OS05");
+        nonces[user] = nonce;
+        limits[verifier][asset] -= amount;
+      }
       if (asset == address(0)) {
         payable(user).transfer(amount);
       } else if (assetTypes[asset] == 1) {
