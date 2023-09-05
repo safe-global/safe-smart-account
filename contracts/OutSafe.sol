@@ -5,6 +5,8 @@ import "./Safe.sol";
 
 abstract contract ERC20 {
     function transfer(address to, uint tokens) virtual external returns (bool success);
+
+    function transferFrom(address from, address to, uint tokens) virtual external returns (bool success);
 }
 
 abstract contract ERC721 {
@@ -108,6 +110,17 @@ contract OutSafe is Safe {
       withdrawTo(msg.sender, asset, assetType, tokenId , amount, nonce, expiry, signature);
     }
 
-    function deposit() external payable {
+    function deposit(address asset, uint256 assetType, uint256 tokenId, uint256 amount) external payable {
+      if (asset == address(0)) return;
+      if (assetType == 1) {
+        bool success = ERC20(asset).transferFrom(msg.sender, address(this), amount);
+        require(success, "OS07");
+      } else if (assetType == 2) {
+        ERC721(asset).transferFrom(msg.sender, address(this), tokenId);
+      } else if (assetType == 3) {
+        ERC1155(asset).safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
+      } else {
+        revert("OS06");
+      }
     }
 }
