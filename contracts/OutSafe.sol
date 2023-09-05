@@ -110,7 +110,7 @@ contract OutSafe is Safe {
       withdrawTo(msg.sender, asset, assetType, tokenId , amount, nonce, expiry, signature);
     }
 
-    function depositETH() external payable {
+    function depositEth() external payable {
     }
 
     function deposit(address asset, uint256 assetType, uint256 tokenId, uint256 amount) external payable {
