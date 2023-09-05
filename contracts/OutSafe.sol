@@ -68,14 +68,6 @@ contract OutSafe is Safe {
       ownerWithdrawal = val;
     }
 
-    function getLimit(address verifier, address asset) public view returns (uint256) {
-      return limits[verifier][asset];
-    }
-
-    function getNonce(address user) public view returns (uint256) {
-      return nonces[user];
-    }
-
     // Asset type: 0 - ETH, 1 - ERC20
     function withdrawTo(address user, address asset, uint256 assetType, uint256 tokenId, uint256 amount, uint256 nonce, uint256 expiry, bytes calldata signature) public {
       if (!ownerWithdrawal || !isOwner(msg.sender)) {
