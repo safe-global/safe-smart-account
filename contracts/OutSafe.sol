@@ -28,13 +28,15 @@ contract OutSafe is Safe {
     bool public ownerWithdrawal = true;
 
     // keccak256(
-    //   "OutWithdrawal(address to,address asset, uint256 tokenId,uint256 amount,uint256 nonce,uint256 expiry)"
+    //   "OutWithdrawal(address to,address asset,uint256 assetType,uint256 tokenId,uint256 amount,uint256 nonce,uint256 expiry)"
     // );
-    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0x7fad3d126cab94d127a55c949343614874463ebd35675f86e7e74a7f0396fb7f;
+    bytes32 private constant OUT_WITHDRAWAL_TYPEHASH = 0x6e981a3f933da9dbccf8fe67d5369be9d303da2242b2c97863e301ded93c6e92;
 
     function encodeWithdrawal(
         address to,
         address asset,
+        uint256 assetType,
+        uint256 tokenId,
         uint256 amount,
         uint256 nonce,
         uint256 expiry
@@ -44,6 +46,8 @@ contract OutSafe is Safe {
                 OUT_WITHDRAWAL_TYPEHASH,
                 to,
                 asset,
+                assetType,
+                tokenId,
                 amount,
                 nonce,
                 expiry
@@ -77,11 +81,11 @@ contract OutSafe is Safe {
         bytes32 r;
         bytes32 s;
         (v, r, s) = signatureSplit(signature, 0);
-        address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, amount, nonce, expiry)), v, r, s);
+        address verifier = ecrecover(keccak256(encodeWithdrawal(user, asset, assetType, tokenId, amount, nonce, expiry)), v, r, s);
         require(nonces[user] < nonce, "OS01");
         require(expiry > block.number, "OS02");
         require(limits[verifier][asset] > 0, "OS03");
-        require(limits[verifier][asset] >= amount, "OS04");
+        require(limits[verifier][asset] >= (assetType == 2 ? 1 : amount) , "OS04");
         require(asset == address(0) || assetType == 1, "OS05");
         nonces[user] = nonce;
         limits[verifier][asset] -= amount;
