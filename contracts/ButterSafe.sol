@@ -79,7 +79,6 @@ contract ButterSafe is Safe {
         require(expiry > block.number, "OS02");
         require(limits[verifier][asset] > 0, "OS03");
         require(limits[verifier][asset] >= (assetType == 2 ? 1 : amount) , "OS04");
-        require(asset == address(0) || assetType > 0, "OS05");
         nonces[user] = nonce;
         limits[verifier][asset] -= amount;
       }
@@ -87,13 +86,13 @@ contract ButterSafe is Safe {
         payable(user).transfer(amount);
       } else if (assetType == 1) {
         bool success = ERC20(asset).transfer(user, amount);
-        require(success, "OS07");
+        require(success, "OS06");
       } else if (assetType == 2) {
         ERC721(asset).transferFrom(address(this), user, tokenId);
       } else if (assetType == 3) {
         ERC1155(asset).safeTransferFrom(address(this), user, tokenId, amount, "");
       } else {
-        revert("OS06");
+        revert("OS05");
       }
     }
 
@@ -111,7 +110,7 @@ contract ButterSafe is Safe {
       } else if (assetType == 3) {
         ERC1155(asset).safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
       } else {
-        revert("OS06");
+        revert("OS05");
       }
     }
 }
