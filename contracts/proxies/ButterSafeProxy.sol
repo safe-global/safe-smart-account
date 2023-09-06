@@ -14,7 +14,7 @@ interface IProxy {
  * @author Stefan George - <stefan@gnosis.io>
  * @author Richard Meissner - <richard@gnosis.io>
  */
-contract OutSafeProxy {
+contract ButterSafeProxy {
     // Singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
     // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
     address internal singleton;

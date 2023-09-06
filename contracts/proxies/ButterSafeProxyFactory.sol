@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./OutSafeProxy.sol";
+import "./ButterSafeProxy.sol";
 import "./IOutProxyCreationCallback.sol";
 
 /**
  * @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
  * @author Stefan George - @Georgi87
  */
-contract OutSafeProxyFactory {
-    event ProxyCreation(OutSafeProxy indexed proxy, address singleton);
+contract ButterSafeProxyFactory {
+    event ProxyCreation(ButterSafeProxy indexed proxy, address singleton);
 
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
-        return type(OutSafeProxy).creationCode;
+        return type(ButterSafeProxy).creationCode;
     }
 
     /**
@@ -23,10 +23,10 @@ contract OutSafeProxyFactory {
      * @param salt Create2 salt to use for calculating the address of the new proxy contract.
      * @return proxy Address of the new proxy contract.
      */
-    function deployProxy(address _singleton, bytes memory initializer, bytes32 salt) internal returns (OutSafeProxy proxy) {
+    function deployProxy(address _singleton, bytes memory initializer, bytes32 salt) internal returns (ButterSafeProxy proxy) {
         require(isContract(_singleton), "Singleton contract not deployed");
 
-        bytes memory deploymentData = abi.encodePacked(type(OutSafeProxy).creationCode, uint256(uint160(_singleton)));
+        bytes memory deploymentData = abi.encodePacked(type(ButterSafeProxy).creationCode, uint256(uint160(_singleton)));
         // solhint-disable-next-line no-inline-assembly
         assembly {
             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
@@ -49,7 +49,7 @@ contract OutSafeProxyFactory {
      * @param initializer Payload for a message call to be sent to a new proxy contract.
      * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
      */
-    function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce) public returns (OutSafeProxy proxy) {
+    function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce) public returns (ButterSafeProxy proxy) {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
         proxy = deployProxy(_singleton, initializer, salt);
@@ -68,7 +68,7 @@ contract OutSafeProxyFactory {
         address _singleton,
         bytes memory initializer,
         uint256 saltNonce
-    ) public returns (OutSafeProxy proxy) {
+    ) public returns (ButterSafeProxy proxy) {
         // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
         proxy = deployProxy(_singleton, initializer, salt);
@@ -88,7 +88,7 @@ contract OutSafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce,
         IOutProxyCreationCallback callback
-    ) public returns (OutSafeProxy proxy) {
+    ) public returns (ButterSafeProxy proxy) {
         uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
         proxy = createProxyWithNonce(_singleton, initializer, saltNonceWithCallback);
         if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);

@@ -21,7 +21,7 @@ abstract contract ERC1155 {
 // 1 - ERC20
 // 2 - ERC721
 // 3 - ERC1155
-contract OutSafe is Safe {
+contract ButterSafe is Safe {
     // Mapping to keep track of hot wallets/verifier limits
     mapping(address => mapping(address => uint256)) public limits;
     // Mapping to keep track of wallet nonces
@@ -79,7 +79,7 @@ contract OutSafe is Safe {
         require(expiry > block.number, "OS02");
         require(limits[verifier][asset] > 0, "OS03");
         require(limits[verifier][asset] >= (assetType == 2 ? 1 : amount) , "OS04");
-        require(asset == address(0) || assetType == 1, "OS05");
+        require(asset == address(0) || assetType > 0, "OS05");
         nonces[user] = nonce;
         limits[verifier][asset] -= amount;
       }
