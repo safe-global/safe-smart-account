@@ -1,15 +1,15 @@
 /*
  * Spec for linked list reachability.
- * 
+ *
  * This file uses a reach predicate:
  *    ghost reach(address, address) returns bool
  * to represent the transitive relation of the next
  * relation given byt the "owners" field.
  *
  * The idea comes from the paper
- * 
- * [1] Itzhaky, S., Banerjee, A., Immerman, N., Nanevski, A., Sagiv, M. (2013). 
- *     Effectively-Propositional Reasoning about Reachability in Linked Data Structures. 
+ *
+ * [1] Itzhaky, S., Banerjee, A., Immerman, N., Nanevski, A., Sagiv, M. (2013).
+ *     Effectively-Propositional Reasoning about Reachability in Linked Data Structures.
  *     In: CAV 2013. Springer, https://doi.org/10.1007/978-3-642-39799-8_53
  */
 
@@ -36,10 +36,10 @@ ghost mapping(address => address) ghostOwners {
 ghost uint256 ghostOwnerCount;
 
 ghost address SENTINEL {
-    axiom to_mathint(SENTINEL) == 1;    
+    axiom to_mathint(SENTINEL) == 1;
 }
 ghost address NULL {
-    axiom to_mathint(NULL) == 0;    
+    axiom to_mathint(NULL) == 0;
 }
 
 invariant thresholdSet() getThreshold() > 0  && getThreshold() <= ghostOwnerCount
@@ -72,7 +72,7 @@ invariant nextNull()
     ghostOwners[NULL] == 0 &&
     (forall address X. forall address Y. ghostOwners[X] == 0 && reach(X, Y) => X == Y || Y == 0)
     filtered { f -> reachableOnly(f) }
-    { 
+    {
         preserved with (env e2) {
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
@@ -122,10 +122,10 @@ invariant reachableInList()
     }
 
 invariant reachHeadNext()
-    forall address X. reach(SENTINEL, X) && X != SENTINEL && X != NULL => 
+    forall address X. reach(SENTINEL, X) && X != SENTINEL && X != NULL =>
            ghostOwners[SENTINEL] != SENTINEL && reach(ghostOwners[SENTINEL], X)
     filtered { f -> reachableOnly(f) }
-    { 
+    {
         preserved with (env e2) {
             requireInvariant inListReachable();
             requireInvariant reachableInList();
@@ -136,14 +136,14 @@ invariant reachHeadNext()
 
 // reach encodes a linear order.  This axiom corresponds to Table 2 in [1].
 invariant reach_invariant()
-    forall address X. forall address Y. forall address Z. ( 
+    forall address X. forall address Y. forall address Z. (
         reach(X, X)
         && (reach(X,Y) && reach (Y, X) => X == Y)
         && (reach(X,Y) && reach (Y, Z) => reach(X, Z))
         && (reach(X,Y) && reach (X, Z) => (reach(Y,Z) || reach(Z,Y)))
     )
     filtered { f -> reachableOnly(f) }
-    { 
+    {
         preserved with (env e2) {
             requireInvariant reach_null();
             requireInvariant inListReachable();
@@ -156,7 +156,7 @@ invariant reach_invariant()
 invariant reach_next()
     forall address X. reach_succ(X, ghostOwners[X])
     filtered { f -> reachableOnly(f) }
-    { 
+    {
         preserved with (env e2) {
             requireInvariant inListReachable();
             requireInvariant reachableInList();
@@ -165,7 +165,7 @@ invariant reach_next()
         }
     }
 
-// Express the next relation from the reach relation by stating that it is reachable and there is no other element 
+// Express the next relation from the reach relation by stating that it is reachable and there is no other element
 // in between.
 // This is equivalent to P_next from Table 3.
 definition isSucc(address a, address b) returns bool = reach(a, b) && a != b && (forall address Z. reach(a, Z) && reach(Z, b) => (a == Z || b == Z));
@@ -179,14 +179,14 @@ definition reach_succ(address key, address next) returns bool =
 // Update the reach relation when the next pointer of a is changed to b.
 // This corresponds to the first two equations in Table 3 [1] (destructive update to break previous paths through a and
 // then additionally allow the path to go through the new edge from a to b).
-definition updateSucc(address a, address b) returns bool = forall address X. forall address Y. reach@new(X, Y) == 
+definition updateSucc(address a, address b) returns bool = forall address X. forall address Y. reach@new(X, Y) ==
             (X == Y ||
             (reach@old(X, Y) && !(reach@old(X, a) && a != Y && reach@old(a, Y))) ||
             (reach@old(X, a) && reach@old(b, Y)));
 
 // hook to update the ghostOwners and the reach ghost state whenever the owners field
-// in storage is written. 
-// This also checks that the reach_succ invariant is preserved. 
+// in storage is written.
+// This also checks that the reach_succ invariant is preserved.
 hook Sstore currentContract.owners[KEY address key] address value STORAGE {
     address valueOrNull;
     address someKey;
@@ -201,8 +201,8 @@ hook Sstore currentContract.ownerCount uint256 value STORAGE {
     ghostOwnerCount = value;
 }
 
-// Hook to match ghost state and storage state when reading owners from storage. 
-// This also provides the reach_succ invariant. 
+// Hook to match ghost state and storage state when reading owners from storage.
+// This also provides the reach_succ invariant.
 hook Sload address value currentContract.owners[KEY address key] STORAGE {
     require ghostOwners[key] == value;
     require reach_succ(key, value);
