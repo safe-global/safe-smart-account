@@ -17,7 +17,6 @@
 methods {
     function isOwner(address) external returns (bool) envfree;
     function getThreshold() external returns (uint256) envfree;
-    function getOwnersCount() external returns (uint256) envfree;
 }
 
 definition reachableOnly(method f) returns bool =
@@ -31,6 +30,10 @@ ghost reach(address, address) returns bool {
 
 ghost mapping(address => address) ghostOwners {
     init_state axiom forall address X. to_mathint(ghostOwners[X]) == 0;
+}
+
+ghost ghostSuccCount(address) returns mathint {
+    init_state axiom forall address X. ghostSuccCount(X) == 0;
 }
 
 ghost uint256 ghostOwnerCount;
@@ -50,9 +53,6 @@ invariant thresholdSet() getThreshold() > 0  && getThreshold() <= ghostOwnerCoun
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
-            // The prover found a counterexample if the owners count is max uint256,
-            // but this is not a realistic scenario.
-            require getOwnersCount() < MAX_UINT256();
         }
     }
 
@@ -64,6 +64,7 @@ invariant self_not_owner() currentContract != SENTINEL => ghostOwners[currentCon
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -73,11 +74,12 @@ invariant nextNull()
     (forall address X. forall address Y. ghostOwners[X] == 0 && reach(X, Y) => X == Y || Y == 0)
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reach_null();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -86,10 +88,11 @@ invariant reach_null()
     (forall address X. reach(X, NULL))
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant reach_invariant();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -99,11 +102,12 @@ invariant inListReachable()
     (forall address key. ghostOwners[key] != 0 => reach(SENTINEL, key))
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant thresholdSet();
             requireInvariant reach_invariant();
             requireInvariant reach_null();
             requireInvariant reachableInList();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -112,12 +116,13 @@ invariant reachableInList()
     (forall address X. forall address Y. reach(X, Y) => X == Y || Y == 0 || ghostOwners[Y] != 0)
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant reach_invariant();
             requireInvariant reach_null();
             requireInvariant inListReachable();
             requireInvariant reach_next();
             requireInvariant nextNull();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -126,11 +131,12 @@ invariant reachHeadNext()
            ghostOwners[SENTINEL] != SENTINEL && reach(ghostOwners[SENTINEL], X)
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reach_invariant();
             requireInvariant reach_null();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -144,11 +150,12 @@ invariant reach_invariant()
     )
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant reach_null();
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reachHeadNext();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -157,11 +164,12 @@ invariant reach_next()
     forall address X. reach_succ(X, ghostOwners[X])
     filtered { f -> reachableOnly(f) }
     {
-        preserved with (env e2) {
+        preserved {
             requireInvariant inListReachable();
             requireInvariant reachableInList();
             requireInvariant reach_null();
             requireInvariant reach_invariant();
+            requireInvariant thresholdSet();
         }
     }
 
@@ -184,6 +192,12 @@ definition updateSucc(address a, address b) returns bool = forall address X. for
             (reach@old(X, Y) && !(reach@old(X, a) && a != Y && reach@old(a, Y))) ||
             (reach@old(X, a) && reach@old(b, Y)));
 
+definition count_expected(address key) returns mathint =
+    ghostOwners[key] == NULL ? 0 : ghostOwners[key] == SENTINEL ? 1 : ghostSuccCount(ghostOwners[key]) + 1;
+
+definition updateGhostSuccCount(address key, mathint diff) returns bool = forall address X.
+    ghostSuccCount@new(X) == ghostSuccCount@old(X) + (reach(X, key) ? diff : 0);
+
 // hook to update the ghostOwners and the reach ghost state whenever the owners field
 // in storage is written.
 // This also checks that the reach_succ invariant is preserved.
@@ -191,10 +205,14 @@ hook Sstore currentContract.owners[KEY address key] address value STORAGE {
     address valueOrNull;
     address someKey;
     require reach_succ(someKey, ghostOwners[someKey]);
+    require ghostSuccCount(someKey) == count_expected(someKey);
     assert reach(value, key) => value == SENTINEL, "list is cyclic";
     ghostOwners[key] = value;
     havoc reach assuming updateSucc(key, next_or_null(value));
+    mathint countDiff = count_expected(key) - ghostSuccCount(key);
+    havoc ghostSuccCount assuming updateGhostSuccCount(key, countDiff);
     assert reach_succ(someKey, ghostOwners[someKey]), "reach_succ violated after owners update";
+    assert ghostSuccCount(someKey) == count_expected(someKey);
 }
 
 hook Sstore currentContract.ownerCount uint256 value STORAGE {
@@ -206,11 +224,62 @@ hook Sstore currentContract.ownerCount uint256 value STORAGE {
 hook Sload address value currentContract.owners[KEY address key] STORAGE {
     require ghostOwners[key] == value;
     require reach_succ(key, value);
+    require ghostSuccCount(key) == count_expected(key);
 }
 
 hook Sload uint256 value currentContract.ownerCount STORAGE {
+    // The prover found a counterexample if the owners count is max uint256,
+    // but this is not a realistic scenario.
+    require ghostOwnerCount < MAX_UINT256();
     require ghostOwnerCount == value;
 }
+
+invariant reachCount()
+    forall address X. forall address Y. reach(X, Y) =>
+        ghostSuccCount(X) >= ghostSuccCount(Y)
+    {
+        preserved {
+            requireInvariant reach_invariant();
+            requireInvariant reach_null();
+            requireInvariant inListReachable();
+            requireInvariant reach_next();
+            requireInvariant nextNull();
+            requireInvariant reachableInList();
+            requireInvariant reachHeadNext();
+            requireInvariant thresholdSet();
+        }
+    }
+
+invariant count_correct()
+    forall address X. ghostSuccCount(X) == count_expected(X)
+    {
+        preserved {
+            requireInvariant reach_invariant();
+            requireInvariant reach_null();
+            requireInvariant inListReachable();
+            requireInvariant reach_next();
+            requireInvariant nextNull();
+            requireInvariant reachableInList();
+            requireInvariant reachHeadNext();
+            requireInvariant thresholdSet();
+        }
+    }
+
+invariant ownercount_correct()
+    ghostSuccCount(SENTINEL) == ghostOwnerCount + 1
+    {
+        preserved  {
+            requireInvariant reach_invariant();
+            requireInvariant reach_null();
+            requireInvariant inListReachable();
+            requireInvariant reach_next();
+            requireInvariant nextNull();
+            requireInvariant reachableInList();
+            requireInvariant reachHeadNext();
+            requireInvariant reachCount();
+            requireInvariant thresholdSet();
+        }
+    }
 
 rule isOwnerDoesNotRevert {
     address addr;
