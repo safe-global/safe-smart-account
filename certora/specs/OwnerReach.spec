@@ -247,6 +247,7 @@ invariant reachCount()
             requireInvariant reachableInList();
             requireInvariant reachHeadNext();
             requireInvariant thresholdSet();
+            requireInvariant count_correct();
         }
     }
 
