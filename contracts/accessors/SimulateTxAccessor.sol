@@ -28,7 +28,7 @@ contract SimulateTxAccessor is Executor {
      * @notice Simulates a Safe transaction and returns the used gas, success boolean and the return data.
      * @dev Executes the specified operation {Call, DelegateCall} and returns operation-specific data.
      *      Has to be called via delegatecall.
-     *      This returns the data equal to `abi.encode(uint256(etimate), bool(success), bytes(returnData))`.
+     *      This returns the data equal to `abi.encode(uint256(estimate), bool(success), bytes(returnData))`.
      *      Specifically, the returndata will be:
      *      `estimate:uint256 || success:bool || returnData.length:uint256 || returnData:bytes`.
      * @param to Destination address .
