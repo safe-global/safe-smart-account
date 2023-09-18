@@ -15,8 +15,6 @@ contract SafeHarness is Safe {
         this.setup(_owners, _threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
     }
 
-
-
     // harnessed functions
     function signatureSplitPublic(bytes memory signatures, uint256 pos) public pure returns (uint8 v, bytes32 r, bytes32 s) {
         require(signatures.length >= 65 * (pos + 1));
@@ -52,5 +50,9 @@ contract SafeHarness is Safe {
 
     function getOwnersCountFromArray() public view returns (uint256) {
         return getOwners().length;
+    }
+
+    function call_keccak256(bytes memory b) external view returns (bytes32) {
+        return keccak256(b);
     }
 }

@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-08-11 07:43:36
-+++ Safe.sol	2023-08-24 22:32:40
+--- Safe.sol	2023-09-18 11:33:31
++++ Safe.sol	2023-09-18 11:38:51
 @@ -44,6 +44,8 @@
      using SafeMath for uint256;
  
@@ -19,16 +19,20 @@ diff -druN Safe.sol Safe.sol
      }
  
      /**
-@@ -252,7 +254,7 @@
+@@ -248,11 +250,10 @@
+     /**
+      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+-     * @param data That should be signed (this is passed to an external validator contract)
       * @param signatures Signature data that should be verified.
       *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
       */
--    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
-+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public {
+-    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public view {
++    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public {
          // Load threshold to avoid multiple storage loads
          uint256 _threshold = threshold;
          // Check that a threshold is set
-@@ -280,7 +282,7 @@
+@@ -280,7 +281,7 @@
          bytes memory /* data */,
          bytes memory signatures,
          uint256 requiredSignatures
@@ -37,7 +41,7 @@ diff -druN Safe.sol Safe.sol
          // Check that the provided signature data is not too short
          require(signatures.length >= requiredSignatures.mul(65), "GS020");
          // There cannot be an owner with address 0.
-@@ -338,7 +340,12 @@
+@@ -338,7 +339,12 @@
                  // Use ecrecover with the messageHash for EOA signatures
                  currentOwner = ecrecover(dataHash, v, r, s);
              }
@@ -52,8 +56,8 @@ diff -druN Safe.sol Safe.sol
          }
      }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-08-11 07:43:36
-+++ base/Executor.sol	2023-08-23 11:26:37
+--- base/Executor.sol	2023-09-11 14:15:40
++++ base/Executor.sol	2023-09-18 11:38:20
 @@ -26,11 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {

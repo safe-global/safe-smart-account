@@ -4,6 +4,7 @@ methods {
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
     function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
+    function getTransactionHash(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,uint256) external returns (bytes32) envfree;
     // function signatureSplit(bytes sig, uint256 pos) internal returns (uint8,bytes32,bytes32) envfree => mySignatureSplit(sig,pos);
 
     // harnessed
@@ -15,6 +16,7 @@ methods {
     function getCurrentOwner(bytes32, uint8, bytes32, bytes32) external returns (address) envfree;
 
     // optional
+    function checkSignatures(bytes32,bytes,bytes) external envfree;
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
@@ -235,7 +237,7 @@ rule checkSignatures() {
 
     require vA == vAB1 && rA == rAB1 && sA == sAB1;
     require vB == vAB2 && rB == rAB2 && sB == sAB2;
-    require vA != 1 && vB != 1;
+    require vA != 1 && vB != 1 && vA != 0 && vB != 0;
     require data.length < 1000;
     require signaturesA.length < 1000;
     require signaturesB.length < 1000;
@@ -259,6 +261,43 @@ rule checkSignatures() {
 
     assert (successA && successB) == successA2, "checkSignatures called must be equivalent to checkSignatures called twice";
 }
+
+rule ownerSignaturesAreProvidedForExecTransaction(
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas, 
+        uint256 gasPrice, 
+        address gasToken, 
+        address refundReceiver, 
+        bytes signatures
+    ) {
+    uint256 nonce = nonce();
+    bytes32 transactionHash = getTransactionHash(
+        to,
+        value,
+        data,
+        operation,
+        safeTxGas,
+        baseGas,
+        gasPrice,
+        gasToken,
+        refundReceiver,
+        nonce
+    );
+    
+    bytes encodedTransactionData;
+    checkSignatures@withrevert(transactionHash, encodedTransactionData, signatures);
+    bool checkSignaturesOk = !lastReverted;
+
+    env e;
+    execTransaction(e, to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
+
+    assert checkSignaturesOk, "transaction executed without valid signatures";
+}
+
 
 rule nativeTokenBalanceSpendingExecTransaction(
         address to,
