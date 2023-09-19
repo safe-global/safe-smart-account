@@ -1,7 +1,46 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-08-30 20:37:09
-+++ Safe.sol	2023-08-30 20:45:31
-@@ -76,7 +76,7 @@
+--- Safe.sol	2023-09-19 11:15:14
++++ Safe.sol	2023-09-19 11:33:41
+@@ -1,18 +1,17 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Guard} from "./base/GuardManager.sol";
+-import {ModuleManager} from "./base/ModuleManager.sol";
+-import {OwnerManager} from "./base/OwnerManager.sol";
+-import {FallbackManager} from "./base/FallbackManager.sol";
+-import {NativeCurrencyPaymentFallback} from "./common/NativeCurrencyPaymentFallback.sol";
+-import {Singleton} from "./common/Singleton.sol";
+-import {SignatureDecoder} from "./common/SignatureDecoder.sol";
+-import {SecuredTokenTransfer} from "./common/SecuredTokenTransfer.sol";
+-import {StorageAccessible} from "./common/StorageAccessible.sol";
+-import {Enum} from "./common/Enum.sol";
+-import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
+-import {SafeMath} from "./external/SafeMath.sol";
++import "./base/ModuleManager.sol";
++import "./base/OwnerManager.sol";
++import "./base/FallbackManager.sol";
++import "./base/GuardManager.sol";
++import "./common/NativeCurrencyPaymentFallback.sol";
++import "./common/Singleton.sol";
++import "./common/SignatureDecoder.sol";
++import "./common/SecuredTokenTransfer.sol";
++import "./common/StorageAccessible.sol";
++import "./interfaces/ISignatureValidator.sol";
++import "./external/SafeMath.sol";
+ 
+ /**
+  * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
+@@ -45,6 +44,8 @@
+     using SafeMath for uint256;
+ 
+     string public constant VERSION = "1.4.1";
++    address public lastOwnerStore;
++    address public currentOwnerStore;
+ 
+     // keccak256(
+     //     "EIP712Domain(uint256 chainId,address verifyingContract)"
+@@ -76,7 +77,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -10,7 +49,7 @@ diff -druN Safe.sol Safe.sol
      }
  
      /**
-@@ -93,15 +93,18 @@
+@@ -93,15 +94,15 @@
       * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
       */
      function setup(
@@ -26,16 +65,222 @@ diff -druN Safe.sol Safe.sol
          address payable paymentReceiver
 -    ) external {
 +    ) public {
-+        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
-+        // constructor.
-+         
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
+@@ -154,7 +155,6 @@
+             txHash = getTransactionHash( // Transaction info
+                 to,
+                 value,
+-                data,
+                 operation,
+                 safeTxGas,
+                 // Payment info
+@@ -249,16 +249,15 @@
+     /**
+      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+-     * @param data That should be signed (this is passed to an external validator contract)
+      * @param signatures Signature data that should be verified.
+      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+      */
+-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
++    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public {
+         // Load threshold to avoid multiple storage loads
+         uint256 _threshold = threshold;
+         // Check that a threshold is set
+         require(_threshold > 0, "GS001");
+-        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
++        checkNSignatures(msg.sender, dataHash, "", signatures, _threshold);
+     }
+ 
+     /**
+@@ -281,7 +280,7 @@
+         bytes memory /* data */,
+         bytes memory signatures,
+         uint256 requiredSignatures
+-    ) public view {
++    ) public {
+         // Check that the provided signature data is not too short
+         require(signatures.length >= requiredSignatures.mul(65), "GS020");
+         // There cannot be an owner with address 0.
+@@ -308,23 +307,21 @@
+ 
+                 // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+                 uint256 contractSignatureLen;
+-                /* solhint-disable no-inline-assembly */
++                // solhint-disable-next-line no-inline-assembly
+                 /// @solidity memory-safe-assembly
+                 assembly {
+                     contractSignatureLen := mload(add(add(signatures, s), 0x20))
+                 }
+-                /* solhint-enable no-inline-assembly */
+                 require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
+ 
+                 // Check signature
+                 bytes memory contractSignature;
+-                /* solhint-disable no-inline-assembly */
++                // solhint-disable-next-line no-inline-assembly
+                 /// @solidity memory-safe-assembly
+                 assembly {
+                     // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
+                     contractSignature := add(add(signatures, s), 0x20)
+                 }
+-                /* solhint-enable no-inline-assembly */
+                 require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+             } else if (v == 1) {
+                 // If v is 1 then it is an approved hash
+@@ -335,13 +332,18 @@
+             } else if (v > 30) {
+                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
+                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
+-                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
++                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32    ", dataHash)), v - 4, r, s);
+             } else {
+                 // Default is the ecrecover flow with the provided data hash
+                 // Use ecrecover with the messageHash for EOA signatures
+                 currentOwner = ecrecover(dataHash, v, r, s);
+             }
+-            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
++            // require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
++            lastOwnerStore = lastOwner;
++            currentOwnerStore = currentOwner;
++            require(owners[currentOwner] != address(0));
++            require(currentOwner != SENTINEL_OWNERS, "GS026");
++            require(currentOwner > lastOwner);
+             lastOwner = currentOwner;
+         }
+     }
+@@ -364,12 +366,11 @@
+      */
+     function domainSeparator() public view returns (bytes32) {
+         uint256 chainId;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             chainId := chainid()
+         }
+-        /* solhint-enable no-inline-assembly */
+ 
+         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
+     }
+@@ -391,7 +392,7 @@
+     function encodeTransactionData(
+         address to,
+         uint256 value,
+-        bytes calldata data,
++        bytes memory data,
+         Enum.Operation operation,
+         uint256 safeTxGas,
+         uint256 baseGas,
+@@ -422,7 +423,6 @@
+      * @notice Returns transaction hash to be signed by owners.
+      * @param to Destination address.
+      * @param value Ether value.
+-     * @param data Data payload.
+      * @param operation Operation type.
+      * @param safeTxGas Gas that should be used for the safe transaction.
+      * @param baseGas Gas costs for data used to trigger the safe transaction.
+@@ -435,7 +435,6 @@
+     function getTransactionHash(
+         address to,
+         uint256 value,
+-        bytes calldata data,
+         Enum.Operation operation,
+         uint256 safeTxGas,
+         uint256 baseGas,
+@@ -444,6 +443,6 @@
+         address refundReceiver,
+         uint256 _nonce
+     ) public view returns (bytes32) {
+-        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
++        return keccak256(encodeTransactionData(to, value, "", operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
+     }
+ }
+diff -druN SafeL2.sol SafeL2.sol
+--- SafeL2.sol	2023-09-19 11:15:14
++++ SafeL2.sol	2023-09-18 11:39:08
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Safe, Enum} from "./Safe.sol";
++import "./Safe.sol";
+ 
+ /**
+  * @title SafeL2 - An implementation of the Safe contract that emits additional events on transaction executions.
+diff -druN accessors/SimulateTxAccessor.sol accessors/SimulateTxAccessor.sol
+--- accessors/SimulateTxAccessor.sol	2023-09-19 11:15:16
++++ accessors/SimulateTxAccessor.sol	2023-09-18 11:39:08
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Executor, Enum} from "../base/Executor.sol";
++import "../base/Executor.sol";
+ 
+ /**
+  * @title Simulate Transaction Accessor.
+@@ -9,10 +9,10 @@
+  * @author Richard Meissner - @rmeissner
+  */
+ contract SimulateTxAccessor is Executor {
+-    address private immutable ACCESSOR_SINGLETON;
++    address private immutable accessorSingleton;
+ 
+     constructor() {
+-        ACCESSOR_SINGLETON = address(this);
++        accessorSingleton = address(this);
+     }
+ 
+     /**
+@@ -20,7 +20,7 @@
+      * If the function is called via a regular call, it will revert.
+      */
+     modifier onlyDelegateCall() {
+-        require(address(this) != ACCESSOR_SINGLETON, "SimulateTxAccessor should only be called via delegatecall");
++        require(address(this) != accessorSingleton, "SimulateTxAccessor should only be called via delegatecall");
+         _;
+     }
+ 
+@@ -28,7 +28,7 @@
+      * @notice Simulates a Safe transaction and returns the used gas, success boolean and the return data.
+      * @dev Executes the specified operation {Call, DelegateCall} and returns operation-specific data.
+      *      Has to be called via delegatecall.
+-     *      This returns the data equal to `abi.encode(uint256(estimate), bool(success), bytes(returnData))`.
++     *      This returns the data equal to `abi.encode(uint256(etimate), bool(success), bytes(returnData))`.
+      *      Specifically, the returndata will be:
+      *      `estimate:uint256 || success:bool || returnData.length:uint256 || returnData:bytes`.
+      * @param to Destination address .
+@@ -48,7 +48,7 @@
+         uint256 startGas = gasleft();
+         success = execute(to, value, data, operation, gasleft());
+         estimate = startGas - gasleft();
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             // Load free memory location
+@@ -63,6 +63,5 @@
+             // Point the return data to the correct memory location
+             returnData := ptr
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-08-30 20:06:21
-+++ base/Executor.sol	2023-08-30 20:47:47
-@@ -26,12 +26,8 @@
+--- base/Executor.sol	2023-09-19 11:15:14
++++ base/Executor.sol	2023-09-18 11:39:08
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+-import {Enum} from "../common/Enum.sol";
++import "../common/Enum.sol";
+ 
+ /**
+  * @title Executor - A contract that can execute transactions
+@@ -26,19 +26,14 @@
          uint256 txGas
      ) internal returns (bool success) {
          if (operation == Enum.Operation.DelegateCall) {
@@ -48,5 +293,977 @@ diff -druN base/Executor.sol base/Executor.sol
 +            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
 +            return true;
          } else {
-             /* solhint-disable no-inline-assembly */
+-            /* solhint-disable no-inline-assembly */
++            // solhint-disable-next-line no-inline-assembly
              /// @solidity memory-safe-assembly
+             assembly {
+                 success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
+             }
+-            /* solhint-enable no-inline-assembly */
+         }
+     }
+ }
+diff -druN base/FallbackManager.sol base/FallbackManager.sol
+--- base/FallbackManager.sol	2023-09-19 11:15:14
++++ base/FallbackManager.sol	2023-09-18 11:39:08
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {SelfAuthorized} from "../common/SelfAuthorized.sol";
++import "../common/SelfAuthorized.sol";
+ 
+ /**
+  * @title Fallback Manager - A contract managing fallback calls made to this contract
+@@ -34,12 +34,11 @@
+         require(handler != address(this), "GS400");
+ 
+         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             sstore(slot, handler)
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+@@ -62,7 +61,7 @@
+     // solhint-disable-next-line payable-fallback,no-complex-fallback
+     fallback() external {
+         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             // When compiled with the optimizer, the compiler relies on a certain assumptions on how the
+@@ -97,6 +96,5 @@
+             }
+             return(returnDataPtr, returndatasize())
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN base/GuardManager.sol base/GuardManager.sol
+--- base/GuardManager.sol	2023-09-19 11:15:14
++++ base/GuardManager.sol	2023-09-18 11:39:08
+@@ -1,10 +1,9 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Enum} from "../common/Enum.sol";
+-import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+-import {IERC165} from "../interfaces/IERC165.sol";
++import "../common/Enum.sol";
++import "../common/SelfAuthorized.sol";
++import "../interfaces/IERC165.sol";
+ 
+ /// @title Guard Interface
+ interface Guard is IERC165 {
+@@ -90,12 +89,11 @@
+             require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
+         }
+         bytes32 slot = GUARD_STORAGE_SLOT;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             sstore(slot, guard)
+         }
+-        /* solhint-enable no-inline-assembly */
+         emit ChangedGuard(guard);
+     }
+ 
+@@ -108,11 +106,10 @@
+      */
+     function getGuard() internal view returns (address guard) {
+         bytes32 slot = GUARD_STORAGE_SLOT;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             guard := sload(slot)
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN base/ModuleManager.sol base/ModuleManager.sol
+--- base/ModuleManager.sol	2023-09-19 11:15:14
++++ base/ModuleManager.sol	2023-09-18 11:39:08
+@@ -1,9 +1,9 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+-import {Enum} from "../common/Enum.sol";
+-import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+-import {Executor} from "./Executor.sol";
+-import {GuardManager, Guard} from "./GuardManager.sol";
++import "../common/Enum.sol";
++import "../common/SelfAuthorized.sol";
++import "./Executor.sol";
++import "./GuardManager.sol";
+ 
+ /**
+  * @title Module Manager - A contract managing Safe modules
+@@ -119,7 +119,7 @@
+         Enum.Operation operation
+     ) public returns (bool success, bytes memory returnData) {
+         success = execTransactionFromModule(to, value, data, operation);
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             // Load free memory location
+@@ -134,7 +134,6 @@
+             // Point the return data to the correct memory location
+             returnData := ptr
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+@@ -181,12 +180,11 @@
+             next = array[moduleCount - 1];
+         }
+         // Set correct size of returned array
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             mstore(array, moduleCount)
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+@@ -197,12 +195,11 @@
+      */
+     function isContract(address account) internal view returns (bool) {
+         uint256 size;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             size := extcodesize(account)
+         }
+-        /* solhint-enable no-inline-assembly */
+         return size > 0;
+     }
+ }
+diff -druN base/OwnerManager.sol base/OwnerManager.sol
+--- base/OwnerManager.sol	2023-09-19 11:15:14
++++ base/OwnerManager.sol	2023-09-18 11:39:08
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+-import {SelfAuthorized} from "../common/SelfAuthorized.sol";
++import "../common/SelfAuthorized.sol";
+ 
+ /**
+  * @title OwnerManager - Manages Safe owners and a threshold to authorize transactions.
+diff -druN common/SecuredTokenTransfer.sol common/SecuredTokenTransfer.sol
+--- common/SecuredTokenTransfer.sol	2023-09-19 11:15:14
++++ common/SecuredTokenTransfer.sol	2023-09-18 11:39:08
+@@ -19,6 +19,7 @@
+         // 0xa9059cbb - keccack("transfer(address,uint256)")
+         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
+         // solhint-disable-next-line no-inline-assembly
++        /// @solidity memory-safe-assembly
+         assembly {
+             // We write the return value to scratch space.
+             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
+diff -druN common/SignatureDecoder.sol common/SignatureDecoder.sol
+--- common/SignatureDecoder.sol	2023-09-19 11:15:14
++++ common/SignatureDecoder.sol	2023-09-18 11:39:08
+@@ -19,14 +19,19 @@
+      * @return s Output value s of the signature.
+      */
+     function signatureSplit(bytes memory signatures, uint256 pos) internal pure returns (uint8 v, bytes32 r, bytes32 s) {
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             let signaturePos := mul(0x41, pos)
+             r := mload(add(signatures, add(signaturePos, 0x20)))
+             s := mload(add(signatures, add(signaturePos, 0x40)))
+-            v := byte(0, mload(add(signatures, add(signaturePos, 0x60))))
++            /**
++             * Here we are loading the last 32 bytes, including 31 bytes
++             * of 's'. There is no 'mload8' to do this.
++             * 'byte' is not working due to the Solidity parser, so lets
++             * use the second best option, 'and'
++             */
++            v := and(mload(add(signatures, add(signaturePos, 0x41))), 0xff)
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN common/StorageAccessible.sol common/StorageAccessible.sol
+--- common/StorageAccessible.sol	2023-09-19 11:15:14
++++ common/StorageAccessible.sol	2023-09-18 11:39:08
+@@ -17,13 +17,12 @@
+     function getStorageAt(uint256 offset, uint256 length) public view returns (bytes memory) {
+         bytes memory result = new bytes(length * 32);
+         for (uint256 index = 0; index < length; index++) {
+-            /* solhint-disable no-inline-assembly */
++            // solhint-disable-next-line no-inline-assembly
+             /// @solidity memory-safe-assembly
+             assembly {
+                 let word := sload(add(offset, index))
+                 mstore(add(add(result, 0x20), mul(index, 0x20)), word)
+             }
+-            /* solhint-enable no-inline-assembly */
+         }
+         return result;
+     }
+@@ -40,7 +39,7 @@
+      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
+      */
+     function simulateAndRevert(address targetContract, bytes memory calldataPayload) external {
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             let success := delegatecall(gas(), targetContract, add(calldataPayload, 0x20), mload(calldataPayload), 0, 0)
+@@ -51,6 +50,5 @@
+             returndatacopy(add(ptr, 0x40), 0, returndatasize())
+             revert(ptr, add(returndatasize(), 0x40))
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN examples/guards/DebugTransactionGuard.sol examples/guards/DebugTransactionGuard.sol
+--- examples/guards/DebugTransactionGuard.sol	2023-09-19 11:15:14
++++ examples/guards/DebugTransactionGuard.sol	2023-09-18 11:39:08
+@@ -1,9 +1,9 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Enum} from "../../common/Enum.sol";
+-import {BaseGuard} from "../../base/GuardManager.sol";
+-import {Safe} from "../../Safe.sol";
++import "../../common/Enum.sol";
++import "../../base/GuardManager.sol";
++import "../../Safe.sol";
+ 
+ /**
+  * @title Debug Transaction Guard - Emits transaction events with extended information.
+diff -druN examples/guards/DelegateCallTransactionGuard.sol examples/guards/DelegateCallTransactionGuard.sol
+--- examples/guards/DelegateCallTransactionGuard.sol	2023-09-19 11:15:14
++++ examples/guards/DelegateCallTransactionGuard.sol	2023-09-18 11:39:08
+@@ -1,18 +1,19 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Enum} from "../../common/Enum.sol";
+-import {BaseGuard} from "../../base/GuardManager.sol";
++import "../../common/Enum.sol";
++import "../../base/GuardManager.sol";
++import "../../Safe.sol";
+ 
+ /**
+  * @title DelegateCallTransactionGuard - Limits delegate calls to a specific target.
+  * @author Richard Meissner - @rmeissner
+  */
+ contract DelegateCallTransactionGuard is BaseGuard {
+-    address public immutable ALLOWED_TARGET;
++    address public immutable allowedTarget;
+ 
+     constructor(address target) {
+-        ALLOWED_TARGET = target;
++        allowedTarget = target;
+     }
+ 
+     // solhint-disable-next-line payable-fallback
+@@ -41,7 +42,7 @@
+         bytes memory,
+         address
+     ) external view override {
+-        require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
++        require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
+     }
+ 
+     function checkAfterExecution(bytes32, bool) external view override {}
+@@ -61,7 +62,7 @@
+         Enum.Operation operation,
+         address module
+     ) external view override returns (bytes32 moduleTxHash) {
+-        require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
++        require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
+         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
+     }
+ }
+diff -druN examples/guards/OnlyOwnersGuard.sol examples/guards/OnlyOwnersGuard.sol
+--- examples/guards/OnlyOwnersGuard.sol	2023-09-19 11:15:14
++++ examples/guards/OnlyOwnersGuard.sol	2023-09-18 11:39:08
+@@ -1,9 +1,9 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Enum} from "../../common/Enum.sol";
+-import {BaseGuard} from "../../base/GuardManager.sol";
++import "../../common/Enum.sol";
++import "../../base/GuardManager.sol";
++import "../../Safe.sol";
+ 
+ interface ISafe {
+     function getOwners() external view returns (address[] memory);
+diff -druN examples/guards/ReentrancyTransactionGuard.sol examples/guards/ReentrancyTransactionGuard.sol
+--- examples/guards/ReentrancyTransactionGuard.sol	2023-09-19 11:15:14
++++ examples/guards/ReentrancyTransactionGuard.sol	2023-09-18 11:39:08
+@@ -1,8 +1,9 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {Enum} from "../../common/Enum.sol";
+-import {BaseGuard} from "../../base/GuardManager.sol";
++import "../../common/Enum.sol";
++import "../../base/GuardManager.sol";
++import "../../Safe.sol";
+ 
+ /**
+  * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
+@@ -28,12 +29,11 @@
+      */
+     function getGuard() internal pure returns (GuardValue storage guard) {
+         bytes32 slot = GUARD_STORAGE_SLOT;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             guard.slot := slot
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+diff -druN examples/libraries/Migrate_1_3_0_to_1_2_0.sol examples/libraries/Migrate_1_3_0_to_1_2_0.sol
+--- examples/libraries/Migrate_1_3_0_to_1_2_0.sol	2023-09-19 11:15:14
++++ examples/libraries/Migrate_1_3_0_to_1_2_0.sol	2023-09-18 11:39:08
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+-import {SafeStorage} from "../../libraries/SafeStorage.sol";
++import "../../libraries/SafeStorage.sol";
+ 
+ /**
+  * @title Migration - Migrates a Safe contract from 1.3.0 to 1.2.0
+@@ -9,14 +9,14 @@
+ contract Migration is SafeStorage {
+     bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749;
+ 
+-    address public immutable MIGRATION_SINGLETON;
+-    address public immutable SAFE_120_SINGLETON;
++    address public immutable migrationSingleton;
++    address public immutable safe120Singleton;
+ 
+     constructor(address targetSingleton) {
+         // Singleton address cannot be zero address.
+         require(targetSingleton != address(0), "Invalid singleton address provided");
+-        SAFE_120_SINGLETON = targetSingleton;
+-        MIGRATION_SINGLETON = address(this);
++        safe120Singleton = targetSingleton;
++        migrationSingleton = address(this);
+     }
+ 
+     event ChangedMasterCopy(address singleton);
+@@ -26,9 +26,9 @@
+      * @dev This can only be called via a delegatecall.
+      */
+     function migrate() public {
+-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
++        require(address(this) != migrationSingleton, "Migration should only be called via delegatecall");
+ 
+-        singleton = SAFE_120_SINGLETON;
++        singleton = safe120Singleton;
+         _deprecatedDomainSeparator = keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, this));
+         emit ChangedMasterCopy(singleton);
+     }
+diff -druN handler/CompatibilityFallbackHandler.sol handler/CompatibilityFallbackHandler.sol
+--- handler/CompatibilityFallbackHandler.sol	2023-09-19 11:15:14
++++ handler/CompatibilityFallbackHandler.sol	2023-09-18 11:39:08
+@@ -1,10 +1,10 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
+-import {ISignatureValidator} from "../interfaces/ISignatureValidator.sol";
+-import {Safe} from "../Safe.sol";
+-import {HandlerContext} from "./HandlerContext.sol";
++import "./TokenCallbackHandler.sol";
++import "../interfaces/ISignatureValidator.sol";
++import "../Safe.sol";
++import "./HandlerContext.sol";
+ 
+ /**
+  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
+@@ -94,7 +94,7 @@
+         targetContract;
+         calldataPayload;
+ 
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             let internalCalldata := mload(0x40)
+@@ -154,7 +154,6 @@
+                 revert(add(response, 0x20), mload(response))
+             }
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+diff -druN handler/HandlerContext.sol handler/HandlerContext.sol
+--- handler/HandlerContext.sol	2023-09-19 11:15:14
++++ handler/HandlerContext.sol	2023-09-18 11:39:08
+@@ -19,12 +19,11 @@
+      */
+     function _msgSender() internal pure returns (address sender) {
+         // The assembly code is more direct than the Solidity version using `abi.decode`.
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             sender := shr(96, calldataload(sub(calldatasize(), 20)))
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ 
+     /**
+diff -druN handler/TokenCallbackHandler.sol handler/TokenCallbackHandler.sol
+--- handler/TokenCallbackHandler.sol	2023-09-19 11:15:14
++++ handler/TokenCallbackHandler.sol	2023-09-18 11:39:08
+@@ -1,10 +1,10 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
+-import {ERC721TokenReceiver} from "../interfaces/ERC721TokenReceiver.sol";
+-import {ERC777TokensRecipient} from "../interfaces/ERC777TokensRecipient.sol";
+-import {IERC165} from "../interfaces/IERC165.sol";
++import "../interfaces/ERC1155TokenReceiver.sol";
++import "../interfaces/ERC721TokenReceiver.sol";
++import "../interfaces/ERC777TokensRecipient.sol";
++import "../interfaces/IERC165.sol";
+ 
+ /**
+  * @title Default Callback Handler - Handles supported tokens' callbacks, allowing Safes receiving these tokens.
+diff -druN interfaces/ISignatureValidator.sol interfaces/ISignatureValidator.sol
+--- interfaces/ISignatureValidator.sol	2023-09-19 11:15:14
++++ interfaces/ISignatureValidator.sol	2023-09-18 11:39:08
+@@ -1,5 +1,4 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+ contract ISignatureValidatorConstants {
+diff -druN libraries/CreateCall.sol libraries/CreateCall.sol
+--- libraries/CreateCall.sol	2023-09-19 11:15:14
++++ libraries/CreateCall.sol	2023-09-18 11:39:08
+@@ -19,12 +19,11 @@
+      * @return newContract The address of the newly created contract.
+      */
+     function performCreate2(uint256 value, bytes memory deploymentData, bytes32 salt) public returns (address newContract) {
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)
+         }
+-        /* solhint-enable no-inline-assembly */
+         require(newContract != address(0), "Could not deploy contract");
+         emit ContractCreation(newContract);
+     }
+@@ -36,12 +35,11 @@
+      * @return newContract The address of the newly created contract.
+      */
+     function performCreate(uint256 value, bytes memory deploymentData) public returns (address newContract) {
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             newContract := create(value, add(deploymentData, 0x20), mload(deploymentData))
+         }
+-        /* solhint-enable no-inline-assembly */
+         require(newContract != address(0), "Could not deploy contract");
+         emit ContractCreation(newContract);
+     }
+diff -druN libraries/MultiSend.sol libraries/MultiSend.sol
+--- libraries/MultiSend.sol	2023-09-19 11:15:14
++++ libraries/MultiSend.sol	2023-09-18 11:39:08
+@@ -9,10 +9,10 @@
+  * @author Richard Meissner - @rmeissner
+  */
+ contract MultiSend {
+-    address private immutable MULTISEND_SINGLETON;
++    address private immutable multisendSingleton;
+ 
+     constructor() {
+-        MULTISEND_SINGLETON = address(this);
++        multisendSingleton = address(this);
+     }
+ 
+     /**
+@@ -28,8 +28,8 @@
+      *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
+      */
+     function multiSend(bytes memory transactions) public payable {
+-        require(address(this) != MULTISEND_SINGLETON, "MultiSend should only be called via delegatecall");
+-        /* solhint-disable no-inline-assembly */
++        require(address(this) != multisendSingleton, "MultiSend should only be called via delegatecall");
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             let length := mload(transactions)
+@@ -69,6 +69,5 @@
+                 i := add(i, add(0x55, dataLength))
+             }
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN libraries/MultiSendCallOnly.sol libraries/MultiSendCallOnly.sol
+--- libraries/MultiSendCallOnly.sol	2023-09-19 11:15:14
++++ libraries/MultiSendCallOnly.sol	2023-09-18 11:39:08
+@@ -23,7 +23,7 @@
+      *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
+      */
+     function multiSend(bytes memory transactions) public payable {
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             let length := mload(transactions)
+@@ -64,6 +64,5 @@
+                 i := add(i, add(0x55, dataLength))
+             }
+         }
+-        /* solhint-enable no-inline-assembly */
+     }
+ }
+diff -druN libraries/Safe130To141Migration.sol libraries/Safe130To141Migration.sol
+--- libraries/Safe130To141Migration.sol	2023-09-19 11:15:16
++++ libraries/Safe130To141Migration.sol	1970-01-01 01:00:00
+@@ -1,127 +0,0 @@
+-// SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+-pragma solidity >=0.7.0 <0.9.0;
+-
+-import {SafeStorage} from "../libraries/SafeStorage.sol";
+-
+-interface ISafe {
+-    function setFallbackHandler(address handler) external;
+-}
+-
+-/**
+- * @title Migration Contract for Safe Upgrade
+- * @notice This contract facilitates the migration of a Safe contract from version 1.3.0 to 1.4.1.
+- *         The older versions should use built-in upgrade methods.
+- * @dev IMPORTANT: The migration will only work with proxies that store the implementation address in the storage slot 0.
+- */
+-contract Safe130To141Migration is SafeStorage {
+-    // Address of this contract
+-    address public immutable MIGRATION_SINGLETON;
+-
+-    // Address of Safe contract version 1.4.1 Singleton
+-    address public constant SAFE_141_SINGLETON = address(0x41675C099F32341bf84BFc5382aF534df5C7461a);
+-
+-    // Address of Safe contract version 1.4.1 Singleton (L2)
+-    address public constant SAFE_141_SINGLETON_L2 = address(0x29fcB43b46531BcA003ddC8FCB67FFE91900C762);
+-
+-    // Address of Safe contract version 1.4.1 Compatibility Fallback Handler
+-    address public constant SAFE_141_FALLBACK_HANDLER = address(0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99);
+-
+-    /**
+-     * @notice Constructor
+-     * @dev Initializes the migrationSingleton with the contract's own address.
+-     */
+-    constructor() {
+-        MIGRATION_SINGLETON = address(this);
+-
+-        require(isContract(SAFE_141_SINGLETON), "Safe 1.4.1 Singleton is not deployed");
+-        require(isContract(SAFE_141_SINGLETON_L2), "Safe 1.4.1 Singleton (L2) is not deployed");
+-        require(isContract(SAFE_141_FALLBACK_HANDLER), "Safe 1.4.1 Fallback Handler is not deployed");
+-    }
+-
+-    /**
+-     * @notice Event indicating a change of master copy address.
+-     * @param singleton New master copy address
+-     */
+-    event ChangedMasterCopy(address singleton);
+-
+-    /**
+-     * @notice Migrate to Safe 1.4.1 Singleton (L1) at `SAFE_141_SINGLETON`
+-     * @dev This function should only be called via a delegatecall to perform the upgrade.
+-     */
+-    function migrate() public {
+-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
+-
+-        singleton = SAFE_141_SINGLETON;
+-
+-        emit ChangedMasterCopy(singleton);
+-    }
+-
+-    /** @notice Migrate to Safe 1.4.1 Singleton (L1) at `SAFE_141_SINGLETON` and sets the fallback handler to `SAFE_141_FALLBACK_HANDLER`
+-     * @dev This function should only be called via a delegatecall to perform the upgrade.
+-     */
+-    function migrateWithFallbackHandler() public {
+-        // The `migrate` function will take care of the delegatecall check
+-        migrate();
+-
+-        ISafe(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
+-    }
+-
+-    /**
+-     * @notice Migrate to Safe 1.4.1 Singleton (L2) at `SAFE_141_SINGLETON_L2`
+-     * @dev This function should only be called via a delegatecall to perform the upgrade.
+-     */
+-    function migrateL2() public {
+-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
+-
+-        singleton = SAFE_141_SINGLETON_L2;
+-
+-        emit ChangedMasterCopy(singleton);
+-    }
+-
+-    /** @notice Migrate to Safe 1.4.1 Singleton (L2) at `SAFE_141_SINGLETON_L2` and sets the fallback handler to `SAFE_141_FALLBACK_HANDLER`
+-     * @dev This function should only be called via a delegatecall to perform the upgrade.
+-     */
+-    function migrateL2WithFallbackHandler() public {
+-        // The `migrateL2` function will take care of the delegatecall check
+-        migrateL2();
+-
+-        ISafe(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
+-    }
+-
+-    /**
+-     * @notice Checks whether an Ethereum address corresponds to a contract or an externally owned account (EOA).
+-     *
+-     * @param account The Ethereum address to be checked.
+-     *
+-     * @return A boolean value indicating whether the address is associated with a contract (true) or an EOA (false).
+-     *
+-     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address is a contract.
+-     * It may return incorrect results in some edge cases:
+-     *
+-     * - During the contract deployment process, including the constructor, this function may incorrectly identify the
+-     *   contract's own address as an EOA, as the code is not yet deployed.
+-     *
+-     * - If a contract performs a self-destruct operation (using `selfdestruct`) after deployment, this function may
+-     *   incorrectly identify the address as an EOA once the contract is destroyed, as its code will be removed.
+-     *
+-     * - When interacting with external contracts that use delegatecall or other mechanisms to execute code from
+-     *   different contracts, this function may not accurately distinguish between a contract and an EOA, as it only
+-     *   checks the code size at the specified address.
+-     *
+-     * - Contracts that are created using the CREATE2 opcode may not be accurately identified as contracts by this
+-     *   function, especially if the code is not deployed until after the creation.
+-     *
+-     * Developers should use caution when relying on the results of this function for critical decision-making.
+-     */
+-    function isContract(address account) internal view returns (bool) {
+-        uint256 size;
+-        // solhint-disable-next-line no-inline-assembly
+-        assembly {
+-            size := extcodesize(account)
+-        }
+-
+-        // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
+-        return size > 0;
+-    }
+-}
+diff -druN libraries/SignMessageLib.sol libraries/SignMessageLib.sol
+--- libraries/SignMessageLib.sol	2023-09-19 11:15:14
++++ libraries/SignMessageLib.sol	2023-09-18 11:39:08
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {SafeStorage} from "./SafeStorage.sol";
+-import {Safe} from "../Safe.sol";
++import "./SafeStorage.sol";
++import "../Safe.sol";
+ 
+ /**
+  * @title SignMessageLib - Allows to sign messages on-chain by writing the signed message hashes on-chain.
+diff -druN proxies/IProxyCreationCallback.sol proxies/IProxyCreationCallback.sol
+--- proxies/IProxyCreationCallback.sol	2023-09-19 11:15:14
++++ proxies/IProxyCreationCallback.sol	2023-09-18 11:39:08
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+-import {SafeProxy} from "./SafeProxy.sol";
++import "./SafeProxy.sol";
+ 
+ /**
+  * @title IProxyCreationCallback
+diff -druN proxies/SafeProxy.sol proxies/SafeProxy.sol
+--- proxies/SafeProxy.sol	2023-09-19 11:15:14
++++ proxies/SafeProxy.sol	2023-09-18 11:39:08
+@@ -1,5 +1,4 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+ /**
+diff -druN proxies/SafeProxyFactory.sol proxies/SafeProxyFactory.sol
+--- proxies/SafeProxyFactory.sol	2023-09-19 11:15:14
++++ proxies/SafeProxyFactory.sol	2023-09-18 11:39:08
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {SafeProxy} from "./SafeProxy.sol";
+-import {IProxyCreationCallback} from "./IProxyCreationCallback.sol";
++import "./SafeProxy.sol";
++import "./IProxyCreationCallback.sol";
+ 
+ /**
+  * @title Proxy Factory - Allows to create a new proxy contract and execute a message call to the new proxy within one transaction.
+@@ -27,23 +27,21 @@
+         require(isContract(_singleton), "Singleton contract not deployed");
+ 
+         bytes memory deploymentData = abi.encodePacked(type(SafeProxy).creationCode, uint256(uint160(_singleton)));
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             proxy := create2(0x0, add(0x20, deploymentData), mload(deploymentData), salt)
+         }
+-        /* solhint-enable no-inline-assembly */
+         require(address(proxy) != address(0), "Create2 call failed");
+ 
+         if (initializer.length > 0) {
+-            /* solhint-disable no-inline-assembly */
++            // solhint-disable-next-line no-inline-assembly
+             /// @solidity memory-safe-assembly
+             assembly {
+                 if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
+                     revert(0, 0)
+                 }
+             }
+-            /* solhint-enable no-inline-assembly */
+         }
+     }
+ 
+@@ -107,12 +105,11 @@
+      */
+     function isContract(address account) internal view returns (bool) {
+         uint256 size;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             size := extcodesize(account)
+         }
+-        /* solhint-enable no-inline-assembly */
+         return size > 0;
+     }
+ 
+@@ -122,12 +119,11 @@
+      */
+     function getChainId() public view returns (uint256) {
+         uint256 id;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             id := chainid()
+         }
+-        /* solhint-enable no-inline-assembly */
+         return id;
+     }
+ }
+diff -druN test/4337/Test4337ModuleAndHandler.sol test/4337/Test4337ModuleAndHandler.sol
+--- test/4337/Test4337ModuleAndHandler.sol	1970-01-01 01:00:00
++++ test/4337/Test4337ModuleAndHandler.sol	2023-09-18 11:39:08
+@@ -0,0 +1,60 @@
++// SPDX-License-Identifier: LGPL-3.0-only
++pragma solidity >=0.7.0 <0.9.0;
++pragma abicoder v2;
++
++struct UserOperation {
++    address sender;
++    uint256 nonce;
++    bytes initCode;
++    bytes callData;
++    uint256 callGasLimit;
++    uint256 verificationGasLimit;
++    uint256 preVerificationGas;
++    uint256 maxFeePerGas;
++    uint256 maxPriorityFeePerGas;
++    bytes paymasterAndData;
++    bytes signature;
++}
++
++interface ISafe {
++    function enableModule(address module) external;
++
++    function execTransactionFromModule(address to, uint256 value, bytes memory data, uint8 operation) external returns (bool success);
++}
++
++/// @dev A Dummy 4337 Module/Handler for testing purposes
++///      ⚠️ ⚠️ ⚠️ DO NOT USE IN PRODUCTION ⚠️ ⚠️ ⚠️
++///      The module does not perform ANY validation, it just executes validateUserOp and execTransaction
++///      to perform the opcode level compliance by the bundler.
++contract Test4337ModuleAndHandler {
++    address public immutable myAddress;
++    address public immutable entryPoint;
++
++    address internal constant SENTINEL_MODULES = address(0x1);
++
++    constructor(address entryPointAddress) {
++        entryPoint = entryPointAddress;
++        myAddress = address(this);
++    }
++
++    function validateUserOp(UserOperation calldata userOp, bytes32, uint256 missingAccountFunds) external returns (uint256 validationData) {
++        address payable safeAddress = payable(userOp.sender);
++        ISafe senderSafe = ISafe(safeAddress);
++
++        if (missingAccountFunds != 0) {
++            senderSafe.execTransactionFromModule(entryPoint, missingAccountFunds, "", 0);
++        }
++
++        return 0;
++    }
++
++    function execTransaction(address to, uint256 value, bytes calldata data) external payable {
++        address payable safeAddress = payable(msg.sender);
++        ISafe safe = ISafe(safeAddress);
++        require(safe.execTransactionFromModule(to, value, data, 0), "tx failed");
++    }
++
++    function enableMyself() public {
++        ISafe(address(this)).enableModule(myAddress);
++    }
++}
+diff -druN test/ERC1155Token.sol test/ERC1155Token.sol
+--- test/ERC1155Token.sol	2023-09-19 11:15:14
++++ test/ERC1155Token.sol	2023-09-18 11:39:08
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
+-import {SafeMath} from "../external/SafeMath.sol";
++import "../interfaces/ERC1155TokenReceiver.sol";
++import "../external/SafeMath.sol";
+ 
+ /**
+  * @title ERC1155Token - A test ERC1155 token contract
+@@ -74,12 +74,11 @@
+      */
+     function isContract(address account) internal view returns (bool) {
+         uint256 size;
+-        /* solhint-disable no-inline-assembly */
++        // solhint-disable-next-line no-inline-assembly
+         /// @solidity memory-safe-assembly
+         assembly {
+             size := extcodesize(account)
+         }
+-        /* solhint-enable no-inline-assembly */
+         return size > 0;
+     }
+ 
+diff -druN test/ERC20Token.sol test/ERC20Token.sol
+--- test/ERC20Token.sol	2023-09-19 11:15:14
++++ test/ERC20Token.sol	2023-09-18 11:39:08
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.6.0 <0.8.0;
+ 
+-import {ERC20} from "@openzeppeltoken/ERC20/ERC20.sol";
++import "@openzeppeltoken/ERC20/ERC20.sol";
+ 
+ /**
+  * @title ERC20Token
+diff -druN test/Test4337ModuleAndHandler.sol test/Test4337ModuleAndHandler.sol
+--- test/Test4337ModuleAndHandler.sol	2023-09-19 11:15:14
++++ test/Test4337ModuleAndHandler.sol	1970-01-01 01:00:00
+@@ -1,61 +0,0 @@
+-// SPDX-License-Identifier: LGPL-3.0-only
+-/* solhint-disable one-contract-per-file */
+-pragma solidity >=0.7.0 <0.9.0;
+-pragma abicoder v2;
+-
+-struct UserOperation {
+-    address sender;
+-    uint256 nonce;
+-    bytes initCode;
+-    bytes callData;
+-    uint256 callGasLimit;
+-    uint256 verificationGasLimit;
+-    uint256 preVerificationGas;
+-    uint256 maxFeePerGas;
+-    uint256 maxPriorityFeePerGas;
+-    bytes paymasterAndData;
+-    bytes signature;
+-}
+-
+-interface ISafe {
+-    function enableModule(address module) external;
+-
+-    function execTransactionFromModule(address to, uint256 value, bytes memory data, uint8 operation) external returns (bool success);
+-}
+-
+-/// @dev A Dummy 4337 Module/Handler for testing purposes
+-///      ⚠️ ⚠️ ⚠️ DO NOT USE IN PRODUCTION ⚠️ ⚠️ ⚠️
+-///      The module does not perform ANY validation, it just executes validateUserOp and execTransaction
+-///      to perform the opcode level compliance by the bundler.
+-contract Test4337ModuleAndHandler {
+-    address public immutable MY_ADDRESS;
+-    address public immutable ENTRYPOINT;
+-
+-    address internal constant SENTINEL_MODULES = address(0x1);
+-
+-    constructor(address entryPointAddress) {
+-        ENTRYPOINT = entryPointAddress;
+-        MY_ADDRESS = address(this);
+-    }
+-
+-    function validateUserOp(UserOperation calldata userOp, bytes32, uint256 missingAccountFunds) external returns (uint256 validationData) {
+-        address payable safeAddress = payable(userOp.sender);
+-        ISafe senderSafe = ISafe(safeAddress);
+-
+-        if (missingAccountFunds != 0) {
+-            senderSafe.execTransactionFromModule(ENTRYPOINT, missingAccountFunds, "", 0);
+-        }
+-
+-        return 0;
+-    }
+-
+-    function execTransaction(address to, uint256 value, bytes calldata data) external payable {
+-        address payable safeAddress = payable(msg.sender);
+-        ISafe safe = ISafe(safeAddress);
+-        require(safe.execTransactionFromModule(to, value, data, 0), "tx failed");
+-    }
+-
+-    function enableMyself() public {
+-        ISafe(address(this)).enableModule(MY_ADDRESS);
+-    }
+-}
+diff -druN test/TestHandler.sol test/TestHandler.sol
+--- test/TestHandler.sol	2023-09-19 11:15:14
++++ test/TestHandler.sol	2023-09-18 11:39:08
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-only
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+-import {HandlerContext} from "../handler/HandlerContext.sol";
++import "../handler/HandlerContext.sol";
+ 
+ /**
+  * @title TestHandler - A test FallbackHandler contract
+diff -druN test/TestImports.sol test/TestImports.sol
+--- test/TestImports.sol	2023-09-19 11:15:14
++++ test/TestImports.sol	2023-09-18 11:39:08
+@@ -3,5 +3,4 @@
+ pragma solidity >=0.7.0 <0.9.0;
+ 
+ // Import the contract so hardhat compiles it, and we have the ABI available
+-// solhint-disable-next-line no-unused-import
+ import {MockContract} from "@safe-global/mock-contraMockContract.sol";

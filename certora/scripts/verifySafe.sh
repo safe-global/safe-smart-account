@@ -15,5 +15,6 @@ certoraRun  certora/harnesses/SafeHarness.sol \
     --optimistic_hashing \
     --hashing_length_bound 352 \
     --rule_sanity \
+    --rule setupCorrectlyConfiguresSafe \
     "${params[@]}" \
     --msg "Safe $1 "

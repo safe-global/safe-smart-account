@@ -3,6 +3,7 @@ methods {
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
+    function isOwner(address) external returns (bool) envfree;
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -75,6 +76,17 @@ ghost address fallbackHandlerAddress {
     init_state axiom fallbackHandlerAddress == 0;
 }
 
+ghost mapping(address => address) ghostOwners {
+    init_state axiom forall address X. to_mathint(ghostOwners[X]) == 0;
+}
+
+// hook to update the ghostOwners and the reach ghost state whenever the owners field
+// in storage is written. 
+// This also checks that the reach_succ invariant is preserved. 
+hook Sstore currentContract.owners[KEY address key] address value STORAGE {
+    ghostOwners[key] = value;
+}
+
 // This is Safe's fallback handler storage slot:
 // 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5
 // converted to decimal because certora doesn't seem to support hex yet.
@@ -95,6 +107,40 @@ rule fallbackHandlerAddressChange(method f) filtered {
 
     assert fbHandlerBefore != fbHandlerAfter =>
         f.selector == sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector || f.selector == sig:setFallbackHandler(address).selector;
+}
+
+rule setFallbackHandlerUpdatesFallbackHandler(address newFallbackHandler) {
+    address fbHandlerBefore = fallbackHandlerAddress;
+    env e;
+
+    setFallbackHandler(e, newFallbackHandler);
+
+    address fbHandlerAfter = fallbackHandlerAddress;
+
+    assert fbHandlerBefore != fbHandlerAfter => fbHandlerAfter == newFallbackHandler;
+}
+
+rule setupCorrectlyConfiguresSafe(
+    address[] owners,
+    uint256 threshold, 
+    address fallbackHandler,
+    address to, bytes data, 
+    address paymentToken, 
+    uint256 payment, 
+    address paymentReceiver
+) {
+    env e;
+
+    require fallbackHandler != 0;
+    uint256 index;
+    require index < owners.length;
+
+    setup(e, owners, threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
+
+    assert getThreshold() == threshold, "Threshold not set correctly";
+    assert fallbackHandlerAddress == fallbackHandler, "Fallback handler not set correctly";
+    assert getOwnersCount() == owners.length, "Owners count not set correctly";
+    assert isOwner(owners[index]), "Owners not set correctly";
 }
 
 
