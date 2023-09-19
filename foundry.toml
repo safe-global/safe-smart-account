@@ -1,7 +1,7 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["node_modules"]
+libs = ["node_modules", "lib"]
 remappings = [
     "@openzeppelin/=node_modules/@openzeppelin/",
     "@safe-global/=node_modules/@safe-global/",
@@ -9,5 +9,8 @@ remappings = [
     "hardhat-deploy/=node_modules/hardhat-deploy/",
     "hardhat/=node_modules/hardhat/",
 ]
+
+# Configures permissions for cheatcodes that touch the filesystem like `vm.readFile`
+fs_permissions = [{ access = "read-write", path = "./script/input" }]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
