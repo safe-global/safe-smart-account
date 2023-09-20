@@ -49,10 +49,31 @@ describe("Safe150Migration library", () => {
         const invalidGuardMock = await getMock();
         await invalidGuardMock.givenCalldataReturnBool(guardEip165Calldata, false);
 
+        const safeWith1967Proxy = await getSafeSingletonAt(
+            await hre.ethers
+                .getContractFactory("UpgradeableProxy")
+                .then((factory) =>
+                    factory.deploy(
+                        singleton130Address,
+                        singleton130.interface.encodeFunctionData("setup", [
+                            [user1.address],
+                            1,
+                            AddressZero,
+                            "0x",
+                            AddressZero,
+                            AddressZero,
+                            0,
+                            AddressZero,
+                        ]),
+                    ),
+                )
+                .then((proxy) => proxy.getAddress()),
+        );
         const migration = await (await migrationContractTo150()).deploy();
         return {
             safe130: await getSafeWithSingleton(singleton130, [user1.address]),
             safe130l2: await getSafeWithSingleton(singleton130L2, [user1.address]),
+            safeWith1967Proxy,
             migration,
             signers,
             validGuardMock,
@@ -61,9 +82,16 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateSingleton", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateSingleton()).to.be.revertedWith("Migration should only be called via delegatecall");
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateSingleton", [], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton", async () => {
@@ -127,9 +155,16 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateL2Singleton", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateL2Singleton()).to.be.revertedWith("Migration should only be called via delegatecall");
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateL2Singleton", [], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton", async () => {
@@ -189,9 +224,16 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateWithFallbackHandler", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateWithFallbackHandler()).to.be.revertedWith("Migration should only be called via delegatecall");
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateWithFallbackHandler", [], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton and the fallback handler", async () => {
@@ -257,9 +299,16 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateL2WithFallbackHandler", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateL2WithFallbackHandler()).to.be.revertedWith("Migration should only be called via delegatecall");
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateL2WithFallbackHandler", [], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton and the fallback handler", async () => {
@@ -325,10 +374,18 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateWithSetGuard", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+                validGuardMock,
+            } = await setupTests();
+            const validGuardAddress = await validGuardMock.getAddress();
 
-            await expect(migration.migrateWithSetGuard(AddressZero)).to.be.revertedWith("Migration should only be called via delegatecall");
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateWithSetGuard", [validGuardAddress], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton and the guard", async () => {
@@ -422,12 +479,18 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateL2WithSetGuard", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+                validGuardMock,
+            } = await setupTests();
+            const validGuardAddress = await validGuardMock.getAddress();
 
-            await expect(migration.migrateL2WithSetGuard(AddressZero)).to.be.revertedWith(
-                "Migration should only be called via delegatecall",
-            );
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateL2WithSetGuard", [validGuardAddress], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton and the guard", async () => {
@@ -521,11 +584,25 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateWithSetGuardAndFallbackHandler", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateWithSetGuardAndFallbackHandler(AddressZero)).to.be.revertedWith(
-                "Migration should only be called via delegatecall",
-            );
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+                validGuardMock,
+            } = await setupTests();
+            const validGuardAddress = await validGuardMock.getAddress();
+
+            await expect(
+                executeContractCallWithSigners(
+                    safeWith1967Proxy,
+                    migration,
+                    "migrateWithSetGuardAndFallbackHandler",
+                    [validGuardAddress],
+                    [user1],
+                    true,
+                ),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton, guard and the fallback handler", async () => {
@@ -642,11 +719,25 @@ describe("Safe150Migration library", () => {
     });
 
     describe("migrateL2WithSetGuardAndFallbackHandler", () => {
-        it("can only be called from Safe itself", async () => {
-            const { migration } = await setupTests();
-            await expect(migration.migrateL2WithSetGuardAndFallbackHandler(AddressZero)).to.be.revertedWith(
-                "Migration should only be called via delegatecall",
-            );
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+                validGuardMock,
+            } = await setupTests();
+            const validGuardAddress = await validGuardMock.getAddress();
+
+            await expect(
+                executeContractCallWithSigners(
+                    safeWith1967Proxy,
+                    migration,
+                    "migrateL2WithSetGuardAndFallbackHandler",
+                    [validGuardAddress],
+                    [user1],
+                    true,
+                ),
+            ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton, guard and the fallback handler", async () => {

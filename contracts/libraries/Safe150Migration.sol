@@ -15,11 +15,11 @@ interface ISafe {
 /**
  * @title Migration Contract for Safe Upgrade
  * @notice This contract facilitates the migration of a Safe contract from version 1.3.0/1.4.1 to 1.5.0.
+ * @dev IMPORTANT: The library is intended to be used with the Safe standard proxy that stores the singleton address
+ *      at the storage slot 0. Use at your own risk with custom proxy implementations. The library will block calls
+ *      if the address stored at the storage slot 0 is not a contract.
  */
 contract Safe150Migration is SafeStorage {
-    // Address of this contract
-    address public immutable MIGRATION_SINGLETON;
-
     // Address of Safe contract version 1.5.0 Singleton (L1)
     // TODO: Update this address when the Safe 1.5.0 Singleton is deployed
     address public constant SAFE_150_SINGLETON = address(0x88627c8904eCd9DF96A572Ef32A7ff13b199Ed8D);
@@ -32,6 +32,8 @@ contract Safe150Migration is SafeStorage {
     // TODO: Update this address when the Safe 1.5.0 Compatibility Fallback Handler is deployed
     address public constant SAFE_150_FALLBACK_HANDLER = address(0x8aa755cB169991fEDC3E306751dCb71964A041c7);
 
+    // the slot is defined as "keccak256("guard_manager.guard.address")" in the GuardManager contract
+    // reference: https://github.com/safe-global/safe-contracts/blob/8ffae95faa815acf86ec8b50021ebe9f96abde10/contracts/base/GuardManager.sol#L76-L77
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     /**
@@ -39,8 +41,6 @@ contract Safe150Migration is SafeStorage {
      * @dev Initializes the migrationSingleton with the contract's own address.
      */
     constructor() {
-        MIGRATION_SINGLETON = address(this);
-
         require(isContract(SAFE_150_SINGLETON), "Safe 1.4.1 Singleton is not deployed");
         require(isContract(SAFE_150_SINGLETON_L2), "Safe 1.4.1 Singleton (L2) is not deployed");
         require(isContract(SAFE_150_FALLBACK_HANDLER), "Safe 1.4.1 Fallback Handler is not deployed");
@@ -63,13 +63,20 @@ contract Safe150Migration is SafeStorage {
         }
     }
 
+    function checkCurrentSingleton() internal view {
+        require(isContract(singleton), "Trying to migrate an invalid Safe");
+    }
+
+    modifier validSingletonOnly() {
+        checkCurrentSingleton();
+        _;
+    }
+
     /**
      * @notice Migrate to Safe 1.5.0 Singleton (L1) at `SAFE_150_SINGLETON`
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
-    function migrateSingleton() public {
-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
-
+    function migrateSingleton() public validSingletonOnly {
         checkGuard();
 
         singleton = SAFE_150_SINGLETON;
@@ -79,7 +86,7 @@ contract Safe150Migration is SafeStorage {
     /**
      * @notice Migrate and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      */
-    function migrateWithFallbackHandler() public {
+    function migrateWithFallbackHandler() public validSingletonOnly {
         migrateSingleton();
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
@@ -89,9 +96,7 @@ contract Safe150Migration is SafeStorage {
      * @notice Migrate and set the guard to the specified address.
      * @param guard The address of the new guard contract.
      */
-    function migrateWithSetGuard(address guard) public {
-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
-
+    function migrateWithSetGuard(address guard) public validSingletonOnly {
         singleton = SAFE_150_SINGLETON;
         emit ChangedMasterCopy(singleton);
 
@@ -102,7 +107,7 @@ contract Safe150Migration is SafeStorage {
      * @notice Migrate, set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      * @param guard The address of the new guard contract.
      */
-    function migrateWithSetGuardAndFallbackHandler(address guard) public {
+    function migrateWithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
         migrateWithSetGuard(guard);
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
@@ -112,9 +117,7 @@ contract Safe150Migration is SafeStorage {
      * @notice Migrate to Safe 1.5.0 Singleton (L2) at `SAFE_150_SINGLETON_L2`
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
-    function migrateL2Singleton() public {
-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
-
+    function migrateL2Singleton() public validSingletonOnly {
         checkGuard();
 
         singleton = SAFE_150_SINGLETON_L2;
@@ -124,7 +127,7 @@ contract Safe150Migration is SafeStorage {
     /**
      * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      */
-    function migrateL2WithFallbackHandler() public {
+    function migrateL2WithFallbackHandler() public validSingletonOnly {
         migrateL2Singleton();
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
@@ -134,9 +137,7 @@ contract Safe150Migration is SafeStorage {
      * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the guard to the specified address.
      * @param guard The address of the new guard contract.
      */
-    function migrateL2WithSetGuard(address guard) public {
-        require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
-
+    function migrateL2WithSetGuard(address guard) public validSingletonOnly {
         singleton = SAFE_150_SINGLETON_L2;
         emit ChangedMasterCopy(singleton);
 
@@ -147,7 +148,7 @@ contract Safe150Migration is SafeStorage {
      * @notice Migrate to Safe 1.5.0 Singleton (L2), set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      * @param guard The address of the new guard contract.
      */
-    function migrateL2WithSetGuardAndFallbackHandler(address guard) public {
+    function migrateL2WithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
         migrateL2WithSetGuard(guard);
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
