@@ -14,6 +14,15 @@ coverage.json
 yarn-error.log
 typechain-types
 script/input
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*
+/broadcast/*/31337/
+/broadcast/**/dry-run/
 
 # Certora Formal Verification related files
 .certora_internal
