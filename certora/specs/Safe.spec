@@ -16,6 +16,8 @@ methods {
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
+
+    function checkSignatures(bytes32, bytes memory, bytes memory) internal => NONDET;
 }
 
 definition noHavoc(method f) returns bool =
@@ -31,7 +33,7 @@ definition reachableOnly(method f) returns bool =
     // "If it’s called from an internal context it is fine but as a public function that can be called with any argument it cannot have hooks applied on."
     && f.selector != sig:getStorageAt(uint256,uint256).selector;
 
-definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffff;
+definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
 /// Nonce must never decrease
 rule nonceMonotonicity(method f) filtered {
@@ -74,17 +76,6 @@ invariant sigletonAddressNeverChanges()
 
 ghost address fallbackHandlerAddress {
     init_state axiom fallbackHandlerAddress == 0;
-}
-
-ghost mapping(address => address) ghostOwners {
-    init_state axiom forall address X. to_mathint(ghostOwners[X]) == 0;
-}
-
-// hook to update the ghostOwners and the reach ghost state whenever the owners field
-// in storage is written. 
-// This also checks that the reach_succ invariant is preserved. 
-hook Sstore currentContract.owners[KEY address key] address value STORAGE {
-    ghostOwners[key] = value;
 }
 
 // This is Safe's fallback handler storage slot:
