@@ -9,7 +9,7 @@ certoraMutate --prover_conf path/to/conf/file.conf --mutation_conf path/to/gambi
 example
 
 ```bash
-certoraMutate --prover_conf certora/conf/safe.conf --mutation_conf gambit.conf
+certoraMutate --prover_conf certora/conf/safe.conf --mutation_conf certora/conf/mutationSafe.conf
 ```
 
 After submitting all the mutation testing jobs to the server, the gambit generates a `collect.json` file with all the information needed to collect the mutation testing results. After a few hours, you can collect these results with the following command:
