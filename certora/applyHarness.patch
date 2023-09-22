@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-09-18 11:33:31
-+++ Safe.sol	2023-09-18 11:38:51
+--- Safe.sol	2023-09-22 14:53:37
++++ Safe.sol	2023-09-22 15:00:17
 @@ -44,6 +44,8 @@
      using SafeMath for uint256;
  
@@ -32,7 +32,38 @@ diff -druN Safe.sol Safe.sol
          // Load threshold to avoid multiple storage loads
          uint256 _threshold = threshold;
          // Check that a threshold is set
-@@ -280,7 +281,7 @@
+@@ -260,6 +261,30 @@
+         checkNSignatures(msg.sender, dataHash, "", signatures, _threshold);
+     }
+ 
++    function checkExternalSignature(ISignatureValidator owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
++        // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
++        require(offset.add(32) <= signatures.length, "GS022");
++
++        // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
++        uint256 contractSignatureLen;
++        // solhint-disable-next-line no-inline-assembly
++        /// @solidity memory-safe-assembly
++        assembly {
++            contractSignatureLen := mload(add(add(signatures, offset), 0x20))
++        }
++        require(offset.add(32).add(contractSignatureLen) <= signatures.length, "GS023");
++
++        // Check signature
++        bytes memory contractSignature;
++        // solhint-disable-next-line no-inline-assembly
++        /// @solidity memory-safe-assembly
++        assembly {
++            // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
++            contractSignature := add(add(signatures, offset), 0x20)
++        }
++        require(owner.isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
++    }
++
+     /**
+      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+@@ -280,7 +305,7 @@
          bytes memory /* data */,
          bytes memory signatures,
          uint256 requiredSignatures
@@ -41,7 +72,36 @@ diff -druN Safe.sol Safe.sol
          // Check that the provided signature data is not too short
          require(signatures.length >= requiredSignatures.mul(65), "GS020");
          // There cannot be an owner with address 0.
-@@ -338,7 +339,12 @@
+@@ -302,27 +327,7 @@
+                 // Here we only check that the pointer is not pointing inside the part that is being processed
+                 require(uint256(s) >= requiredSignatures.mul(65), "GS021");
+ 
+-                // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
+-                require(uint256(s).add(32) <= signatures.length, "GS022");
+-
+-                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+-                uint256 contractSignatureLen;
+-                // solhint-disable-next-line no-inline-assembly
+-                /// @solidity memory-safe-assembly
+-                assembly {
+-                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
+-                }
+-                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
+-
+-                // Check signature
+-                bytes memory contractSignature;
+-                // solhint-disable-next-line no-inline-assembly
+-                /// @solidity memory-safe-assembly
+-                assembly {
+-                    // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
+-                    contractSignature := add(add(signatures, s), 0x20)
+-                }
+-                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
++                checkExternalSignature(ISignatureValidator(currentOwner), dataHash, signatures, uint256(s));
+             } else if (v == 1) {
+                 // If v is 1 then it is an approved hash
+                 // When handling approved hashes the address of the approver is encoded into r
+@@ -338,7 +343,12 @@
                  // Use ecrecover with the messageHash for EOA signatures
                  currentOwner = ecrecover(dataHash, v, r, s);
              }
@@ -56,8 +116,8 @@ diff -druN Safe.sol Safe.sol
          }
      }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-09-11 14:15:40
-+++ base/Executor.sol	2023-09-18 11:38:20
+--- base/Executor.sol	2023-09-22 14:53:37
++++ base/Executor.sol	2023-09-22 14:56:34
 @@ -26,11 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
