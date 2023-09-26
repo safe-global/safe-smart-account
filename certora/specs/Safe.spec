@@ -2,6 +2,7 @@ methods {
     function getThreshold() external returns (uint256) envfree;
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
+    function isOwner(address) external returns (bool) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
     function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
     function getTransactionHash(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,uint256) external returns (bytes32) envfree;
@@ -16,7 +17,7 @@ methods {
 
     // summaries
     function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint8,bytes32,bytes32) => mySignatureSplit(signatures,pos);
-    function Safe.checkExternalSignature(address, bytes32, bytes memory, uint256) internal => NONDET;
+    function Safe.checkExternalSignature(address, bytes32, bytes memory) internal => NONDET;
 
     // optional
     function checkSignatures(bytes32,bytes,bytes) external envfree;
@@ -179,8 +180,8 @@ rule checkSignatures() {
     require signaturesA.length >= 65;
     require signaturesB.length >= 65;
     require signaturesAB.length >= 130;
-    requireInvariant safeOwnerCannotBeItself(e);
-    requireInvariant threholdShouldBeLessThanOwners();
+    require !isOwner(currentContract);
+    require getThreshold() <= 2;
     require getCurrentOwner(dataHash, vA, rA, sA) < getCurrentOwner(dataHash, vB, rB, sB);
 
     checkNSignatures@withrevert(e, executor, dataHash, data, signaturesA, 1);

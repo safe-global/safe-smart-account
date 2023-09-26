@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-09-26 16:08:45
-+++ Safe.sol	2023-09-26 16:11:51
+--- Safe.sol	2023-09-27 10:13:46
++++ Safe.sol	2023-09-27 10:14:12
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -24,52 +24,21 @@ diff -druN Safe.sol Safe.sol
          address paymentToken,
          uint256 payment,
          address payable paymentReceiver
-     ) external {
+-    ) external {
++    ) public {
 +        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
 +        // constructor
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -246,6 +248,30 @@
+@@ -349,7 +351,6 @@
+             lastOwner = currentOwner;
          }
      }
+-
  
-+    function checkExternalSignature(ISignatureValidator owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
-+        // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
-+        require(offset.add(32) <= signatures.length, "GS022");
-+
-+        // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
-+        uint256 contractSignatureLen;
-+        // solhint-disable-next-line no-inline-assembly
-+        /// @solidity memory-safe-assembly
-+        assembly {
-+            contractSignatureLen := mload(add(add(signatures, offset), 0x20))
-+        }
-+        require(offset.add(32).add(contractSignatureLen) <= signatures.length, "GS023");
-+
-+        // Check signature
-+        bytes memory contractSignature;
-+        // solhint-disable-next-line no-inline-assembly
-+        /// @solidity memory-safe-assembly
-+        assembly {
-+            // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
-+            contractSignature := add(add(signatures, offset), 0x20)
-+        }
-+        require(owner.isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
-+    }
-+
      /**
-      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
-      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-@@ -324,7 +350,7 @@
-                     contractSignature := add(add(signatures, s), 0x20)
-                 }
-                 /* solhint-enable no-inline-assembly */
--                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
-+                checkExternalSignature(ISignatureValidator(currentOwner), dataHash, signatures, uint256(s));
-             } else if (v == 1) {
-                 // If v is 1 then it is an approved hash
-                 // When handling approved hashes the address of the approver is encoded into r
+      * @notice Marks hash `hashToApprove` as approved.
 diff -druN base/Executor.sol base/Executor.sol
 --- base/Executor.sol	2023-09-26 16:12:09
 +++ base/Executor.sol	2023-09-26 16:10:42
