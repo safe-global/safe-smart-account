@@ -1,18 +1,7 @@
 diff -druN Safe.sol Safe.sol
-
---- Safe.sol	2023-09-22 14:53:37
-+++ Safe.sol	2023-09-22 15:00:17
-@@ -44,6 +44,8 @@
-     using SafeMath for uint256;
- 
-     string public constant VERSION = "1.4.1";
-+    address public lastOwnerStore;
-+    address public currentOwnerStore;
- 
-     // keccak256(
-     //     "EIP712Domain(uint256 chainId,address verifyingContract)"
-@@ -75,7 +77,7 @@
-
+--- Safe.sol	2023-09-26 16:08:45
++++ Safe.sol	2023-09-26 16:11:51
+@@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -21,22 +10,28 @@ diff -druN Safe.sol Safe.sol
      }
  
      /**
-
-@@ -248,11 +250,10 @@
-     /**
-      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
-      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
--     * @param data That should be signed (this is passed to an external validator contract)
-      * @param signatures Signature data that should be verified.
-      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+@@ -93,15 +93,17 @@
+      * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
       */
--    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public view {
-+    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public {
-         // Load threshold to avoid multiple storage loads
-         uint256 _threshold = threshold;
-         // Check that a threshold is set
-@@ -260,6 +261,30 @@
-         checkNSignatures(msg.sender, dataHash, "", signatures, _threshold);
+     function setup(
+-        address[] calldata _owners,
++        address[] memory _owners,
+         uint256 _threshold,
+         address to,
+-        bytes calldata data,
++        bytes memory data,
+         address fallbackHandler,
+         address paymentToken,
+         uint256 payment,
+         address payable paymentReceiver
+     ) external {
++        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
++        // constructor
+         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
+         setupOwners(_owners, _threshold);
+         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
+@@ -246,6 +248,30 @@
+         }
      }
  
 +    function checkExternalSignature(ISignatureValidator owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
@@ -65,89 +60,19 @@ diff -druN Safe.sol Safe.sol
 +
      /**
       * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
-      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
-@@ -280,7 +305,7 @@
-         bytes memory /* data */,
-         bytes memory signatures,
-         uint256 requiredSignatures
--    ) public view {
-+    ) public {
-         // Check that the provided signature data is not too short
-         require(signatures.length >= requiredSignatures.mul(65), "GS020");
-         // There cannot be an owner with address 0.
-@@ -302,27 +327,7 @@
-                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                 require(uint256(s) >= requiredSignatures.mul(65), "GS021");
- 
--                // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
--                require(uint256(s).add(32) <= signatures.length, "GS022");
--
--                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
--                uint256 contractSignatureLen;
--                // solhint-disable-next-line no-inline-assembly
--                /// @solidity memory-safe-assembly
--                assembly {
--                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
--                }
--                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
--
--                // Check signature
--                bytes memory contractSignature;
--                // solhint-disable-next-line no-inline-assembly
--                /// @solidity memory-safe-assembly
--                assembly {
--                    // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
--                    contractSignature := add(add(signatures, s), 0x20)
--                }
+      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+@@ -324,7 +350,7 @@
+                     contractSignature := add(add(signatures, s), 0x20)
+                 }
+                 /* solhint-enable no-inline-assembly */
 -                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
 +                checkExternalSignature(ISignatureValidator(currentOwner), dataHash, signatures, uint256(s));
              } else if (v == 1) {
                  // If v is 1 then it is an approved hash
                  // When handling approved hashes the address of the approver is encoded into r
-@@ -338,7 +343,12 @@
-                 // Use ecrecover with the messageHash for EOA signatures
-                 currentOwner = ecrecover(dataHash, v, r, s);
-             }
--            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
-+            // require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
-+            lastOwnerStore = lastOwner;
-+            currentOwnerStore = currentOwner;
-+            require(owners[currentOwner] != address(0));
-+            require(currentOwner != SENTINEL_OWNERS, "GS026");
-+            require(currentOwner > lastOwner);
-             lastOwner = currentOwner;
-         }
-     }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-09-22 14:53:37
-+++ base/Executor.sol	2023-09-22 14:56:34
-@@ -26,11 +26,8 @@
-=======
-@@ -93,15 +93,18 @@
-      * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
-      */
-     function setup(
--        address[] calldata _owners,
-+        address[] memory _owners,
-         uint256 _threshold,
-         address to,
--        bytes calldata data,
-+        bytes memory data,
-         address fallbackHandler,
-         address paymentToken,
-         uint256 payment,
-         address payable paymentReceiver
--    ) external {
-+    ) public {
-+        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
-+        // constructor.
-+         
-         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
-         setupOwners(_owners, _threshold);
-         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-08-30 20:06:21
-+++ base/Executor.sol	2023-08-30 20:47:47
+--- base/Executor.sol	2023-09-26 16:12:09
++++ base/Executor.sol	2023-09-26 16:10:42
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {

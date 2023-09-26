@@ -190,8 +190,6 @@ rule checkSignatures() {
 
     checkNSignatures@withrevert(e, executor, dataHash, data, signaturesAB, 2);
     bool successAB = !lastReverted;
-    address lastOwner = lastOwnerStore(e);
-    address currentOwner = currentOwnerStore(e);
 
     assert (successA && successB) <=> successAB, "checkSignatures called must be equivalent to checkSignatures called twice";
 }

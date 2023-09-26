@@ -249,7 +249,6 @@ contract Safe is
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param data That should be signed (this is passed to an external validator contract)
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
