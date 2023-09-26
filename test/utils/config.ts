@@ -1,3 +1,8 @@
-export const safeContractUnderTest = () => {
-    return !process.env.SAFE_CONTRACT_UNDER_TEST ? "Safe" : process.env.SAFE_CONTRACT_UNDER_TEST;
+export const safeContractUnderTest = (): "Safe" | "SafeL2" => {
+    switch (process.env.SAFE_CONTRACT_UNDER_TEST) {
+        case "SafeL2":
+            return "SafeL2";
+        default:
+            return "Safe";
+    }
 };

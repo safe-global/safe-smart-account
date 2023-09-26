@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import "@nomiclabs/hardhat-ethers";
 import { getContractStorageLayout } from "../utils/storage";
 
 const EXPECTED_LAYOUT = [
@@ -40,7 +39,7 @@ const EXPECTED_LAYOUT = [
     },
 ];
 
-describe("SafeStorage", async () => {
+describe("SafeStorage", () => {
     it("follows the expected storage layout", async () => {
         const safeStorageLayout = await getContractStorageLayout(hre, "SafeStorage");
 

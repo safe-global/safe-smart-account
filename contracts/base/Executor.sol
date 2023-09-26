@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import "../common/Enum.sol";
+import {Enum} from "../common/Enum.sol";
 
 /**
  * @title Executor - A contract that can execute transactions
@@ -26,17 +26,19 @@ abstract contract Executor {
         uint256 txGas
     ) internal returns (bool success) {
         if (operation == Enum.Operation.DelegateCall) {
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
                 success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
             }
+            /* solhint-enable no-inline-assembly */
         } else {
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
                 success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
             }
+            /* solhint-enable no-inline-assembly */
         }
     }
 }

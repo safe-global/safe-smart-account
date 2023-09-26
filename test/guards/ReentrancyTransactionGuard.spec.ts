@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafeWithOwners } from "../utils/setup";
 import {
     buildSafeTransaction,
@@ -11,37 +10,48 @@ import {
     safeSignTypedData,
 } from "../../src/utils/execution";
 
-describe("ReentrancyTransactionGuard", async () => {
-    const [user1] = waffle.provider.getWallets();
-
+describe("ReentrancyTransactionGuard", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         const safe = await getSafeWithOwners([user1.address]);
         const guardFactory = await hre.ethers.getContractFactory("ReentrancyTransactionGuard");
         const guard = await guardFactory.deploy();
+        const guardAddress = await guard.getAddress();
         const mock = await getMock();
-        await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1]);
+        await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], [user1]);
+
         return {
             safe,
             mock,
             guardFactory,
             guard,
+            signers,
         };
     });
 
-    describe("fallback", async () => {
+    describe("fallback", () => {
         it("must NOT revert on fallback without value", async () => {
-            const { guard } = await setupTests();
+            const {
+                guard,
+                signers: [user1],
+            } = await setupTests();
+            const guardAddress = await guard.getAddress();
             await user1.sendTransaction({
-                to: guard.address,
+                to: guardAddress,
                 data: "0xbaddad",
             });
         });
         it("should revert on fallback with value", async () => {
-            const { guard } = await setupTests();
+            const {
+                guard,
+                signers: [user1],
+            } = await setupTests();
+            const guardAddress = await guard.getAddress();
             await expect(
                 user1.sendTransaction({
-                    to: guard.address,
+                    to: guardAddress,
                     data: "0xbaddad",
                     value: 1,
                 }),
@@ -49,12 +59,18 @@ describe("ReentrancyTransactionGuard", async () => {
         });
     });
 
-    describe("checkTransaction", async () => {
+    describe("checkTransaction", () => {
         it("should revert if Safe tries to reenter execTransaction", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
+            const safeAddress = await safe.getAddress();
             const nonce = await safe.nonce();
-            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: nonce.add(1) });
-            const signatures = [await safeSignTypedData(user1, safe, safeTx)];
+            const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce: nonce + 1n });
+            const signatures = [await safeSignTypedData(user1, safeAddress, safeTx)];
             const signatureBytes = buildSignatureBytes(signatures);
 
             // We should revert with GS013 as the internal tx is reverted because of the reentrancy guard
@@ -79,20 +95,26 @@ describe("ReentrancyTransactionGuard", async () => {
                 ),
             ).to.be.revertedWith("GS013");
 
-            expect(await mock.callStatic.invocationCount()).to.be.eq(0);
+            expect(await mock.invocationCount()).to.be.eq(0);
         });
 
         it("should be able to execute without nesting", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
+            const safeAddress = await safe.getAddress();
             const nonce = await safe.nonce();
-            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: nonce.add(1) });
-            const signatures = [await safeSignTypedData(user1, safe, safeTx)];
+            const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce: nonce + 1n });
+            const signatures = [await safeSignTypedData(user1, safeAddress, safeTx)];
 
-            await executeTxWithSigners(safe, buildSafeTransaction({ to: safe.address, data: "0x", nonce: nonce }), [user1]);
+            await executeTxWithSigners(safe, buildSafeTransaction({ to: safeAddress, data: "0x", nonce: nonce }), [user1]);
             await executeTx(safe, safeTx, signatures);
 
-            expect(await mock.callStatic.invocationCount()).to.be.eq(1);
-            expect(await mock.callStatic.invocationCountForCalldata("0xbaddad42")).to.be.eq(1);
+            expect(await mock.invocationCount()).to.be.eq(1);
+            expect(await mock.invocationCountForCalldata("0xbaddad42")).to.be.eq(1);
         });
     });
 });
