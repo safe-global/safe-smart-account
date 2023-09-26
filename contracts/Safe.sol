@@ -253,12 +253,12 @@ contract Safe is
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
+    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, "", signatures, _threshold);
     }
 
     /**
