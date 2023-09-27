@@ -19,6 +19,7 @@ script/input
 ./out/
 cache/
 out/
+cache_hardhat/
 
 # Ignores development broadcast logs
 !/broadcast
