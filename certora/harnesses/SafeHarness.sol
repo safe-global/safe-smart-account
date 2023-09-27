@@ -52,7 +52,7 @@ contract SafeHarness is Safe {
         return getOwners().length;
     }
 
-    function call_keccak256(bytes memory b) external view returns (bytes32) {
-        return keccak256(b);
+    function callKeccak256(bytes memory data) external view returns (bytes32) {
+        return keccak256(data);
     }
 }
