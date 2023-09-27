@@ -2,6 +2,7 @@
 src = "src"
 out = "out"
 libs = ["node_modules", "lib"]
+solc = "0.8.19"
 remappings = [
     "@openzeppelin/=node_modules/@openzeppelin/",
     "@safe-global/=node_modules/@safe-global/",
