@@ -77,12 +77,18 @@ contract AdminGuard is BaseGuard {
 
     function _hashSafeSensitiveState() internal view returns (bytes32) {
         address singleton = address(uint160(uint256(bytes32(StorageAccessible(msg.sender).getStorageAt(0, 1)))));
+        
         bytes32 fallbackHandlerSlot = keccak256("fallback_manager.handler.address");
         address fallbackHandler = address(uint160(uint256(bytes32(StorageAccessible(msg.sender).getStorageAt(uint256(fallbackHandlerSlot), 1)))));
-        address guard = address(this);
+        
+        bytes32 guardStorageSlot = keccak256("guard_manager.guard.address");
+        address guard = address(uint160(uint256(bytes32(StorageAccessible(msg.sender).getStorageAt(uint256(guardStorageSlot), 1)))));
+        
         (address[] memory modules,) = ModuleManager(msg.sender).getModulesPaginated(address(0x1), type(uint256).max);
+        
         address[] memory owners = OwnerManager(msg.sender).getOwners();
         uint256 ownerCount = owners.length;
+        
         uint256 threshold = OwnerManager(msg.sender).getThreshold();
         uint256 nonce = Safe(payable(msg.sender)).nonce();
 
