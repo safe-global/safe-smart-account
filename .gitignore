@@ -15,8 +15,11 @@ yarn-error.log
 typechain-types
 script/input
 # Compiler files
+./cache/
+./out/
 cache/
 out/
+cache_hardhat/
 
 # Ignores development broadcast logs
 !/broadcast
