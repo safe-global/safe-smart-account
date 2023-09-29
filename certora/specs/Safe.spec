@@ -3,6 +3,7 @@ methods {
     function disableModule(address,address) external;
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
+    function isOwner(address) external returns (bool) envfree;
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -15,6 +16,8 @@ methods {
     function execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation) external returns (bool, bytes memory);
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
+
+    function checkSignatures(bytes32, bytes memory, bytes memory) internal => NONDET;
 }
 
 definition reachableOnly(method f) returns bool =
@@ -90,6 +93,40 @@ rule fallbackHandlerAddressChange(method f) filtered {
 
     assert fbHandlerBefore != fbHandlerAfter =>
         f.selector == sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector || f.selector == sig:setFallbackHandler(address).selector;
+}
+
+rule setFallbackHandlerUpdatesFallbackHandler(address newFallbackHandler) {
+    address fbHandlerBefore = fallbackHandlerAddress;
+    env e;
+
+    setFallbackHandler(e, newFallbackHandler);
+
+    address fbHandlerAfter = fallbackHandlerAddress;
+
+    assert fbHandlerBefore != fbHandlerAfter => fbHandlerAfter == newFallbackHandler;
+}
+
+rule setupCorrectlyConfiguresSafe(
+    address[] owners,
+    uint256 threshold, 
+    address fallbackHandler,
+    address to, bytes data, 
+    address paymentToken, 
+    uint256 payment, 
+    address paymentReceiver
+) {
+    env e;
+
+    require fallbackHandler != 0;
+    uint256 index;
+    require index < owners.length;
+
+    setup(e, owners, threshold, to, data, fallbackHandler, paymentToken, payment, paymentReceiver);
+
+    assert getThreshold() == threshold, "Threshold not set correctly";
+    assert fallbackHandlerAddress == fallbackHandler, "Fallback handler not set correctly";
+    assert getOwnersCount() == owners.length, "Owners count not set correctly";
+    assert isOwner(owners[index]), "Owners not set correctly";
 }
 
 

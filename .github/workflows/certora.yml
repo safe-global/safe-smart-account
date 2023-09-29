@@ -15,7 +15,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                rule: ["verifyOwners.sh", "verifySafe.sh", "verifyModules.sh", "verifySignatures.sh"]
+                rule: ["verifyOwners.sh", "verifySafe.sh", "verifyModules.sh", "verifyNativeTokenRefund.sh", "verifySignatures.sh"]
 
         steps:
             - uses: actions/checkout@v3
