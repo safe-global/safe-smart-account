@@ -258,7 +258,7 @@ contract Safe is
     function checkContractSignature(address owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
         // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
         require(offset.add(32) <= signatures.length, "GS022");
-        
+
         // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
         uint256 contractSignatureLen;
         /* solhint-disable no-inline-assembly */
@@ -268,7 +268,7 @@ contract Safe is
         }
         /* solhint-enable no-inline-assembly */
         require(offset.add(32).add(contractSignatureLen) <= signatures.length, "GS023");
-        
+
         // Check signature
         bytes memory contractSignature;
         /* solhint-disable no-inline-assembly */
@@ -277,25 +277,27 @@ contract Safe is
             // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
             contractSignature := add(add(signatures, offset), 0x20)
         }
-        /* solhint-enable no-inline-assembly */ 
-        
+        /* solhint-enable no-inline-assembly */
+
         require(ISignatureValidator(owner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
     }
-    
+
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param data NOT USED. That should be signed (this is passed to an external validator contract)
+     *             For some reason, removing it from the parameters and passing empty bytes ("") slightly increases the gas costs, so we keep it.
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
-    function checkSignatures(bytes32 dataHash, bytes memory, bytes memory signatures) public view {
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(msg.sender, dataHash, "", signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
     }
-    
+
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
@@ -332,7 +334,7 @@ contract Safe is
                 // If v is 0 then it is a contract signature
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
-                
+
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
@@ -362,7 +364,6 @@ contract Safe is
             lastOwner = currentOwner;
         }
     }
-
 
     /**
      * @notice Marks hash `hashToApprove` as approved.

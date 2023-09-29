@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-09-27 13:31:45
-+++ Safe.sol	2023-09-27 14:34:22
+--- Safe.sol	2023-09-29 15:38:28
++++ Safe.sol	2023-09-29 15:40:17
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -31,14 +31,6 @@ diff -druN Safe.sol Safe.sol
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -362,7 +364,6 @@
-             lastOwner = currentOwner;
-         }
-     }
--
- 
-     /**
-      * @notice Marks hash `hashToApprove` as approved.
 diff -druN base/Executor.sol base/Executor.sol
 --- base/Executor.sol	2023-09-26 16:12:09
 +++ base/Executor.sol	2023-09-26 16:10:42
