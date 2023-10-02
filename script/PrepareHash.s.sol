@@ -47,7 +47,7 @@ contract PrepareHashScript is ScriptUtils {
         console.logString("safeTxHash to sign:");
         console.logBytes32(digest);
         string memory dest = "./script/input/unsignedDigest";
-        string memory output = string(abi.encodePacked(digest));
+        string memory output = Strings.toHexString(uint256(digest));
         vm.writeLine(dest, output);
 
         vm.stopBroadcast();
