@@ -171,7 +171,7 @@
         1157
       ],
       "IERC165": [
-        2426
+        2729
       ],
       "SelfAuthorized": [
         2233
@@ -256,7 +256,7 @@
         "file": "../interfaces/IERC165.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 1158,
-        "sourceUnit": 2427,
+        "sourceUnit": 2730,
         "symbolAliases": [
           {
             "foreign": {
@@ -264,7 +264,7 @@
               "name": "IERC165",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 2426,
+              "referencedDeclaration": 2729,
               "src": "229:7:3",
               "typeDescriptions": {}
             },
@@ -936,7 +936,7 @@
                 "319:7:3"
               ],
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 2426,
+              "referencedDeclaration": 2729,
               "src": "319:7:3"
             },
             "id": 1016,
@@ -956,7 +956,7 @@
         "fullyImplemented": false,
         "linearizedBaseContracts": [
           1069,
-          2426
+          2729
         ],
         "name": "Guard",
         "nameLocation": "310:5:3",
@@ -1118,10 +1118,10 @@
                               "name": "IERC165",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2426,
+                              "referencedDeclaration": 2729,
                               "src": "2773:7:3",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_IERC165_$2426_$",
+                                "typeIdentifier": "t_type$_t_contract$_IERC165_$2729_$",
                                 "typeString": "type(contract IERC165)"
                               }
                             }
@@ -1129,7 +1129,7 @@
                           "expression": {
                             "argumentTypes": [
                               {
-                                "typeIdentifier": "t_type$_t_contract$_IERC165_$2426_$",
+                                "typeIdentifier": "t_type$_t_contract$_IERC165_$2729_$",
                                 "typeString": "type(contract IERC165)"
                               }
                             ],
@@ -1156,7 +1156,7 @@
                           "src": "2768:13:3",
                           "tryCall": false,
                           "typeDescriptions": {
-                            "typeIdentifier": "t_magic_meta_type_t_contract$_IERC165_$2426",
+                            "typeIdentifier": "t_magic_meta_type_t_contract$_IERC165_$2729",
                             "typeString": "type(contract IERC165)"
                           }
                         },
@@ -1194,7 +1194,7 @@
               ]
             },
             "baseFunctions": [
-              2425
+              2728
             ],
             "functionSelector": "01ffc9a7",
             "implemented": true,
@@ -1307,7 +1307,7 @@
         "linearizedBaseContracts": [
           1095,
           1069,
-          2426
+          2729
         ],
         "name": "BaseGuard",
         "nameLocation": "2538:9:3",
@@ -1654,7 +1654,7 @@
                                 "memberLocation": "3965:17:3",
                                 "memberName": "supportsInterface",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 2425,
+                                "referencedDeclaration": 2728,
                                 "src": "3952:30:3",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_external_view$_t_bytes4_$returns$_t_bool_$",

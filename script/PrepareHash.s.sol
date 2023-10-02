@@ -3,10 +3,11 @@ pragma solidity ^0.8.13;
 
 import {ScriptUtils} from "script/utils/ScriptUtils.sol";
 import {Safe} from "contracts/Safe.sol";
-import {SafeProxyFactory} from "contracts/proxies/SafeProxyFactory.sol";
-import {SafeProxy} from "contracts/proxies/SafeProxy.sol";
+import {GuardManager} from "contracts/base/GuardManager.sol";
+import {ModuleManager} from "contracts/base/ModuleManager.sol";
 import {Enum} from "contracts/common/Enum.sol";
 import {AdminGuard} from "contracts/examples/guards/AdminGuard.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract PrepareHashScript is ScriptUtils {
 
@@ -22,9 +23,9 @@ contract PrepareHashScript is ScriptUtils {
         adminGuard = new AdminGuard{salt: salt}();
 
         // format array of encoded transactions for Multicall3
-        bytes memory addAdminGuardData = abi.encodeWithSelector(Safe.setGuard.selector, address(AdminGuard));
-        bytes memory addModule1Data = abi.encodeWithSelector(Safe.enableModule.selector, ScriptUtils.symmetry);
-        bytes memory addModule2Data = abi.encodeWithSelector(Safe.enableModule.selector, ScriptUtils.robriks);
+        bytes memory addAdminGuardData = abi.encodeWithSelector(GuardManager.setGuard.selector, address(adminGuard));
+        bytes memory addModule1Data = abi.encodeWithSelector(ModuleManager.enableModule.selector, ScriptUtils.symmetry);
+        bytes memory addModule2Data = abi.encodeWithSelector(ModuleManager.enableModule.selector, ScriptUtils.robriks);
         Call3 memory addAdminGuardCall = Call3({
             target: ScriptUtils.stationFounderSafe,
             allowFailure: false,
@@ -41,21 +42,23 @@ contract PrepareHashScript is ScriptUtils {
             callData: addModule2Data
         });
         Call3[] memory calls = new Call3[](3);
-        calls[0] = addAdminGuard;
-        calls[1] = addModule1;
-        calls[2] = addModule2;
+        calls[0] = addAdminGuardCall;
+        calls[1] = addModule1Call;
+        calls[2] = addModule2Call;
         // to use as data param for `Safe::execTransaction()`
         bytes memory multicallData = abi.encodeWithSignature("aggregate3((address,bool,bytes)[])", calls);
 
         bytes memory safeTxData = abi.encodeWithSelector(
             Safe.execTransaction.selector, multicall3, 0, multicallData,
             uint8(1), // Operation.DELEGATECALL
-            0, 0, 0, address(0), address(0), 0 // optional params
+            0, 0, 0, address(0), address(0), // optional params
+            0 // nonce, can use `Safe.nonce()`
         );
 
-        bytes memory digest = getTransactionHash(multicall3, 0, multicallData, uint8(1), 0, 0, 0, address(0), address(0), 0);
+        bytes32 digest = getTransactionHash(multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), 0);
 
         string memory dest = "./script/input/unsignedDigest";
+        string memory output = string(abi.encodePacked(digest));
         vm.writeLine(dest, output);
 
         vm.stopBroadcast();
@@ -64,7 +67,7 @@ contract PrepareHashScript is ScriptUtils {
     function getTransactionHash(
         address to,
         uint256 value,
-        bytes calldata data,
+        bytes memory data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
@@ -83,7 +86,7 @@ contract PrepareHashScript is ScriptUtils {
     function encodeTransactionData(
         address to,
         uint256 value,
-        bytes calldata data,
+        bytes memory data,
         Enum.Operation operation,
         uint256 safeTxGas,
         uint256 baseGas,
