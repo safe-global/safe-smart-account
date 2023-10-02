@@ -4,6 +4,12 @@ pragma solidity ^0.8.13;
 import {Script} from "forge-std/Script.sol";
 
 abstract contract ScriptUtils is Script {
+    struct Call3 {
+        address target;
+        bool allowFailure;
+        bytes callData;
+    }
+    
     error Create2Failure();
 
     // global addresses
