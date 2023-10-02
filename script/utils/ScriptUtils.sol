@@ -22,6 +22,8 @@ abstract contract ScriptUtils is Script {
 
     // safe
     address public constant stationFounderSafe = 0x0f95a7b50eaeEFc08eb10Be44Dd48409b46372b2;
+    // Multicall3 contract address across almost all chains
+    address public constant multicall3 = 0xcA11bde05977b3631167028862bE2a173976CA11;
 
     // reads a plain extensionless file containing *only the salt string*
     function readSalt(string memory fileName) internal view returns (string memory) {
