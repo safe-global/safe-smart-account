@@ -9,7 +9,7 @@ abstract contract ScriptUtils is Script {
         bool allowFailure;
         bytes callData;
     }
-    
+
     error Create2Failure();
 
     // global addresses
@@ -25,6 +25,7 @@ abstract contract ScriptUtils is Script {
     address public constant frog = 0xE7affDB964178261Df49B86BFdBA78E9d768Db6D;
     address public constant paprika = 0x4b8c47aE2e5083EE6AA9aE2884E8051c2e4741b1;
     address public constant robriks = 0xFFFFfFfFA2eC6F66a22017a0Deb0191e5F8cBc35;
+    address public constant robriks2 = 0x5d5d4d04B70BFe49ad7Aac8C4454536070dAf180;
 
     // safe
     address public constant stationFounderSafe = 0x0f95a7b50eaeEFc08eb10Be44Dd48409b46372b2;

@@ -8,9 +8,9 @@ import {ModuleManager} from "contracts/base/ModuleManager.sol";
 import {Enum} from "contracts/common/Enum.sol";
 import {AdminGuard} from "contracts/examples/guards/AdminGuard.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {console} from "forge-std/console.sol";
 
 contract PrepareHashScript is ScriptUtils {
-
     // The following contract will be deployed:
     AdminGuard public adminGuard;
 
@@ -19,28 +19,20 @@ contract PrepareHashScript is ScriptUtils {
 
         // deploy AdminGuard using Create2 & custom salt
         string memory saltString = "station";
-        bytes32 salt = bytes32(bytes(saltString));
-        adminGuard = new AdminGuard{salt: salt}();
+        // bytes32 salt = bytes32(bytes(saltString));
+        // adminGuard = new AdminGuard{salt: salt}();
+        adminGuard = AdminGuard(0x2370cB6D6909eAD72b322496628b824DAfDcc3F0);
 
         // format array of encoded transactions for Multicall3
         bytes memory addAdminGuardData = abi.encodeWithSelector(GuardManager.setGuard.selector, address(adminGuard));
         bytes memory addModule1Data = abi.encodeWithSelector(ModuleManager.enableModule.selector, ScriptUtils.symmetry);
-        bytes memory addModule2Data = abi.encodeWithSelector(ModuleManager.enableModule.selector, ScriptUtils.robriks);
-        Call3 memory addAdminGuardCall = Call3({
-            target: ScriptUtils.stationFounderSafe,
-            allowFailure: false,
-            callData: addAdminGuardData
-        });
-        Call3 memory addModule1Call = Call3({
-            target: ScriptUtils.stationFounderSafe,
-            allowFailure: false,
-            callData: addModule1Data
-        });
-        Call3 memory addModule2Call = Call3({
-            target: ScriptUtils.stationFounderSafe,
-            allowFailure: false,
-            callData: addModule2Data
-        });
+        bytes memory addModule2Data = abi.encodeWithSelector(ModuleManager.enableModule.selector, ScriptUtils.robriks2);
+        Call3 memory addAdminGuardCall =
+            Call3({target: ScriptUtils.stationFounderSafe, allowFailure: false, callData: addAdminGuardData});
+        Call3 memory addModule1Call =
+            Call3({target: ScriptUtils.stationFounderSafe, allowFailure: false, callData: addModule1Data});
+        Call3 memory addModule2Call =
+            Call3({target: ScriptUtils.stationFounderSafe, allowFailure: false, callData: addModule2Data});
         Call3[] memory calls = new Call3[](3);
         calls[0] = addAdminGuardCall;
         calls[1] = addModule1Call;
@@ -48,15 +40,12 @@ contract PrepareHashScript is ScriptUtils {
         // to use as data param for `Safe::execTransaction()`
         bytes memory multicallData = abi.encodeWithSignature("aggregate3((address,bool,bytes)[])", calls);
 
-        bytes memory safeTxData = abi.encodeWithSelector(
-            Safe.execTransaction.selector, multicall3, 0, multicallData,
-            uint8(1), // Operation.DELEGATECALL
-            0, 0, 0, address(0), address(0), // optional params
-            0 // nonce, can use `Safe.nonce()`
+        bytes32 digest = getTransactionHash(
+            multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), 0
         );
 
-        bytes32 digest = getTransactionHash(multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), 0);
-
+        console.logString("safeTxHash to sign:");
+        console.logBytes32(digest);
         string memory dest = "./script/input/unsignedDigest";
         string memory output = string(abi.encodePacked(digest));
         vm.writeLine(dest, output);
