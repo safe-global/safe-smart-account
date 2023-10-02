@@ -20,6 +20,9 @@ abstract contract ScriptUtils is Script {
     address public constant paprika = 0x4b8c47aE2e5083EE6AA9aE2884E8051c2e4741b1;
     address public constant robriks = 0xFFFFfFfFA2eC6F66a22017a0Deb0191e5F8cBc35;
 
+    // safe
+    address public constant stationFounderSafe = 0x0f95a7b50eaeEFc08eb10Be44Dd48409b46372b2;
+
     // reads a plain extensionless file containing *only the salt string*
     function readSalt(string memory fileName) internal view returns (string memory) {
         string memory inputDir = "./script/input/";
