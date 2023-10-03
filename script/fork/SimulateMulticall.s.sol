@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL
 pragma solidity ^0.8.13;
 
-// import "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
 import {ScriptUtils} from "script/utils/ScriptUtils.sol";
 import {Safe} from "contracts/Safe.sol";
 import {GuardManager} from "contracts/base/GuardManager.sol";
@@ -22,6 +22,8 @@ contract SimulateMulticallScript is ScriptUtils {
 
     address module1;
     address module2;
+
+    /// @dev *Important* See documentation below at the assignment of these variables
     bytes symmetrySig;
     bytes paprikaSig;
     bytes signatures;
@@ -33,8 +35,16 @@ contract SimulateMulticallScript is ScriptUtils {
         module1 = ScriptUtils.symmetry;
         module2 = ScriptUtils.robriks2;
 
-        symmetrySig = bytes(hex'ce285cadc0e8ccef4f5f8bc863811934e074335016a433af83ff68b0b9f6ddbe7948494799a617e5dcdfb564f82829dc4b0bec21643baf5de0aa5a7b35b6a3e31c');
-        paprikaSig = bytes(hex'ae5ef721887c166623fa89596d7325c9fb09e293b0792bd75531a5ecce4425137d087930e7981f12c08a91e6d00f46a639f294f4d833ab48faac485169844bad1b');
+        /// @notice The owners' signatures should be generated using Foundry's `cast wallet sign` command which uses `eth_sign` under the hood.
+        /// As a result, the transaction hash (aka message) that was signed was first prefixed with the following string: "\x19Ethereum Signed Message:\n32"
+        /// To pass the deployed Gnosis Safe's signature verification schema, the `eth_sign` branch must be executed.
+        /// Therefore, 4 must be added to the signature's `uint8 v` which resides on the far small endian side (64th index).
+        /// @notice In keeping with best security practices, the owners' ECDSA signatures should be set as environment variables using the key names below
+        /// For example: `export SIG1=0x[r.s.v]` and `export SIG2=0x[r.s.v]`
+        symmetrySig = vm.envBytes("SIG1");
+        paprikaSig = vm.envBytes("SIG2");
+        /// @notice Keep in mind that the signatures *must* be ordered by ascending signer address value.
+        /// This means the following must be true: `uint160(address(ecrecover(sig1))) < uint160(address(ecrecover(sig2)))`
         signatures = abi.encodePacked(symmetrySig, paprikaSig);
     }
 
@@ -61,13 +71,20 @@ contract SimulateMulticallScript is ScriptUtils {
         );
         require(r, "Safe::execTransaction() failed");
 
+        // guard storage slot must be checked explicitly
         bytes32 guardStorageSlot = keccak256("guard_manager.guard.address");
         address activeGuard =
-            address(uint160(uint256(bytes32(StorageAccessible(msg.sender).getStorageAt(uint256(guardStorageSlot), 1)))));
+            address(uint160(uint256(bytes32(StorageAccessible(founderSafe).getStorageAt(uint256(guardStorageSlot), 1)))));
+        
+        // assert guard value is correct
         assert(activeGuard == address(adminGuard));
 
-        (address[] memory modules,) = ModuleManager(msg.sender).getModulesPaginated(address(0x1), type(uint256).max);
-        assert(modules[0] == ScriptUtils.symmetry);
-        assert(modules[1] == ScriptUtils.robriks2);
+        // only 2 modules are expected
+        (address[] memory modules,) = ModuleManager(founderSafe).getModulesPaginated(address(0x1), 2);
+        
+        // assert module values are correct
+        for (uint256 i; i < modules.length; ++i) {
+            assert(modules[i] == ScriptUtils.symmetry || modules[i] == ScriptUtils.robriks2);
+        }
     }
 }
