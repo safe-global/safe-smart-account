@@ -79,8 +79,7 @@ contract SimulateMulticallScript is ScriptUtils {
         // assert guard value is correct
         assert(activeGuard == address(adminGuard));
 
-        // only 2 modules are expected
-        (address[] memory modules,) = ModuleManager(founderSafe).getModulesPaginated(address(0x1), 2);
+        (address[] memory modules,) = ModuleManager(founderSafe).getModulesPaginated(address(0x1), 32);
         
         // assert module values are correct
         for (uint256 i; i < modules.length; ++i) {
