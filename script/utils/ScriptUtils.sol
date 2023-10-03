@@ -28,7 +28,7 @@ abstract contract ScriptUtils is Script {
     address public constant robriks2 = 0x5d5d4d04B70BFe49ad7Aac8C4454536070dAf180;
 
     // safe
-    address public constant stationFounderSafe = 0x5d347E9b0e348a10327F4368a90286b3d1E7FB15;
+    address public constant stationFounderSafe = 0xDd70fb41e936c5dc67Fc783BA5281E50f0A46fBC;
     // Multicall3 contract address across almost all chains
     address public constant multicall3 = 0xcA11bde05977b3631167028862bE2a173976CA11;
 
