@@ -10,6 +10,10 @@ import {AdminGuard} from "contracts/examples/guards/AdminGuard.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {console} from "forge-std/console.sol";
 
+/// @dev Foundry script to get an existing Safe's transaction hash for initialization.
+/// Developed to test the initialization of the Station FounderSafe since domains are separated by chainId.
+/// To run the script on an existing safe, use the following Foundry command template:
+///     `forge script script/PrepareHash.s.sol:PrepareHashScript --fork-url $LINEA_RPC_URL -vvvv`
 contract PrepareHashScript is ScriptUtils {
     AdminGuard public adminGuard;
     Safe public founderSafe;
@@ -22,6 +26,7 @@ contract PrepareHashScript is ScriptUtils {
         // bytes32 salt = bytes32(bytes(saltString));
         // adminGuard = new AdminGuard{salt: salt}();
         adminGuard = AdminGuard(0x2370cB6D6909eAD72b322496628b824DAfDcc3F0);
+        founderSafe = Safe(payable(0x5d347E9b0e348a10327F4368a90286b3d1E7FB15));
 
         // format array of encoded transactions for Multicall3
         bytes memory addAdminGuardData = abi.encodeWithSelector(GuardManager.setGuard.selector, address(adminGuard));
