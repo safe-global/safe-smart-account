@@ -11,8 +11,8 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {console} from "forge-std/console.sol";
 
 contract PrepareHashScript is ScriptUtils {
-    // The following contract will be deployed:
     AdminGuard public adminGuard;
+    Safe public founderSafe;
 
     function run() public {
         vm.startBroadcast();
@@ -37,11 +37,12 @@ contract PrepareHashScript is ScriptUtils {
         calls[0] = addAdminGuardCall;
         calls[1] = addModule1Call;
         calls[2] = addModule2Call;
-        // to use as data param for `Safe::execTransaction()`
+        // to use as data param for `Safe::getTransactionHash()`
         bytes memory multicallData = abi.encodeWithSignature("aggregate3((address,bool,bytes)[])", calls);
 
-        bytes32 digest = getTransactionHash(
-            multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), 0
+        uint256 currentNonce = founderSafe.nonce();
+        bytes32 digest = founderSafe.getTransactionHash(
+            multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), currentNonce
         );
 
         console.logString("safeTxHash to sign:");
