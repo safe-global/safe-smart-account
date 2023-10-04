@@ -21,10 +21,6 @@ contract PrepareHashScript is ScriptUtils {
     function run() public {
         vm.startBroadcast();
 
-        // deploy AdminGuard using Create2 & custom salt
-        // string memory saltString = "station";
-        // bytes32 salt = bytes32(bytes(saltString));
-        // adminGuard = new AdminGuard{salt: salt}();
         adminGuard = AdminGuard(ScriptUtils.safeAdminGuard);
         founderSafe = Safe(payable(ScriptUtils.stationFounderSafe));
 

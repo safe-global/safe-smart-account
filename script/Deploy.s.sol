@@ -9,8 +9,10 @@ import {SafeProxy} from "contracts/proxies/SafeProxy.sol";
 
 contract DeployScript is ScriptUtils {
 
+    // following contracts will be deployed:
     Safe public safeImpl;
     SafeProxyFactory public safeProxyFactory;
+    AdminGuard public adminGuard;
     SafeProxy public proxy;
 
     function run() public {
@@ -21,6 +23,7 @@ contract DeployScript is ScriptUtils {
 
         safeImpl = new Safe{salt: salt}(); // -> 0x4aecEDCb5A1DD4615F57dF2672D5399b843F2469
         safeProxyFactory = new SafeProxyFactory{salt: salt}(); // -> 0x17841bb20729B25F23FdC6307dbCCd883Ad30f91
+        adminGuard = new AdminGuard{salt: salt}(); // -> 0xDB9A089A20D4b8cDef355ca474323b6C832D9776
 
         // deploy the first multisig proxy
         address[] memory owners = new address[](3);
