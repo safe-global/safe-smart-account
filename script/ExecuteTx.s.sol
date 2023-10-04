@@ -72,7 +72,14 @@ contract ExecuteTxScript is ScriptUtils {
         // execution template
         multicallData = abi.encodeWithSignature("aggregate3((address,bool,bytes)[])", calls);
 
-        // execute transaction using env sigs
+        // check signatures with transaction hash before executing
+        uint256 currentNonce = founderSafe.nonce();
+        bytes32 digest = founderSafe.getTransactionHash(
+            multicall3, 0, multicallData, Enum.Operation.DelegateCall, 0, 0, 0, address(0), address(0), currentNonce
+        );
+        founderSafe.checkSignatures(digest, multicallData, signatures);
+
+        // if signatures pass, execute transaction using env sigs
         bool r = founderSafe.execTransaction(
             to, value, multicallData, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures
         );
