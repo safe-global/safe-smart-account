@@ -29,6 +29,7 @@ abstract contract ScriptUtils is Script {
 
     // safe
     address public constant stationFounderSafe = 0xDd70fb41e936c5dc67Fc783BA5281E50f0A46fBC;
+    address public constant safeAdminGuard = 0x0F15442BBB92Ae76aCE824565F3aA29F71Ae752d;
     // Multicall3 contract address across almost all chains
     address public constant multicall3 = 0xcA11bde05977b3631167028862bE2a173976CA11;
 

@@ -22,11 +22,11 @@ contract PrepareHashScript is ScriptUtils {
         vm.startBroadcast();
 
         // deploy AdminGuard using Create2 & custom salt
-        string memory saltString = "station";
+        // string memory saltString = "station";
         // bytes32 salt = bytes32(bytes(saltString));
         // adminGuard = new AdminGuard{salt: salt}();
-        adminGuard = AdminGuard(0x2370cB6D6909eAD72b322496628b824DAfDcc3F0);
-        founderSafe = Safe(payable(0x5d347E9b0e348a10327F4368a90286b3d1E7FB15));
+        adminGuard = AdminGuard(ScriptUtils.safeAdminGuard);
+        founderSafe = Safe(payable(ScriptUtils.stationFounderSafe));
 
         // format array of encoded transactions for Multicall3
         bytes memory addAdminGuardData = abi.encodeWithSelector(GuardManager.setGuard.selector, address(adminGuard));

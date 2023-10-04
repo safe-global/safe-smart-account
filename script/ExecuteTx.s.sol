@@ -33,8 +33,8 @@ contract ExecuteTxScript is ScriptUtils {
         vm.startBroadcast();
 
         // contracts config
-        founderSafe = Safe(payable(0x5d347E9b0e348a10327F4368a90286b3d1E7FB15));
-        adminGuard = AdminGuard(0x2370cB6D6909eAD72b322496628b824DAfDcc3F0);
+        founderSafe = Safe(payable(ScriptUtils.stationFounderSafe));
+        adminGuard = AdminGuard(ScriptUtils.safeAdminGuard);
 
         // Call3 array formatting
         bytes memory addAdminGuardData = abi.encodeWithSelector(GuardManager.setGuard.selector, address(adminGuard));
@@ -72,6 +72,7 @@ contract ExecuteTxScript is ScriptUtils {
         // execution template
         multicallData = abi.encodeWithSignature("aggregate3((address,bool,bytes)[])", calls);
 
+        // execute transaction using env sigs
         bool r = founderSafe.execTransaction(
             to, value, multicallData, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures
         );

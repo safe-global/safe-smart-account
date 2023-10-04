@@ -29,8 +29,8 @@ contract SimulateMulticallScript is ScriptUtils {
     bytes signatures;
 
     function setUp() public {
-        founderSafe = Safe(payable(0x5d347E9b0e348a10327F4368a90286b3d1E7FB15));
-        adminGuard = AdminGuard(0x2370cB6D6909eAD72b322496628b824DAfDcc3F0);
+        founderSafe = Safe(payable(ScriptUtils.stationFounderSafe));
+        adminGuard = AdminGuard(ScriptUtils.safeAdminGuard);
 
         module1 = ScriptUtils.symmetry;
         module2 = ScriptUtils.robriks2;
