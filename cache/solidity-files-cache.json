@@ -583,6 +583,64 @@
         }
       }
     },
+    "contracts/examples/guards/AdminGuard.sol": {
+      "lastModificationDate": 1696270505299,
+      "contentHash": "51a0ca32ccc6ff32bf5e427078c16dc7",
+      "sourceName": "contracts/examples/guards/AdminGuard.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Safe.sol",
+        "contracts/base/Executor.sol",
+        "contracts/base/FallbackManager.sol",
+        "contracts/base/GuardManager.sol",
+        "contracts/base/ModuleManager.sol",
+        "contracts/base/OwnerManager.sol",
+        "contracts/common/Enum.sol",
+        "contracts/common/NativeCurrencyPaymentFallback.sol",
+        "contracts/common/SecuredTokenTransfer.sol",
+        "contracts/common/SelfAuthorized.sol",
+        "contracts/common/SignatureDecoder.sol",
+        "contracts/common/Singleton.sol",
+        "contracts/common/StorageAccessible.sol",
+        "contracts/external/SafeMath.sol",
+        "contracts/interfaces/IERC165.sol",
+        "contracts/interfaces/ISignatureValidator.sol"
+      ],
+      "versionRequirement": ">=0.7.0, <0.9.0",
+      "artifacts": {
+        "AdminGuard": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "AdminGuard.sol/AdminGuard.json"
+        }
+      }
+    },
     "contracts/external/SafeMath.sol": {
       "lastModificationDate": 1695088230303,
       "contentHash": "337f2d06534270dbd37557c83037b2da",
@@ -706,6 +764,137 @@
         },
         "ISignatureValidatorConstants": {
           "0.8.19+commit.7dd6d404.Linux.gcc": "ISignatureValidator.sol/ISignatureValidatorConstants.json"
+        }
+      }
+    },
+    "contracts/proxies/IProxyCreationCallback.sol": {
+      "lastModificationDate": 1695088230303,
+      "contentHash": "6f697704082269b9fc52d5629dba1bc1",
+      "sourceName": "contracts/proxies/IProxyCreationCallback.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/proxies/SafeProxy.sol"
+      ],
+      "versionRequirement": ">=0.7.0, <0.9.0",
+      "artifacts": {
+        "IProxyCreationCallback": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "IProxyCreationCallback.sol/IProxyCreationCallback.json"
+        }
+      }
+    },
+    "contracts/proxies/SafeProxy.sol": {
+      "lastModificationDate": 1695088230303,
+      "contentHash": "7ced2be77ee1561d94b887ce0e6f1f65",
+      "sourceName": "contracts/proxies/SafeProxy.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.7.0, <0.9.0",
+      "artifacts": {
+        "IProxy": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "SafeProxy.sol/IProxy.json"
+        },
+        "SafeProxy": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "SafeProxy.sol/SafeProxy.json"
+        }
+      }
+    },
+    "contracts/proxies/SafeProxyFactory.sol": {
+      "lastModificationDate": 1695088230303,
+      "contentHash": "64608b8977c639b134dde510e270774f",
+      "sourceName": "contracts/proxies/SafeProxyFactory.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/proxies/IProxyCreationCallback.sol",
+        "contracts/proxies/SafeProxy.sol"
+      ],
+      "versionRequirement": ">=0.7.0, <0.9.0",
+      "artifacts": {
+        "SafeProxyFactory": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "SafeProxyFactory.sol/SafeProxyFactory.json"
         }
       }
     },
@@ -1556,9 +1745,135 @@
         }
       }
     },
+    "node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1695922346133,
+      "contentHash": "48686fc32a22a3754b8e63321857dd2a",
+      "sourceName": "node_modules/@openzeppelin/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Strings": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "Strings.sol/Strings.json"
+        }
+      }
+    },
+    "node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1695922346125,
+      "contentHash": "fe63409d8a06818b926cf89e0ea88b1b",
+      "sourceName": "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Math": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "Math.sol/Math.json"
+        }
+      }
+    },
+    "node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1695922346133,
+      "contentHash": "9488ebd4daacfee8ad04811600d7d061",
+      "sourceName": "node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "SignedMath": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "SignedMath.sol/SignedMath.json"
+        }
+      }
+    },
     "script/Deploy.s.sol": {
-      "lastModificationDate": 1695099200402,
-      "contentHash": "78713e61ae13f68bf14f0f25d8725962",
+      "lastModificationDate": 1695158024768,
+      "contentHash": "a6b5c6b4e3eb98f62c71b7a105913a7d",
       "sourceName": "script/Deploy.s.sol",
       "solcConfig": {
         "settings": {
@@ -1606,6 +1921,9 @@
         "contracts/external/SafeMath.sol",
         "contracts/interfaces/IERC165.sol",
         "contracts/interfaces/ISignatureValidator.sol",
+        "contracts/proxies/IProxyCreationCallback.sol",
+        "contracts/proxies/SafeProxy.sol",
+        "contracts/proxies/SafeProxyFactory.sol",
         "lib/forge-std/src/Base.sol",
         "lib/forge-std/src/Script.sol",
         "lib/forge-std/src/StdChains.sol",
@@ -1629,9 +1947,86 @@
         }
       }
     },
+    "script/PrepareHash.s.sol": {
+      "lastModificationDate": 1696277139387,
+      "contentHash": "d2f882ad33ed5e84798331598d09ddfc",
+      "sourceName": "script/PrepareHash.s.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Safe.sol",
+        "contracts/base/Executor.sol",
+        "contracts/base/FallbackManager.sol",
+        "contracts/base/GuardManager.sol",
+        "contracts/base/ModuleManager.sol",
+        "contracts/base/OwnerManager.sol",
+        "contracts/common/Enum.sol",
+        "contracts/common/NativeCurrencyPaymentFallback.sol",
+        "contracts/common/SecuredTokenTransfer.sol",
+        "contracts/common/SelfAuthorized.sol",
+        "contracts/common/SignatureDecoder.sol",
+        "contracts/common/Singleton.sol",
+        "contracts/common/StorageAccessible.sol",
+        "contracts/examples/guards/AdminGuard.sol",
+        "contracts/external/SafeMath.sol",
+        "contracts/interfaces/IERC165.sol",
+        "contracts/interfaces/ISignatureValidator.sol",
+        "lib/forge-std/src/Base.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdStyle.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/forge-std/src/interfaces/IMulticall3.sol",
+        "lib/forge-std/src/safeconsole.sol",
+        "node_modules/@openzeppelin/contracts/utils/Strings.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/Math.sol",
+        "node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol",
+        "script/utils/ScriptUtils.sol"
+      ],
+      "versionRequirement": "^0.8.13",
+      "artifacts": {
+        "PrepareHashScript": {
+          "0.8.19+commit.7dd6d404.Linux.gcc": "PrepareHash.s.sol/PrepareHashScript.json"
+        }
+      }
+    },
     "script/utils/ScriptUtils.sol": {
-      "lastModificationDate": 1695098229743,
-      "contentHash": "cf36d2a8635e522ef298556298a093b6",
+      "lastModificationDate": 1696271639762,
+      "contentHash": "f41ec6cb1aec9556594bceb2f2c5aa0d",
       "sourceName": "script/utils/ScriptUtils.sol",
       "solcConfig": {
         "settings": {

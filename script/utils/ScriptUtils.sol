@@ -4,6 +4,12 @@ pragma solidity ^0.8.13;
 import {Script} from "forge-std/Script.sol";
 
 abstract contract ScriptUtils is Script {
+    struct Call3 {
+        address target;
+        bool allowFailure;
+        bytes callData;
+    }
+
     error Create2Failure();
 
     // global addresses
@@ -19,6 +25,13 @@ abstract contract ScriptUtils is Script {
     address public constant frog = 0xE7affDB964178261Df49B86BFdBA78E9d768Db6D;
     address public constant paprika = 0x4b8c47aE2e5083EE6AA9aE2884E8051c2e4741b1;
     address public constant robriks = 0xFFFFfFfFA2eC6F66a22017a0Deb0191e5F8cBc35;
+    address public constant robriks2 = 0x5d5d4d04B70BFe49ad7Aac8C4454536070dAf180;
+
+    // safe
+    address public constant stationFounderSafe = 0xDd70fb41e936c5dc67Fc783BA5281E50f0A46fBC;
+    address public constant safeAdminGuard = 0xDB9A089A20D4b8cDef355ca474323b6C832D9776;
+    // Multicall3 contract address across almost all chains
+    address public constant multicall3 = 0xcA11bde05977b3631167028862bE2a173976CA11;
 
     // reads a plain extensionless file containing *only the salt string*
     function readSalt(string memory fileName) internal view returns (string memory) {
