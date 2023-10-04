@@ -79,7 +79,7 @@ contract AdminGuard is BaseGuard {
         address guard =
             address(uint160(uint256(bytes32(StorageAccessible(msg.sender).getStorageAt(uint256(guardStorageSlot), 1)))));
 
-        (address[] memory modules,) = ModuleManager(msg.sender).getModulesPaginated(address(0x1), 32);
+        (address[] memory modules, address sentinelModulesLimiter) = ModuleManager(msg.sender).getModulesPaginated(address(0x1), 32);
 
         address[] memory owners = OwnerManager(msg.sender).getOwners();
         uint256 ownerCountSlot = 4;
@@ -89,7 +89,7 @@ contract AdminGuard is BaseGuard {
         uint256 nonce = Safe(payable(msg.sender)).nonce();
 
         return keccak256(
-            abi.encodePacked(singleton, fallbackHandler, guard, modules, owners, ownerCount, threshold, nonce)
+            abi.encodePacked(singleton, fallbackHandler, guard, modules, sentinelModulesLimiter, owners, ownerCount, threshold, nonce)
         );
     }
 }
