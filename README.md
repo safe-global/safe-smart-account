@@ -1,66 +1,22 @@
-## Foundry
+# 👷 GroupOS Safe 🦺
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A distinguishing feature of the GroupOS + 0xRails protocols that puts Station Labs at the cutting edge of the Web3 space is commitment to consistent addresses across networks. This repository makes that fact possible.
 
-Foundry consists of:
+All GroupOS toolkits reside at identical addresses across chains to eliminate the need for users and clients to manage multiple account addresses across blockchains. These include:
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- ERC4337 Account Abstraction
+- ERC6551 Tokenbound Accounts
+- Modular contract signature validation
+- All core contracts
 
-## Documentation
+## About Safe
 
-https://book.getfoundry.sh/
+Safe is a renowned multisig contract repository famous for its widespread use and robust security.
 
-## Usage
+To preserve the top-tier security posture of Safe, no changes are made to any core contracts. In fact, the only difference made in this codebase is the implementation of a single Guard contract designed to cater to our specific access control requirements, the `AdminGuard`.
 
-### Build
+This custom Safe guard facilitates smooth and secure onchain operations tailored to GroupOS's organizational needs. It is currently undergoing security audit.
 
-```shell
-$ forge build
-```
+## Contact
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+For inquiries, feedback, or collaboration proposals, feel free to reach out to us at [groupos.xyz](https://groupos.xyz).
