@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-08-30 20:37:09
-+++ Safe.sol	2023-08-30 20:45:31
+--- Safe.sol	2023-09-29 15:38:28
++++ Safe.sol	2023-09-29 15:40:17
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -10,7 +10,7 @@ diff -druN Safe.sol Safe.sol
      }
  
      /**
-@@ -93,15 +93,18 @@
+@@ -93,15 +93,17 @@
       * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
       */
      function setup(
@@ -27,14 +27,13 @@ diff -druN Safe.sol Safe.sol
 -    ) external {
 +    ) public {
 +        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
-+        // constructor.
-+         
++        // constructor
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-08-30 20:06:21
-+++ base/Executor.sol	2023-08-30 20:47:47
+--- base/Executor.sol	2023-09-26 16:12:09
++++ base/Executor.sol	2023-09-26 16:10:42
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {

@@ -6,7 +6,7 @@ if [[ -n "$CI" ]]; then
     params=()
 fi
 
-certoraRun certora/conf/safe.conf \
+certoraRun certora/conf/signatures.conf \
     "${params[@]}" \
     --msg "Safe $*" \
     "$@"

@@ -247,9 +247,46 @@ contract Safe is
     }
 
     /**
+     * @notice Checks whether the contract signature is valid. Reverts otherwise.
+     * @dev This is extracted to a separate function for better compatibility with Certora's prover.
+     *      More info here: https://github.com/safe-global/safe-contracts/pull/661
+     * @param owner Address of the owner used to sign the message
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param signatures Signature data that should be verified.
+     * @param offset Offset to the start of the contract signature in the signatures byte array
+     */
+    function checkContractSignature(address owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
+        // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
+        require(offset.add(32) <= signatures.length, "GS022");
+
+        // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+        uint256 contractSignatureLen;
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
+        assembly {
+            contractSignatureLen := mload(add(add(signatures, offset), 0x20))
+        }
+        /* solhint-enable no-inline-assembly */
+        require(offset.add(32).add(contractSignatureLen) <= signatures.length, "GS023");
+
+        // Check signature
+        bytes memory contractSignature;
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
+        assembly {
+            // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
+            contractSignature := add(add(signatures, offset), 0x20)
+        }
+        /* solhint-enable no-inline-assembly */
+
+        require(ISignatureValidator(owner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+    }
+
+    /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param data That should be signed (this is passed to an external validator contract)
+     * @param data NOT USED. That should be signed (this is passed to an external validator contract)
+     *             For some reason, removing it from the parameters and passing empty bytes ("") slightly increases the gas costs, so we keep it.
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
@@ -303,29 +340,11 @@ contract Safe is
                 // Here we only check that the pointer is not pointing inside the part that is being processed
                 require(uint256(s) >= requiredSignatures.mul(65), "GS021");
 
-                // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
-                require(uint256(s).add(32) <= signatures.length, "GS022");
-
-                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
-                uint256 contractSignatureLen;
-                /* solhint-disable no-inline-assembly */
-                /// @solidity memory-safe-assembly
-                assembly {
-                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
-                }
-                /* solhint-enable no-inline-assembly */
-                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
-
-                // Check signature
-                bytes memory contractSignature;
-                /* solhint-disable no-inline-assembly */
-                /// @solidity memory-safe-assembly
-                assembly {
-                    // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
-                    contractSignature := add(add(signatures, s), 0x20)
-                }
-                /* solhint-enable no-inline-assembly */
-                require(ISignatureValidator(currentOwner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+                // The contract signature check is extracted to a separate function for better compatibility with formal verification
+                // A quote from the Certora team:
+                // "The assembly code broke the pointer analysis, which switched the prover in failsafe mode, where it is (a) much slower and (b) computes different hashes than in the normal mode."
+                // More info here: https://github.com/safe-global/safe-contracts/pull/661
+                checkContractSignature(currentOwner, dataHash, signatures, uint256(s));
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash
                 // When handling approved hashes the address of the approver is encoded into r

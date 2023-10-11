@@ -20,11 +20,6 @@ methods {
     function checkSignatures(bytes32, bytes memory, bytes memory) internal => NONDET;
 }
 
-definition noHavoc(method f) returns bool =
-    f.selector != sig:execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation).selector
-    && f.selector != sig:execTransactionFromModule(address,uint256,bytes,Enum.Operation).selector 
-    && f.selector != sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector;
-
 definition reachableOnly(method f) returns bool =
     f.selector != sig:setup(address[],uint256,address,bytes,address,address,uint256,address).selector
     && f.selector != sig:simulateAndRevert(address,bytes).selector
@@ -49,7 +44,7 @@ rule nonceMonotonicity(method f) filtered {
 
     uint256 nonceAfter = nonce();
 
-    assert nonceAfter != nonceBefore => 
+    assert nonceAfter != nonceBefore =>
         to_mathint(nonceAfter) == nonceBefore + 1 && f.selector == sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector;
 }
 
@@ -164,11 +159,12 @@ rule nativeTokenBalanceSpending(method f) filtered {
 
     uint256 balanceAfter = getNativeTokenBalance();
 
-    assert balanceAfter < balanceBefore => 
+    assert balanceAfter < balanceBefore =>
         f.selector == sig:execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes).selector
         || f.selector == sig:execTransactionFromModule(address,uint256,bytes,Enum.Operation).selector
         || f.selector == sig:execTransactionFromModuleReturnData(address,uint256,bytes,Enum.Operation).selector;
 }
+
 
 rule nativeTokenBalanceSpendingExecTransaction(
         address to,
@@ -176,10 +172,10 @@ rule nativeTokenBalanceSpendingExecTransaction(
         bytes data,
         Enum.Operation operation,
         uint256 safeTxGas,
-        uint256 baseGas, 
-        uint256 gasPrice, 
-        address gasToken, 
-        address refundReceiver, 
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address refundReceiver,
         bytes signatures
     ) {
     uint256 balanceBefore = getNativeTokenBalance();
@@ -189,7 +185,7 @@ rule nativeTokenBalanceSpendingExecTransaction(
 
     uint256 balanceAfter = getNativeTokenBalance();
 
-    assert 
+    assert
         gasPrice == 0 => to_mathint(balanceBefore - value) <= to_mathint(balanceAfter)
         // When the gas price is non-zero and the gas token is zero (zero = native token), the refund params should also be taken into account.
         || gasPrice > 0 && gasToken == 0 => to_mathint(balanceBefore - value - (gasPrice * (baseGas + safeTxGas))) <= to_mathint(balanceAfter);
@@ -208,7 +204,7 @@ rule nativeTokenBalanceSpendingExecTransactionFromModule(
 
     uint256 balanceAfter = getNativeTokenBalance();
 
-    assert balanceAfter < balanceBefore => 
+    assert balanceAfter < balanceBefore =>
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
 }
 
@@ -226,7 +222,7 @@ rule nativeTokenBalanceSpendingExecTransactionFromModuleReturnData(
 
     uint256 balanceAfter = getNativeTokenBalance();
 
-    assert balanceAfter < balanceBefore => 
+    assert balanceAfter < balanceBefore =>
         to_mathint(balanceBefore - value) <= to_mathint(balanceAfter);
 }
 
@@ -247,9 +243,10 @@ rule moduleOnlyAddedThroughEnableModule(method f, address module) filtered {
     calldataarg args; env e;
     f(e, args);
 
-    assert getModule(module) != 0 => 
+    assert getModule(module) != 0 =>
         f.selector == sig:enableModule(address).selector;
 }
+
 
 rule onlyModuleCanExecuteModuleThransactions(
     address to,
