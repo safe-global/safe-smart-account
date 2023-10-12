@@ -50,8 +50,7 @@ contract Test4337ModuleAndHandler {
     }
 
     function execTransaction(address to, uint256 value, bytes calldata data) external payable {
-        address payable safeAddress = payable(msg.sender);
-        ISafe safe = ISafe(safeAddress);
+        ISafe safe = ISafe(address(this));
         require(safe.execTransactionFromModule(to, value, data, 0), "tx failed");
     }
 
