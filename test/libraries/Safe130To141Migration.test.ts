@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
+import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithSingleton, migrationContractFrom130To141, getSafeSingletonAt } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
@@ -38,11 +39,33 @@ describe("Safe130To141Migration library", () => {
         const singleton130L2 = await getSafeSingletonAt(singleton130L2Address);
 
         const migration = await (await migrationContractFrom130To141()).deploy();
+
+        const safeWith1967Proxy = await getSafeSingletonAt(
+            await hre.ethers
+                .getContractFactory("UpgradeableProxy")
+                .then((factory) =>
+                    factory.deploy(
+                        singleton130Address,
+                        singleton130.interface.encodeFunctionData("setup", [
+                            [user1.address],
+                            1,
+                            AddressZero,
+                            "0x",
+                            AddressZero,
+                            AddressZero,
+                            0,
+                            AddressZero,
+                        ]),
+                    ),
+                )
+                .then((proxy) => proxy.getAddress()),
+        );
         return {
             safe130: await getSafeWithSingleton(singleton130, [user1.address]),
             safe130l2: await getSafeWithSingleton(singleton130L2, [user1.address]),
             migration,
             signers,
+            safeWith1967Proxy,
         };
     });
 
@@ -56,7 +79,19 @@ describe("Safe130To141Migration library", () => {
     describe("migrate", () => {
         it("can only be called from Safe itself", async () => {
             const { migration } = await setupTests();
-            await expect(migration.migrate()).to.be.revertedWith("Migration should only be called via delegatecall");
+            await expect(migration.migrate()).to.be.revertedWith("Unsupported proxy contract");
+        });
+
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(executeContractCallWithSigners(safeWith1967Proxy, migration, "migrate", [], [user1], true)).to.be.revertedWith(
+                "GS013",
+            );
         });
 
         it("can migrate", async () => {
@@ -100,7 +135,19 @@ describe("Safe130To141Migration library", () => {
     describe("migrateWithFallbackHandler", () => {
         it("can only be called from Safe itself", async () => {
             const { migration } = await setupTests();
-            await expect(migration.migrateWithFallbackHandler()).to.be.revertedWith("Migration should only be called via delegatecall");
+            await expect(migration.migrateWithFallbackHandler()).to.be.revertedWith("Unsupported proxy contract");
+        });
+
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateWithFallbackHandler", [], [user1], true),
+            ).to.be.revertedWith("GS013");
         });
 
         it("can migrate", async () => {
@@ -150,7 +197,31 @@ describe("Safe130To141Migration library", () => {
     describe("migrateL2", () => {
         it("can only be called from Safe itself", async () => {
             const { migration } = await setupTests();
-            await expect(migration.migrateL2()).to.be.revertedWith("Migration should only be called via delegatecall");
+            await expect(migration.migrateL2()).to.be.revertedWith("Unsupported proxy contract");
+        });
+
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(
+                executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateL2WithFallbackHandler", [], [user1], true),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts if the singleton in storage at slot 0 is not a contract", async () => {
+            const {
+                migration,
+                safeWith1967Proxy,
+                signers: [user1],
+            } = await setupTests();
+
+            await expect(executeContractCallWithSigners(safeWith1967Proxy, migration, "migrateL2", [], [user1], true)).to.be.revertedWith(
+                "GS013",
+            );
         });
 
         it("can migrate", async () => {
@@ -194,7 +265,7 @@ describe("Safe130To141Migration library", () => {
     describe("migrateL2WithFallbackHandler", () => {
         it("can only be called from Safe itself", async () => {
             const { migration } = await setupTests();
-            await expect(migration.migrateL2WithFallbackHandler()).to.be.revertedWith("Migration should only be called via delegatecall");
+            await expect(migration.migrateL2WithFallbackHandler()).to.be.revertedWith("Unsupported proxy contract");
         });
 
         it("can migrate", async () => {
