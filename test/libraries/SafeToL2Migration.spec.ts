@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithSingleton, migrationContractTo150, getSafeSingletonAt, getMock } from "../utils/setup";
+import { getSafeWithSingleton, getSafeSingletonAt, getMock } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
@@ -130,8 +130,6 @@ describe("SafeToL2Migration library", () => {
                 singleton130L2Address,
             } = await setupTests();
             const safeAddress = await safe130.getAddress();
-            // The emit matcher checks the address, which is the Safe as delegatecall is used
-            const migrationSafe = migration.attach(safeAddress);
 
             // Increase nonce by sending eth
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
