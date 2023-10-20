@@ -6,6 +6,7 @@ import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Enum} from "../common/Enum.sol";
 
 interface ISafe {
+    // solhint-disable-next-line
     function VERSION() external view returns (string memory);
 }
 
@@ -72,11 +73,8 @@ contract SafeToL2Migration is SafeStorage {
         // Simulate a L2 transaction so indexer picks up the Safe
         // 0xef2624ae - keccack("migrateToL2(address)")
         bytes memory data = abi.encodeWithSelector(0xef2624ae, l2Singleton);
-        bytes memory additionalInfo;
-        {
-            // nonce, sender, threshold
-            additionalInfo = abi.encode(nonce, msg.sender, threshold);
-        }
+        // nonce, sender, threshold
+        bytes memory additionalInfo = abi.encode(nonce - 1, msg.sender, threshold);
         emit SafeMultiSigTransaction(
             MIGRATION_SINGLETON,
             0,

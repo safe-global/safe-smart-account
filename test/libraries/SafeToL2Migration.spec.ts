@@ -130,6 +130,7 @@ describe("SafeToL2Migration library", () => {
                 singleton130L2Address,
             } = await setupTests();
             const safeAddress = await safe130.getAddress();
+            expect(await safe130.nonce()).to.be.eq(0);
 
             // Increase nonce by sending eth
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
@@ -137,6 +138,7 @@ describe("SafeToL2Migration library", () => {
             const safeTx = buildSafeTransaction({ to: user1.address, value: ethers.parseEther("1"), nonce });
             await executeTxWithSigners(safe130, safeTx, [user1]);
 
+            expect(await safe130.nonce()).to.be.eq(1);
             await expect(
                 executeContractCallWithSigners(safe130, migration, "migrateToL2", [singleton130L2Address], [user1], true),
             ).to.be.revertedWith("GS013");
@@ -155,13 +157,36 @@ describe("SafeToL2Migration library", () => {
             const safeAddress = await safe130.getAddress();
             // The emit matcher checks the address, which is the Safe as delegatecall is used
             const migrationSafe = migration.attach(safeAddress);
+            const migrationAddress = await migration.getAddress();
 
-            await expect(executeContractCallWithSigners(safe130, migration, "migrateToL2", [singleton130L2Address], [user1], true))
+            const functionName = "migrateToL2";
+            const expectedData = migration.interface.encodeFunctionData(functionName, [singleton130L2Address]);
+            const safeThreshold = await safe130.getThreshold();
+            const additionalInfo = hre.ethers.AbiCoder.defaultAbiCoder().encode(
+                ["uint256", "address", "uint256"],
+                [0, user1.address, safeThreshold],
+            );
+            await expect(executeContractCallWithSigners(safe130, migration, functionName, [singleton130L2Address], [user1], true))
                 .to.emit(migrationSafe, "ChangedMasterCopy")
-                .withArgs(singleton130L2Address);
+                .withArgs(singleton130L2Address)
+                .to.emit(migrationSafe, "SafeMultiSigTransaction")
+                .withArgs(
+                    migrationAddress,
+                    0,
+                    expectedData,
+                    1,
+                    0,
+                    0,
+                    0,
+                    AddressZero,
+                    AddressZero,
+                    "0x", // We cannot detect signatures
+                    additionalInfo,
+                );
 
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
             expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(singleton130L2Address);
+            expect(await safe130.nonce()).to.be.eq(1);
         });
 
         it("doesn't touch important storage slots", async () => {
