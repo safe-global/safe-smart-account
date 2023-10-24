@@ -10,8 +10,6 @@ const SAFE_SINGLETON_141_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
 
 const SAFE_SINGLETON_141_L2_ADDRESS = "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA";
 
-const SAFE_SINGLETON_150_ADDRESS = "0x88627c8904eCd9DF96A572Ef32A7ff13b199Ed8D";
-
 const SAFE_SINGLETON_150_L2_ADDRESS = "0x0Ee37514644683f7EB9745a5726C722DeBa77e52";
 
 const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
@@ -27,7 +25,6 @@ describe("SafeToL2Migration library", () => {
         // Set the runtime code for hardcoded addresses, so the expected events are emitted
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_141_ADDRESS, safeRuntimeBytecode.safe141]);
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_141_L2_ADDRESS, safeRuntimeBytecode.safe141l2]);
-        await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_ADDRESS, safeRuntimeBytecode.safe150]);
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_L2_ADDRESS, safeRuntimeBytecode.safe150l2]);
 
         const signers = await ethers.getSigners();
@@ -39,7 +36,7 @@ describe("SafeToL2Migration library", () => {
             throw new Error("Could not deploy Safe130 or Safe130L2");
         }
         const singleton130 = await getSafeSingletonAt(singleton130Address);
-        const singleton130L2 = await getSafeSingletonAt(singleton130L2Address);
+        const singleton141 = await getSafeSingletonAt(SAFE_SINGLETON_141_ADDRESS);
 
         const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x945b8148"]);
@@ -73,7 +70,7 @@ describe("SafeToL2Migration library", () => {
         const migration = await safeToL2MigrationContract.deploy();
         return {
             safe130: await getSafeWithSingleton(singleton130, [user1.address]),
-            safe130l2: await getSafeWithSingleton(singleton130L2, [user1.address]),
+            safe141: await getSafeWithSingleton(singleton141, [user1.address]),
             safeWith1967Proxy,
             migration,
             signers,
@@ -187,6 +184,47 @@ describe("SafeToL2Migration library", () => {
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
             expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(singleton130L2Address);
             expect(await safe130.nonce()).to.be.eq(1);
+        });
+
+        it("migrates from singleton 1.4.1 to 1.4.1L2", async () => {
+            const {
+                safe141,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe141.getAddress();
+            // The emit matcher checks the address, which is the Safe as delegatecall is used
+            const migrationSafe = migration.attach(safeAddress);
+            const migrationAddress = await migration.getAddress();
+
+            const functionName = "migrateToL2";
+            const expectedData = migration.interface.encodeFunctionData(functionName, [SAFE_SINGLETON_141_L2_ADDRESS]);
+            const safeThreshold = await safe141.getThreshold();
+            const additionalInfo = hre.ethers.AbiCoder.defaultAbiCoder().encode(
+                ["uint256", "address", "uint256"],
+                [0, user1.address, safeThreshold],
+            );
+            await expect(executeContractCallWithSigners(safe141, migration, functionName, [SAFE_SINGLETON_141_L2_ADDRESS], [user1], true))
+                .to.emit(migrationSafe, "ChangedMasterCopy")
+                .withArgs(SAFE_SINGLETON_141_L2_ADDRESS)
+                .to.emit(migrationSafe, "SafeMultiSigTransaction")
+                .withArgs(
+                    migrationAddress,
+                    0,
+                    expectedData,
+                    1,
+                    0,
+                    0,
+                    0,
+                    AddressZero,
+                    AddressZero,
+                    "0x", // We cannot detect signatures
+                    additionalInfo,
+                );
+
+            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_141_L2_ADDRESS);
+            expect(await safe141.nonce()).to.be.eq(1);
         });
 
         it("doesn't touch important storage slots", async () => {
