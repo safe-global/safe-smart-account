@@ -52,7 +52,9 @@ contract SafeToL2Migration is SafeStorage {
 
     /**
      * @notice Migrate from Safe 1.3.0/1.4.1 Singleton (L1) to the same version provided L2 singleton
+     * Safe is required to have nonce 0 so backend can support it after the migration
      * @dev This function should only be called via a delegatecall to perform the upgrade.
+     * Singletons versions will be compared, so it implies that contract exists
      */
     function migrateToL2(address l2Singleton) public {
         require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
