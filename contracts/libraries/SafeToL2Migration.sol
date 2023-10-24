@@ -72,7 +72,7 @@ contract SafeToL2Migration is SafeStorage {
         singleton = l2Singleton;
 
         // Simulate a L2 transaction so indexer picks up the Safe
-        // 0xef2624ae - keccack("migrateToL2(address)")
+        // 0xef2624ae - keccak("migrateToL2(address)")
         bytes memory data = abi.encodeWithSelector(0xef2624ae, l2Singleton);
         // nonce, sender, threshold
         bytes memory additionalInfo = abi.encode(nonce - 1, msg.sender, threshold);
