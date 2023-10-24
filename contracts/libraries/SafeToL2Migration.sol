@@ -10,8 +10,6 @@ interface ISafe {
     function VERSION() external view returns (string memory);
 }
 
-
-
 /**
  * @title Migration Contract for updating a Safe from 1.3.0/1.4.1 version to a L2 version. Useful when replaying a Safe from a non L2 network in a L2 network.
  * @notice This contract facilitates the migration of a Safe contract from version 1.3.0 to 1.3.0L2 or from 1.4.1 to 1.4.1L2
@@ -66,8 +64,11 @@ contract SafeToL2Migration is SafeStorage {
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
         // There's no way to make sure if address is a valid singleton, unless we cofigure the contract for every chain
-        require(newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")), "Provided singleton version is not supported");
-        
+        require(
+            newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")),
+            "Provided singleton version is not supported"
+        );
+
         singleton = l2Singleton;
 
         // Simulate a L2 transaction so indexer picks up the Safe
@@ -85,45 +86,9 @@ contract SafeToL2Migration is SafeStorage {
             0,
             address(0),
             address(0),
-            "",  // We cannot detect signatures
+            "", // We cannot detect signatures
             additionalInfo
         );
         emit ChangedMasterCopy(singleton);
-    }
-
-    /**
-     * @notice Checks whether an Ethereum address corresponds to a contract or an externally owned account (EOA).
-     *
-     * @param account The Ethereum address to be checked.
-     *
-     * @return A boolean value indicating whether the address is associated with a contract (true) or an EOA (false).
-     *
-     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address is a contract.
-     * It may return incorrect results in some edge cases:
-     *
-     * - During the contract deployment process, including the constructor, this function may incorrectly identify the
-     *   contract's own address as an EOA, as the code is not yet deployed.
-     *
-     * - If a contract performs a self-destruct operation (using `selfdestruct`) after deployment, this function may
-     *   incorrectly identify the address as an EOA once the contract is destroyed, as its code will be removed.
-     *
-     * - When interacting with external contracts that use delegatecall or other mechanisms to execute code from
-     *   different contracts, this function may not accurately distinguish between a contract and an EOA, as it only
-     *   checks the code size at the specified address.
-     *
-     * - Contracts that are created using the CREATE2 opcode may not be accurately identified as contracts by this
-     *   function, especially if the code is not deployed until after the creation.
-     *
-     * Developers should use caution when relying on the results of this function for critical decision-making.
-     */
-    function isContract(address account) internal view returns (bool) {
-        uint256 size;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            size := extcodesize(account)
-        }
-
-        // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
-        return size > 0;
     }
 }
