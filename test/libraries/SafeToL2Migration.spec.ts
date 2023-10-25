@@ -4,13 +4,21 @@ import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithSingleton, getSafeSingletonAt, getMock } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
-import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
+import {
+    buildSafeTransaction,
+    executeContractCallWithSigners,
+    executeTx,
+    executeTxWithSigners,
+    safeApproveHash,
+} from "../../src/utils/execution";
 
 const SAFE_SINGLETON_141_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
 
 const SAFE_SINGLETON_141_L2_ADDRESS = "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA";
 
 const SAFE_SINGLETON_150_L2_ADDRESS = "0x0Ee37514644683f7EB9745a5726C722DeBa77e52";
+
+const COMPATIBILITY_FALLBACK_HANDLER_150 = "0x8aa755cB169991fEDC3E306751dCb71964A041c7";
 
 const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
 
@@ -26,15 +34,21 @@ describe("SafeToL2Migration library", () => {
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_141_ADDRESS, safeRuntimeBytecode.safe141]);
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_141_L2_ADDRESS, safeRuntimeBytecode.safe141l2]);
         await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_L2_ADDRESS, safeRuntimeBytecode.safe150l2]);
+        await hre.network.provider.send("hardhat_setCode", [
+            COMPATIBILITY_FALLBACK_HANDLER_150,
+            safeRuntimeBytecode.safe150CompatibilityFallbackHandler,
+        ]);
 
         const signers = await ethers.getSigners();
         const [user1] = signers;
+        const singleton111Address = (await (await user1.sendTransaction({ data: deploymentData.safe111 })).wait())?.contractAddress;
         const singleton130Address = (await (await user1.sendTransaction({ data: deploymentData.safe130 })).wait())?.contractAddress;
         const singleton130L2Address = (await (await user1.sendTransaction({ data: deploymentData.safe130l2 })).wait())?.contractAddress;
 
-        if (!singleton130Address || !singleton130L2Address) {
-            throw new Error("Could not deploy Safe130 or Safe130L2");
+        if (!singleton111Address || !singleton130Address || !singleton130L2Address) {
+            throw new Error("Could not deploy Safe111, Safe130 or Safe130L2");
         }
+        const singleton111 = await getSafeSingletonAt(singleton111Address);
         const singleton130 = await getSafeSingletonAt(singleton130Address);
         const singleton141 = await getSafeSingletonAt(SAFE_SINGLETON_141_ADDRESS);
 
@@ -69,6 +83,7 @@ describe("SafeToL2Migration library", () => {
         const safeToL2MigrationContract = await hre.ethers.getContractFactory("SafeToL2Migration");
         const migration = await safeToL2MigrationContract.deploy();
         return {
+            safe111: await getSafeWithSingleton(singleton111, [user1.address]),
             safe130: await getSafeWithSingleton(singleton130, [user1.address]),
             safe141: await getSafeWithSingleton(singleton141, [user1.address]),
             safeWith1967Proxy,
@@ -225,6 +240,66 @@ describe("SafeToL2Migration library", () => {
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
             expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_141_L2_ADDRESS);
             expect(await safe141.nonce()).to.be.eq(1);
+        });
+
+        it("migrates from singleton 1.1.1 to 1.4.1L2", async () => {
+            const {
+                safe111,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe111.getAddress();
+            expect(await safe111.VERSION()).eq("1.1.1");
+            expect("0x" + (await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).slice(26)).to.be.eq(
+                AddressZero,
+            );
+
+            // The emit matcher checks the address, which is the Safe as delegatecall is used
+            const migrationSafe = migration.attach(safeAddress);
+            const migrationAddress = await migration.getAddress();
+
+            const functionName = "migrateFromV111";
+            const data = migration.interface.encodeFunctionData(functionName, [
+                SAFE_SINGLETON_141_L2_ADDRESS,
+                COMPATIBILITY_FALLBACK_HANDLER_150,
+            ]);
+            const nonce = await safe111.nonce();
+            expect(nonce).to.be.eq(0);
+            const safeThreshold = await safe111.getThreshold();
+            const additionalInfo = hre.ethers.AbiCoder.defaultAbiCoder().encode(
+                ["uint256", "address", "uint256"],
+                [0, user1.address, safeThreshold],
+            );
+
+            const tx = buildSafeTransaction({ to: migrationAddress, data, operation: 1, nonce });
+
+            expect(await executeTx(safe111, tx, [await safeApproveHash(user1, safe111, tx, true)]))
+                .to.emit(migrationSafe, "ChangedMasterCopy")
+                .withArgs(SAFE_SINGLETON_141_L2_ADDRESS)
+                .to.emit(migrationSafe, "SafeMultiSigTransaction")
+                .withArgs(
+                    migrationAddress,
+                    0,
+                    data,
+                    1,
+                    0,
+                    0,
+                    0,
+                    AddressZero,
+                    AddressZero,
+                    "0x", // We cannot detect signatures
+                    additionalInfo,
+                )
+                .to.emit(migrationSafe, "SafeSetup")
+                .withArgs(migrationAddress, await safe111.getOwners(), safeThreshold, AddressZero, COMPATIBILITY_FALLBACK_HANDLER_150);
+
+            expect(await safe111.nonce()).to.be.eq(1);
+            expect(await safe111.VERSION()).to.be.eq("1.4.1");
+            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_141_L2_ADDRESS);
+            expect("0x" + (await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).slice(26)).to.be.eq(
+                COMPATIBILITY_FALLBACK_HANDLER_150.toLowerCase(),
+            );
         });
 
         it("doesn't touch important storage slots", async () => {
