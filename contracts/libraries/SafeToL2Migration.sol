@@ -119,7 +119,7 @@ contract SafeToL2Migration is SafeStorage {
     }
 
     /**
-     * @notice Migrate from Safe 1.1.1 Singleton to 1.3.1 or 1.4.1 L2
+     * @notice Migrate from Safe 1.1.1 Singleton to 1.3.0 or 1.4.1 L2
      * Safe is required to have nonce 0 so backend can support it after the migration
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      * Singletons version will be checked, so it implies that contracts exist.
