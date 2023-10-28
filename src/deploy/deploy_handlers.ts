@@ -15,7 +15,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const tokenCallbackHandler = await hre.ethers.getContractFactory("TokenCallbackHandler");
         const deployed = await tokenCallbackHandler.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("TokenCallbackHandler deployed at:\n", await instance.getAddress());
+        console.log("================ TokenCallbackHandler ====================");
+        console.log("TokenCallbackHandler deployed at:", await instance.getAddress());
+        console.log("================ TokenCallbackHandler ====================");
     });
 
     await deploy("CompatibilityFallbackHandler", {
@@ -27,8 +29,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const compatibilityFallbackHandler = await hre.ethers.getContractFactory("CompatibilityFallbackHandler");
         const deployed = await compatibilityFallbackHandler.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("================ CompatibilityFallbackHandler ====================");
-        console.log("CompatibilityFallbackHandler deployed at:\n", await instance.getAddress());
+        console.log("\n================ CompatibilityFallbackHandler ====================");
+        console.log("CompatibilityFallbackHandler deployed at:", await instance.getAddress());
         console.log("================ CompatibilityFallbackHandler ====================");
     });
 };

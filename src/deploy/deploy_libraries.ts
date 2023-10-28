@@ -15,8 +15,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const createCall = await hre.ethers.getContractFactory("CreateCall");
         const deployed = await createCall.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("==================== CreateCall ====================");
-        console.log("CreateCall deployed at:\n", await instance.getAddress());
+        console.log("\n==================== CreateCall ====================");
+        console.log("CreateCall deployed at:", await instance.getAddress());
         console.log("==================== CreateCall ====================");
     });
 
@@ -29,8 +29,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const multiSend = await hre.ethers.getContractFactory("MultiSend");
         const deployed = await multiSend.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("==================== MultiSend ====================");
-        console.log("MultiSend deployed at:\n", await instance.getAddress());
+        console.log("\n==================== MultiSend ====================");
+        console.log("MultiSend deployed at:", await instance.getAddress());
         console.log("==================== MultiSend ====================");
     });
 
@@ -43,8 +43,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const multiSendCallOnly = await hre.ethers.getContractFactory("MultiSendCallOnly");
         const deployed = await multiSendCallOnly.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("==================== MultiSendCallOnly ====================");
-        console.log("MultiSendCallOnly deployed at:\n", await instance.getAddress());
+        console.log("\n==================== MultiSendCallOnly ====================");
+        console.log("MultiSendCallOnly deployed at:", await instance.getAddress());
         console.log("==================== MultiSendCallOnly ====================");
     });
 
@@ -57,8 +57,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const signMessageLib = await hre.ethers.getContractFactory("SignMessageLib");
         const deployed = await signMessageLib.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("==================== SignMessageLib ====================");
-        console.log("SignMessageLib deployed at:\n", await instance.getAddress());
+        console.log("\n==================== SignMessageLib ====================");
+        console.log("SignMessageLib deployed at:", await instance.getAddress());
         console.log("==================== SignMessageLib ====================");
     });
 };

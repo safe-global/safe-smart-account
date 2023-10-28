@@ -16,8 +16,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const simulateTxAccessor = await ethers.getContractFactory("SimulateTxAccessor");
         const deployed = await simulateTxAccessor.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log(`================ SimulateTxAccessor ====================`);
-        console.log("SimulateTxAccessor deployed at:\n", await instance.getAddress());
+        console.log(`\n================ SimulateTxAccessor ====================`);
+        console.log("SimulateTxAccessor deployed at:", await instance.getAddress());
         console.log(`================ SimulateTxAccessor ====================`);
     });
 };

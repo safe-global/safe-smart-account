@@ -15,8 +15,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const safe = await hre.ethers.getContractFactory("Safe");
         const deployed = await safe.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("==================== Safe ====================");
-        console.log("Safe Singleton deployed at:\n", await instance.getAddress());
+        console.log("\n==================== Safe ====================");
+        console.log("Safe Singleton deployed at:", await instance.getAddress());
         console.log("==================== Safe ====================");
     });
 };

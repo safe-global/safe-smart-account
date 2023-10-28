@@ -16,8 +16,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const safeProxyFactory = await ethers.getContractFactory("SafeProxyFactory");
         const deployed = await safeProxyFactory.deploy();
         const instance = await deployed.waitForDeployment();
-        console.log("================ SafeProxyFactory ====================");
-        console.log("SafeProxyFactory deployed at:\n", await instance.getAddress());
+        console.log("\n================ SafeProxyFactory ====================");
+        console.log("SafeProxyFactory deployed at:", await instance.getAddress());
         console.log("================ SafeProxyFactory ====================");
     });
 };
