@@ -4,6 +4,7 @@ import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { getSingletonFactoryInfo } from "@safe-global/safe-singleton-factory";
+import "@nomicfoundation/hardhat-ethers";
 
 const argv = yargs
     .option("network", {

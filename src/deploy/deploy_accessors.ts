@@ -1,8 +1,9 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import "@nomicfoundation/hardhat-ethers";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getNamedAccounts } = hre;
+    const { deployments, getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
     const { deploy } = deployments;
 
@@ -11,6 +12,13 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         deterministicDeployment: true,
+    }).catch(async (e) => {
+        const simulateTxAccessor = await ethers.getContractFactory("SimulateTxAccessor");
+        const deployed = await simulateTxAccessor.deploy();
+        const instance = await deployed.waitForDeployment();
+        console.log(`================ SimulateTxAccessor ====================`);
+        console.log("SimulateTxAccessor deployed at:\n", await instance.getAddress());
+        console.log(`================ SimulateTxAccessor ====================`);
     });
 };
 

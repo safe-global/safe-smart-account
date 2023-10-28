@@ -11,6 +11,13 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         deterministicDeployment: true,
+    }).catch(async (e) => {
+        const safeL2 = await hre.ethers.getContractFactory("SafeL2");
+        const deployed = await safeL2.deploy();
+        const instance = await deployed.waitForDeployment();
+        console.log("==================== SafeL2 ====================");
+        console.log("SafeL2 deployed at:\n", await instance.getAddress());
+        console.log("==================== SafeL2 ====================");
     });
 };
 
