@@ -68,13 +68,23 @@ contract SafeToL2Migration is SafeStorage {
     }
 
     /**
+     * @notice Modifier to prevent using initialized Safes.
+     * If Safe has a nonce higher than 0, it will revert
+     */
+    modifier onlyNonceZero() {
+        // Nonce is increased before executing a tx, so first executed tx will have nonce=1
+        require(nonce == 1, "Safe must have not executed any tx");
+        _;
+    }
+
+    /**
      * @dev Internal function with common migration steps, changes the singleton and emits SafeMultiSigTransaction event
      */
     function migrate(address l2Singleton, bytes memory functionData) private {
         singleton = l2Singleton;
 
         // Encode nonce, sender, threshold
-        bytes memory additionalInfo = abi.encode(nonce - 1, msg.sender, threshold);
+        bytes memory additionalInfo = abi.encode(0, msg.sender, threshold);
 
         // Simulate a L2 transaction so Safe Tx Service indexer picks up the Safe
         emit SafeMultiSigTransaction(
@@ -99,10 +109,8 @@ contract SafeToL2Migration is SafeStorage {
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      * Singletons versions will be compared, so it implies that contracts exist
      */
-    function migrateToL2(address l2Singleton) public onlyDelegateCall {
+    function migrateToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero {
         require(address(singleton) != l2Singleton, "Safe is already using the singleton");
-        // Nonce is increased before executing a tx, so first executed tx will have nonce=1
-        require(nonce == 1, "Safe must have not executed any tx");
         bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
         bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
 
@@ -125,7 +133,7 @@ contract SafeToL2Migration is SafeStorage {
      * Singletons version will be checked, so it implies that contracts exist.
      * A valid and compatible fallbackHandler needs to be provided, only existance will be checked.
      */
-    function migrateFromV111(address l2Singleton, address fallbackHandler) public onlyDelegateCall {
+    function migrateFromV111(address l2Singleton, address fallbackHandler) public onlyDelegateCall onlyNonceZero {
         require(isContract(fallbackHandler), "fallbackHandler is not a contract");
 
         bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
