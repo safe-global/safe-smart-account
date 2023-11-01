@@ -62,7 +62,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
-            safe.checkSignatures(messageHash, messageData, _signature);
+            safe.checkSignatures(messageHash, _signature);
         }
         return EIP1271_MAGIC_VALUE;
     }
@@ -162,13 +162,35 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
      *      The function was moved to the fallback handler as a part of
      *      1.5.0 contract upgrade. It used to be a part of the Safe core contract, but
-     *      was replaced by the same function that accepts the executor as a parameter.
+     *      was replaced by the same function that also accepts an executor address.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(bytes32 dataHash, bytes memory, bytes memory signatures, uint256 requiredSignatures) public view {
-        Safe(payable(_manager())).checkNSignatures(_msgSender(), dataHash, "", signatures, requiredSignatures);
+    function checkNSignatures(
+        bytes32 dataHash,
+        bytes memory /* IGNORED */,
+        bytes memory signatures,
+        uint256 requiredSignatures
+    ) public view {
+        Safe(payable(_manager())).checkNSignatures(_msgSender(), dataHash, signatures, requiredSignatures);
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
+     *      The function was moved to the fallback handler as a part of
+     *      1.5.0 contract upgrade. It used to be a part of the Safe core contract, but
+     *      was replaced by the same function that removes the raw encoded bytes data parameter.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     */
+    function checkSignatures(bytes32 dataHash, bytes memory /* IGNORED */, bytes memory signatures) public view {
+        Safe safe = Safe(payable(_manager()));
+
+        uint256 threshold = safe.getThreshold();
+        safe.checkNSignatures(_msgSender(), dataHash, signatures, threshold);
     }
 }

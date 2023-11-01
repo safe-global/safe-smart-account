@@ -1,7 +1,7 @@
 // This spec is a separate file because we summarize checkSignatures here
 
 methods {
-    function checkSignatures(bytes32, bytes memory, bytes memory) internal => NONDET;
+    function checkSignatures(bytes32, bytes memory) internal => NONDET;
 
     function getNativeTokenBalanceFor(address) external returns (uint256) envfree;
     function getSafeGuard() external returns (address) envfree;

@@ -17,7 +17,7 @@ methods {
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
 
-    function checkSignatures(bytes32, bytes memory, bytes memory) internal => NONDET;
+    function checkSignatures(bytes32, bytes memory) internal => NONDET;
 }
 
 definition reachableOnly(method f) returns bool =

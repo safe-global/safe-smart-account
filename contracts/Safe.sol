@@ -166,7 +166,7 @@ contract Safe is
                 // We use the post-increment here, so the current nonce value is used and incremented afterwards.
                 nonce++
             );
-            checkSignatures(txHash, "", signatures);
+            checkSignatures(txHash, signatures);
         }
         address guard = getGuard();
         {
@@ -285,25 +285,20 @@ contract Safe is
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param data NOT USED. That should be signed (this is passed to an external validator contract)
-     *             For some reason, removing it from the parameters and passing empty bytes ("") slightly increases the gas costs, so we keep it.
      * @param signatures Signature data that should be verified.
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) public view {
+    function checkSignatures(bytes32 dataHash, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         require(_threshold > 0, "GS001");
-        checkNSignatures(msg.sender, dataHash, data, signatures, _threshold);
+        checkNSignatures(msg.sender, dataHash, signatures, _threshold);
     }
 
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
-     *      The data parameter (bytes) is not used since v1.5.0 as it is not required anymore. Prior to v1.5.0,
-     *      data parameter was used in contract signature validation flow using legacy EIP-1271.
-     *      Version v1.5.0, uses dataHash parameter instead of data with updated EIP-1271 implementation.
      * @param executor Address that executing the transaction.
      *        ⚠️⚠️⚠️ Make sure that the executor address is a legitmate executor.
      *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
@@ -312,13 +307,7 @@ contract Safe is
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
-    function checkNSignatures(
-        address executor,
-        bytes32 dataHash,
-        bytes memory /* data */,
-        bytes memory signatures,
-        uint256 requiredSignatures
-    ) public view {
+    function checkNSignatures(address executor, bytes32 dataHash, bytes memory signatures, uint256 requiredSignatures) public view {
         // Check that the provided signature data is not too short
         require(signatures.length >= requiredSignatures.mul(65), "GS020");
         // There cannot be an owner with address 0.

@@ -27,7 +27,7 @@ methods {
     // ) external returns (bytes32) => transactionHashGhost(to, value, callKeccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce) ;
 
     // optional
-    function checkSignatures(bytes32,bytes,bytes) external;
+    function checkSignatures(bytes32,bytes) external;
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
 }
 
@@ -58,7 +58,6 @@ function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint8,bytes
 // both signatures concatenated
 rule checkSignatures() {
     bytes32 dataHash;
-    bytes data;
     address executor;
     env e;
     bytes signaturesAB;
@@ -77,18 +76,17 @@ rule checkSignatures() {
     require vA == vAB1 && rA == rAB1 && sA == sAB1;
     require vB == vAB2 && rB == rAB2 && sB == sAB2;
     require vA != 0 && vB != 0;
-    require data.length == 0;
     require !isOwner(currentContract);
     require getThreshold() == 2;
     require getCurrentOwner(dataHash, vA, rA, sA) < getCurrentOwner(dataHash, vB, rB, sB);
     require executor == e.msg.sender;
 
-    checkNSignatures@withrevert(e, executor, dataHash, data, signaturesA, 1);
+    checkNSignatures@withrevert(e, executor, dataHash, signaturesA, 1);
     bool successA = !lastReverted;
-    checkNSignatures@withrevert(e, executor, dataHash, data, signaturesB, 1);
+    checkNSignatures@withrevert(e, executor, dataHash, signaturesB, 1);
     bool successB = !lastReverted;
 
-    checkSignatures@withrevert(e, dataHash, data, signaturesAB);
+    checkSignatures@withrevert(e, dataHash, signaturesAB);
     bool successAB = !lastReverted;
 
     assert (successA && successB) <=> successAB, "checkNSignatures called twice separately must be equivalent to checkSignatures";
