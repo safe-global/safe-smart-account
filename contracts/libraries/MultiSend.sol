@@ -46,6 +46,8 @@ contract MultiSend {
                 // We offset the load address by 1 byte (operation byte)
                 // We shift it right by 96 bits (256 - 160 [20 address bytes]) to right-align the data and zero out unused data.
                 let to := shr(0x60, mload(add(transactions, add(i, 0x01))))
+                // Defaults `to` to `address(this)` if `address(0)` is provided.
+                to := or(to, mul(iszero(to), address()))
                 // We offset the load address by 21 byte (operation byte + 20 address bytes)
                 let value := mload(add(transactions, add(i, 0x15)))
                 // We offset the load address by 53 byte (operation byte + 20 address bytes + 32 value bytes)
