@@ -1,7 +1,13 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
+import {
+    buildSafeTransaction,
+    executeContractCallWithSigners,
+    executeTx,
+    executeTxWithSigners,
+    safeSignTypedData,
+} from "../../src/utils/execution";
 
 describe("OnlyOwnersGuard", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
@@ -40,13 +46,15 @@ describe("OnlyOwnersGuard", () => {
             const {
                 safe,
                 mock,
-                signers: [, user2],
+                signers: [user1, user2],
             } = await setupTests();
             const nonce = await safe.nonce();
             const mockAddress = await mock.getAddress();
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
+            const signature = await safeSignTypedData(user1, await safe.getAddress(), safeTx);
+            const safeUser2 = await safe.connect(user2);
 
-            await expect(executeTxWithSigners(safe, safeTx, [user2])).to.be.reverted;
+            await expect(executeTx(safeUser2, safeTx, [signature])).to.be.revertedWith("msg sender is not allowed to exec");
         });
     });
 });
