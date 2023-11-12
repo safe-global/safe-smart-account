@@ -6,7 +6,7 @@ import {Enum} from "../../common/Enum.sol";
 import {BaseGuard} from "../../base/GuardManager.sol";
 
 interface ISafe {
-    function getOwners() external view returns (address[] memory);
+    function isOwner(address owner) external view returns (bool);
 }
 
 /**
@@ -14,8 +14,6 @@ interface ISafe {
  * @author Richard Meissner - @rmeissner
  */
 contract OnlyOwnersGuard is BaseGuard {
-    ISafe public safe;
-
     constructor() {}
 
     // solhint-disable-next-line payable-fallback
@@ -43,16 +41,7 @@ contract OnlyOwnersGuard is BaseGuard {
         bytes memory,
         address msgSender
     ) external view override {
-        // Only owners can exec
-        address[] memory owners = ISafe(msg.sender).getOwners();
-        for (uint256 i = 0; i < owners.length; i++) {
-            if (owners[i] == msgSender) {
-                return;
-            }
-        }
-
-        // msg sender is not an owner
-        revert("msg sender is not allowed to exec");
+        require(ISafe(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}
