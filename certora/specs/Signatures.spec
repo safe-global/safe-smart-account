@@ -13,18 +13,18 @@ methods {
     function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint8,bytes32,bytes32) => signatureSplitGhost(signatures,pos);
     function Safe.checkContractSignature(address, bytes32, bytes memory, uint256) internal => NONDET;
     // needed for the execTransaction <> signatures rule
-    // function getTransactionHash(
-    //     address to,
-    //     uint256 value,
-    //     bytes data,
-    //     Enum.Operation operation,
-    //     uint256 safeTxGas,
-    //     uint256 baseGas,
-    //     uint256 gasPrice,
-    //     address gasToken,
-    //     address refundReceiver,
-    //     uint256 _nonce
-    // ) external returns (bytes32) => transactionHashGhost(to, value, callKeccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce) ;
+    function getTransactionHash(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address refundReceiver,
+        uint256 _nonce
+    ) internal returns (bytes32) => transactionHashGhost(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce) ;
 
     // optional
     function checkSignatures(bytes32,bytes) external;
@@ -38,17 +38,17 @@ ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
 ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
 
 // This is needed for the execTransaction <> signatures rule
-// ghost transactionHashGhost(
-//         address /*to */, 
-//         uint256 /*value */, 
-//         bytes32, 
-//         Enum.Operation /*operation*/,
-//         uint256 /*safeTxGas */,
-//         uint256 /*baseGas*/,
-//         uint256 /*gasPrice*/,
-//         address /*gasToken*/,
-//         address /*refundReceiver*/,
-//         uint256 /*_nonce*/ ) returns bytes32 ; 
+ghost transactionHashGhost(
+        address /*to */,
+        uint256 /*value */,
+        bytes,
+        Enum.Operation /*operation*/,
+        uint256 /*safeTxGas */,
+        uint256 /*baseGas*/,
+        uint256 /*gasPrice*/,
+        address /*gasToken*/,
+        address /*refundReceiver*/,
+        uint256 /*_nonce*/ ) returns bytes32 ;
 
 function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint8,bytes32,bytes32) {
     return (mySigSplitV[signatures][pos], mySigSplitR[signatures][pos], mySigSplitS[signatures][pos]);
