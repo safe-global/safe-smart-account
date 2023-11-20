@@ -30,26 +30,10 @@ jobs:
 
     tests:
         runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: ${{ env.NODE_VERSION }}
-                  cache: "npm"
-            - run: npm ci
-            - run: npm run build
-            - run: SAFE_CONTRACT_UNDER_TEST=SafeL2 npm run coverage
-            - name: Coveralls
-              uses: coverallsapp/github-action@master
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-
-    tests-other:
-        runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
-                contract-name: ["SafeL2"]
+                contract-name: ["Safe", "SafeL2"]
         env:
             SAFE_CONTRACT_UNDER_TEST: ${{ matrix.contract-name }}
         steps:
@@ -61,10 +45,24 @@ jobs:
             - run: npm ci
             - run: npm run build
             - run: npm run coverage
-            - name: Coveralls
-              uses: coverallsapp/github-action@master
+            - name: Send coverage to Coveralls (parallel)
+              uses: coverallsapp/github-action@v2
               with:
+                  parallel: true
+                  flag-name: run-$
                   github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    finish:
+        runs-on: ubuntu-latest
+        needs: tests
+        if: ${{ always() }}
+        steps:
+            - name: Coveralls Finished
+              uses: coverallsapp/github-action@v2
+              with:
+                  parallel-finished: true
+                  carryforward: "run-Safe,run-SafeL2"
+
     benchmarks:
         runs-on: ubuntu-latest
         strategy:
