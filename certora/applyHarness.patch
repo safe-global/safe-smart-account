@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-09-29 15:38:28
-+++ Safe.sol	2023-09-29 15:40:17
+--- Safe.sol	2023-11-10 09:50:31
++++ Safe.sol	2023-11-20 11:06:39
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -31,9 +31,19 @@ diff -druN Safe.sol Safe.sol
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
+@@ -451,7 +453,8 @@
+         address gasToken,
+         address refundReceiver,
+         uint256 _nonce
+-    ) public view returns (bytes32) {
++    ) internal view returns (bytes32) {
++        // MUNGED: The function was made internal to enable CVL summaries.
+         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
+     }
+ }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-09-26 16:12:09
-+++ base/Executor.sol	2023-09-26 16:10:42
+--- base/Executor.sol	2023-11-10 09:50:31
++++ base/Executor.sol	2023-11-20 10:28:47
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {

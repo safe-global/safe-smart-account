@@ -6,14 +6,14 @@ methods {
     // harnessed
     function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
     function getCurrentOwner(bytes32, uint8, bytes32, bytes32) external returns (address) envfree;
+    function getTransactionHashPublic(address, uint256, bytes, Enum.Operation, uint256, uint256, uint256, address, address, uint256) external returns (bytes32) envfree;
     // needed for the getTransactionHash ghost for the execTransaction <> signatures rule
-    // function callKeccak256(bytes) external returns (bytes32) envfree;
 
     // summaries
     function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint8,bytes32,bytes32) => signatureSplitGhost(signatures,pos);
     function Safe.checkContractSignature(address, bytes32, bytes memory, uint256) internal => NONDET;
     // needed for the execTransaction <> signatures rule
-    function getTransactionHash(
+    function Safe.getTransactionHash(
         address to,
         uint256 value,
         bytes calldata data,
@@ -24,7 +24,7 @@ methods {
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) internal returns (bytes32) => transactionHashGhost(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce) ;
+    ) internal returns (bytes32) => CONSTANT;
 
     // optional
     function checkSignatures(bytes32,bytes) external;
@@ -93,40 +93,38 @@ rule checkSignatures() {
 }
 
 // This rule doesn't run because of a prover error at the moment.
-// rule ownerSignaturesAreProvidedForExecTransaction(
-//         address to,
-//         uint256 value,
-//         bytes data,
-//         Enum.Operation operation,
-//         uint256 safeTxGas,
-//         uint256 baseGas,
-//         uint256 gasPrice,
-//         address gasToken,
-//         address refundReceiver,
-//         bytes signatures
-//     ) {
-//     uint256 nonce = nonce();
-//     bytes32 transactionHash = getTransactionHash(
-//         to,
-//         value,
-//         data,
-//         operation,
-//         safeTxGas,
-//         baseGas,
-//         gasPrice,
-//         gasToken,
-//         refundReceiver,
-//         nonce
-//     );
+rule ownerSignaturesAreProvidedForExecTransaction(
+        address to,
+        uint256 value,
+        bytes data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address refundReceiver,
+        bytes signatures
+    ) {
+    uint256 nonce = nonce();
+    bytes32 transactionHash = getTransactionHashPublic(
+        to,
+        value,
+        data,
+        operation,
+        safeTxGas,
+        baseGas,
+        gasPrice,
+        gasToken,
+        refundReceiver,
+        nonce
+    );
 
-//     env e;
-//     require e.msg.value == 0;
-//     bytes encodedTransactionData;
-//     require encodedTransactionData.length <= 66;
-//     checkSignatures@withrevert(e, transactionHash, encodedTransactionData, signatures);
-//     bool checkSignaturesOk = !lastReverted;
+    env e;
+    require e.msg.value == 0;
+    checkSignatures@withrevert(e, transactionHash, signatures);
+    bool checkSignaturesOk = !lastReverted;
 
-//     execTransaction(e, to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
+    execTransaction(e, to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
 
-//     assert checkSignaturesOk, "transaction executed without valid signatures";
-// }
+    assert checkSignaturesOk, "transaction executed without valid signatures";
+}
