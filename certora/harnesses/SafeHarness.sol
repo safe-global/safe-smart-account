@@ -56,7 +56,19 @@ contract SafeHarness is Safe {
         return getOwners().length;
     }
 
-    function callKeccak256(bytes memory data) external view returns (bytes32) {
-        return keccak256(data);
+    function getTransactionHashPublic(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address refundReceiver,
+        uint256 _nonce
+    ) public view returns (bytes32) {
+        // MUNGED: The function was made internal to enable CVL summaries.
+        return getTransactionHash(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce);
     }
 }
