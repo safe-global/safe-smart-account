@@ -298,6 +298,35 @@ describe("GuardManager", () => {
     });
 
     describe("execTransactionFromModuleReturnData", () => {
+        it("correctly returns the return data if the guard allows the transaction", async () => {
+            const {
+                safe,
+                validGuardMock,
+                signers: [user1, user2],
+            } = await setupWithTemplate();
+            const validGuardMockAddress = await validGuardMock.getAddress();
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
+
+            const mock = await getMock();
+            const callData = "0xbeef73";
+            const returnBytes32 = "0x" + crypto.randomBytes(32).toString("hex");
+            await mock.givenCalldataReturnBytes32(callData, returnBytes32);
+            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
+            const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
+                await mock.getAddress(),
+                0,
+                callData,
+                0,
+                user1.address,
+            ]);
+
+            await validGuardMock.givenCalldataReturnBool(checkModuleTxData, true);
+
+            const returnData = await safe.execTransactionFromModuleReturnData.staticCall(await mock.getAddress(), 0, callData, 0);
+
+            expect(returnData[1]).to.equal(returnBytes32);
+        });
+
         it("reverts if the pre hook of the guard reverts", async () => {
             const {
                 safe,

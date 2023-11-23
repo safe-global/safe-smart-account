@@ -40,6 +40,29 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         }
     }
 
+    function runPreExecutionChecks(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address guard
+    ) internal returns (bytes32 guardHash) {
+        // Only whitelisted modules are allowed.
+        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
+
+        if (guard != address(0)) {
+            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+        }
+    }
+
+    function postExecutionChecksWithEventEmissions(bytes32 guardHash, bool success, address guard) internal {
+        if (guard != address(0)) {
+            Guard(guard).checkAfterExecution(guardHash, success);
+        }
+        if (success) emit ExecutionFromModuleSuccess(msg.sender);
+        else emit ExecutionFromModuleFailure(msg.sender);
+    }
+
     /**
      * @notice Enables the module `module` for the Safe.
      * @dev This can only be done via a Safe transaction.
@@ -85,22 +108,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         bytes memory data,
         Enum.Operation operation
     ) public virtual returns (bool success) {
-        // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
-        // Execute transaction without further confirmations.
         address guard = getGuard();
-
-        bytes32 guardHash;
-        if (guard != address(0)) {
-            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
-        }
+        bytes32 guardHash = runPreExecutionChecks(to, value, data, operation, guard);
         success = execute(to, value, data, operation, type(uint256).max);
-
-        if (guard != address(0)) {
-            Guard(guard).checkAfterExecution(guardHash, success);
-        }
-        if (success) emit ExecutionFromModuleSuccess(msg.sender);
-        else emit ExecutionFromModuleFailure(msg.sender);
+        postExecutionChecksWithEventEmissions(guardHash, success, guard);
     }
 
     /**
@@ -118,7 +129,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         bytes memory data,
         Enum.Operation operation
     ) public returns (bool success, bytes memory returnData) {
-        success = execTransactionFromModule(to, value, data, operation);
+        address guard = getGuard();
+        bytes32 guardHash = runPreExecutionChecks(to, value, data, operation, guard);
+        success = execute(to, value, data, operation, type(uint256).max);
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -135,6 +148,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
             returnData := ptr
         }
         /* solhint-enable no-inline-assembly */
+        postExecutionChecksWithEventEmissions(guardHash, success, guard);
     }
 
     /**
