@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions.

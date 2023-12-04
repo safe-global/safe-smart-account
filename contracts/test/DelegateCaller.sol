@@ -14,10 +14,12 @@ contract DelegateCaller {
         (success, returnData) = _called.delegatecall(_calldata);
         if (!success) {
             // solhint-disable-next-line no-inline-assembly
+            /// @solidity memory-safe-assembly
             assembly {
+                let ptr := mload(0x40)
                 let length := returndatasize()
-                returndatacopy(0, 0, length)
-                revert(0, length)
+                returndatacopy(ptr, 0, length)
+                revert(ptr, length)
             }
         }
     }

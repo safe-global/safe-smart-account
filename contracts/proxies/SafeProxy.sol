@@ -32,6 +32,7 @@ contract SafeProxy {
     /// @dev Fallback function forwards all transactions and returns all received return data.
     fallback() external payable {
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             let _singleton := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
@@ -39,13 +40,15 @@ contract SafeProxy {
                 mstore(0, _singleton)
                 return(0, 0x20)
             }
-            calldatacopy(0, 0, calldatasize())
-            let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)
-            returndatacopy(0, 0, returndatasize())
+            let calldataPtr := mload(0x40)
+            calldatacopy(calldataPtr, 0, calldatasize())
+            let success := delegatecall(gas(), _singleton, calldataPtr, calldatasize(), 0, 0)
+            let returndataPtr := mload(0x40)
+            returndatacopy(returndataPtr, 0, returndatasize())
             if eq(success, 0) {
-                revert(0, returndatasize())
+                revert(returndataPtr, returndatasize())
             }
-            return(0, returndatasize())
+            return(returndataPtr, returndatasize())
         }
     }
 }

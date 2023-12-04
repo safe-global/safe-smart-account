@@ -161,6 +161,7 @@ contract Safe150Migration is SafeStorage {
     function getGuard() internal view returns (address guard) {
         bytes32 slot = GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             guard := sload(slot)
         }
@@ -177,6 +178,7 @@ contract Safe150Migration is SafeStorage {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }

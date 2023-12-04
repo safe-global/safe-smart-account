@@ -126,6 +126,7 @@ contract Safe130To141Migration is SafeStorage {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }

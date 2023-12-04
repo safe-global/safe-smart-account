@@ -96,7 +96,7 @@ contract SafeToL2Migration is SafeStorage {
             0,
             0,
             address(0),
-            address(0),
+            payable(address(0)),
             "", // We cannot detect signatures
             additionalInfo
         );
@@ -167,6 +167,7 @@ contract SafeToL2Migration is SafeStorage {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
