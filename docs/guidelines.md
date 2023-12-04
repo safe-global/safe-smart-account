@@ -11,6 +11,7 @@ The data can be stored to this location with
 ```
 bytes32 slot = VARIABLE_SLOT;
 // solhint-disable-next-line no-inline-assembly
+/// @solidity memory-safe-assembly
 assembly {
     sstore(slot, value)
 }
@@ -21,6 +22,7 @@ and read with
 ```
 bytes32 slot = VARIABLE_SLOT;
 // solhint-disable-next-line no-inline-assembly
+/// @solidity memory-safe-assembly
 assembly {
     value := sload(slot)
 }
