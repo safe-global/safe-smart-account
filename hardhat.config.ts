@@ -39,8 +39,10 @@ import "./src/tasks/show_codesize";
 import { BigNumber } from "@ethersproject/bignumber";
 import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 
-const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6";
-const soliditySettings = SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
+const primarySolidityVersion = SOLIDITY_VERSION || "0.8.19";
+const soliditySettings = SOLIDITY_SETTINGS
+    ? JSON.parse(SOLIDITY_SETTINGS)
+    : JSON.parse('{"viaIR":true,"optimizer":{"enabled":true, "details": {"yul": true}}}');
 
 const deterministicDeployment = (network: string): DeterministicDeploymentInfo => {
     const info = getSingletonFactoryInfo(parseInt(network));
@@ -70,7 +72,12 @@ const userConfig: HardhatUserConfig = {
         target: "ethers-v6",
     },
     solidity: {
-        compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: "0.6.12" }, { version: "0.5.17" }],
+        compilers: [
+            { version: primarySolidityVersion, settings: soliditySettings },
+            { version: "0.7.6" },
+            { version: "0.6.12" },
+            { version: "0.5.17" },
+        ],
     },
     networks: {
         hardhat: {
