@@ -9,6 +9,7 @@ contract Test {
 
     function expose() public returns (address handler) {
         bytes32 slot = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
+        /// @solidity memory-safe-assembly
         assembly {
             handler := sload(slot)
         }

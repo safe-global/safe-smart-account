@@ -46,10 +46,7 @@ describe("SignMessageLib", () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
-            // ethers v6 throws instead of reverting
-            await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith(
-                "function selector was not recognized and there's no fallback function",
-            );
+            await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith("Transaction reverted without a reason string");
         });
 
         it("changes the expected storage slot without touching the most important ones", async () => {
