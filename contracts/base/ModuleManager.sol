@@ -183,7 +183,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         // Set correct size of returned array
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
-        assembly {
+        assembly ("memory-safe") {
             mstore(array, moduleCount)
         }
         /* solhint-enable no-inline-assembly */
