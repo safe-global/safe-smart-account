@@ -70,7 +70,7 @@
         "husky": "^8.0.3",
         "prettier": "^3.1.0",
         "prettier-plugin-solidity": "^1.2.0",
-        "solc": "0.7.6",
+        "solc": "0.8.19",
         "solhint": "^4.0.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.2",
