@@ -166,11 +166,12 @@ contract SafeToL2Migration is SafeStorage {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
+        /* solhint-enable no-inline-assembly */
 
         // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
         return size > 0;
