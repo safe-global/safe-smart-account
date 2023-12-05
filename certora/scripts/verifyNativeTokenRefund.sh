@@ -8,7 +8,7 @@ fi
 
 certoraRun  certora/harnesses/SafeHarness.sol \
     --verify SafeHarness:certora/specs/NativeTokenRefund.spec \
-    --solc solc7.6 \
+    --solc solc8.19 \
     --optimistic_loop \
     --prover_args '-optimisticFallback true -s z3' \
     --loop_iter 3 \
