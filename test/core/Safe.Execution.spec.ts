@@ -297,19 +297,16 @@ describe("Safe", () => {
             const data = gasUser.interface.encodeFunctionData("useGas", [80]);
             const safeTxGas = 10000;
             const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.nonce() });
-            console.log(1);
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 170000 }),
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 250000 }),
                 "Safe transaction should fail with low gasLimit",
             ).to.emit(safe, "ExecutionFailure");
 
-            console.log(2);
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
                 "Safe transaction should succeed with high gasLimit",
             ).to.emit(safe, "ExecutionSuccess");
 
-            console.log(3);
             // This should only work if the gasPrice is 0
             tx.gasPrice = 1;
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
