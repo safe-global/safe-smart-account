@@ -36,7 +36,7 @@ abstract contract FallbackManager is SelfAuthorized {
         bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
-        assembly ("memory-safe") {
+        assembly {
             sstore(slot, handler)
         }
         /* solhint-enable no-inline-assembly */

@@ -20,7 +20,7 @@ abstract contract SecuredTokenTransfer {
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
-        assembly ("memory-safe") {
+        assembly {
             // We write the return value to scratch space.
             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
             let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0x20)

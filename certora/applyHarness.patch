@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-12-05 16:23:27
-+++ Safe.sol	2023-12-05 21:15:44
+--- Safe.sol	2023-12-06 16:00:31
++++ Safe.sol	2023-12-07 00:01:59
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -42,12 +42,12 @@ diff -druN Safe.sol Safe.sol
      }
  }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-12-05 16:20:21
-+++ base/Executor.sol	2023-12-05 21:16:46
+--- base/Executor.sol	2023-12-06 16:00:31
++++ base/Executor.sol	2023-12-07 00:01:59
 @@ -29,8 +29,10 @@
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
-             assembly ("memory-safe") {
+             assembly {
 -                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
 +                // success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
 +                // MUNGED: lets be optimistic and assume execute does nothing for DELEGATECALL
@@ -58,7 +58,7 @@ diff -druN base/Executor.sol base/Executor.sol
              /* solhint-disable no-inline-assembly */
 diff -druN base/Executor.sol.orig base/Executor.sol.orig
 --- base/Executor.sol.orig	1970-01-01 05:30:00
-+++ base/Executor.sol.orig	2023-12-05 21:15:44
++++ base/Executor.sol.orig	2023-12-07 00:01:59
 @@ -0,0 +1,44 @@
 +// SPDX-License-Identifier: LGPL-3.0-only
 +pragma solidity >=0.7.0 <0.9.0;
@@ -90,7 +90,7 @@ diff -druN base/Executor.sol.orig base/Executor.sol.orig
 +        if (operation == Enum.Operation.DelegateCall) {
 +            /* solhint-disable no-inline-assembly */
 +            /// @solidity memory-safe-assembly
-+            assembly ("memory-safe") {
++            assembly {
 +                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
 +            }
 +            /* solhint-enable no-inline-assembly */
@@ -106,7 +106,7 @@ diff -druN base/Executor.sol.orig base/Executor.sol.orig
 +}
 diff -druN base/Executor.sol.rej base/Executor.sol.rej
 --- base/Executor.sol.rej	1970-01-01 05:30:00
-+++ base/Executor.sol.rej	2023-12-05 21:15:44
++++ base/Executor.sol.rej	2023-12-07 00:01:59
 @@ -0,0 +1,15 @@
 +@@ -26,12 +26,8 @@
 +         uint256 txGas

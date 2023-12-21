@@ -263,7 +263,7 @@ contract Safe is
         uint256 contractSignatureLen;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
-        assembly ("memory-safe") {
+        assembly {
             contractSignatureLen := mload(add(add(signatures, offset), 0x20))
         }
         /* solhint-enable no-inline-assembly */
@@ -273,7 +273,7 @@ contract Safe is
         bytes memory contractSignature;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
-        assembly ("memory-safe") {
+        assembly {
             // The signature data for contract signatures is appended to the concatenated signatures and the offset is stored in s
             contractSignature := add(add(signatures, offset), 0x20)
         }

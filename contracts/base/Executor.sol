@@ -28,7 +28,7 @@ abstract contract Executor {
         if (operation == Enum.Operation.DelegateCall) {
             /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
-            assembly ("memory-safe") {
+            assembly {
                 success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
             }
             /* solhint-enable no-inline-assembly */
