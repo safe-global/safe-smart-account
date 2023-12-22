@@ -43,6 +43,7 @@ describe("SignMessageLib", () => {
             expect(await safe.signedMessages(messageHash)).to.be.eq(1);
         });
 
+        // ethers v6 throws instead of reverting
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
