@@ -79,23 +79,23 @@ abstract contract FallbackManager is SelfAuthorized {
                 return(0, 0)
             }
 
-            let calldataPtr := allocate(calldatasize())
-            calldatacopy(calldataPtr, 0, calldatasize())
+            let dataSize := calldatasize()
+            let ptr := mload(0x40)
+            calldatacopy(ptr, 0, dataSize)
 
             // The msg.sender address is shifted to the left by 12 bytes to remove the padding
             // Then the address without padding is stored right after the calldata
-            let senderPtr := allocate(20)
-            mstore(senderPtr, shl(96, caller()))
+            mstore(add(ptr, dataSize), shl(96, caller()))
 
             // Add 20 bytes for the address appended add the end
-            let success := call(gas(), handler, 0, calldataPtr, add(calldatasize(), 20), 0, 0)
+            let success := call(gas(), handler, 0, ptr, add(dataSize, 20), 0, 0)
 
-            let returnDataPtr := allocate(returndatasize())
-            returndatacopy(returnDataPtr, 0, returndatasize())
+            dataSize := returndatasize()
+            returndatacopy(ptr, 0, dataSize)
             if iszero(success) {
-                revert(returnDataPtr, returndatasize())
+                revert(ptr, dataSize)
             }
-            return(returnDataPtr, returndatasize())
+            return(ptr, dataSize)
         }
         /* solhint-enable no-inline-assembly */
     }

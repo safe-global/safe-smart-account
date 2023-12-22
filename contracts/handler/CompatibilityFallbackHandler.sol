@@ -97,12 +97,14 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            let internalCalldata := mload(0x40)
+            let ptr := mload(0x40)
             /**
              * Store `simulateAndRevert.selector`.
              * String representation is used to force right padding
              */
-            mstore(internalCalldata, "\xb4\xfa\xba\x09")
+            mstore(ptr, "\xb4\xfa\xba\x09")
+
+            let dataSize := calldatasize()
             /**
              * Abuse the fact that both this and the internal methods have the
              * same signature, and differ only in symbol name (and therefore,
@@ -110,10 +112,8 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
              * 250 bytes of code and 300 gas at runtime over the
              * `abi.encodeWithSelector` builtin.
              */
-            calldatacopy(add(internalCalldata, 0x04), 0x04, sub(calldatasize(), 0x04))
+            calldatacopy(add(ptr, 0x04), 0x04, sub(dataSize, 0x04))
 
-            let returnPtr := mload(0x40)
-            mstore(0x40, add(returnPtr, 0x20))
             /**
              * `pop` is required here by the compiler, as top level expressions
              * can't have return values in inline assembly. `call` typically
@@ -126,15 +126,15 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                     // address() has been changed to caller() to use the implementation of the Safe
                     caller(),
                     0,
-                    internalCalldata,
-                    calldatasize(),
+                    ptr,
+                    dataSize,
                     /**
                      * The `simulateAndRevert` call always reverts, and
                      * instead encodes whether or not it was successful in the return
                      * data. The first 32-byte word of the return data contains the
                      * `success` value, so write it to `returnPtr`.
                      */
-                    returnPtr,
+                    add(ptr, dataSize),
                     0x20
                 )
             )
@@ -151,7 +151,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             mstore(0x40, add(response, responseSize))
             returndatacopy(response, 0x20, responseSize)
 
-            if iszero(mload(returnPtr)) {
+            if iszero(mload(add(ptr, dataSize))) {
                 revert(add(response, 0x20), mload(response))
             }
         }

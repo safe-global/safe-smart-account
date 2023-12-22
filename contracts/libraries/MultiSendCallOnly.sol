@@ -60,7 +60,6 @@ contract MultiSendCallOnly {
                 if eq(success, 0) {
                     let errorLength := returndatasize()
                     let returnPtr := mload(0x40)
-                    mstore(0x40, add(returnPtr, returndatasize()))
                     returndatacopy(returnPtr, 0, errorLength)
                     revert(returnPtr, errorLength)
                 }

@@ -18,7 +18,6 @@ contract DelegateCaller {
             assembly {
                 let ptr := mload(0x40)
                 let length := returndatasize()
-                mstore(0x40, add(ptr, length))
                 returndatacopy(ptr, 0, length)
                 revert(ptr, length)
             }

@@ -41,12 +41,9 @@ contract SafeProxy {
                 mstore(ptr, _singleton)
                 return(ptr, 0x20)
             }
-            mstore(0x40, add(ptr, calldatasize()))
             calldatacopy(ptr, 0, calldatasize())
 
             let success := delegatecall(gas(), _singleton, ptr, calldatasize(), 0, 0)
-            ptr := mload(0x40)
-            mstore(0x40, add(ptr, returndatasize()))
             returndatacopy(ptr, 0, returndatasize())
             if eq(success, 0) {
                 revert(ptr, returndatasize())
