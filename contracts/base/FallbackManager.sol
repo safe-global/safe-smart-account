@@ -69,11 +69,6 @@ abstract contract FallbackManager is SelfAuthorized {
             // memory is used, therefore we need to guarantee memory safety (keeping the free memory point 0x40 slot intact,
             // not going beyond the scratch space, etc)
             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
-            function allocate(length) -> pos {
-                pos := mload(0x40)
-                mstore(0x40, add(pos, length))
-            }
-
             let handler := sload(slot)
             if iszero(handler) {
                 return(0, 0)
