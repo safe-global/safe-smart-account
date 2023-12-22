@@ -46,7 +46,9 @@ describe("SignMessageLib", () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
-            await expect(lib.signMessage("0xbaddad")).to.be.rejected;
+            await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith(
+                "function selector was not recognized and there's no fallback function",
+            );
         });
 
         it("changes the expected storage slot without touching the most important ones", async () => {

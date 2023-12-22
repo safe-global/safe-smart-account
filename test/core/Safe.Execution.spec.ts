@@ -298,7 +298,7 @@ describe("Safe", () => {
             const safeTxGas = 10000;
             const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.nonce() });
             await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 250000 }),
+                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 170000 }),
                 "Safe transaction should fail with low gasLimit",
             ).to.emit(safe, "ExecutionFailure");
 
@@ -346,7 +346,7 @@ describe("Safe", () => {
                 }
             }
 
-            expect(parsedLogs[0].forwardedGas).to.be.gte(366000n);
+            expect(parsedLogs[0].forwardedGas).to.be.gte(400000n);
         });
     });
 });

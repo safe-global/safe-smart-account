@@ -65,7 +65,7 @@ describe("SimulateTxAccessor", () => {
             const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData);
             expect(safe.interface.decodeFunctionResult("getOwners", simulation.returnData)[0]).to.be.deep.eq([user1.address]);
             expect(simulation.success).to.be.true;
-            expect(simulation.estimate).to.be.lte(14800n);
+            expect(simulation.estimate).to.be.lte(10000n);
         });
 
         it("simulate delegatecall", async () => {
@@ -83,7 +83,7 @@ describe("SimulateTxAccessor", () => {
                 userBalance + ethers.parseEther("1"),
             );
             expect(simulation.success).to.be.true;
-            expect(simulation.estimate).to.be.lte(15100n);
+            expect(simulation.estimate).to.be.lte(15000n);
         });
 
         it("simulate selfdestruct", async () => {
