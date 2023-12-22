@@ -64,8 +64,10 @@ contract MultiSend {
                 }
                 if eq(success, 0) {
                     let errorLength := returndatasize()
-                    returndatacopy(0, 0, errorLength)
-                    revert(0, errorLength)
+                    let returnPtr := mload(0x40)
+                    mstore(0x40, add(returnPtr, returndatasize()))
+                    returndatacopy(returnPtr, 0, errorLength)
+                    revert(returnPtr, errorLength)
                 }
                 // Next entry starts at 85 byte + data length
                 i := add(i, add(0x55, dataLength))

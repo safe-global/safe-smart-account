@@ -40,7 +40,11 @@ contract SafeProxyFactory {
             /// @solidity memory-safe-assembly
             assembly {
                 if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
-                    revert(0, 0)
+                    let returnPtr := mload(0x40)
+                    let length := returndatasize()
+                    mstore(0x40, add(returnPtr, length))
+                    returndatacopy(returnPtr, 0, length)
+                    revert(returnPtr, length)
                 }
             }
             /* solhint-enable no-inline-assembly */

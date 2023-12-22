@@ -112,6 +112,8 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
              */
             calldatacopy(add(internalCalldata, 0x04), 0x04, sub(calldatasize(), 0x04))
 
+            let returnPtr := mload(0x40)
+            mstore(0x40, add(returnPtr, 0x20))
             /**
              * `pop` is required here by the compiler, as top level expressions
              * can't have return values in inline assembly. `call` typically
@@ -130,10 +132,9 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                      * The `simulateAndRevert` call always reverts, and
                      * instead encodes whether or not it was successful in the return
                      * data. The first 32-byte word of the return data contains the
-                     * `success` value, so write it to memory address 0x00 (which is
-                     * reserved Solidity scratch space and OK to use).
+                     * `success` value, so write it to `returnPtr`.
                      */
-                    0x00,
+                    returnPtr,
                     0x20
                 )
             )
@@ -150,7 +151,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             mstore(0x40, add(response, responseSize))
             returndatacopy(response, 0x20, responseSize)
 
-            if iszero(mload(0x00)) {
+            if iszero(mload(returnPtr)) {
                 revert(add(response, 0x20), mload(response))
             }
         }
