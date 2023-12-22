@@ -104,7 +104,6 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
              */
             mstore(ptr, "\xb4\xfa\xba\x09")
 
-            let dataSize := calldatasize()
             /**
              * Abuse the fact that both this and the internal methods have the
              * same signature, and differ only in symbol name (and therefore,
@@ -112,7 +111,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
              * 250 bytes of code and 300 gas at runtime over the
              * `abi.encodeWithSelector` builtin.
              */
-            calldatacopy(add(ptr, 0x04), 0x04, sub(dataSize, 0x04))
+            calldatacopy(add(ptr, 0x04), 0x04, sub(calldatasize(), 0x04))
 
             /**
              * `pop` is required here by the compiler, as top level expressions
@@ -127,14 +126,14 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                     caller(),
                     0,
                     ptr,
-                    dataSize,
+                    calldatasize(),
                     /**
                      * The `simulateAndRevert` call always reverts, and
                      * instead encodes whether or not it was successful in the return
                      * data. The first 32-byte word of the return data contains the
                      * `success` value, so write it to `returnPtr`.
                      */
-                    add(ptr, dataSize),
+                    add(ptr, calldatasize()),
                     0x20
                 )
             )
@@ -151,7 +150,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             mstore(0x40, add(response, responseSize))
             returndatacopy(response, 0x20, responseSize)
 
-            if iszero(mload(add(ptr, dataSize))) {
+            if iszero(mload(add(ptr, calldatasize()))) {
                 revert(add(response, 0x20), mload(response))
             }
         }
