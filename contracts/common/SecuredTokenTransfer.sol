@@ -21,15 +21,15 @@ abstract contract SecuredTokenTransfer {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            let returnPtr := mload(0x40)
+            // We write the return value to scratch space.
             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
-            let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), returnPtr, 0x20)
+            let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0x20)
             switch returndatasize()
             case 0 {
                 transferred := success
             }
             case 0x20 {
-                transferred := iszero(or(iszero(success), iszero(mload(returnPtr))))
+                transferred := iszero(or(iszero(success), iszero(mload(0))))
             }
             default {
                 transferred := 0
