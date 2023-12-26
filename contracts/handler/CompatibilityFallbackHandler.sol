@@ -188,9 +188,6 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
     function checkSignatures(bytes32 dataHash, bytes memory /* IGNORED */, bytes memory signatures) public view {
-        Safe safe = Safe(payable(_manager()));
-
-        uint256 threshold = safe.getThreshold();
-        safe.checkNSignatures(_msgSender(), dataHash, signatures, threshold);
+        Safe(payable(_manager())).checkSignatures(dataHash, "", signatures);
     }
 }
