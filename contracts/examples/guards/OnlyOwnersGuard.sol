@@ -4,10 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../common/Enum.sol";
 import {BaseGuard} from "../../base/GuardManager.sol";
-
-interface ISafe {
-    function isOwner(address owner) external view returns (bool);
-}
+import {ISafe} from "../../interfaces/ISafe.sol";
 
 /**
  * @title OnlyOwnersGuard - Only allows owners to execute transactions.
