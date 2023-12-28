@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-/**
- * @title Enum - Collection of enums used in Safe contracts.
- */
-interface Enum {
-    enum Operation {
-        Call,
-        DelegateCall
-    }
-}
+import {Enum} from "./IEnum.sol";
 
 /**
  * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
@@ -137,6 +129,7 @@ interface ISafe {
     /**
      * @dev External getter function for state variables.
      */
+    function VERSION() external view returns (string memory);
     function signedMessages(bytes32 messageHash) external view returns (uint256);
 
     /**
@@ -144,4 +137,8 @@ interface ISafe {
      */
     function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next);
     function getThreshold() external view returns (uint256);
+    function isOwner(address owner) external view returns (bool);
+    function getOwners() external view returns (address[] memory);
+    function setFallbackHandler(address handler) external;
+    function setGuard(address guard) external;
 }
