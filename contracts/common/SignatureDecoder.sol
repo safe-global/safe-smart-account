@@ -18,7 +18,7 @@ abstract contract SignatureDecoder {
      * @return r Output value r of the signature.
      * @return s Output value s of the signature.
      */
-    function signatureSplit(bytes memory signatures, uint256 pos) internal pure returns (uint8 v, bytes32 r, bytes32 s) {
+    function signatureSplit(bytes memory signatures, uint256 pos) internal pure returns (uint256 v, bytes32 r, bytes32 s) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {

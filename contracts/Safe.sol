@@ -313,7 +313,7 @@ contract Safe is
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
-        uint8 v;
+        uint256 v;
         bytes32 r;
         bytes32 s;
         uint256 i;
@@ -343,11 +343,11 @@ contract Safe is
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
-                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v - 4, r, s);
+                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), uint8(v - 4), r, s);
             } else {
                 // Default is the ecrecover flow with the provided data hash
                 // Use ecrecover with the messageHash for EOA signatures
-                currentOwner = ecrecover(dataHash, v, r, s);
+                currentOwner = ecrecover(dataHash, uint8(v), r, s);
             }
             require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
             lastOwner = currentOwner;
