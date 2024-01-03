@@ -33,11 +33,10 @@ abstract contract FallbackManager is SelfAuthorized {
         */
         require(handler != address(this), "GS400");
 
-        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, handler)
+            sstore(FALLBACK_HANDLER_STORAGE_SLOT, handler)
         }
         /* solhint-enable no-inline-assembly */
     }
@@ -61,7 +60,6 @@ abstract contract FallbackManager is SelfAuthorized {
     //      and having the original caller address may enable additional verification scenarios.
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
-        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -74,7 +72,7 @@ abstract contract FallbackManager is SelfAuthorized {
                 mstore(0x40, add(pos, length))
             }
 
-            let handler := sload(slot)
+            let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
             if iszero(handler) {
                 return(0, 0)
             }
