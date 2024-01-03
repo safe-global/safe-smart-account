@@ -63,7 +63,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      */
     function disableModule(address prevModule, address module) public authorized {
         // Validate module address and check that it corresponds to module index.
-        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
+        if (module == address(0) || module == SENTINEL_MODULES) revert("GS101");
         require(modules[prevModule] == module, "GS103");
         modules[prevModule] = modules[module];
         modules[module] = address(0);
