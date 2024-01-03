@@ -86,7 +86,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         Enum.Operation operation
     ) public virtual returns (bool success) {
         // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
+        if (msg.sender == SENTINEL_MODULES || modules[msg.sender] == address(0)) revert("GS104");
         // Execute transaction without further confirmations.
         address guard = getGuard();
 
