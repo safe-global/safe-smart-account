@@ -89,11 +89,10 @@ abstract contract GuardManager is SelfAuthorized {
         if (guard != address(0)) {
             require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
         }
-        bytes32 slot = GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, guard)
+            sstore(GUARD_STORAGE_SLOT, guard)
         }
         /* solhint-enable no-inline-assembly */
         emit ChangedGuard(guard);
@@ -107,11 +106,10 @@ abstract contract GuardManager is SelfAuthorized {
      * @return guard The address of the guard
      */
     function getGuard() internal view returns (address guard) {
-        bytes32 slot = GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            guard := sload(slot)
+            guard := sload(GUARD_STORAGE_SLOT)
         }
         /* solhint-enable no-inline-assembly */
     }
