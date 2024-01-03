@@ -47,7 +47,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      */
     function enableModule(address module) public authorized {
         // Module address cannot be null or sentinel.
-        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
+        if (module == address(0) || module == SENTINEL_MODULES) revert("GS101");
         // Module cannot be added twice.
         require(modules[module] == address(0), "GS102");
         modules[module] = modules[SENTINEL_MODULES];
