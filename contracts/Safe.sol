@@ -289,6 +289,17 @@ contract Safe is
      *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
      */
     function checkSignatures(bytes32 dataHash, bytes memory signatures) public view {
+        checkSignatures(dataHash, "", signatures);
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @dev This function makes it compatible with previous versions.
+     */
+    function checkSignatures(bytes32 dataHash, bytes memory /* IGNORED */, bytes memory signatures) public view {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
