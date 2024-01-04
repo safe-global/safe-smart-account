@@ -129,6 +129,7 @@ interface ISafe {
     /**
      * @dev External getter function for state variables.
      */
+    // solhint-disable-next-line
     function VERSION() external view returns (string memory);
     function signedMessages(bytes32 messageHash) external view returns (uint256);
 
