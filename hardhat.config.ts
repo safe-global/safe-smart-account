@@ -71,15 +71,7 @@ const userConfig: HardhatUserConfig = {
         target: "ethers-v6",
     },
     solidity: {
-        compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: "0.6.12" }, { version: "0.5.17" }],
-        overrides: {
-            "contracts/test/ERC20Token.sol": {
-                version: defaultSolidityVersion,
-            },
-            "contracts/test/TestImports.sol": {
-                version: defaultSolidityVersion,
-            },
-        },
+        compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: defaultSolidityVersion }],
     },
     networks: {
         hardhat: {
