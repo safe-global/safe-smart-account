@@ -2,7 +2,7 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../../common/Enum.sol";
+import {Enum} from "../../interfaces/IEnum.sol";
 import {BaseGuard} from "../../base/GuardManager.sol";
 import {ISafe} from "../../interfaces/ISafe.sol";
 
