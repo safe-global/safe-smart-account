@@ -131,7 +131,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                      * The `simulateAndRevert` call always reverts, and
                      * instead encodes whether or not it was successful in the return
                      * data. The first 32-byte word of the return data contains the
-                     * `success` value, so write it to `returnPtr`.
+                     * `success` value, so write it to `ptr`.
                      */
                     add(ptr, calldatasize()),
                     0x20
