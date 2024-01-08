@@ -28,19 +28,20 @@ abstract contract OwnerManager is SelfAuthorized {
     function setupOwners(address[] memory _owners, uint256 _threshold) internal {
         // Threshold can only be 0 at initialization.
         // Check ensures that setup function can only be called once.
-        require(threshold == 0, "GS200");
+        if (threshold > 0) revertWithError("GS200");
         // Validate that threshold is smaller than number of added owners.
-        require(_threshold <= _owners.length, "GS201");
+        if (_threshold > _owners.length) revertWithError("GS201");
         // There has to be at least one Safe owner.
-        require(_threshold > 0, "GS202");
+        if (_threshold == 0) revertWithError("GS202");
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner) revert("GS203");
+            if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner)
+                revertWithError("GS203");
             // No duplicate owners allowed.
-            require(owners[owner] == address(0), "GS204");
+            if (owners[owner] != address(0)) revertWithError("GS204");
             owners[currentOwner] = owner;
             currentOwner = owner;
         }
@@ -57,9 +58,9 @@ abstract contract OwnerManager is SelfAuthorized {
      */
     function addOwnerWithThreshold(address owner, uint256 _threshold) public authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
-        if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this)) revert("GS203");
+        if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this)) revertWithError("GS203");
         // No duplicate owners allowed.
-        require(owners[owner] == address(0), "GS204");
+        if (owners[owner] != address(0)) revertWithError("GS204");
         owners[owner] = owners[SENTINEL_OWNERS];
         owners[SENTINEL_OWNERS] = owner;
         ownerCount++;
@@ -77,10 +78,10 @@ abstract contract OwnerManager is SelfAuthorized {
      */
     function removeOwner(address prevOwner, address owner, uint256 _threshold) public authorized {
         // Only allow to remove an owner, if threshold can still be reached.
-        require(ownerCount - 1 >= _threshold, "GS201");
+        if (ownerCount - 1 < _threshold) revertWithError("GS201");
         // Validate owner address and check that it corresponds to owner index.
-        if (owner == address(0) || owner == SENTINEL_OWNERS) revert("GS203");
-        require(owners[prevOwner] == owner, "GS205");
+        if (owner == address(0) || owner == SENTINEL_OWNERS) revertWithError("GS203");
+        if (owners[prevOwner] != owner) revertWithError("GS205");
         owners[prevOwner] = owners[owner];
         owners[owner] = address(0);
         ownerCount--;
@@ -98,12 +99,12 @@ abstract contract OwnerManager is SelfAuthorized {
      */
     function swapOwner(address prevOwner, address oldOwner, address newOwner) public authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
-        if (newOwner == address(0) || newOwner == SENTINEL_OWNERS || newOwner == address(this)) revert("GS203");
+        if (newOwner == address(0) || newOwner == SENTINEL_OWNERS || newOwner == address(this)) revertWithError("GS203");
         // No duplicate owners allowed.
-        require(owners[newOwner] == address(0), "GS204");
+        if (owners[newOwner] != address(0)) revertWithError("GS204");
         // Validate oldOwner address and check that it corresponds to owner index.
-        require(oldOwner != address(0) && oldOwner != SENTINEL_OWNERS, "GS203");
-        require(owners[prevOwner] == oldOwner, "GS205");
+        if (oldOwner == address(0) || oldOwner == SENTINEL_OWNERS) revertWithError("GS203");
+        if (owners[prevOwner] != oldOwner) revertWithError("GS205");
         owners[newOwner] = owners[oldOwner];
         owners[prevOwner] = newOwner;
         owners[oldOwner] = address(0);
@@ -118,9 +119,9 @@ abstract contract OwnerManager is SelfAuthorized {
      */
     function changeThreshold(uint256 _threshold) public authorized {
         // Validate that threshold is smaller than number of owners.
-        require(_threshold <= ownerCount, "GS201");
+        if (_threshold > ownerCount) revertWithError("GS201");
         // There has to be at least one Safe owner.
-        require(_threshold > 0, "GS202");
+        if (_threshold == 0) revertWithError("GS202");
         threshold = _threshold;
         emit ChangedThreshold(threshold);
     }

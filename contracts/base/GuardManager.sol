@@ -86,9 +86,7 @@ abstract contract GuardManager is SelfAuthorized {
      * @param guard The address of the guard to be used or the 0 address to disable the guard
      */
     function setGuard(address guard) external authorized {
-        if (guard != address(0)) {
-            require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
-        }
+        if (guard != address(0) && !Guard(guard).supportsInterface(type(Guard).interfaceId)) revertWithError("GS300");
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {

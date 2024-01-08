@@ -192,7 +192,7 @@ contract Safe is
 
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
-        require(gasleft() >= ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
+        if (gasleft() < ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500) revertWithError("GS010");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
@@ -202,7 +202,7 @@ contract Safe is
             gasUsed = gasUsed.sub(gasleft());
             // If no safeTxGas and no gasPrice was set (e.g. both are 0), then the internal tx is required to be successful
             // This makes it possible to use `estimateGas` without issues, as it searches for the minimum gas where the tx doesn't revert
-            require(success || safeTxGas != 0 || gasPrice != 0, "GS013");
+            if (!success && safeTxGas == 0 && gasPrice == 0) revertWithError("GS013");
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;
             if (gasPrice > 0) {
@@ -239,10 +239,10 @@ contract Safe is
             // For native tokens, we will only adjust the gas price to not be higher than the actually used gas price
             payment = gasUsed.add(baseGas).mul(gasPrice < tx.gasprice ? gasPrice : tx.gasprice);
             (bool refundSuccess, ) = receiver.call{value: payment}("");
-            require(refundSuccess, "GS011");
+            if (!refundSuccess) revertWithError("GS011");
         } else {
             payment = gasUsed.add(baseGas).mul(gasPrice);
-            require(transferToken(gasToken, receiver, payment), "GS012");
+            if (!transferToken(gasToken, receiver, payment)) revertWithError("GS012");
         }
     }
 
@@ -257,7 +257,7 @@ contract Safe is
      */
     function checkContractSignature(address owner, bytes32 dataHash, bytes memory signatures, uint256 offset) internal view {
         // Check that signature data pointer (s) is in bounds (points to the length of data -> 32 bytes)
-        require(offset.add(32) <= signatures.length, "GS022");
+        if (offset.add(32) > signatures.length) revertWithError("GS022");
 
         // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
         uint256 contractSignatureLen;
@@ -267,7 +267,7 @@ contract Safe is
             contractSignatureLen := mload(add(add(signatures, offset), 0x20))
         }
         /* solhint-enable no-inline-assembly */
-        require(offset.add(32).add(contractSignatureLen) <= signatures.length, "GS023");
+        if (offset.add(32).add(contractSignatureLen) > signatures.length) revertWithError("GS023");
 
         // Check signature
         bytes memory contractSignature;
@@ -279,7 +279,7 @@ contract Safe is
         }
         /* solhint-enable no-inline-assembly */
 
-        require(ISignatureValidator(owner).isValidSignature(dataHash, contractSignature) == EIP1271_MAGIC_VALUE, "GS024");
+        if (ISignatureValidator(owner).isValidSignature(dataHash, contractSignature) != EIP1271_MAGIC_VALUE) revertWithError("GS024");
     }
 
     /**
@@ -292,7 +292,7 @@ contract Safe is
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
-        require(_threshold > 0, "GS001");
+        if (_threshold == 0) revertWithError("GS001");
         checkNSignatures(msg.sender, dataHash, signatures, _threshold);
     }
 
@@ -309,7 +309,7 @@ contract Safe is
      */
     function checkNSignatures(address executor, bytes32 dataHash, bytes memory signatures, uint256 requiredSignatures) public view {
         // Check that the provided signature data is not too short
-        require(signatures.length >= requiredSignatures.mul(65), "GS020");
+        if (signatures.length < requiredSignatures.mul(65)) revertWithError("GS020");
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
@@ -327,7 +327,7 @@ contract Safe is
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
                 // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
-                require(uint256(s) >= requiredSignatures.mul(65), "GS021");
+                if (uint256(s) < requiredSignatures.mul(65)) revertWithError("GS021");
 
                 // The contract signature check is extracted to a separate function for better compatibility with formal verification
                 // A quote from the Certora team:
@@ -339,7 +339,7 @@ contract Safe is
                 // When handling approved hashes the address of the approver is encoded into r
                 currentOwner = address(uint160(uint256(r)));
                 // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
-                require(executor == currentOwner || approvedHashes[currentOwner][dataHash] != 0, "GS025");
+                if (executor != currentOwner && approvedHashes[currentOwner][dataHash] == 0) revertWithError("GS025");
             } else if (v > 30) {
                 // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
                 // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -349,7 +349,8 @@ contract Safe is
                 // Use ecrecover with the messageHash for EOA signatures
                 currentOwner = ecrecover(dataHash, uint8(v), r, s);
             }
-            require(currentOwner > lastOwner && owners[currentOwner] != address(0) && currentOwner != SENTINEL_OWNERS, "GS026");
+            if (currentOwner <= lastOwner || owners[currentOwner] == address(0) || currentOwner == SENTINEL_OWNERS)
+                revertWithError("GS026");
             lastOwner = currentOwner;
         }
     }
@@ -361,7 +362,7 @@ contract Safe is
      * @param hashToApprove The hash to mark as approved for signatures that are verified by this contract.
      */
     function approveHash(bytes32 hashToApprove) external {
-        require(owners[msg.sender] != address(0), "GS030");
+        if (owners[msg.sender] == address(0)) revertWithError("GS030");
         approvedHashes[msg.sender][hashToApprove] = 1;
         emit ApproveHash(hashToApprove, msg.sender);
     }
