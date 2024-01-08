@@ -35,12 +35,12 @@ contract SafeProxy {
         /// @solidity memory-safe-assembly
         assembly {
             let _singleton := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
-            let ptr := mload(0x40)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
             if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
-                mstore(ptr, _singleton)
-                return(ptr, 0x20)
+                mstore(0, _singleton)
+                return(0, 0x20)
             }
+            let ptr := mload(0x40)
             calldatacopy(ptr, 0, calldatasize())
 
             let success := delegatecall(gas(), _singleton, ptr, calldatasize(), 0, 0)
