@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
 --- Safe.sol	2024-01-05 18:53:19
-+++ Safe.sol	2024-01-08 14:58:16
++++ Safe.sol	2024-01-08 15:25:22
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -43,11 +43,17 @@ diff -druN Safe.sol Safe.sol
  }
 diff -druN base/Executor.sol base/Executor.sol
 --- base/Executor.sol	2024-01-05 18:53:19
-+++ base/Executor.sol	2024-01-08 15:01:40
-@@ -32,6 +32,8 @@
-                 success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-             }
-             /* solhint-enable no-inline-assembly */
++++ base/Executor.sol	2024-01-08 15:25:22
+@@ -26,12 +26,8 @@
+         uint256 txGas
+     ) internal returns (bool success) {
+         if (operation == Enum.Operation.DelegateCall) {
+-            /* solhint-disable no-inline-assembly */
+-            /// @solidity memory-safe-assembly
+-            assembly {
+-                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
+-            }
+-            /* solhint-enable no-inline-assembly */
 +            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
 +            return true;
          } else {
