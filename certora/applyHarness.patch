@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-12-06 16:00:31
-+++ Safe.sol	2023-12-07 00:01:59
+--- Safe.sol	2024-01-05 18:53:19
++++ Safe.sol	2024-01-08 13:01:26
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -42,84 +42,18 @@ diff -druN Safe.sol Safe.sol
      }
  }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-12-06 16:00:31
-+++ base/Executor.sol	2023-12-07 00:01:59
+--- base/Executor.sol	2024-01-05 18:53:19
++++ base/Executor.sol	2024-01-08 13:03:10
 @@ -29,8 +29,10 @@
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
              assembly {
 -                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
+-            }
 +                // success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-+                // MUNGED: lets be optimistic and assume execute does nothing for DELEGATECALL
-             }
++                // MUNGED: lets be optimistic and assume execute does nothing for DELEGATECALL and always returns true
++             }
 +            return true;
              /* solhint-enable no-inline-assembly */
          } else {
              /* solhint-disable no-inline-assembly */
-diff -druN base/Executor.sol.orig base/Executor.sol.orig
---- base/Executor.sol.orig	1970-01-01 05:30:00
-+++ base/Executor.sol.orig	2023-12-07 00:01:59
-@@ -0,0 +1,44 @@
-+// SPDX-License-Identifier: LGPL-3.0-only
-+pragma solidity >=0.7.0 <0.9.0;
-+import {Enum} from "../common/Enum.sol";
-+
-+/**
-+ * @title Executor - A contract that can execute transactions
-+ * @author Richard Meissner - @rmeissner
-+ */
-+abstract contract Executor {
-+    /**
-+     * @notice Executes either a delegatecall or a call with provided parameters.
-+     * @dev This method doesn't perform any sanity check of the transaction, such as:
-+     *      - if the contract at `to` address has code or not
-+     *      It is the responsibility of the caller to perform such checks.
-+     * @param to Destination address.
-+     * @param value Ether value.
-+     * @param data Data payload.
-+     * @param operation Operation type.
-+     * @return success boolean flag indicating if the call succeeded.
-+     */
-+    function execute(
-+        address to,
-+        uint256 value,
-+        bytes memory data,
-+        Enum.Operation operation,
-+        uint256 txGas
-+    ) internal returns (bool success) {
-+        if (operation == Enum.Operation.DelegateCall) {
-+            /* solhint-disable no-inline-assembly */
-+            /// @solidity memory-safe-assembly
-+            assembly {
-+                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-+            }
-+            /* solhint-enable no-inline-assembly */
-+        } else {
-+            /* solhint-disable no-inline-assembly */
-+            /// @solidity memory-safe-assembly
-+            assembly {
-+                success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
-+            }
-+            /* solhint-enable no-inline-assembly */
-+        }
-+    }
-+}
-diff -druN base/Executor.sol.rej base/Executor.sol.rej
---- base/Executor.sol.rej	1970-01-01 05:30:00
-+++ base/Executor.sol.rej	2023-12-07 00:01:59
-@@ -0,0 +1,15 @@
-+@@ -26,12 +26,8 @@
-+         uint256 txGas
-+     ) internal returns (bool success) {
-+         if (operation == Enum.Operation.DelegateCall) {
-+-            /* solhint-disable no-inline-assembly */
-+-            /// @solidity memory-safe-assembly
-+-            assembly {
-+-                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
-+-            }
-+-            /* solhint-enable no-inline-assembly */
-++            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
-++            return true;
-+         } else {
-+             /* solhint-disable no-inline-assembly */
-+             /// @solidity memory-safe-assembly
