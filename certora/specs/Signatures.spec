@@ -4,13 +4,13 @@ methods {
     function isOwner(address) external returns (bool) envfree;
 
     // harnessed
-    function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
-    function getCurrentOwner(bytes32, uint8, bytes32, bytes32) external returns (address) envfree;
+    function signatureSplitPublic(bytes,uint256) external returns (uint256,bytes32,bytes32) envfree;
+    function getCurrentOwner(bytes32, uint256, bytes32, bytes32) external returns (address) envfree;
     function getTransactionHashPublic(address, uint256, bytes, Enum.Operation, uint256, uint256, uint256, address, address, uint256) external returns (bytes32) envfree;
     // needed for the getTransactionHash ghost for the execTransaction <> signatures rule
 
     // summaries
-    function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint8,bytes32,bytes32) => signatureSplitGhost(signatures,pos);
+    function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint256,bytes32,bytes32) => signatureSplitGhost(signatures,pos);
     function Safe.checkContractSignature(address, bytes32, bytes memory, uint256) internal => NONDET;
     // needed for the execTransaction <> signatures rule
     function Safe.getTransactionHash(
@@ -33,7 +33,7 @@ methods {
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
+ghost mapping(bytes => mapping(uint256 => uint256)) mySigSplitV;
 ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
 ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
 
@@ -50,7 +50,7 @@ ghost transactionHashGhost(
         address /*refundReceiver*/,
         uint256 /*_nonce*/ ) returns bytes32 ;
 
-function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint8,bytes32,bytes32) {
+function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint256,bytes32,bytes32) {
     return (mySigSplitV[signatures][pos], mySigSplitR[signatures][pos], mySigSplitS[signatures][pos]);
 }
 
@@ -63,10 +63,10 @@ rule checkSignatures() {
     bytes signaturesAB;
     bytes signaturesA;
     bytes signaturesB;
-    uint8 vA; bytes32 rA; bytes32 sA;
-    uint8 vB; bytes32 rB; bytes32 sB;
-    uint8 vAB1; bytes32 rAB1; bytes32 sAB1;
-    uint8 vAB2; bytes32 rAB2; bytes32 sAB2;
+    uint256 vA; bytes32 rA; bytes32 sA;
+    uint256 vB; bytes32 rB; bytes32 sB;
+    uint256 vAB1; bytes32 rAB1; bytes32 sAB1;
+    uint256 vAB2; bytes32 rAB2; bytes32 sAB2;
     vA, rA, sA = signatureSplitPublic(signaturesA, 0);
     vB, rB, sB = signatureSplitPublic(signaturesB, 0);
     vAB1, rAB1, sAB1 = signatureSplitPublic(signaturesAB, 0);
