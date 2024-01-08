@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2024-01-05 18:53:19
-+++ Safe.sol	2024-01-08 15:25:22
+--- Safe.sol	2023-11-10 09:50:31
++++ Safe.sol	2023-11-20 11:06:39
 @@ -76,7 +76,7 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -42,8 +42,8 @@ diff -druN Safe.sol Safe.sol
      }
  }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2024-01-05 18:53:19
-+++ base/Executor.sol	2024-01-08 15:25:22
+--- base/Executor.sol	2023-11-10 09:50:31
++++ base/Executor.sol	2023-11-20 10:28:47
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
