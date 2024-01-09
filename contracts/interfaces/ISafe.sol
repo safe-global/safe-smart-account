@@ -5,7 +5,7 @@ import {Enum} from "./IEnum.sol";
 
 /**
  * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
- * @author Shebin John - @remedcu
+ * @author @safe-global/safe-protocol
  */
 interface ISafe {
     /**
