@@ -131,9 +131,10 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                      * The `simulateAndRevert` call always reverts, and
                      * instead encodes whether or not it was successful in the return
                      * data. The first 32-byte word of the return data contains the
-                     * `success` value, so write it to `ptr`.
+                     * `success` value, so write it to memory address 0x00 (which is
+                     * reserved Solidity scratch space and OK to use).
                      */
-                    add(ptr, calldatasize()),
+                    0x00,
                     0x20
                 )
             )
@@ -150,7 +151,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             mstore(0x40, add(response, responseSize))
             returndatacopy(response, 0x20, responseSize)
 
-            if iszero(mload(add(ptr, calldatasize()))) {
+            if iszero(mload(0x00)) {
                 revert(add(response, 0x20), mload(response))
             }
         }
