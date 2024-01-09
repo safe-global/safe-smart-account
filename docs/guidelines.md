@@ -10,22 +10,24 @@ The data can be stored to this location with
 
 ```
 bytes32 slot = VARIABLE_SLOT;
-// solhint-disable-next-line no-inline-assembly
+/* solhint-disable no-inline-assembly */
 /// @solidity memory-safe-assembly
 assembly {
     sstore(slot, value)
 }
+/* solhint-enable no-inline-assembly */
 ```
 
 and read with
 
 ```
 bytes32 slot = VARIABLE_SLOT;
-// solhint-disable-next-line no-inline-assembly
+/* solhint-disable no-inline-assembly */
 /// @solidity memory-safe-assembly
 assembly {
     value := sload(slot)
 }
+/* solhint-enable no-inline-assembly */
 ```
 
 Note: Make sure to use a unique identifier else unexpected behaviour will occur
