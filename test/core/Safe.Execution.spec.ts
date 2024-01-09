@@ -22,11 +22,12 @@ describe("Safe", () => {
             contract StorageSetter {
                 function setStorage(bytes3 data) public {
                     bytes32 slot = 0x4242424242424242424242424242424242424242424242424242424242424242;
-                    // solhint-disable-next-line no-inline-assembly
+                    /* solhint-disable no-inline-assembly */
                     /// @solidity memory-safe-assembly
                     assembly {
                         sstore(slot, data)
                     }
+                    /* solhint-enable no-inline-assembly */
                 }
             }`;
         const storageSetter = await deployContract(user1, setterSource);
