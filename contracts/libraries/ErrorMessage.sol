@@ -11,19 +11,18 @@ abstract contract ErrorMessage {
     /**
      * @notice Function which uses assembly to revert with the passed error message.
      * @param error The error string to revert with.
-     * @dev Currently it is expected that the `error` string is at max 32 bytes of length.
+     * @dev Currently it is expected that the `error` string is at max 5 bytes of length. Ex: "GSXXX"
      */
-    function revertWithError(string memory error) internal pure {
+    function revertWithError(bytes5 error) internal pure {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
             mstore(ptr, 0x08c379a000000000000000000000000000000000000000000000000000000000) // Selector for method "Error(string)"
             mstore(add(ptr, 0x04), 0x20) // String offset
-            // First 32 bytes (0x20) is the length of the `error`, and the rest is the actual `error`.
-            mstore(add(ptr, 0x24), mload(error)) // Revert reason length
-            mstore(add(ptr, 0x44), mload(add(error, 0x20))) // Revert reason
-            revert(ptr, 0x64) // Revert data length is 4 bytes for selector + offset + errorLength + error.
+            mstore(add(ptr, 0x24), 0x05) // Revert reason length (5 bytes for bytes5)
+            mstore(add(ptr, 0x44), error) // Revert reason
+            revert(ptr, 0x64) // Revert data length is 4 bytes for selector + offset + error length + error.
         }
         /* solhint-enable no-inline-assembly */
     }
