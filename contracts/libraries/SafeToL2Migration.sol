@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Enum} from "../interfaces/IEnum.sol";
-import {ISafe} from "../interfaces/ISafe.sol";
+import {ISafeExtended} from "../interfaces/ISafeExtended.sol";
 
 /**
  * @title Migration Contract for updating a Safe from 1.1.1/1.3.0/1.4.1 versions to a L2 version. Useful when replaying a Safe from a non L2 network in a L2 network.
@@ -101,8 +101,8 @@ contract SafeToL2Migration is SafeStorage {
      */
     function migrateToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero {
         require(address(singleton) != l2Singleton, "Safe is already using the singleton");
-        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
-        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
+        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafeExtended(singleton).VERSION()));
+        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafeExtended(l2Singleton).VERSION()));
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
         // There's no way to make sure if address is a valid singleton, unless we cofigure the contract for every chain
@@ -126,16 +126,16 @@ contract SafeToL2Migration is SafeStorage {
     function migrateFromV111(address l2Singleton, address fallbackHandler) public onlyDelegateCall onlyNonceZero {
         require(isContract(fallbackHandler), "fallbackHandler is not a contract");
 
-        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
+        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafeExtended(singleton).VERSION()));
         require(oldSingletonVersion == keccak256(abi.encodePacked("1.1.1")), "Provided singleton version is not supported");
 
-        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
+        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafeExtended(l2Singleton).VERSION()));
         require(
             newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")),
             "Provided singleton version is not supported"
         );
 
-        ISafe safe = ISafe(address(this));
+        ISafeExtended safe = ISafeExtended(address(this));
         safe.setFallbackHandler(fallbackHandler);
 
         // Safes < 1.3.0 did not emit SafeSetup, so Safe Tx Service backend needs the event to index the Safe

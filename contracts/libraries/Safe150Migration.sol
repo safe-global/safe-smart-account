@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Guard} from "../base/GuardManager.sol";
-import {ISafe} from "../interfaces/ISafe.sol";
+import {ISafeExtended} from "../interfaces/ISafeExtended.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
@@ -83,7 +83,7 @@ contract Safe150Migration is SafeStorage {
     function migrateWithFallbackHandler() public validSingletonOnly {
         migrateSingleton();
 
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+        ISafeExtended(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
 
     /**
@@ -94,7 +94,7 @@ contract Safe150Migration is SafeStorage {
         singleton = SAFE_150_SINGLETON;
         emit ChangedMasterCopy(singleton);
 
-        ISafe(address(this)).setGuard(guard);
+        ISafeExtended(address(this)).setGuard(guard);
     }
 
     /**
@@ -104,7 +104,7 @@ contract Safe150Migration is SafeStorage {
     function migrateWithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
         migrateWithSetGuard(guard);
 
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+        ISafeExtended(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
 
     /**
@@ -124,7 +124,7 @@ contract Safe150Migration is SafeStorage {
     function migrateL2WithFallbackHandler() public validSingletonOnly {
         migrateL2Singleton();
 
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+        ISafeExtended(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
 
     /**
@@ -135,7 +135,7 @@ contract Safe150Migration is SafeStorage {
         singleton = SAFE_150_SINGLETON_L2;
         emit ChangedMasterCopy(singleton);
 
-        ISafe(address(this)).setGuard(guard);
+        ISafeExtended(address(this)).setGuard(guard);
     }
 
     /**
@@ -145,7 +145,7 @@ contract Safe150Migration is SafeStorage {
     function migrateL2WithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
         migrateL2WithSetGuard(guard);
 
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
+        ISafeExtended(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
 
     /**
