@@ -15,8 +15,9 @@ contract DelegateCaller {
         if (!success) {
             /* solhint-disable no-inline-assembly */
             assembly {
-                returndatacopy(0, 0, returndatasize())
-                revert(0, returndatasize())
+                let length := returndatasize()
+                returndatacopy(0, 0, length)
+                revert(0, length)
             }
             /* solhint-enable no-inline-assembly */
         }

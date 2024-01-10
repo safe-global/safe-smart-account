@@ -62,8 +62,9 @@ contract MultiSend {
                     success := delegatecall(gas(), to, data, dataLength, 0, 0)
                 }
                 if eq(success, 0) {
-                    returndatacopy(0, 0, returndatasize())
-                    revert(0, returndatasize())
+                    let errorLength := returndatasize()
+                    returndatacopy(0, 0, errorLength)
+                    revert(0, errorLength)
                 }
                 // Next entry starts at 85 byte + data length
                 i := add(i, add(0x55, dataLength))
