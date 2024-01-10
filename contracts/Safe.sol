@@ -64,7 +64,7 @@ contract Safe is
     event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
     event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
 
-    uint256 public nonce;
+    uint256 public override nonce;
     bytes32 private _deprecatedDomainSeparator;
     // Mapping to keep track of all message hashes that have been approved by ALL REQUIRED owners
     mapping(bytes32 => uint256) public override signedMessages;

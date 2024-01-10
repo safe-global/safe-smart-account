@@ -141,5 +141,6 @@ interface ISafe {
      */
     // solhint-disable-next-line
     function VERSION() external view returns (string memory);
+    function nonce() external view returns (uint256);
     function signedMessages(bytes32 messageHash) external view returns (uint256);
 }

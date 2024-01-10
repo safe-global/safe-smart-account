@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "./SafeStorage.sol";
-import {Safe} from "../Safe.sol";
+import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title SignMessageLib - Allows to sign messages on-chain by writing the signed message hashes on-chain.
@@ -32,6 +32,6 @@ contract SignMessageLib is SafeStorage {
      */
     function getMessageHash(bytes memory message) public view returns (bytes32) {
         bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
-        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), Safe(payable(address(this))).domainSeparator(), safeMessageHash));
+        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), ISafe(payable(address(this))).domainSeparator(), safeMessageHash));
     }
 }
