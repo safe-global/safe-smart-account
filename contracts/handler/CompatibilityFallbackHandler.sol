@@ -97,12 +97,13 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            let internalCalldata := mload(0x40)
+            let ptr := mload(0x40)
             /**
              * Store `simulateAndRevert.selector`.
              * String representation is used to force right padding
              */
-            mstore(internalCalldata, "\xb4\xfa\xba\x09")
+            mstore(ptr, "\xb4\xfa\xba\x09")
+
             /**
              * Abuse the fact that both this and the internal methods have the
              * same signature, and differ only in symbol name (and therefore,
@@ -110,7 +111,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
              * 250 bytes of code and 300 gas at runtime over the
              * `abi.encodeWithSelector` builtin.
              */
-            calldatacopy(add(internalCalldata, 0x04), 0x04, sub(calldatasize(), 0x04))
+            calldatacopy(add(ptr, 0x04), 0x04, sub(calldatasize(), 0x04))
 
             /**
              * `pop` is required here by the compiler, as top level expressions
@@ -124,7 +125,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                     // address() has been changed to caller() to use the implementation of the Safe
                     caller(),
                     0,
-                    internalCalldata,
+                    ptr,
                     calldatasize(),
                     /**
                      * The `simulateAndRevert` call always reverts, and
@@ -175,22 +176,5 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         uint256 requiredSignatures
     ) public view {
         Safe(payable(_manager())).checkNSignatures(_msgSender(), dataHash, signatures, requiredSignatures);
-    }
-
-    /**
-     * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
-     * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
-     *      The function was moved to the fallback handler as a part of
-     *      1.5.0 contract upgrade. It used to be a part of the Safe core contract, but
-     *      was replaced by the same function that removes the raw encoded bytes data parameter.
-     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param signatures Signature data that should be verified.
-     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
-     */
-    function checkSignatures(bytes32 dataHash, bytes memory /* IGNORED */, bytes memory signatures) public view {
-        Safe safe = Safe(payable(_manager()));
-
-        uint256 threshold = safe.getThreshold();
-        safe.checkNSignatures(_msgSender(), dataHash, signatures, threshold);
     }
 }

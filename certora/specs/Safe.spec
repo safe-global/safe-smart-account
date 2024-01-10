@@ -65,7 +65,7 @@ hook Sstore SafeHarness.(slot 24440054405305269366569402256811496959409073762505
     ghostSingletonAddress = newSingletonAddress;
 }
 
-invariant sigletonAddressNeverChanges()
+invariant singletonAddressNeverChanges()
     ghostSingletonAddress == 0
     filtered { f -> reachableOnly(f) && f.selector != sig:getStorageAt(uint256,uint256).selector }
 

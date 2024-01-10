@@ -18,7 +18,8 @@ abstract contract SecuredTokenTransfer {
     function transferToken(address token, address receiver, uint256 amount) internal returns (bool transferred) {
         // 0xa9059cbb - keccack("transfer(address,uint256)")
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             // We write the return value to scratch space.
             // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
@@ -34,5 +35,6 @@ abstract contract SecuredTokenTransfer {
                 transferred := 0
             }
         }
+        /* solhint-enable no-inline-assembly */
     }
 }
