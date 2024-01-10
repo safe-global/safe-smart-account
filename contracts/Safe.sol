@@ -313,7 +313,7 @@ contract Safe is
         // There cannot be an owner with address 0.
         address lastOwner = address(0);
         address currentOwner;
-        uint256 v;
+        uint256 v; // Implicit conversion from uint8 to uint256 will be done for v received from signatureSplit(...).
         bytes32 r;
         bytes32 s;
         uint256 i;
