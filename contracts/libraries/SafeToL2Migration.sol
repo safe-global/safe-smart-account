@@ -86,7 +86,7 @@ contract SafeToL2Migration is SafeStorage {
             0,
             0,
             address(0),
-            address(0),
+            payable(address(0)),
             "", // We cannot detect signatures
             additionalInfo
         );
@@ -105,7 +105,7 @@ contract SafeToL2Migration is SafeStorage {
         bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafeExtended(l2Singleton).VERSION()));
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
-        // There's no way to make sure if address is a valid singleton, unless we cofigure the contract for every chain
+        // There's no way to make sure if address is a valid singleton, unless we configure the contract for every chain
         require(
             newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")),
             "Provided singleton version is not supported"
@@ -156,10 +156,12 @@ contract SafeToL2Migration is SafeStorage {
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             size := extcodesize(account)
         }
+        /* solhint-enable no-inline-assembly */
 
         // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
         return size > 0;

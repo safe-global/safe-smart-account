@@ -24,7 +24,6 @@ contract MultiSendCallOnly {
      */
     function multiSend(bytes memory transactions) public payable {
         /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20

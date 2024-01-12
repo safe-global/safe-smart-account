@@ -30,7 +30,6 @@ contract MultiSend {
     function multiSend(bytes memory transactions) public payable {
         require(address(this) != MULTISEND_SINGLETON, "MultiSend should only be called via delegatecall");
         /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
         assembly {
             let length := mload(transactions)
             let i := 0x20
