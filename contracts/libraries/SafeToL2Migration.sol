@@ -115,7 +115,7 @@ contract SafeToL2Migration is SafeStorage {
         bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
-        // There's no way to make sure if address is a valid singleton, unless we cofigure the contract for every chain
+        // There's no way to make sure if address is a valid singleton, unless we configure the contract for every chain
         require(
             newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")),
             "Provided singleton version is not supported"
