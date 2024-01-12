@@ -72,7 +72,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      * @param guard Guard to be used for checking.
      * @dev Emits event based on module transaction success.
      */
-    function postModuleExecution(bytes32 guardHash, bool success, address guard) internal {
+    function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
             Guard(guard).checkAfterExecution(guardHash, success);
         }
@@ -127,7 +127,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
     ) public virtual returns (bool success) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
-        postModuleExecution(guardHash, success, guard);
+        postModuleExecution(guard, guardHash, success);
     }
 
     /**
@@ -163,7 +163,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
             returnData := ptr
         }
         /* solhint-enable no-inline-assembly */
-        postModuleExecution(guardHash, success, guard);
+        postModuleExecution(guard, guardHash, success);
     }
 
     /**
