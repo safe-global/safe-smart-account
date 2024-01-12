@@ -304,27 +304,36 @@ describe("GuardManager", () => {
                 validGuardMock,
                 signers: [user1, user2],
             } = await setupWithTemplate();
-            const validGuardMockAddress = await validGuardMock.getAddress();
+            // Enabling the Module.
             await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
 
+            // Creating a MockContract and creating dummy calldata and return values.
             const mock = await getMock();
+            const mockAddress = await mock.getAddress();
             const callData = "0xbeef73";
-            const returnBytes32 = "0x" + crypto.randomBytes(32).toString("hex");
-            await mock.givenCalldataReturnBytes32(callData, returnBytes32);
+            const returnBytes = "0xdeaddeed";
+            await mock.givenCalldataReturn(callData, returnBytes);
+
+            // Getting the Guard Address and Interface.
+            const validGuardMockAddress = await validGuardMock.getAddress();
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
-            const checkModuleTxData = guardInterface.encodeFunctionData("checkModuleTransaction", [
-                await mock.getAddress(),
+
+            // Creating the calldata's for the Guard before & after Module TX Execution.
+            const checkModuleTxDataByGuard = guardInterface.encodeFunctionData("checkModuleTransaction", [
+                user1.address,
                 0,
                 callData,
                 0,
                 user1.address,
             ]);
+            await validGuardMock.givenCalldataReturnBytes32(checkModuleTxDataByGuard, ethers.ZeroHash);
+            const checkAfterExecutionTxDataByGuard = guardInterface.encodeFunctionData("checkAfterExecution", [ethers.ZeroHash, true]);
+            await validGuardMock.givenCalldataReturn(checkAfterExecutionTxDataByGuard, "0x1337");
 
-            await validGuardMock.givenCalldataReturnBool(checkModuleTxData, true);
-
-            const returnData = await safe.execTransactionFromModuleReturnData.staticCall(await mock.getAddress(), 0, callData, 0);
-
-            expect(returnData[1]).to.equal(returnBytes32);
+            await expect(await safe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, callData, 0)).to.be.deep.eq([
+                true,
+                returnBytes,
+            ]);
         });
 
         it("reverts if the pre hook of the guard reverts", async () => {
