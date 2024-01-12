@@ -31,13 +31,12 @@ abstract contract FallbackManager is SelfAuthorized {
             where the first 3 bytes of the previous calldata + the first byte of the address make up a valid function signature. The subsequent call would result in unsanctioned access to Safe's internal protected methods.
             For some reason, solidity matches the first 4 bytes of the calldata to a function signature, regardless if more data follow these 4 bytes.
         */
-        require(handler != address(this), "GS400");
+        if (handler == address(this)) revertWithError("GS400");
 
-        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, handler)
+            sstore(FALLBACK_HANDLER_STORAGE_SLOT, handler)
         }
         /* solhint-enable no-inline-assembly */
     }
@@ -61,7 +60,6 @@ abstract contract FallbackManager is SelfAuthorized {
     //      and having the original caller address may enable additional verification scenarios.
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external {
-        bytes32 slot = FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -69,7 +67,9 @@ abstract contract FallbackManager is SelfAuthorized {
             // memory is used, therefore we need to guarantee memory safety (keeping the free memory point 0x40 slot intact,
             // not going beyond the scratch space, etc)
             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
-            let handler := sload(slot)
+
+            let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
+
             if iszero(handler) {
                 return(0, 0)
             }

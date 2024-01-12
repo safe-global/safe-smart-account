@@ -31,12 +31,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      * @param data Optional data of call to execute.
      */
     function setupModules(address to, bytes memory data) internal {
-        require(modules[SENTINEL_MODULES] == address(0), "GS100");
+        if (modules[SENTINEL_MODULES] != address(0)) revertWithError("GS100");
         modules[SENTINEL_MODULES] = SENTINEL_MODULES;
         if (to != address(0)) {
-            require(isContract(to), "GS002");
+            if (!isContract(to)) revertWithError("GS002");
             // Setup has to complete successfully or transaction fails.
-            require(execute(to, 0, data, Enum.Operation.DelegateCall, type(uint256).max), "GS000");
+            if (!execute(to, 0, data, Enum.Operation.DelegateCall, type(uint256).max)) revertWithError("GS000");
         }
     }
 
@@ -87,9 +87,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      */
     function enableModule(address module) public authorized {
         // Module address cannot be null or sentinel.
-        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
+        if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
         // Module cannot be added twice.
-        require(modules[module] == address(0), "GS102");
+        if (modules[module] != address(0)) revertWithError("GS102");
         modules[module] = modules[SENTINEL_MODULES];
         modules[SENTINEL_MODULES] = module;
         emit EnabledModule(module);
@@ -103,8 +103,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      */
     function disableModule(address prevModule, address module) public authorized {
         // Validate module address and check that it corresponds to module index.
-        require(module != address(0) && module != SENTINEL_MODULES, "GS101");
-        require(modules[prevModule] == module, "GS103");
+        if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
+        if (modules[prevModule] != module) revertWithError("GS103");
         modules[prevModule] = modules[module];
         modules[module] = address(0);
         emit DisabledModule(module);
@@ -182,8 +182,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
      * @return next Start of the next page.
      */
     function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next) {
-        require(start == SENTINEL_MODULES || isModuleEnabled(start), "GS105");
-        require(pageSize > 0, "GS106");
+        if (start != SENTINEL_MODULES && !isModuleEnabled(start)) revertWithError("GS105");
+        if (pageSize == 0) revertWithError("GS106");
         // Init array with max page size
         array = new address[](pageSize);
 
