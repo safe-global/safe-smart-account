@@ -41,6 +41,46 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
     }
 
     /**
+     * @notice Runs pre-execution checks for module transactions if a guard is enabled.
+     * @param to Target address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     * @return guard Guard to be used for checking.
+     * @return guardHash Hash returned from the guard tx check.
+     */
+    function preModuleExecution(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation
+    ) internal returns (address guard, bytes32 guardHash) {
+        guard = getGuard();
+
+        // Only whitelisted modules are allowed.
+        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
+
+        if (guard != address(0)) {
+            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+        }
+    }
+
+    /**
+     * @notice Runs post-execution checks for module transactions if a guard is enabled.
+     * @param guardHash Hash returned from the guard during pre execution check.
+     * @param success Boolean flag indicating if the call succeeded.
+     * @param guard Guard to be used for checking.
+     * @dev Emits event based on module transaction success.
+     */
+    function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
+        if (guard != address(0)) {
+            Guard(guard).checkAfterExecution(guardHash, success);
+        }
+        if (success) emit ExecutionFromModuleSuccess(msg.sender);
+        else emit ExecutionFromModuleFailure(msg.sender);
+    }
+
+    /**
      * @notice Enables the module `module` for the Safe.
      * @dev This can only be done via a Safe transaction.
      * @param module Module to be whitelisted.
@@ -85,22 +125,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         bytes memory data,
         Enum.Operation operation
     ) public virtual returns (bool success) {
-        // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
-        // Execute transaction without further confirmations.
-        address guard = getGuard();
-
-        bytes32 guardHash;
-        if (guard != address(0)) {
-            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
-        }
+        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
-
-        if (guard != address(0)) {
-            Guard(guard).checkAfterExecution(guardHash, success);
-        }
-        if (success) emit ExecutionFromModuleSuccess(msg.sender);
-        else emit ExecutionFromModuleFailure(msg.sender);
+        postModuleExecution(guard, guardHash, success);
     }
 
     /**
@@ -118,7 +145,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         bytes memory data,
         Enum.Operation operation
     ) public returns (bool success, bytes memory returnData) {
-        success = execTransactionFromModule(to, value, data, operation);
+        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
+        success = execute(to, value, data, operation, type(uint256).max);
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -133,6 +161,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
             returndatacopy(add(returnData, 0x20), 0, returndatasize())
         }
         /* solhint-enable no-inline-assembly */
+        postModuleExecution(guard, guardHash, success);
     }
 
     /**
