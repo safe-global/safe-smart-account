@@ -40,6 +40,15 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         }
     }
 
+    /**
+     * @notice Runs pre-execution checks for module transactions if a guard is enabled.
+     * @param to Target address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     * @param guard Guard to be used for checking.
+     * @return guardHash Hash returned from the guard tx check.
+     */
     function runPreExecutionChecks(
         address to,
         uint256 value,
@@ -55,6 +64,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         }
     }
 
+    /**
+     * @notice Runs post-execution checks for module transactions if a guard is enabled along with Event emission.
+     * @param guardHash Hash returned from the guard during pre execution check.
+     * @param success Boolean flag indicating if the call succeeded.
+     * @param guard Guard to be used for checking.
+     */
     function postExecutionChecksWithEventEmissions(bytes32 guardHash, bool success, address guard) internal {
         if (guard != address(0)) {
             Guard(guard).checkAfterExecution(guardHash, success);
