@@ -2,8 +2,6 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../interfaces/IEnum.sol";
-
 /**
  * @title IGuardManager - A contract interface managing transaction guards which perform pre and post-checks on Safe transactions.
  * @author @safe-global/safe-protocol
