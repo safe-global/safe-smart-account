@@ -2,12 +2,13 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
  * @author Richard Meissner - @rmeissner
  */
-abstract contract FallbackManager is SelfAuthorized {
+abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
     event ChangedFallbackHandler(address indexed handler);
 
     // keccak256("fallback_manager.handler.address")
@@ -41,14 +42,8 @@ abstract contract FallbackManager is SelfAuthorized {
         /* solhint-enable no-inline-assembly */
     }
 
-    /**
-     * @notice Set Fallback Handler to `handler` for the Safe.
-     * @dev Only fallback calls without value and with data will be forwarded.
-     *      This can only be done via a Safe transaction.
-     *      Cannot be set to the Safe itself.
-     * @param handler contract to handle fallback calls.
-     */
-    function setFallbackHandler(address handler) public authorized {
+    // @inheritdoc IFallbackManager
+    function setFallbackHandler(address handler) public override authorized {
         internalSetFallbackHandler(handler);
         emit ChangedFallbackHandler(handler);
     }

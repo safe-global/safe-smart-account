@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {ISafeExtended} from "../interfaces/ISafeExtended.sol";
+import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
@@ -72,7 +72,7 @@ contract Safe130To141Migration is SafeStorage {
         // The `migrate` function will take care of the delegatecall check
         migrate();
 
-        ISafeExtended(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
+        ISafe(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
     }
 
     /**
@@ -92,7 +92,7 @@ contract Safe130To141Migration is SafeStorage {
         // The `migrateL2` function will take care of the delegatecall check
         migrateL2();
 
-        ISafeExtended(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
+        ISafe(address(this)).setFallbackHandler(SAFE_141_FALLBACK_HANDLER);
     }
 
     /**

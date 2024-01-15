@@ -2,12 +2,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "./IEnum.sol";
+import {IModuleManager} from "./IModuleManager.sol";
+import {IOwnerManager} from "./IOwnerManager.sol";
+import {IFallbackManager} from "./IFallbackManager.sol";
 
 /**
  * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
  * @author @safe-global/safe-protocol
  */
-interface ISafe {
+interface ISafe is IModuleManager, IOwnerManager, IFallbackManager {
     /**
      * @notice Sets an initial storage of the Safe contract.
      * @dev This method can only be called once.

@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../interfaces/IEnum.sol";
 import {BaseGuard} from "../../base/GuardManager.sol";
-import {ISafeExtended} from "../../interfaces/ISafeExtended.sol";
+import {ISafe} from "../../interfaces/ISafe.sol";
 
 /**
  * @title OnlyOwnersGuard - Only allows owners to execute transactions.
@@ -38,7 +38,7 @@ contract OnlyOwnersGuard is BaseGuard {
         bytes memory,
         address msgSender
     ) external view override {
-        require(ISafeExtended(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
+        require(ISafe(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}
