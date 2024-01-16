@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import {Enum} from "../common/Enum.sol";
+import {Enum} from "../libraries/Enum.sol";
 
 /**
  * @title Executor - A contract that can execute transactions

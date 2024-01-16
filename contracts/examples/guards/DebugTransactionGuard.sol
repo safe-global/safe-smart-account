@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../../common/Enum.sol";
+import {Enum} from "../../libraries/Enum.sol";
 import {BaseGuard} from "../../base/GuardManager.sol";
-import {Safe} from "../../Safe.sol";
+import {ISafe} from "../../interfaces/ISafe.sol";
 
 /**
  * @title Debug Transaction Guard - Emits transaction events with extended information.
@@ -75,7 +75,7 @@ contract DebugTransactionGuard is BaseGuard {
         uint256 nonce;
         bytes32 txHash;
         {
-            Safe safe = Safe(payable(msg.sender));
+            ISafe safe = ISafe(payable(msg.sender));
             nonce = safe.nonce() - 1;
             txHash = safe.getTransactionHash(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce);
         }

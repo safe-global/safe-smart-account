@@ -20,6 +20,7 @@
         "test": "hardhat test",
         "test:parallel": "hardhat test --parallel",
         "coverage": "hardhat coverage",
+        "codesize": "hardhat codesize",
         "benchmark": "npm run test benchmark/*.ts",
         "deploy-custom": "rm -rf deployments/custom && npm run deploy-all custom",
         "deploy-all": "hardhat deploy-contracts --network",

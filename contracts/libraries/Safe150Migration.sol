@@ -4,13 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Guard} from "../base/GuardManager.sol";
-
-// Interface for interacting with the Safe contract
-interface ISafe {
-    function setFallbackHandler(address handler) external;
-
-    function setGuard(address guard) external;
-}
+import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade

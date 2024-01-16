@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
+import {IOwnerManager} from "../interfaces/IOwnerManager.sol";
 
 /**
  * @title OwnerManager - Manages Safe owners and a threshold to authorize transactions.
@@ -9,11 +10,7 @@ import {SelfAuthorized} from "../common/SelfAuthorized.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-abstract contract OwnerManager is SelfAuthorized {
-    event AddedOwner(address indexed owner);
-    event RemovedOwner(address indexed owner);
-    event ChangedThreshold(uint256 threshold);
-
+abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     address internal constant SENTINEL_OWNERS = address(0x1);
 
     mapping(address => address) internal owners;
@@ -50,13 +47,8 @@ abstract contract OwnerManager is SelfAuthorized {
         threshold = _threshold;
     }
 
-    /**
-     * @notice Adds the owner `owner` to the Safe and updates the threshold to `_threshold`.
-     * @dev This can only be done via a Safe transaction.
-     * @param owner New owner address.
-     * @param _threshold New threshold.
-     */
-    function addOwnerWithThreshold(address owner, uint256 _threshold) public authorized {
+    // @inheritdoc IOwnerManager
+    function addOwnerWithThreshold(address owner, uint256 _threshold) public override authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
         if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this)) revertWithError("GS203");
         // No duplicate owners allowed.
@@ -69,14 +61,8 @@ abstract contract OwnerManager is SelfAuthorized {
         if (threshold != _threshold) changeThreshold(_threshold);
     }
 
-    /**
-     * @notice Removes the owner `owner` from the Safe and updates the threshold to `_threshold`.
-     * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be removed in the linked list
-     * @param owner Owner address to be removed.
-     * @param _threshold New threshold.
-     */
-    function removeOwner(address prevOwner, address owner, uint256 _threshold) public authorized {
+    // @inheritdoc IOwnerManager
+    function removeOwner(address prevOwner, address owner, uint256 _threshold) public override authorized {
         // Only allow to remove an owner, if threshold can still be reached.
         if (ownerCount - 1 < _threshold) revertWithError("GS201");
         // Validate owner address and check that it corresponds to owner index.
@@ -90,14 +76,8 @@ abstract contract OwnerManager is SelfAuthorized {
         if (threshold != _threshold) changeThreshold(_threshold);
     }
 
-    /**
-     * @notice Replaces the owner `oldOwner` in the Safe with `newOwner`.
-     * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be replaced in the linked list
-     * @param oldOwner Owner address to be replaced.
-     * @param newOwner New owner address.
-     */
-    function swapOwner(address prevOwner, address oldOwner, address newOwner) public authorized {
+    // @inheritdoc IOwnerManager
+    function swapOwner(address prevOwner, address oldOwner, address newOwner) public override authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
         if (newOwner == address(0) || newOwner == SENTINEL_OWNERS || newOwner == address(this)) revertWithError("GS203");
         // No duplicate owners allowed.
@@ -112,12 +92,8 @@ abstract contract OwnerManager is SelfAuthorized {
         emit AddedOwner(newOwner);
     }
 
-    /**
-     * @notice Changes the threshold of the Safe to `_threshold`.
-     * @dev This can only be done via a Safe transaction.
-     * @param _threshold New threshold.
-     */
-    function changeThreshold(uint256 _threshold) public authorized {
+    // @inheritdoc IOwnerManager
+    function changeThreshold(uint256 _threshold) public override authorized {
         // Validate that threshold is smaller than number of owners.
         if (_threshold > ownerCount) revertWithError("GS201");
         // There has to be at least one Safe owner.
@@ -126,27 +102,18 @@ abstract contract OwnerManager is SelfAuthorized {
         emit ChangedThreshold(threshold);
     }
 
-    /**
-     * @notice Returns the number of required confirmations for a Safe transaction aka the threshold.
-     * @return Threshold number.
-     */
-    function getThreshold() public view returns (uint256) {
+    // @inheritdoc IOwnerManager
+    function getThreshold() public view override returns (uint256) {
         return threshold;
     }
 
-    /**
-     * @notice Returns if `owner` is an owner of the Safe.
-     * @return Boolean if owner is an owner of the Safe.
-     */
-    function isOwner(address owner) public view returns (bool) {
+    // @inheritdoc IOwnerManager
+    function isOwner(address owner) public view override returns (bool) {
         return !(owner == SENTINEL_OWNERS || owners[owner] == address(0));
     }
 
-    /**
-     * @notice Returns a list of Safe owners.
-     * @return Array of Safe owners.
-     */
-    function getOwners() public view returns (address[] memory) {
+    // @inheritdoc IOwnerManager
+    function getOwners() public view override returns (address[] memory) {
         address[] memory array = new address[](ownerCount);
 
         // populate return array

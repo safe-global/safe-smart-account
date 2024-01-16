@@ -3,18 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {Enum} from "../common/Enum.sol";
-
-interface ISafe {
-    // solhint-disable-next-line
-    function VERSION() external view returns (string memory);
-
-    function setFallbackHandler(address handler) external;
-
-    function getOwners() external view returns (address[] memory);
-
-    function getThreshold() external view returns (uint256);
-}
+import {Enum} from "../libraries/Enum.sol";
+import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title Migration Contract for updating a Safe from 1.1.1/1.3.0/1.4.1 versions to a L2 version. Useful when replaying a Safe from a non L2 network in a L2 network.

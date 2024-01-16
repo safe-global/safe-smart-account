@@ -1,7 +1,7 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2023-11-10 09:50:31
-+++ Safe.sol	2023-11-20 11:06:39
-@@ -76,7 +76,7 @@
+--- Safe.sol	2024-01-16 17:25:51
++++ Safe.sol	2024-01-16 17:45:52
+@@ -72,20 +72,22 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -9,10 +9,7 @@ diff -druN Safe.sol Safe.sol
 +        // threshold = 1; MUNGED: remove and add to constructor of the harness
      }
  
-     /**
-@@ -93,15 +93,17 @@
-      * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
-      */
+     // @inheritdoc ISafe
      function setup(
 -        address[] calldata _owners,
 +        address[] memory _owners,
@@ -24,26 +21,26 @@ diff -druN Safe.sol Safe.sol
          address paymentToken,
          uint256 payment,
          address payable paymentReceiver
--    ) external {
-+    ) public {
+-    ) external override {
++    ) public override {
 +        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
 +        // constructor
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -451,7 +453,8 @@
+@@ -391,7 +393,8 @@
          address gasToken,
          address refundReceiver,
          uint256 _nonce
--    ) public view returns (bytes32) {
+-    ) public view override returns (bytes32) {
 +    ) internal view returns (bytes32) {
 +        // MUNGED: The function was made internal to enable CVL summaries.
          return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
      }
  }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2023-11-10 09:50:31
-+++ base/Executor.sol	2023-11-20 10:28:47
+--- base/Executor.sol	2024-01-16 16:57:39
++++ base/Executor.sol	2024-01-16 17:46:29
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -59,3 +56,40 @@ diff -druN base/Executor.sol base/Executor.sol
          } else {
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
+diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
+--- interfaces/ISafe.sol	2024-01-16 17:28:41
++++ interfaces/ISafe.sol	2024-01-16 17:47:01
+@@ -119,33 +119,6 @@
+     function domainSeparator() external view returns (bytes32);
+ 
+     /**
+-     * @notice Returns transaction hash to be signed by owners.
+-     * @param to Destination address.
+-     * @param value Ether value.
+-     * @param data Data payload.
+-     * @param operation Operation type.
+-     * @param safeTxGas Gas that should be used for the safe transaction.
+-     * @param baseGas Gas costs for data used to trigger the safe transaction.
+-     * @param gasPrice Maximum gas price that should be used for this transaction.
+-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
+-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
+-     * @param _nonce Transaction nonce.
+-     * @return Transaction hash.
+-     */
+-    function getTransactionHash(
+-        address to,
+-        uint256 value,
+-        bytes calldata data,
+-        Enum.Operation operation,
+-        uint256 safeTxGas,
+-        uint256 baseGas,
+-        uint256 gasPrice,
+-        address gasToken,
+-        address refundReceiver,
+-        uint256 _nonce
+-    ) external view returns (bytes32);
+-
+-    /**
+      * External getter function for state variables.
+      */
+ 

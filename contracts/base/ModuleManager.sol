@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import {Enum} from "../common/Enum.sol";
+import {Enum} from "../libraries/Enum.sol";
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {Executor} from "./Executor.sol";
 import {GuardManager, Guard} from "./GuardManager.sol";
+import {IModuleManager} from "../interfaces/IModuleManager.sol";
 
 /**
  * @title Module Manager - A contract managing Safe modules
@@ -14,12 +15,7 @@ import {GuardManager, Guard} from "./GuardManager.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
-    event EnabledModule(address indexed module);
-    event DisabledModule(address indexed module);
-    event ExecutionFromModuleSuccess(address indexed module);
-    event ExecutionFromModuleFailure(address indexed module);
-
+abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModuleManager {
     address internal constant SENTINEL_MODULES = address(0x1);
 
     mapping(address => address) internal modules;
@@ -80,12 +76,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         else emit ExecutionFromModuleFailure(msg.sender);
     }
 
-    /**
-     * @notice Enables the module `module` for the Safe.
-     * @dev This can only be done via a Safe transaction.
-     * @param module Module to be whitelisted.
-     */
-    function enableModule(address module) public authorized {
+    // @inheritdoc IModuleManager
+    function enableModule(address module) public override authorized {
         // Module address cannot be null or sentinel.
         if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
         // Module cannot be added twice.
@@ -95,13 +87,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         emit EnabledModule(module);
     }
 
-    /**
-     * @notice Disables the module `module` for the Safe.
-     * @dev This can only be done via a Safe transaction.
-     * @param prevModule Previous module in the modules linked list.
-     * @param module Module to be removed.
-     */
-    function disableModule(address prevModule, address module) public authorized {
+    // @inheritdoc IModuleManager
+    function disableModule(address prevModule, address module) public override authorized {
         // Validate module address and check that it corresponds to module index.
         if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
         if (modules[prevModule] != module) revertWithError("GS103");
@@ -110,41 +97,25 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         emit DisabledModule(module);
     }
 
-    /**
-     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `value` (Native Token)
-     * @dev Function is virtual to allow overriding for L2 singleton to emit an event for indexing.
-     * @param to Destination address of module transaction.
-     * @param value Ether value of module transaction.
-     * @param data Data payload of module transaction.
-     * @param operation Operation type of module transaction.
-     * @return success Boolean flag indicating if the call succeeded.
-     */
+    // @inheritdoc IModuleManager
     function execTransactionFromModule(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public virtual returns (bool success) {
+    ) public virtual override returns (bool success) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
         postModuleExecution(guard, guardHash, success);
     }
 
-    /**
-     * @notice Execute `operation` (0: Call, 1: DelegateCall) to `to` with `value` (Native Token) and return data
-     * @param to Destination address of module transaction.
-     * @param value Ether value of module transaction.
-     * @param data Data payload of module transaction.
-     * @param operation Operation type of module transaction.
-     * @return success Boolean flag indicating if the call succeeded.
-     * @return returnData Data returned by the call.
-     */
+    // @inheritdoc IModuleManager
     function execTransactionFromModuleReturnData(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public returns (bool success, bytes memory returnData) {
+    ) public override returns (bool success, bytes memory returnData) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
         /* solhint-disable no-inline-assembly */
@@ -164,24 +135,13 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager {
         postModuleExecution(guard, guardHash, success);
     }
 
-    /**
-     * @notice Returns if an module is enabled
-     * @return True if the module is enabled
-     */
-    function isModuleEnabled(address module) public view returns (bool) {
+    // @inheritdoc IModuleManager
+    function isModuleEnabled(address module) public view override returns (bool) {
         return SENTINEL_MODULES != module && modules[module] != address(0);
     }
 
-    /**
-     * @notice Returns an array of modules.
-     *         If all entries fit into a single page, the next pointer will be 0x1.
-     *         If another page is present, next will be the last element of the returned array.
-     * @param start Start of the page. Has to be a module or start pointer (0x1 address)
-     * @param pageSize Maximum number of modules that should be returned. Has to be > 0
-     * @return array Array of modules.
-     * @return next Start of the next page.
-     */
-    function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next) {
+    // @inheritdoc IModuleManager
+    function getModulesPaginated(address start, uint256 pageSize) external view override returns (address[] memory array, address next) {
         if (start != SENTINEL_MODULES && !isModuleEnabled(start)) revertWithError("GS105");
         if (pageSize == 0) revertWithError("GS106");
         // Init array with max page size
