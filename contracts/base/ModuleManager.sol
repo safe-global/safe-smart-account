@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
-import {Enum} from "../interfaces/Enum.sol";
+import {Enum} from "../libraries/Enum.sol";
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {Executor} from "./Executor.sol";
 import {GuardManager, Guard} from "./GuardManager.sol";

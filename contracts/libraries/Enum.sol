@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title Enum - Collection of enums used in Safe contracts.
  * @author @safe-global/safe-protocol
  */
-interface Enum {
+library Enum {
     enum Operation {
         Call,
         DelegateCall

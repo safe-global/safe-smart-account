@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {Enum} from "../interfaces/Enum.sol";
+import {Enum} from "../libraries/Enum.sol";
 import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
