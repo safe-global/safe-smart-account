@@ -10,7 +10,7 @@ import {Singleton} from "./common/Singleton.sol";
 import {SignatureDecoder} from "./common/SignatureDecoder.sol";
 import {SecuredTokenTransfer} from "./common/SecuredTokenTransfer.sol";
 import {StorageAccessible} from "./common/StorageAccessible.sol";
-import {Enum} from "./interfaces/IEnum.sol";
+import {Enum} from "./interfaces/Enum.sol";
 import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
 import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
