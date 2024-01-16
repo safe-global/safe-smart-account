@@ -33,12 +33,12 @@ methods {
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
+persistent ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
+persistent ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
+persistent ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
 
 // This is needed for the execTransaction <> signatures rule
-ghost transactionHashGhost(
+persistent ghost transactionHashGhost(
         address /*to */,
         uint256 /*value */,
         bytes,
