@@ -69,7 +69,7 @@ contract Safe is
     // Mapping to keep track of all message hashes that have been approved by ALL REQUIRED owners
     mapping(bytes32 => uint256) public override signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approved by ANY owners
-    mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
+    mapping(address => mapping(bytes32 => uint256)) public override approvedHashes;
 
     // This constructor ensures that this contract can only be used as a singleton for Proxy contracts
     constructor() {

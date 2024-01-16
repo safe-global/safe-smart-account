@@ -146,4 +146,5 @@ interface ISafe is IModuleManager, IOwnerManager, IFallbackManager {
     function VERSION() external view returns (string memory);
     function nonce() external view returns (uint256);
     function signedMessages(bytes32 messageHash) external view returns (uint256);
+    function approvedHashes(address owner, bytes32 messageHash) external view returns (uint256);
 }
