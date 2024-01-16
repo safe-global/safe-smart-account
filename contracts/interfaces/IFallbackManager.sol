@@ -6,6 +6,8 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author @safe-global/safe-protocol
  */
 interface IFallbackManager {
+    event ChangedFallbackHandler(address indexed handler);
+
     /**
      * @notice Set Fallback Handler to `handler` for the Safe.
      * @dev Only fallback calls without value and with data will be forwarded.

@@ -9,8 +9,6 @@ import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
-    event ChangedFallbackHandler(address indexed handler);
-
     // keccak256("fallback_manager.handler.address")
     bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
 

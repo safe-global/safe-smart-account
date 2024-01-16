@@ -12,6 +12,11 @@ import {IGuardManager} from "./IGuardManager.sol";
  * @author @safe-global/safe-protocol
  */
 interface IModuleManager is IGuardManager {
+    event EnabledModule(address indexed module);
+    event DisabledModule(address indexed module);
+    event ExecutionFromModuleSuccess(address indexed module);
+    event ExecutionFromModuleFailure(address indexed module);
+
     /**
      * @notice Enables the module `module` for the Safe.
      * @dev This can only be done via a Safe transaction.

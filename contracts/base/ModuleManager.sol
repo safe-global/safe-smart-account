@@ -16,11 +16,6 @@ import {IModuleManager} from "../interfaces/IModuleManager.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModuleManager {
-    event EnabledModule(address indexed module);
-    event DisabledModule(address indexed module);
-    event ExecutionFromModuleSuccess(address indexed module);
-    event ExecutionFromModuleFailure(address indexed module);
-
     address internal constant SENTINEL_MODULES = address(0x1);
 
     mapping(address => address) internal modules;

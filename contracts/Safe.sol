@@ -58,12 +58,6 @@ contract Safe is
     // );
     bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
-    event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
-    event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
-    event SignMsg(bytes32 indexed msgHash);
-    event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
-    event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
-
     uint256 public override nonce;
     bytes32 private _deprecatedDomainSeparator;
     // Mapping to keep track of all message hashes that have been approved by ALL REQUIRED owners

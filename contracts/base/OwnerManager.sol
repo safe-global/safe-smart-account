@@ -11,10 +11,6 @@ import {IOwnerManager} from "../interfaces/IOwnerManager.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
-    event AddedOwner(address indexed owner);
-    event RemovedOwner(address indexed owner);
-    event ChangedThreshold(uint256 threshold);
-
     address internal constant SENTINEL_OWNERS = address(0x1);
 
     mapping(address => address) internal owners;

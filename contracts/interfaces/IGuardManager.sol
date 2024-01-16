@@ -7,6 +7,8 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author @safe-global/safe-protocol
  */
 interface IGuardManager {
+    event ChangedGuard(address indexed guard);
+
     /**
      * @dev Set a guard that checks transactions before execution
      *      This can only be done via a Safe transaction.

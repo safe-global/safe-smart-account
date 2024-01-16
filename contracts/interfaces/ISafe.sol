@@ -11,6 +11,12 @@ import {IFallbackManager} from "./IFallbackManager.sol";
  * @author @safe-global/safe-protocol
  */
 interface ISafe is IModuleManager, IOwnerManager, IFallbackManager {
+    event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
+    event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
+    event SignMsg(bytes32 indexed msgHash);
+    event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
+    event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
+
     /**
      * @notice Sets an initial storage of the Safe contract.
      * @dev This method can only be called once.

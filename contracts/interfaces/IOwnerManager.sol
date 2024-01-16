@@ -6,6 +6,10 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author @safe-global/safe-protocol
  */
 interface IOwnerManager {
+    event AddedOwner(address indexed owner);
+    event RemovedOwner(address indexed owner);
+    event ChangedThreshold(uint256 threshold);
+
     /**
      * @notice Adds the owner `owner` to the Safe and updates the threshold to `_threshold`.
      * @dev This can only be done via a Safe transaction.
