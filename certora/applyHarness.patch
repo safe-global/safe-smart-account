@@ -1,7 +1,7 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2024-01-10 15:40:45
-+++ Safe.sol	2024-01-10 15:49:32
-@@ -78,20 +78,22 @@
+--- Safe.sol	2024-01-16 17:25:51
++++ Safe.sol	2024-01-16 17:45:52
+@@ -72,20 +72,22 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -28,7 +28,7 @@ diff -druN Safe.sol Safe.sol
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -396,7 +398,8 @@
+@@ -391,7 +393,8 @@
          address gasToken,
          address refundReceiver,
          uint256 _nonce
@@ -39,8 +39,8 @@ diff -druN Safe.sol Safe.sol
      }
  }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2024-01-10 15:18:44
-+++ base/Executor.sol	2024-01-10 15:50:04
+--- base/Executor.sol	2024-01-16 16:57:39
++++ base/Executor.sol	2024-01-16 17:46:29
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -57,9 +57,9 @@ diff -druN base/Executor.sol base/Executor.sol
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
 diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2024-01-10 15:36:01
-+++ interfaces/ISafe.sol	2024-01-10 15:55:55
-@@ -110,33 +110,6 @@
+--- interfaces/ISafe.sol	2024-01-16 17:28:41
++++ interfaces/ISafe.sol	2024-01-16 17:47:01
+@@ -119,33 +119,6 @@
      function domainSeparator() external view returns (bytes32);
  
      /**
@@ -90,6 +90,6 @@ diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
 -    ) external view returns (bytes32);
 -
 -    /**
-      * @dev External getter function for state variables.
+      * External getter function for state variables.
       */
-     // solhint-disable-next-line
+ 
