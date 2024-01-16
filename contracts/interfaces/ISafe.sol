@@ -140,11 +140,34 @@ interface ISafe is IModuleManager, IOwnerManager, IFallbackManager {
     ) external view returns (bytes32);
 
     /**
-     * @dev External getter function for state variables.
+     * External getter function for state variables.
+     */
+
+    /**
+     * @notice Returns the version of the Safe contract.
+     * @return Version string.
      */
     // solhint-disable-next-line
     function VERSION() external view returns (string memory);
+
+    /**
+     * @notice Returns the nonce of the Safe contract.
+     * @return Nonce.
+     */
     function nonce() external view returns (uint256);
+
+    /**
+     * @notice Returns a uint if the messageHash is signed by the owner.
+     * @param messageHash Hash of message that should be checked.
+     * @return Number denoting if an owner signed the hash.
+     */
     function signedMessages(bytes32 messageHash) external view returns (uint256);
+
+    /**
+     * @notice Returns a uint if the messageHash is approved by the owner.
+     * @param owner Owner address that should be checked.
+     * @param messageHash Hash of message that should be checked.
+     * @return Number denoting if an owner approved the hash.
+     */
     function approvedHashes(address owner, bytes32 messageHash) external view returns (uint256);
 }
