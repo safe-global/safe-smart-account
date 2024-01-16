@@ -7,7 +7,7 @@ methods {
     function getSafeGuard() external returns (address) envfree;
 }
 
-ghost uint256 gasPriceEnv {
+persistent ghost uint256 gasPriceEnv {
     init_state axiom gasPriceEnv == 1;
 }
 
