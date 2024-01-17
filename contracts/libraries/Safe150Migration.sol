@@ -27,7 +27,7 @@ contract Safe150Migration is SafeStorage {
     address public constant SAFE_150_FALLBACK_HANDLER = address(0x8aa755cB169991fEDC3E306751dCb71964A041c7);
 
     // the slot is defined as "keccak256("guard_manager.guard.address")" in the GuardManager contract
-    // reference: https://github.com/safe-global/safe-contracts/blob/8ffae95faa815acf86ec8b50021ebe9f96abde10/contracts/base/GuardManager.sol#L76-L77
+    // reference: https://github.com/safe-global/safe-smart-account/blob/8ffae95faa815acf86ec8b50021ebe9f96abde10/contracts/base/GuardManager.sol#L76-L77
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     /**

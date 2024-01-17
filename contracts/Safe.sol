@@ -214,7 +214,7 @@ contract Safe is
     /**
      * @notice Checks whether the contract signature is valid. Reverts otherwise.
      * @dev This is extracted to a separate function for better compatibility with Certora's prover.
-     *      More info here: https://github.com/safe-global/safe-contracts/pull/661
+     *      More info here: https://github.com/safe-global/safe-smart-account/pull/661
      * @param owner Address of the owner used to sign the message
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.
@@ -292,7 +292,7 @@ contract Safe is
                 // The contract signature check is extracted to a separate function for better compatibility with formal verification
                 // A quote from the Certora team:
                 // "The assembly code broke the pointer analysis, which switched the prover in failsafe mode, where it is (a) much slower and (b) computes different hashes than in the normal mode."
-                // More info here: https://github.com/safe-global/safe-contracts/pull/661
+                // More info here: https://github.com/safe-global/safe-smart-account/pull/661
                 checkContractSignature(currentOwner, dataHash, signatures, uint256(s));
             } else if (v == 1) {
                 // If v is 1 then it is an approved hash

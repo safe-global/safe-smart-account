@@ -48,7 +48,7 @@ const deterministicDeployment = (network: string): DeterministicDeploymentInfo =
     if (!info) {
         throw new Error(`
         Safe factory not found for network ${network}. You can request a new deployment at https://github.com/safe-global/safe-singleton-factory.
-        For more information, see https://github.com/safe-global/safe-contracts#replay-protection-eip-155
+        For more information, see https://github.com/safe-global/safe-smart-account#replay-protection-eip-155
       `);
     }
     return {

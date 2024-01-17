@@ -64,7 +64,7 @@ The method `signMessage` can be used to mark a message as signed on-chain.
 
 `{32-bytes hash validator}{32-bytes ignored}{1-byte signature type}`
 
-**Hash validator** - Padded address of the account that pre-validated the hash that should be validated. The Safe keeps track of all hashes that have been pre validated. This is done with a **mapping address to mapping of bytes32 to boolean** where it is possible to set a hash as validated by a certain address \(hash validator\). To add an entry to this mapping use `approveHash`. Also if the validator is the sender of transaction that executed the Safe transaction it is **not** required to use `approveHash` to add an entry to the mapping. \(This can be seen in the [Team Edition tests](https://github.com/gnosis/safe-contracts/blob/v1.0.0/test/gnosisSafeTeamEdition.js)\)
+**Hash validator** - Padded address of the account that pre-validated the hash that should be validated. The Safe keeps track of all hashes that have been pre validated. This is done with a **mapping address to mapping of bytes32 to boolean** where it is possible to set a hash as validated by a certain address \(hash validator\). To add an entry to this mapping use `approveHash`. Also if the validator is the sender of transaction that executed the Safe transaction it is **not** required to use `approveHash` to add an entry to the mapping. \(This can be seen in the [Team Edition tests](https://github.com/gnosis/safe-smart-account/blob/v1.0.0/test/gnosisSafeTeamEdition.js)\)
 
 **Signature type** - 1
 
