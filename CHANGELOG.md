@@ -4,6 +4,12 @@ This changelog only contains changes starting from version 1.3.0
 
 # Version 1.5.0
 
+## Rename repository
+
+Issue: [#719](https://github.com/safe-global/safe-smart-account/issues/719)
+
+The repository was renamed from `safe-contracts` to `safe-smart-account` to better reflect the purpose of the contracts. Also, the npm package name was changed from `@safe-global/safe-contracts` to `@safe-global/safe-smart-account`.
+
 ## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
