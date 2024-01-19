@@ -7,7 +7,7 @@ import {ISafe} from "../interfaces/ISafe.sol";
 import {HandlerContext} from "./HandlerContext.sol";
 
 /**
- * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe contracts.
+ * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe Smart Account contracts.
  * @author Richard Meissner - @rmeissner
  */
 contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator, HandlerContext {
