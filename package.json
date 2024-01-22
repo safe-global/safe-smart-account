@@ -1,8 +1,8 @@
 {
-    "name": "@safe-global/safe-contracts",
+    "name": "@safe-global/safe-smart-account",
     "version": "1.4.1-build.0",
     "description": "Ethereum multisig contract",
-    "homepage": "https://github.com/safe-global/safe-contracts/",
+    "homepage": "https://github.com/safe-global/safe-smart-account/",
     "license": "LGPL-3.0",
     "main": "dist/src/index.js",
     "typings": "dist/src/index.d.ts",
@@ -39,7 +39,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/safe-global/safe-contracts.git"
+        "url": "git+https://github.com/safe-global/safe-smart-account.git"
     },
     "keywords": [
         "Ethereum",
@@ -48,7 +48,7 @@
     ],
     "author": "richard@safe.global",
     "bugs": {
-        "url": "https://github.com/safe-global/safe-contracts/issues"
+        "url": "https://github.com/safe-global/safe-smart-account/issues"
     },
     "devDependencies": {
         "@nomicfoundation/hardhat-toolbox": "^4.0.0",

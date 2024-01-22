@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
 
-task("deploy-contracts", "Deploys and verifies Safe contracts").setAction(async (_, hre) => {
+task("deploy-contracts", "Deploys and verifies Safe Smart Account contracts").setAction(async (_, hre) => {
     await hre.run("deploy");
     await hre.run("local-verify");
     await hre.run("sourcify");

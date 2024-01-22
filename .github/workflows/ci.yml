@@ -1,4 +1,4 @@
-name: safe-contracts
+name: safe-smart-account
 on: [push, pull_request]
 env:
     NODE_VERSION: 18.17.1

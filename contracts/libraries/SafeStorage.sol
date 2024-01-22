@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title SafeStorage - Storage layout of the Safe contracts to be used in libraries.
+ * @title SafeStorage - Storage layout of the Safe Smart Account contracts to be used in libraries.
  * @dev Should be always the first base contract of a library that is used with a Safe.
  * @author Richard Meissner - @rmeissner
  */

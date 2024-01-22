@@ -1,11 +1,11 @@
-Safe Contracts
+Safe Smart Account
 ==============
 
-[![npm version](https://badge.fury.io/js/%40safe-global%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40safe-global%2Fsafe-contracts)
-[![Build Status](https://github.com/safe-global/safe-contracts/workflows/safe-contracts/badge.svg?branch=main)](https://github.com/safe-global/safe-contracts/actions)
-[![Coverage Status](https://coveralls.io/repos/github/safe-global/safe-contracts/badge.svg?branch=main)](https://coveralls.io/github/safe-global/safe-contracts)
+[![npm version](https://badge.fury.io/js/%40safe-global%2Fsafe-smart-account.svg)](https://badge.fury.io/js/%40safe-global%2Fsafe-smart-account)
+[![Build Status](https://github.com/safe-global/safe-smart-account/workflows/safe-smart-account/badge.svg?branch=main)](https://github.com/safe-global/safe-smart-account/actions)
+[![Coverage Status](https://coveralls.io/repos/github/safe-global/safe-smart-account/badge.svg?branch=main)](https://coveralls.io/github/safe-global/safe-smart-account)
 
-> :warning: **This branch contains changes that are under development** To use the latest audited version make sure to use the correct commit. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-contracts/releases).
+> :warning: **This branch contains changes that are under development** To use the latest audited version make sure to use the correct commit. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
 
 Usage
 -----
@@ -46,9 +46,9 @@ To add support for a new network follow the steps of the ``Deploy`` section and 
 
 ### Deploy
 
-> :warning: **Make sure to use the correct commit when deploying the contracts.** Any change (even comments) within the contract files will result in different addresses. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-contracts/releases).
+> :warning: **Make sure to use the correct commit when deploying the contracts.** Any change (even comments) within the contract files will result in different addresses. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
 
-> **Current version:** The latest release is [v1.3.0-libs.0](https://github.com/safe-global/safe-contracts/tree/v1.3.0-libs.0) on the commit [767ef36](https://github.com/safe-global/safe-contracts/commit/767ef36bba88bdbc0c9fe3708a4290cabef4c376)
+> **Current version:** The latest release is [v1.3.0-libs.0](https://github.com/safe-global/safe-smart-account/tree/v1.3.0-libs.0) on the commit [767ef36](https://github.com/safe-global/safe-smart-account/commit/767ef36bba88bdbc0c9fe3708a4290cabef4c376)
 
 This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
@@ -84,7 +84,7 @@ Note: Address will vary if contract code is changed or a different Solidity vers
 
 Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
 
-Safe contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, make sure to run `npm i --save-dev @gnosis.pm/safe-singleton-factory` before deployment. For more information, including how to deploy the factory to a new network, please refer to the factory repo.  
+Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, make sure to run `npm i --save-dev @gnosis.pm/safe-singleton-factory` before deployment. For more information, including how to deploy the factory to a new network, please refer to the factory repo.  
 
 Note: This will result in different addresses compared to hardhat's default deterministic deployment process.
 
