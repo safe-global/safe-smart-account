@@ -50,7 +50,7 @@ rule nonceMonotonicity(method f) filtered {
 
 
 // The singleton is a private variable, so we need to use a ghost variable to track it.
-ghost address ghostSingletonAddress {
+persistent ghost address ghostSingletonAddress {
     init_state axiom ghostSingletonAddress == 0;
 }
 
@@ -69,7 +69,7 @@ invariant singletonAddressNeverChanges()
     ghostSingletonAddress == 0
     filtered { f -> reachableOnly(f) && f.selector != sig:getStorageAt(uint256,uint256).selector }
 
-ghost address fallbackHandlerAddress {
+persistent ghost address fallbackHandlerAddress {
     init_state axiom fallbackHandlerAddress == 0;
 }
 

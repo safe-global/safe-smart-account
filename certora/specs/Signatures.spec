@@ -33,22 +33,9 @@ methods {
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
-ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
-
-// This is needed for the execTransaction <> signatures rule
-ghost transactionHashGhost(
-        address /*to */,
-        uint256 /*value */,
-        bytes,
-        Enum.Operation /*operation*/,
-        uint256 /*safeTxGas */,
-        uint256 /*baseGas*/,
-        uint256 /*gasPrice*/,
-        address /*gasToken*/,
-        address /*refundReceiver*/,
-        uint256 /*_nonce*/ ) returns bytes32 ;
+persistent ghost mapping(bytes => mapping(uint256 => uint8)) mySigSplitV;
+persistent ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitR;
+persistent ghost mapping(bytes => mapping(uint256 => bytes32)) mySigSplitS;
 
 function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint8,bytes32,bytes32) {
     return (mySigSplitV[signatures][pos], mySigSplitR[signatures][pos], mySigSplitS[signatures][pos]);

@@ -21,18 +21,19 @@ methods {
 definition reachableOnly(method f) returns bool =
     f.selector != sig:simulateAndRevert(address,bytes).selector;
 
-ghost reach(address, address) returns bool {
+persistent ghost reach(address, address) returns bool {
     init_state axiom forall address X. forall address Y. reach(X, Y) == (X == Y || to_mathint(Y) == 0);
 }
 
-ghost mapping(address => address) ghostModules {
+persistent ghost mapping(address => address) ghostModules {
     init_state axiom forall address X. to_mathint(ghostModules[X]) == 0;
 }
 
-ghost address SENTINEL {
+persistent ghost address SENTINEL {
     axiom to_mathint(SENTINEL) == 1;    
 }
-ghost address NULL {
+
+persistent ghost address NULL {
     axiom to_mathint(NULL) == 0;    
 }
 
