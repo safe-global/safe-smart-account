@@ -68,9 +68,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                solidity: ["0.7.6", "0.8.19"]
+                solidity: ["0.7.6", "0.8.24"]
                 include:
-                    - solidity: "0.8.19"
+                    - solidity: "0.8.24"
                       settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":1000000}}'
         env:
             SOLIDITY_VERSION: ${{ matrix.solidity }}
@@ -81,4 +81,4 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
                   cache: "npm"
-            - run: (npm ci && npm run build && npx hardhat codesize --contractname Safe && npm run benchmark) || echo "Benchmark failed"
+            - run: npm ci && npm run build && npx hardhat codesize --contractname Safe && npm run benchmark
