@@ -33,7 +33,7 @@ contract SafeProxy {
     fallback() external payable {
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            let _singleton := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
+            let _singleton := sload(0)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
             if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
                 mstore(0, _singleton)
