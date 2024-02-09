@@ -36,7 +36,7 @@ contract SafeProxy {
             let _singleton := sload(0)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
             if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
-                mstore(0, _singleton)
+                mstore(0, and(_singleton, 0xffffffffffffffffffffffffffffffffffffffff))
                 return(0, 0x20)
             }
             calldatacopy(0, 0, calldatasize())
