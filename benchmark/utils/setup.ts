@@ -20,7 +20,7 @@ export interface Contracts {
     additions: any | undefined;
 }
 
-const generateTarget = async (owners: number, threshold: number, guardAddress: string, logGasUsage?: boolean) => {
+const generateTarget = async (owners: number, threshold: number, guardAddress: string, logGasUsage?: boolean, saltNumber?: string) => {
     const fallbackHandler = await getTokenCallbackHandler();
     const fallbackHandlerAddress = await fallbackHandler.getAddress();
     const signers = (await ethers.getSigners()).slice(0, owners);
@@ -29,6 +29,7 @@ const generateTarget = async (owners: number, threshold: number, guardAddress: s
         threshold,
         fallbackHandlerAddress,
         logGasUsage,
+        saltNumber,
     );
     await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], signers);
     return safe;
@@ -45,17 +46,23 @@ export const configs = [
 export const setupBenchmarkContracts = (benchmarkFixture?: () => Promise<any>, logGasUsage?: boolean) => {
     return deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const additions = benchmarkFixture ? await benchmarkFixture() : undefined;
         const guardFactory = await hre.ethers.getContractFactory("DelegateCallTransactionGuard");
-        const guard = await guardFactory.deploy(AddressZero);
+        const guard = additions?.guard ?? (await guardFactory.deploy(AddressZero));
         const guardAddress = await guard.getAddress();
         const targets: SafeSingleton[] = [];
         for (const config of configs) {
-            targets.push(await generateTarget(config.signers, config.threshold, config.useGuard ? guardAddress : AddressZero, logGasUsage));
+            targets.push(
+                await generateTarget(
+                    config.signers,
+                    config.threshold,
+                    config.useGuard ? guardAddress : AddressZero,
+                    logGasUsage,
+                    ethers.id(config.name),
+                ),
+            );
         }
-        return {
-            targets,
-            additions: benchmarkFixture ? await benchmarkFixture() : undefined,
-        };
+        return { targets, additions };
     });
 };
 
@@ -74,11 +81,14 @@ export const benchmark = async (topic: string, benchmarks: BenchmarkWithSetup) =
     for (const benchmark of setupBenchmarks) {
         const { name, prepare, after, fixture } = benchmark;
         const contractSetup = setupBenchmarkContracts(fixture);
-        describe(`${topic} - ${name}`, () => {
-            it("with an EOA", async () => {
+        describe(`${topic} - ${name}`, function () {
+            it("with an EOA", async function () {
                 const contracts = await contractSetup();
                 const [, , , , , user6] = await ethers.getSigners();
                 const tx = await prepare(contracts, user6.address, 0);
+                if (tx.operation !== 0) {
+                    this.skip();
+                }
                 await logGas(
                     name,
                     user6.sendTransaction({
