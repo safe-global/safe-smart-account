@@ -6,7 +6,7 @@
   * Nick Munoz-McDonald (@NickErrant)
 
 ##### Notes
-All changes for 1.1.1 until commit [2df0b2e0ad5d0f7ab5423e7f5baa72b2456d32ae](https://github.com/safe-global/safe-smart-account/commit/2df0b2e0ad5d0f7ab5423e7f5baa72b2456d32ae) have been audited and the result were added to an ammended report.
+All changes for 1.1.1 until commit [2df0b2e0ad5d0f7ab5423e7f5baa72b2456d32ae](https://github.com/safe-global/safe-smart-account/commit/2df0b2e0ad5d0f7ab5423e7f5baa72b2456d32ae) have been audited and the result were added to an amended report.
 
 All changes for 1.1.0 until commit [78494bcdbc61b3db52308a25f0556c42cf656ab1](https://github.com/safe-global/safe-smart-account/commit/78494bcdbc61b3db52308a25f0556c42cf656ab1) have been audited and are considered in the audit report.
 

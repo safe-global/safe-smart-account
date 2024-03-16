@@ -543,7 +543,7 @@ Note: **This contract is meant as an example to demonstrate how to facilitate a 
 
 Expected behaviour:
 
-This transaction guard can be used to prevent that Safe transactions can re-enter the `execTransaction` method. The transaction guard does not differentiate between different Safes, so if multiple Safes use the same guard instance it prevents entrancy in all of the connected Safes.
+This transaction guard can be used to prevent that Safe transactions can re-enter the `execTransaction` method. The transaction guard does not differentiate between different Safes, so if multiple Safes use the same guard instance it prevents reentrancy in all of the connected Safes.
 
 ### Libraries
 

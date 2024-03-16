@@ -286,7 +286,7 @@ describe("ModuleManager", () => {
             expect(await mock.invocationCountForCalldata.staticCall("0xbaddad")).to.equal(1n);
         });
 
-        it("Returns expected from contract on successs", async () => {
+        it("Returns expected from contract on success", async () => {
             const {
                 safe,
                 mock,
