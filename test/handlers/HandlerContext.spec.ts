@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeTemplate } from "../utils/setup";
+import { getContractFactoryByName, getSafeTemplate, getWallets } from "../utils/setup";
 
 describe("HandlerContext", () => {
-    const setup = deployments.createFixture(async ({ deployments }) => {
+    const setup = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const TestHandler = await hre.ethers.getContractFactory("TestHandler");
+        const TestHandler = await getContractFactoryByName("TestHandler");
         const handler = await TestHandler.deploy();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         return {
             safe: await getSafeTemplate(),
             handler,
@@ -38,7 +38,7 @@ describe("HandlerContext", () => {
         } = await setup();
         const handlerAddress = await handler.getAddress();
         const safeAddress = await safe.getAddress();
-        await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handlerAddress, AddressZero, 0, AddressZero);
+        await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handlerAddress, AddressZero, 0, AddressZero)).wait();
 
         const response = await user1.call({
             to: safeAddress,

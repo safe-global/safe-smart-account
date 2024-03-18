@@ -85,7 +85,7 @@ export const safeApproveHash = async (
         const safeAddress = await safe.getAddress();
         const typedDataHash = calculateSafeTransactionHash(safeAddress, safeTx, chainId);
         const signerSafe = safe.connect(signer);
-        await signerSafe.approveHash(typedDataHash);
+        await (await signerSafe.approveHash(typedDataHash)).wait();
     }
     const signerAddress = await signer.getAddress();
     return {

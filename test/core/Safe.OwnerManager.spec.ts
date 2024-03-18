@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafeWithOwners, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("OwnerManager", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         return {
             safe: await getSafeWithOwners([user1.address]),
@@ -63,7 +63,7 @@ describe("OwnerManager", () => {
                 safe,
                 signers: [user1, user2],
             } = await setupTests();
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).wait();
 
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).to.revertedWith(
                 "GS013",
@@ -225,8 +225,8 @@ describe("OwnerManager", () => {
                 safe,
                 signers: [user1, user2, user3],
             } = await setupTests();
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
-            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user3.address, 2], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).wait();
+            await (await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user3.address, 2], [user1])).wait();
             await expect(await safe.getOwners()).to.be.deep.equal([user3.address, user2.address, user1.address]);
             await expect(await safe.getThreshold()).to.be.deep.eq(2n);
             await expect(await safe.isOwner(user1.address)).to.be.true;

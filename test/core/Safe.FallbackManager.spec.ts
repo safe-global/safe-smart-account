@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultTokenCallbackHandlerDeployment, deployContract, getSafeTemplate, getTokenCallbackHandler } from "../utils/setup";
+import { defaultTokenCallbackHandlerDeployment, deployContract, getSafeTemplate, getTokenCallbackHandler, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("FallbackManager", () => {
-    const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
+    const setupWithTemplate = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const source = `
         contract Mirror {
@@ -17,7 +17,7 @@ describe("FallbackManager", () => {
                 return msg.data;
             }
         }`;
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         const mirror = await deployContract(user1, source);
         return {
@@ -42,7 +42,9 @@ describe("FallbackManager", () => {
             ).to.be.eq("0x" + "".padStart(64, "0"));
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
+            await (
+                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            ).wait();
 
             // Check fallback handler
             await expect(
@@ -59,7 +61,7 @@ describe("FallbackManager", () => {
             const [user1, user2] = signers;
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait();
 
             // Check fallback handler
             await expect(
@@ -88,7 +90,7 @@ describe("FallbackManager", () => {
             const [user1, user2] = signers;
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait();
 
             // Check event
             await expect(executeContractCallWithSigners(safe, safe, "setFallbackHandler", [handler.address], [user1]))
@@ -110,7 +112,9 @@ describe("FallbackManager", () => {
             await expect(safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.rejected;
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
+            await (
+                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            ).wait();
 
             // Check callbacks
             expect(await safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
@@ -121,7 +125,9 @@ describe("FallbackManager", () => {
             const mirrorAddress = await mirror.getAddress();
             const [user1, user2] = signers;
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirrorAddress, AddressZero, 0, AddressZero);
+            await (
+                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirrorAddress, AddressZero, 0, AddressZero)
+            ).wait();
 
             const tx = {
                 to: await safe.getAddress(),
@@ -144,7 +150,9 @@ describe("FallbackManager", () => {
             const mirrorAddress = await mirror.getAddress();
             const [user1, user2] = signers;
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirrorAddress, AddressZero, 0, AddressZero);
+            await (
+                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirrorAddress, AddressZero, 0, AddressZero)
+            ).wait();
 
             const tx = {
                 to: await safe.getAddress(),
@@ -172,7 +180,7 @@ describe("FallbackManager", () => {
             const { safe, signers } = await setupWithTemplate();
             const [user1] = signers;
             // Setup Safe
-            await safe.setup([user1.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
+            await (await safe.setup([user1.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait();
 
             // The transaction execution function doesn't bubble up revert messages so we check for a generic transaction fail code GS013
             await expect(

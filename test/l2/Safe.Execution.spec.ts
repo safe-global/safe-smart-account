@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import {
     safeApproveHash,
     buildSafeTransaction,
@@ -17,8 +17,8 @@ describe("SafeL2", () => {
         }
     });
 
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
-        const signers = await ethers.getSigners();
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
+        const signers = await getWallets();
         const [user1] = signers;
         await deployments.fixture();
         const mock = await getMock();
@@ -45,7 +45,7 @@ describe("SafeL2", () => {
                 refundReceiver: user2.address,
             });
 
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") })).wait();
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
             const additionalInfo = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -81,9 +81,12 @@ describe("SafeL2", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+            await (await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).wait();
 
-            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
+            //Use manual gasLimit because gas estimation fails for this function on zkSync, though transaction executed successfully
+            await expect(
+                user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0, { gasLimit: hre.network.zksync ? 250_000 : undefined }),
+            )
                 .to.emit(safe, "SafeModuleTransaction")
                 .withArgs(user2.address, mockAddress, 0, "0xbaddad", 0)
                 .to.emit(safe, "ExecutionFromModuleSuccess")

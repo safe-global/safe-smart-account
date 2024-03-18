@@ -1,16 +1,16 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 
-import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
+import { deployContract, getMock, getSafeSingleton, getSafeTemplate, getWallets } from "../utils/setup";
 import { calculateSafeDomainSeparator } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
 
 describe("Safe", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         return {
             template: await getSafeTemplate(),
             mock: await getMock(),
@@ -79,16 +79,18 @@ describe("Safe", () => {
                 template,
                 signers: [user1, user2, user3],
             } = await setupTests();
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                0,
-                AddressZero,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    0,
+                    AddressZero,
+                )
+            ).wait();
             await expect(
                 template.setup(
                     [user1.address, user2.address, user3.address],
@@ -313,20 +315,22 @@ describe("Safe", () => {
             } = await setupTests();
             const templateAddress = await template.getAddress();
             const payment = ethers.parseEther("10");
-            await user1.sendTransaction({ to: templateAddress, value: payment });
+            await (await user1.sendTransaction({ to: templateAddress, value: payment })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user1.address);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                AddressZero,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    AddressZero,
+                )
+            ).wait();
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
             await expect(userBalance < (await hre.ethers.provider.getBalance(user1.address))).to.be.true;
@@ -339,20 +343,22 @@ describe("Safe", () => {
             } = await setupTests();
             const templateAddress = await template.getAddress();
             const payment = ethers.parseEther("10");
-            await user1.sendTransaction({ to: templateAddress, value: payment });
+            await (await user1.sendTransaction({ to: templateAddress, value: payment })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                user2.address,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    user2.address,
+                )
+            ).wait();
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + payment);
@@ -395,17 +401,19 @@ describe("Safe", () => {
             const payment = 133742;
 
             const transferData = encodeTransfer(user1.address, payment);
-            await mock.givenCalldataReturnBool(transferData, true);
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                mockAddress,
-                payment,
-                AddressZero,
-            );
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait();
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    mockAddress,
+                    payment,
+                    AddressZero,
+                )
+            ).wait();
 
             expect(await mock.invocationCountForCalldata.staticCall(transferData)).to.eq(1n);
 
@@ -422,17 +430,19 @@ describe("Safe", () => {
             const payment = 133742;
 
             const transferData = encodeTransfer(user2.address, payment);
-            await mock.givenCalldataReturnBool(transferData, true);
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                mockAddress,
-                payment,
-                user2.address,
-            );
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait();
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    mockAddress,
+                    payment,
+                    user2.address,
+                )
+            ).wait();
 
             expect(await mock.invocationCountForCalldata.staticCall(transferData)).to.eq(1n);
 

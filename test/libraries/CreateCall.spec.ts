@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { compile, getCreateCall, getSafeWithOwners } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { compile, getCreateCall, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildContractCall, executeTx, safeApproveHash } from "../../src/utils/execution";
 
 const CONTRACT_SOURCE = `
@@ -16,10 +16,18 @@ contract Test {
 }`;
 
 describe("CreateCall", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    before(function () {
+        /**
+         * ## performCreate and performCreate2 functions of CreateCall.sol will not work on zkSync
+         * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#create-create2
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const testContract = await compile(CONTRACT_SOURCE);
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         return {
             safe: await getSafeWithOwners([user1.address]),

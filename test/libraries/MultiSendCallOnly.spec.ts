@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
+import hre, { ethers } from "hardhat";
+import { deployContract, getMock, getMultiSendCallOnly, getSafeWithOwners, getDelegateCaller, getWallets } from "../utils/setup";
 import {
     buildContractCall,
     buildSafeTransaction,
@@ -12,7 +12,7 @@ import {
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
 
 describe("MultiSendCallOnly", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const setterSource = `
             contract StorageSetter {
@@ -26,7 +26,7 @@ describe("MultiSendCallOnly", () => {
                     /* solhint-enable no-inline-assembly */
                 }
             }`;
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         const storageSetter = await deployContract(user1, setterSource);
         return {
@@ -82,7 +82,7 @@ describe("MultiSendCallOnly", () => {
                 multiSend,
                 signers: [user1, user2],
             } = await setupTests();
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.be.deep.eq(ethers.parseEther("1"));
 
@@ -100,7 +100,7 @@ describe("MultiSendCallOnly", () => {
                 multiSend,
                 signers: [user1, user2],
             } = await setupTests();
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
@@ -171,7 +171,7 @@ describe("MultiSendCallOnly", () => {
             } = await setupTests();
             const storageSetterAddress = await storageSetter.getAddress();
 
-            await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") });
+            await (await user1.sendTransaction({ to: await safe.getAddress(), value: ethers.parseEther("1") })).wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
 
@@ -206,7 +206,7 @@ describe("MultiSendCallOnly", () => {
             const triggerCalldata = "0xbaddad";
             const errorMessage = "Some random message";
 
-            await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage);
+            await (await mock.givenCalldataRevertWithMessage(triggerCalldata, errorMessage)).wait();
 
             const txs: MetaTransaction[] = [
                 {

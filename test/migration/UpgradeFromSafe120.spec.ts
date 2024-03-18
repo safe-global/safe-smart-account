@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeSingleton, getFactory, getMock, getMultiSend } from "../utils/setup";
+import { getSafeSingleton, getFactory, getMock, getMultiSend, getWallets } from "../utils/setup";
 import { buildSafeTransaction, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { verificationTests } from "./subTests.spec";
 import deploymentData from "../json/safeDeployment.json";
@@ -15,7 +15,7 @@ describe("Upgrade from Safe 1.2.0", () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
-        const [user1] = await ethers.getSigners();
+        const [user1] = await getWallets();
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) throw new Error("Could not deploy Safe 1.2.0");
 

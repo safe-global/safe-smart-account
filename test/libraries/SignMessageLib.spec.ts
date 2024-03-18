@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { getSafeWithOwners } from "../utils/setup";
+import hre from "hardhat";
+import { getContractFactoryByName, getSafeWithOwners, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("SignMessageLib", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const lib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
-        const signers = await ethers.getSigners();
+        const lib = await (await getContractFactoryByName("SignMessageLib")).deploy();
+        const signers = await getWallets();
         const [user1, user2] = signers;
         return {
             safe: await getSafeWithOwners([user1.address, user2.address]),
@@ -81,7 +81,7 @@ describe("SignMessageLib", () => {
             expect(await safe.signedMessages(safeInternalMsgHash)).to.be.eq(0);
             expect(msgStorageSlotBeforeSigning).to.be.eq(`0x${"0".padStart(64, "0")}`);
 
-            await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true);
+            await (await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true)).wait();
 
             const masterCopyAddressAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 0);
             const ownerCountAfterSigning = await hre.ethers.provider.getStorage(await safe.getAddress(), 3);

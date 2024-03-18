@@ -1,19 +1,26 @@
 import { expect } from "chai";
-import { ethers, deployments } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners, getSafeSingleton, migrationContract } from "../utils/setup";
+import { getSafeWithOwners, getSafeSingleton, migrationContract, getWallets } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("Migration", () => {
+    before(function () {
+        /**
+         * ## Migration test is not relevant for zkSync: there is no 1.2.0 of safe-contracts on zkSync
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
     const MigratedInterface = new ethers.Interface([
         "function domainSeparator() view returns(bytes32)",
         "function masterCopy() view returns(address)",
     ]);
 
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await getWallets();
         const [user1] = signers;
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) {
