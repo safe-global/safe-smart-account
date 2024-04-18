@@ -28,7 +28,9 @@ contract SafeL2 is Safe {
 
     event SafeModuleTransaction(address module, address to, uint256 value, bytes data, Enum.Operation operation);
 
-    // @inheritdoc Safe
+    /**
+     *  @inheritdoc Safe
+     */
     function execTransaction(
         address to,
         uint256 value,
@@ -61,7 +63,9 @@ contract SafeL2 is Safe {
         return super.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
     }
 
-    // @inheritdoc Safe
+    /**
+     *  @inheritdoc Safe
+     */
     function execTransactionFromModule(
         address to,
         uint256 value,
