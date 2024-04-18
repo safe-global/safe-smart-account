@@ -40,7 +40,9 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         /* solhint-enable no-inline-assembly */
     }
 
-    // @inheritdoc IFallbackManager
+    /**
+     * @inheritdoc IFallbackManager
+     */
     function setFallbackHandler(address handler) public override authorized {
         internalSetFallbackHandler(handler);
         emit ChangedFallbackHandler(handler);

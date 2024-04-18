@@ -13,6 +13,6 @@
         "reason-string": "off",
         "no-empty-blocks": "off",
         "avoid-low-level-calls": "off",
-        "custom-errors": "off"
+        "gas-custom-errors": "off"
     }
 }

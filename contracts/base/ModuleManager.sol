@@ -76,7 +76,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         else emit ExecutionFromModuleFailure(msg.sender);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function enableModule(address module) public override authorized {
         // Module address cannot be null or sentinel.
         if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
@@ -87,7 +89,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         emit EnabledModule(module);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function disableModule(address prevModule, address module) public override authorized {
         // Validate module address and check that it corresponds to module index.
         if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
@@ -97,7 +101,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         emit DisabledModule(module);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function execTransactionFromModule(
         address to,
         uint256 value,
@@ -109,7 +115,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         postModuleExecution(guard, guardHash, success);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function execTransactionFromModuleReturnData(
         address to,
         uint256 value,
@@ -135,12 +143,16 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         postModuleExecution(guard, guardHash, success);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function isModuleEnabled(address module) public view override returns (bool) {
         return SENTINEL_MODULES != module && modules[module] != address(0);
     }
 
-    // @inheritdoc IModuleManager
+    /**
+     * @inheritdoc IModuleManager
+     */
     function getModulesPaginated(address start, uint256 pageSize) external view override returns (address[] memory array, address next) {
         if (start != SENTINEL_MODULES && !isModuleEnabled(start)) revertWithError("GS105");
         if (pageSize == 0) revertWithError("GS106");

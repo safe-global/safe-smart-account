@@ -75,7 +75,9 @@ contract Safe is
         threshold = 1;
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function setup(
         address[] calldata _owners,
         uint256 _threshold,
@@ -100,7 +102,9 @@ contract Safe is
         emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function execTransaction(
         address to,
         uint256 value,
@@ -247,7 +251,9 @@ contract Safe is
         if (ISignatureValidator(owner).isValidSignature(dataHash, contractSignature) != EIP1271_MAGIC_VALUE) revertWithError("GS024");
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
@@ -256,7 +262,9 @@ contract Safe is
         checkNSignatures(msg.sender, dataHash, signatures, _threshold);
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function checkNSignatures(
         address executor,
         bytes32 dataHash,
@@ -341,14 +349,18 @@ contract Safe is
         checkNSignatures(msg.sender, dataHash, signatures, requiredSignatures);
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function approveHash(bytes32 hashToApprove) external override {
         if (owners[msg.sender] == address(0)) revertWithError("GS030");
         approvedHashes[msg.sender][hashToApprove] = 1;
         emit ApproveHash(hashToApprove, msg.sender);
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function domainSeparator() public view override returns (bytes32) {
         uint256 chainId;
         /* solhint-disable no-inline-assembly */
@@ -405,7 +417,9 @@ contract Safe is
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
     }
 
-    // @inheritdoc ISafe
+    /**
+     * @inheritdoc ISafe
+     */
     function getTransactionHash(
         address to,
         uint256 value,
