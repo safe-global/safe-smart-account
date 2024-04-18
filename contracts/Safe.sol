@@ -249,11 +249,6 @@ contract Safe is
 
     // @inheritdoc ISafe
     function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
-        checkSignatures(dataHash, "", signatures);
-    }
-
-    // @inheritdoc ISafe
-    function checkSignatures(bytes32 dataHash, bytes memory /* IGNORED */, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
@@ -313,6 +308,37 @@ contract Safe is
                 revertWithError("GS026");
             lastOwner = currentOwner;
         }
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided hash. Reverts otherwise.
+     *         The `data` parameter is completely ignored during signature verification.
+     * @dev This function is provided for compatibility with previous versions.
+     *      Use `checkSignatures(bytes32,bytes)` instead.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash).
+     * @param data **IGNORED** The data pre-image.
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     */
+    function checkSignatures(bytes32 dataHash, bytes calldata data, bytes memory signatures) external view {
+        data;
+        checkSignatures(dataHash, signatures);
+    }
+
+    /**
+     * @notice Checks whether the signature provided is valid for the provided hash. Reverts otherwise.
+     *         The `data` parameter is completely ignored during signature verification.
+     * @dev This function is provided for compatibility with previous versions.
+     *      Use `checkNSignatures(address,bytes32,bytes,uint256)` instead.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
+     * @param data **IGNORED** The data pre-image.
+     * @param signatures Signature data that should be verified.
+     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param requiredSignatures Amount of required valid signatures.
+     */
+    function checkNSignatures(bytes32 dataHash, bytes calldata data, bytes memory signatures, uint256 requiredSignatures) external view {
+        data;
+        checkNSignatures(msg.sender, dataHash, signatures, requiredSignatures);
     }
 
     // @inheritdoc ISafe
