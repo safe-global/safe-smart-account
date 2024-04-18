@@ -48,7 +48,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function addOwnerWithThreshold(address owner, uint256 _threshold) public override authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
@@ -64,7 +64,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function removeOwner(address prevOwner, address owner, uint256 _threshold) public override authorized {
         // Only allow to remove an owner, if threshold can still be reached.
@@ -81,7 +81,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function swapOwner(address prevOwner, address oldOwner, address newOwner) public override authorized {
         // Owner address cannot be null, the sentinel or the Safe itself.
@@ -99,7 +99,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function changeThreshold(uint256 _threshold) public override authorized {
         // Validate that threshold is smaller than number of owners.
@@ -111,21 +111,21 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function getThreshold() public view override returns (uint256) {
         return threshold;
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function isOwner(address owner) public view override returns (bool) {
         return !(owner == SENTINEL_OWNERS || owners[owner] == address(0));
     }
 
     /**
-     *  @inheritdoc IOwnerManager
+     * @inheritdoc IOwnerManager
      */
     function getOwners() public view override returns (address[] memory) {
         address[] memory array = new address[](ownerCount);

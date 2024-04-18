@@ -41,7 +41,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
     }
 
     /**
-     *  @inheritdoc IFallbackManager
+     * @inheritdoc IFallbackManager
      */
     function setFallbackHandler(address handler) public override authorized {
         internalSetFallbackHandler(handler);

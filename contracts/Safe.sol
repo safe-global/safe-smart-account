@@ -76,7 +76,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function setup(
         address[] calldata _owners,
@@ -103,7 +103,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function execTransaction(
         address to,
@@ -252,7 +252,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
@@ -263,7 +263,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function checkNSignatures(
         address executor,
@@ -350,7 +350,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function approveHash(bytes32 hashToApprove) external override {
         if (owners[msg.sender] == address(0)) revertWithError("GS030");
@@ -359,7 +359,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function domainSeparator() public view override returns (bytes32) {
         uint256 chainId;
@@ -418,7 +418,7 @@ contract Safe is
     }
 
     /**
-     *  @inheritdoc ISafe
+     * @inheritdoc ISafe
      */
     function getTransactionHash(
         address to,
