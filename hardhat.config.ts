@@ -115,6 +115,10 @@ const userConfig: HardhatUserConfig = {
             ...sharedNetworkConfig,
             url: `https://api.avax.network/ext/bc/C/rpc`,
         },
+        berachain: {
+            ...sharedNetworkConfig,
+            url: `https://artio.rpc.berachain.com/`,
+        }
     },
     deterministicDeployment,
     namedAccounts: {

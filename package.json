@@ -51,6 +51,7 @@
         "url": "https://github.com/safe-global/safe-smart-account/issues"
     },
     "devDependencies": {
+        "@gnosis.pm/safe-singleton-factory": "^1.0.14",
         "@nomicfoundation/hardhat-toolbox": "^5.0.0",
         "@openzeppelin/contracts": "^3.4.0",
         "@safe-global/mock-contract": "^4.1.0",
