@@ -69,13 +69,13 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) internal returns (address guard, bytes32 guardHash) {
-        guard = getGuard();
+        guard = getModuleGuard();
 
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         if (guard != address(0)) {
-            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+            guardHash = ModuleGuard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
         }
     }
 
@@ -88,7 +88,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
-            Guard(guard).checkAfterExecution(guardHash, success);
+            ModuleGuard(guard).checkAfterExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
@@ -129,23 +129,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         Enum.Operation operation
     ) public virtual override returns (bool success) {
         // Only whitelisted modules are allowed.
-        require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
-
-        address moduleGuard = getModuleGuard();
-
-        if (moduleGuard != address(0)) {
-            ModuleGuard(moduleGuard).checkTransaction(to, value, data, operation, msg.sender);
-        }
+        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
 
         // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, type(uint256).max);
-        if (success) emit ExecutionFromModuleSuccess(msg.sender);
-        else emit ExecutionFromModuleFailure(msg.sender);
-
-        if (moduleGuard != address(0)) {
-            bytes32 dataHash = keccak256(data);
-            ModuleGuard(moduleGuard).checkAfterExecution(dataHash, success);
-        }
+        /* solhint-enable no-inline-assembly */
+        postModuleExecution(guard, guardHash, success);
     }
 
     /**

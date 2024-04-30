@@ -36,22 +36,6 @@ interface Guard is IERC165 {
         address msgSender
     ) external;
 
-    /// @notice Checks the module transaction details.
-    /// @dev The function needs to implement module transaction validation logic.
-    /// @param to The address to which the transaction is intended.
-    /// @param value The value of the transaction in Wei.
-    /// @param data The transaction data.
-    /// @param operation The type of operation of the transaction.
-    /// @param module The module involved in the transaction.
-    /// @return moduleTxHash The hash of the module transaction.
-    function checkModuleTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address module
-    ) external returns (bytes32 moduleTxHash);
-
     /// @notice Checks after execution of transaction.
     /// @dev The function needs to implement a check after the execution of the transaction.
     /// @param hash The hash of the transaction.

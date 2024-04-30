@@ -16,6 +16,7 @@ interface IModuleManager is IGuardManager {
     event DisabledModule(address indexed module);
     event ExecutionFromModuleSuccess(address indexed module);
     event ExecutionFromModuleFailure(address indexed module);
+    event ChangedModuleGuard(address indexed moduleGuard);
 
     /**
      * @notice Enables the module `module` for the Safe.
