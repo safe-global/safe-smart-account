@@ -8,6 +8,15 @@ import {IERC165} from "../interfaces/IERC165.sol";
 
 /// @title IModuleGuard Interface
 interface IModuleGuard is IERC165 {
+    /**
+     * @notice Checks the module transaction details.
+     * @dev The function needs to implement module transaction validation logic.
+     * @param to The address to which the transaction is intended.
+     * @param value The value of the transaction in Wei.
+     * @param data The transaction data.
+     * @param operation The type of operation of the module transaction.
+     * @param msgSender The address of the message sender.
+     */
     function checkTransaction(
         address to,
         uint256 value,
@@ -16,6 +25,12 @@ interface IModuleGuard is IERC165 {
         address msgSender
     ) external returns (bytes32);
 
+    /**
+     * @notice Checks after execution of module transaction.
+     * @dev The function needs to implement a check after the execution of the module transaction.
+     * @param txHash The hash of the module transaction.
+     * @param success The status of the module transaction execution.
+     */
     function checkAfterExecution(bytes32 txHash, bool success) external;
 }
 
