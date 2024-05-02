@@ -11,7 +11,7 @@ import {IGuardManager} from "./IGuardManager.sol";
            completely takeover a Safe.
  * @author @safe-global/safe-protocol
  */
-interface IModuleManager is IGuardManager {
+interface IModuleManager {
     event EnabledModule(address indexed module);
     event DisabledModule(address indexed module);
     event ExecutionFromModuleSuccess(address indexed module);
@@ -81,4 +81,15 @@ interface IModuleManager is IGuardManager {
      * @return next Start of the next page.
      */
     function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next);
+
+    /**
+     * @dev Set a module guard that checks transactions initiated by the module before execution
+     *      This can only be done via a Safe transaction.
+     *      ⚠️ IMPORTANT: Since a module guard has full power to block Safe transaction execution initiatied via a module,
+     *        a broken module guard can cause a denial of service for the Safe modules. Make sure to carefully
+     *        audit the module guard code and design recovery mechanisms.
+     * @notice Set Module Guard `moduleGuard` for the Safe. Make sure you trust the module guard.
+     * @param moduleGuard The address of the module guard to be used or the 0 address to disable the module guard.
+     */
+    function setModuleGuard(address moduleGuard) external;
 }

@@ -249,15 +249,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     }
 
     /**
-     * @dev Set a module guard that checks transactions initiated by the module before execution
-     *      This can only be done via a Safe transaction.
-     *      ⚠️ IMPORTANT: Since a module guard has full power to block Safe transaction execution initiatied via a module,
-     *        a broken module guard can cause a denial of service for the Safe modules. Make sure to carefully
-     *        audit the module guard code and design recovery mechanisms.
-     * @notice Set Module Guard `moduleGuard` for the Safe. Make sure you trust the module guard.
-     * @param moduleGuard The address of the module guard to be used or the 0 address to disable the module guard.
+     * @inheritdoc IModuleManager
      */
-    function setModuleGuard(address moduleGuard) external authorized {
+    function setModuleGuard(address moduleGuard) external override authorized {
         if (moduleGuard != address(0)) {
             require(IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId), "GS300");
         }

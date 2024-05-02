@@ -53,6 +53,7 @@ describe("SafeToL2Migration library", () => {
         const singleton141 = await getSafeSingletonAt(SAFE_SINGLETON_141_ADDRESS);
 
         const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
+        // TODO: Use updated interfaceId
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x945b8148"]);
         const validGuardMock = await getMock();
         await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);

@@ -93,7 +93,7 @@ contract Safe150Migration is SafeStorage {
     function migrateWithSetGuard(address guard) public validSingletonOnly {
         singleton = SAFE_150_SINGLETON;
         emit ChangedMasterCopy(singleton);
-
+        // TODO: Set module guard
         ISafe(address(this)).setGuard(guard);
     }
 

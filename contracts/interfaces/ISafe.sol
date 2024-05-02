@@ -5,12 +5,13 @@ import {Enum} from "../libraries/Enum.sol";
 import {IModuleManager} from "./IModuleManager.sol";
 import {IOwnerManager} from "./IOwnerManager.sol";
 import {IFallbackManager} from "./IFallbackManager.sol";
+import {IGuardManager} from "./IGuardManager.sol";
 
 /**
  * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
  * @author @safe-global/safe-protocol
  */
-interface ISafe is IModuleManager, IOwnerManager, IFallbackManager {
+interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManager {
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
     event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
     event SignMsg(bytes32 indexed msgHash);
