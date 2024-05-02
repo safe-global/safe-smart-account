@@ -155,7 +155,7 @@ describe("GuardManager", () => {
             const validGuardMockAddress = await validGuardMock.getAddress();
             const safeAddress = await safe.getAddress();
 
-            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: 1 });
+            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
@@ -199,7 +199,7 @@ describe("GuardManager", () => {
             const validGuardMockAddress = await validGuardMock.getAddress();
             const safeAddress = await safe.getAddress();
 
-            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: 1 });
+            const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
             const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
