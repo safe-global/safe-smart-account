@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Guard} from "./base/GuardManager.sol";
+import {Guard, GuardManager} from "./base/GuardManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {OwnerManager} from "./base/OwnerManager.sol";
 import {FallbackManager} from "./base/FallbackManager.sol";
@@ -36,6 +36,7 @@ contract Safe is
     Singleton,
     NativeCurrencyPaymentFallback,
     ModuleManager,
+    GuardManager,
     OwnerManager,
     SignatureDecoder,
     SecuredTokenTransfer,

@@ -94,25 +94,4 @@ contract DebugTransactionGuard is BaseGuard {
         txNonces[txHash] = 0;
         emit GasUsage(msg.sender, txHash, nonce, success);
     }
-
-    /**
-     * @notice Called by the Safe contract before a transaction is executed via a module.
-     * @param to Destination address of Safe transaction.
-     * @param value Ether value of Safe transaction.
-     * @param data Data payload of Safe transaction.
-     * @param operation Operation type of Safe transaction.
-     * @param module Account executing the transaction.
-     * @return moduleTxHash Hash of the module transaction.
-     */
-    function checkModuleTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address module
-    ) external override returns (bytes32 moduleTxHash) {
-        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
-
-        emit ModuleTransasctionDetails(moduleTxHash, to, value, data, operation, module);
-    }
 }

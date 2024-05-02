@@ -3,20 +3,26 @@ pragma solidity >=0.7.0 <0.9.0;
 import {Enum} from "../libraries/Enum.sol";
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {Executor} from "./Executor.sol";
-import {GuardManager, Guard} from "./GuardManager.sol";
 import {IModuleManager} from "../interfaces/IModuleManager.sol";
-import "../interfaces/IERC165.sol";
+import {IERC165} from "../interfaces/IERC165.sol";
 
-interface ModuleGuard is IERC165 {
-    function checkTransaction(address to, uint256 value, bytes memory data, Enum.Operation operation, address msgSender) external;
+/// @title IModuleGuard Interface
+interface IModuleGuard is IERC165 {
+    function checkTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address msgSender
+    ) external returns (bytes32);
 
     function checkAfterExecution(bytes32 txHash, bool success) external;
 }
 
-abstract contract BaseModuleGuard is ModuleGuard {
+abstract contract BaseModuleGuard is IModuleGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(ModuleGuard).interfaceId || // TODO
+            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -75,7 +81,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         if (guard != address(0)) {
-            guardHash = ModuleGuard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+            guardHash = IModuleGuard(guard).checkTransaction(to, value, data, operation, msg.sender);
         }
     }
 
@@ -88,7 +94,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
-            ModuleGuard(guard).checkAfterExecution(guardHash, success);
+            IModuleGuard(guard).checkAfterExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
@@ -238,7 +244,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function setModuleGuard(address moduleGuard) external authorized {
         if (moduleGuard != address(0)) {
-            require(ModuleGuard(moduleGuard).supportsInterface(type(ModuleGuard).interfaceId), "GS300");
+            require(IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId), "GS300");
         }
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
