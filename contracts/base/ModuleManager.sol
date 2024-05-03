@@ -149,12 +149,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) public virtual override returns (bool success) {
-        // Only whitelisted modules are allowed.
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
 
-        // Execute transaction without further confirmations.
         success = execute(to, value, data, operation, type(uint256).max);
-        /* solhint-enable no-inline-assembly */
         postModuleExecution(guard, guardHash, success);
     }
 
@@ -253,7 +250,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function setModuleGuard(address moduleGuard) external override authorized {
         if (moduleGuard != address(0)) {
-            require(IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId), "GS300");
+            require(IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId), "GS301");
         }
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
