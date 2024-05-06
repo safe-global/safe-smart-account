@@ -88,7 +88,7 @@ interface IModuleManager {
      *        a broken module guard can cause a denial of service for the Safe modules. Make sure to carefully
      *        audit the module guard code and design recovery mechanisms.
      * @notice Set Module Guard `moduleGuard` for the Safe. Make sure you trust the module guard.
-     * @param moduleGuard The address of the module guard to be used or the 0 address to disable the module guard.
+     * @param moduleGuard The address of the module guard to be used or the zero address to disable the module guard.
      */
     function setModuleGuard(address moduleGuard) external;
 }
