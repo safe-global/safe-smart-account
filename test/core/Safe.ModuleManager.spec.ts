@@ -540,7 +540,7 @@ describe("ModuleManager", () => {
                     signers: [user1, user2],
                 } = await setupWithTemplate();
                 const validModuleGuardMockAddress = await validModuleGuardMock.getAddress();
-                const hash = "0x" + crypto.randomBytes(32).toString("hex");
+                const hash = ethers.hexlify(ethers.randomBytes(32));
 
                 await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
 
