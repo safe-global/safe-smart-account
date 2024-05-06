@@ -29,16 +29,9 @@ describe("GuardManager", () => {
         const safe = await getSafeWithOwners([user2.address]);
         await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user2]);
 
-        const validModuleGuardMock = await getMock();
-        const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xd7e8e3a4"]);
-        await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
-        await executeContractCallWithSigners(safe, safe, "setModuleGuard", [validModuleGuardMock.target], [user2]);
-
         return {
             safe,
             validGuardMock,
-            validModuleGuardMock,
             guardEip165Calldata,
             signers,
         };
