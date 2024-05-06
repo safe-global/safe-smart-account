@@ -641,6 +641,7 @@ describe("Safe150Migration library", () => {
             } = await setupTests();
             const invalidGuardMockAddress = await invalidGuardMock.getAddress();
             const invalidModuleGuardMockAddress = await invalidModuleGuardMock.getAddress();
+            const validGuardMockAddress = await validGuardMock.getAddress();
 
             await expect(
                 executeContractCallWithSigners(
@@ -658,7 +659,7 @@ describe("Safe150Migration library", () => {
                     safe130l2,
                     migration,
                     "migrateL2WithSetGuards",
-                    [validGuardMock, invalidModuleGuardMockAddress],
+                    [validGuardMockAddress, invalidModuleGuardMockAddress],
                     [user1],
                     true,
                 ),
