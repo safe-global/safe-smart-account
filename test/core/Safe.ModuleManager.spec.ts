@@ -2,16 +2,9 @@ import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners, getMock } from "../utils/setup";
-import {
-    buildContractCall,
-    calculateSafeTransactionHash,
-    executeContractCallWithSigners,
-    executeTx,
-    safeApproveHash,
-} from "../../src/utils/execution";
+import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 import crypto from "crypto";
-import { chainId } from "../utils/encoding";
 
 describe("ModuleManager", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
@@ -464,7 +457,6 @@ describe("ModuleManager", () => {
                     signers: [user1, user2],
                 } = await setupWithTemplate();
                 const validModuleGuardMockAddress = await validModuleGuardMock.getAddress();
-                const safeAddress = await safe.getAddress();
 
                 // Check module guard
                 await expect(await hre.ethers.provider.getStorage(await safe.getAddress(), MODULE_GUARD_STORAGE_SLOT)).to.be.eq(
@@ -473,10 +465,16 @@ describe("ModuleManager", () => {
 
                 await executeContractCallWithSigners(safe, safe, "enableModule", [user1.address], [user2]);
 
-                const safeTx = await buildContractCall(safe, "setModuleGuard", [AddressZero], await safe.nonce());
-                const signature = await safeApproveHash(user2, safe, safeTx);
+                const data = safe.interface.encodeFunctionData("setModuleGuard", [AddressZero]);
 
-                await expect(executeTx(safe, safeTx, [signature]))
+                const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
+                const checkTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [safe.target, 0, data, 0, user1.address]);
+
+                const guardHash = ethers.randomBytes(32);
+
+                await validModuleGuardMock.givenCalldataReturnBytes32(checkTxData, guardHash);
+
+                await expect(await safe.connect(user1).execTransactionFromModule(safe, 0, data, 0))
                     .to.emit(safe, "ChangedModuleGuard")
                     .withArgs(AddressZero);
 
@@ -485,29 +483,16 @@ describe("ModuleManager", () => {
                     "0x" + "".padStart(64, "0"),
                 );
 
-                const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-                const checkTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [
-                    safeTx.to,
-                    safeTx.value,
-                    safeTx.data,
-                    safeTx.operation,
-                    user1.address,
-                ]);
                 expect(await validModuleGuardMock.invocationCountForCalldata.staticCall(checkTxData)).to.be.eq(1);
                 // Module Guard should also be called for post exec check, even if it is removed with the Safe tx
-                const checkExecData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [
-                    calculateSafeTransactionHash(safeAddress, safeTx, await chainId()),
-                    true,
-                ]);
-
-                await safe.execTransactionFromModule(user1.address, 0, "0x", 0);
+                const checkExecData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [guardHash, true]);
 
                 expect(await validModuleGuardMock.invocationCountForCalldata.staticCall(checkExecData)).to.be.eq(1);
             });
         });
 
         describe("execTransactionFromModule", () => {
-            it("reverts if the pre hook of the guard reverts", async () => {
+            it("reverts if the pre hook of the module guard reverts", async () => {
                 const {
                     safe,
                     validModuleGuardMock,
@@ -578,7 +563,7 @@ describe("ModuleManager", () => {
         });
 
         describe("execTransactionFromModuleReturnData", () => {
-            it("correctly returns the return data if the guard allows the transaction", async () => {
+            it("correctly returns the return data if the module guard allows the transaction", async () => {
                 const {
                     safe,
                     validModuleGuardMock,
