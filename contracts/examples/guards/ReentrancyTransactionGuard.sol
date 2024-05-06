@@ -2,13 +2,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard} from "../../base/GuardManager.sol";
+import {BaseGuard, Guard} from "../../base/GuardManager.sol";
+import {BaseModuleGuard, IModuleGuard} from "../../base/ModuleManager.sol";
+import {IERC165} from "../../interfaces/IERC165.sol";
 
 /**
  * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
  * @author Richard Meissner - @rmeissner
  */
-contract ReentrancyTransactionGuard is BaseGuard {
+contract ReentrancyTransactionGuard is BaseGuard, BaseModuleGuard {
     bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrancy_guard.guard.struct");
 
     struct GuardValue {
@@ -63,7 +65,36 @@ contract ReentrancyTransactionGuard is BaseGuard {
      * @notice Called by the Safe contract after a transaction is executed.
      * @dev Resets the guard value.
      */
-    function checkAfterExecution(bytes32, bool) external override {
+    function checkAfterExecution(bytes32, bool) external override(Guard, IModuleGuard) {
         getGuard().active = false;
+    }
+
+    /**
+     * @notice Called by the Safe contract before a transaction is executed via a module.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param module Account executing the transaction.
+     */
+    function checkTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address module
+    ) external override returns (bytes32 moduleTxHash) {
+        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
+
+        GuardValue storage guard = getGuard();
+        require(!guard.active, "Reentrancy detected");
+        guard.active = true;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view virtual override(BaseGuard, BaseModuleGuard) returns (bool) {
+        return
+            interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
+            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
+            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }

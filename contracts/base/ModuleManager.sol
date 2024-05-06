@@ -15,15 +15,16 @@ interface IModuleGuard is IERC165 {
      * @param value The value of the transaction in Wei.
      * @param data The transaction data.
      * @param operation The type of operation of the module transaction.
-     * @param msgSender The address of the message sender.
+     * @param module The module involved in the transaction.
+     * @return moduleTxHash The hash of the module transaction.
      */
     function checkTransaction(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
-        address msgSender
-    ) external returns (bytes32);
+        address module
+    ) external returns (bytes32 moduleTxHash);
 
     /**
      * @notice Checks after execution of module transaction.
