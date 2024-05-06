@@ -5,7 +5,6 @@ pragma solidity >=0.7.0 <0.9.0;
 import {SafeStorage} from "../libraries/SafeStorage.sol";
 import {Guard} from "../base/GuardManager.sol";
 import {ISafe} from "../interfaces/ISafe.sol";
-
 /**
  * @title Migration Contract for Safe Upgrade
  * @notice This contract facilitates the migration of a Safe contract from version 1.3.0/1.4.1 to 1.5.0.
@@ -16,11 +15,11 @@ import {ISafe} from "../interfaces/ISafe.sol";
 contract Safe150Migration is SafeStorage {
     // Address of Safe contract version 1.5.0 Singleton (L1)
     // TODO: Update this address when the Safe 1.5.0 Singleton is deployed
-    address public constant SAFE_150_SINGLETON = address(0x88627c8904eCd9DF96A572Ef32A7ff13b199Ed8D);
+    address public constant SAFE_150_SINGLETON = address(0x17a6234BcFa92e95AC768DF5487864F470979E00);
 
     // Address of Safe contract version 1.5.0 Singleton (L2)
     // TODO: Update this address when the Safe 1.5.0 Singleton (L2) is deployed
-    address public constant SAFE_150_SINGLETON_L2 = address(0x0Ee37514644683f7EB9745a5726C722DeBa77e52);
+    address public constant SAFE_150_SINGLETON_L2 = address(0x5AA0E22548aBDc5332177b468afd2FCfF89ed2F1);
 
     // Address of Safe contract version 1.5.0 Compatibility Fallback Handler
     // TODO: Update this address when the Safe 1.5.0 Compatibility Fallback Handler is deployed
@@ -87,22 +86,24 @@ contract Safe150Migration is SafeStorage {
     }
 
     /**
-     * @notice Migrate and set the guard to the specified address.
+     * @notice Migrate and set the guards to the specified address.
      * @param guard The address of the new guard contract.
+     * @param moduleGuard The address of the module guard contract.
      */
-    function migrateWithSetGuard(address guard) public validSingletonOnly {
+    function migrateWithSetGuards(address guard, address moduleGuard) public validSingletonOnly {
         singleton = SAFE_150_SINGLETON;
         emit ChangedMasterCopy(singleton);
-        // TODO: Set module guard
         ISafe(address(this)).setGuard(guard);
+        ISafe(address(this)).setModuleGuard(moduleGuard);
     }
 
     /**
      * @notice Migrate, set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      * @param guard The address of the new guard contract.
+     * @param moduleGuard The address of the module guard contract.
      */
-    function migrateWithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
-        migrateWithSetGuard(guard);
+    function migrateWithSetGuardsAndFallbackHandler(address guard, address moduleGuard) public validSingletonOnly {
+        migrateWithSetGuards(guard, moduleGuard);
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
@@ -130,20 +131,23 @@ contract Safe150Migration is SafeStorage {
     /**
      * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the guard to the specified address.
      * @param guard The address of the new guard contract.
+     * @param moduleGuard The address of the module guard contract.
      */
-    function migrateL2WithSetGuard(address guard) public validSingletonOnly {
+    function migrateL2WithSetGuards(address guard, address moduleGuard) public validSingletonOnly {
         singleton = SAFE_150_SINGLETON_L2;
         emit ChangedMasterCopy(singleton);
 
         ISafe(address(this)).setGuard(guard);
+        ISafe(address(this)).setModuleGuard(moduleGuard);
     }
 
     /**
      * @notice Migrate to Safe 1.5.0 Singleton (L2), set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
      * @param guard The address of the new guard contract.
+     * @param moduleGuard The address of the module guard contract.
      */
-    function migrateL2WithSetGuardAndFallbackHandler(address guard) public validSingletonOnly {
-        migrateL2WithSetGuard(guard);
+    function migrateL2WithSetGuardsAndFallbackHandler(address guard, address moduleGuard) public validSingletonOnly {
+        migrateL2WithSetGuards(guard, moduleGuard);
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }

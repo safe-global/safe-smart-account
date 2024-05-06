@@ -16,7 +16,7 @@ const SAFE_SINGLETON_141_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
 
 const SAFE_SINGLETON_141_L2_ADDRESS = "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA";
 
-const SAFE_SINGLETON_150_L2_ADDRESS = "0x0Ee37514644683f7EB9745a5726C722DeBa77e52";
+const SAFE_SINGLETON_150_L2_ADDRESS = "0x5AA0E22548aBDc5332177b468afd2FCfF89ed2F1";
 
 const COMPATIBILITY_FALLBACK_HANDLER_150 = "0x8aa755cB169991fEDC3E306751dCb71964A041c7";
 
@@ -53,8 +53,7 @@ describe("SafeToL2Migration library", () => {
         const singleton141 = await getSafeSingletonAt(SAFE_SINGLETON_141_ADDRESS);
 
         const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
-        // TODO: Use updated interfaceId
-        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0x945b8148"]);
+        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
         const validGuardMock = await getMock();
         await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
 
