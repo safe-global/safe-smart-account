@@ -4,7 +4,6 @@ import { AddressZero } from "@ethersproject/constants";
 import { getSafeWithOwners, getMock } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
-import crypto from "crypto";
 
 describe("ModuleManager", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
