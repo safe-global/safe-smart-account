@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
+/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 import {Enum} from "../libraries/Enum.sol";
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
@@ -6,7 +7,9 @@ import {Executor} from "./Executor.sol";
 import {IModuleManager} from "../interfaces/IModuleManager.sol";
 import {IERC165} from "../interfaces/IERC165.sol";
 
-/// @title IModuleGuard Interface
+/**
+ * @title IModuleGuard Interface
+ */
 interface IModuleGuard is IERC165 {
     /**
      * @notice Checks the module transaction details.
