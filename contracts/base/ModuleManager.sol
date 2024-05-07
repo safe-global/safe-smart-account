@@ -253,9 +253,9 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @inheritdoc IModuleManager
      */
     function setModuleGuard(address moduleGuard) external override authorized {
-        if (moduleGuard != address(0)) {
-            require(IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId), "GS301");
-        }
+        if (moduleGuard != address(0) && !IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId))
+            revertWithError("GS301");
+
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         // solhint-disable-next-line no-inline-assembly
         assembly {
