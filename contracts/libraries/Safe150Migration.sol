@@ -86,29 +86,6 @@ contract Safe150Migration is SafeStorage {
     }
 
     /**
-     * @notice Migrate and set the guards to the specified address.
-     * @param guard The address of the new guard contract.
-     * @param moduleGuard The address of the module guard contract.
-     */
-    function migrateWithSetGuards(address guard, address moduleGuard) public validSingletonOnly {
-        singleton = SAFE_150_SINGLETON;
-        emit ChangedMasterCopy(singleton);
-        ISafe(address(this)).setGuard(guard);
-        ISafe(address(this)).setModuleGuard(moduleGuard);
-    }
-
-    /**
-     * @notice Migrate, set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
-     * @param guard The address of the new guard contract.
-     * @param moduleGuard The address of the module guard contract.
-     */
-    function migrateWithSetGuardsAndFallbackHandler(address guard, address moduleGuard) public validSingletonOnly {
-        migrateWithSetGuards(guard, moduleGuard);
-
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-    }
-
-    /**
      * @notice Migrate to Safe 1.5.0 Singleton (L2) at `SAFE_150_SINGLETON_L2`
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
@@ -124,30 +101,6 @@ contract Safe150Migration is SafeStorage {
      */
     function migrateL2WithFallbackHandler() public validSingletonOnly {
         migrateL2Singleton();
-
-        ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-    }
-
-    /**
-     * @notice Migrate to Safe 1.5.0 Singleton (L2) and set the guard to the specified address.
-     * @param guard The address of the new guard contract.
-     * @param moduleGuard The address of the module guard contract.
-     */
-    function migrateL2WithSetGuards(address guard, address moduleGuard) public validSingletonOnly {
-        singleton = SAFE_150_SINGLETON_L2;
-        emit ChangedMasterCopy(singleton);
-
-        ISafe(address(this)).setGuard(guard);
-        ISafe(address(this)).setModuleGuard(moduleGuard);
-    }
-
-    /**
-     * @notice Migrate to Safe 1.5.0 Singleton (L2), set the guard to the specified address, and set the fallback handler to Safe 1.5.0 Compatibility Fallback Handler.
-     * @param guard The address of the new guard contract.
-     * @param moduleGuard The address of the module guard contract.
-     */
-    function migrateL2WithSetGuardsAndFallbackHandler(address guard, address moduleGuard) public validSingletonOnly {
-        migrateL2WithSetGuards(guard, moduleGuard);
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
     }
