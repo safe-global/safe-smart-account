@@ -17,7 +17,7 @@ describe("ModuleManager", () => {
 
         const validModuleGuardMock = await getMock();
         const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xd7e8e3a4"]);
+        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xe1ab3a1a"]);
         await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
 
         return {
@@ -252,7 +252,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [
+            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user1.address,
                 0,
                 "0xbeef73",
@@ -283,7 +283,7 @@ describe("ModuleManager", () => {
             await expect(safe.execTransactionFromModule(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
-        it("preserves the hash returned by checkTransaction and passes it to checkAfterExecution", async () => {
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
             const {
                 safe,
                 validModuleGuardMock,
@@ -297,7 +297,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [
+            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user2.address,
                 0,
                 "0xbeef73",
@@ -422,7 +422,7 @@ describe("ModuleManager", () => {
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
 
             // Creating the calldata's for the Guard before & after Module TX Execution.
-            const checkModuleTxDataByGuard = moduleGuardInterface.encodeFunctionData("checkTransaction", [
+            const checkModuleTxDataByGuard = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user2.address,
                 0,
                 callData,
@@ -451,7 +451,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [
+            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user2.address,
                 0,
                 "0xbeef73",
@@ -481,7 +481,7 @@ describe("ModuleManager", () => {
             await expect(safe.execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
-        it("preserves the hash returned by checkTransaction and passes it to checkAfterExecution", async () => {
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
             const {
                 safe,
                 validModuleGuardMock,
@@ -495,7 +495,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [
+            const checkModuleTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user2.address,
                 0,
                 "0xbeef73",
@@ -635,7 +635,7 @@ describe("ModuleManager", () => {
             const data = safe.interface.encodeFunctionData("setModuleGuard", [AddressZero]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkTxData = moduleGuardInterface.encodeFunctionData("checkTransaction", [safe.target, 0, data, 0, user1.address]);
+            const checkTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [safe.target, 0, data, 0, user1.address]);
 
             const guardHash = ethers.randomBytes(32);
 

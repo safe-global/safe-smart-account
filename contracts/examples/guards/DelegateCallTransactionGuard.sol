@@ -2,15 +2,13 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard, Guard} from "../../base/GuardManager.sol";
-import {BaseModuleGuard, IModuleGuard} from "../../base/ModuleManager.sol";
-import {IERC165} from "../../interfaces/IERC165.sol";
+import {BaseGuard} from "./BaseGuard.sol";
 
 /**
  * @title DelegateCallTransactionGuard - Limits delegate calls to a specific target.
  * @author Richard Meissner - @rmeissner
  */
-contract DelegateCallTransactionGuard is BaseGuard, BaseModuleGuard {
+contract DelegateCallTransactionGuard is BaseGuard {
     address public immutable ALLOWED_TARGET;
 
     constructor(address target) {
@@ -46,7 +44,7 @@ contract DelegateCallTransactionGuard is BaseGuard, BaseModuleGuard {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
     }
 
-    function checkAfterExecution(bytes32, bool) external view override(Guard, IModuleGuard) {}
+    function checkAfterExecution(bytes32, bool) external view override {}
 
     /**
      * @notice Called by the Safe contract before a transaction is executed via a module.
@@ -56,7 +54,7 @@ contract DelegateCallTransactionGuard is BaseGuard, BaseModuleGuard {
      * @param operation Operation type of Safe transaction.
      * @param module Module executing the transaction.
      */
-    function checkTransaction(
+    function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
@@ -65,12 +63,5 @@ contract DelegateCallTransactionGuard is BaseGuard, BaseModuleGuard {
     ) external view override returns (bytes32 moduleTxHash) {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
-    }
-
-    function supportsInterface(bytes4 interfaceId) external view virtual override(BaseGuard, BaseModuleGuard) returns (bool) {
-        return
-            interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
-            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
-            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }

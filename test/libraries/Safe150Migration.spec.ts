@@ -50,7 +50,7 @@ describe("Safe150Migration library", () => {
         await invalidGuardMock.givenCalldataReturnBool(guardEip165Calldata, false);
 
         const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xd7e8e3a4"]);
+        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xe1ab3a1a"]);
         const validModuleGuardMock = await getMock();
         await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
 

@@ -3,14 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard} from "../../base/GuardManager.sol";
+import {BaseTransactionGuard} from "../../base/GuardManager.sol";
 import {ISafe} from "../../interfaces/ISafe.sol";
 
 /**
  * @title OnlyOwnersGuard - Only allows owners to execute transactions.
  * @author Richard Meissner - @rmeissner
  */
-contract OnlyOwnersGuard is BaseGuard {
+contract OnlyOwnersGuard is BaseTransactionGuard {
     constructor() {}
 
     // solhint-disable-next-line payable-fallback

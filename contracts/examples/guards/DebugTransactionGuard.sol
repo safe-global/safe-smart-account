@@ -2,17 +2,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard, Guard} from "../../base/GuardManager.sol";
-import {BaseModuleGuard, IModuleGuard} from "../../base/ModuleManager.sol";
 import {ISafe} from "../../interfaces/ISafe.sol";
-import {IERC165} from "../../interfaces/IERC165.sol";
-
+import {BaseGuard} from "./BaseGuard.sol";
 /**
  * @title Debug Transaction Guard - Emits transaction events with extended information.
  * @dev This guard is only meant as a development tool and example
  * @author Richard Meissner - @rmeissner
  */
-contract DebugTransactionGuard is BaseGuard, BaseModuleGuard {
+contract DebugTransactionGuard is BaseGuard {
     // solhint-disable-next-line payable-fallback
     fallback() external {
         // We don't revert on fallback to avoid issues in case of a Safe upgrade
@@ -90,7 +87,7 @@ contract DebugTransactionGuard is BaseGuard, BaseModuleGuard {
      * @param txHash Hash of the executed transaction.
      * @param success True if the transaction was successful.
      */
-    function checkAfterExecution(bytes32 txHash, bool success) external override(Guard, IModuleGuard) {
+    function checkAfterExecution(bytes32 txHash, bool success) external override {
         uint256 nonce = txNonces[txHash];
         require(nonce != 0, "Could not get nonce");
         txNonces[txHash] = 0;
@@ -105,7 +102,7 @@ contract DebugTransactionGuard is BaseGuard, BaseModuleGuard {
      * @param operation The type of operation of the module transaction.
      * @param msgSender The address of the message sender.
      */
-    function checkTransaction(
+    function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
@@ -115,12 +112,5 @@ contract DebugTransactionGuard is BaseGuard, BaseModuleGuard {
         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, msgSender));
 
         emit ModuleTransasctionDetails(moduleTxHash, to, value, data, operation, msgSender);
-    }
-
-    function supportsInterface(bytes4 interfaceId) external view virtual override(BaseGuard, BaseModuleGuard) returns (bool) {
-        return
-            interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
-            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
-            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }

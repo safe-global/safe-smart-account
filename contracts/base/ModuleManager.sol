@@ -21,7 +21,7 @@ interface IModuleGuard is IERC165 {
      * @param module The module involved in the transaction.
      * @return moduleTxHash The hash of the module transaction.
      */
-    function checkTransaction(
+    function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
@@ -41,7 +41,7 @@ interface IModuleGuard is IERC165 {
 abstract contract BaseModuleGuard is IModuleGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
+            interfaceId == type(IModuleGuard).interfaceId || // 0xe1ab3a1a
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -100,7 +100,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         if (guard != address(0)) {
-            guardHash = IModuleGuard(guard).checkTransaction(to, value, data, operation, msg.sender);
+            guardHash = IModuleGuard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
         }
     }
 

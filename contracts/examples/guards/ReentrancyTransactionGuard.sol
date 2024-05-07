@@ -2,15 +2,13 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard, Guard} from "../../base/GuardManager.sol";
-import {BaseModuleGuard, IModuleGuard} from "../../base/ModuleManager.sol";
-import {IERC165} from "../../interfaces/IERC165.sol";
+import {BaseGuard} from "./BaseGuard.sol";
 
 /**
  * @title ReentrancyTransactionGuard - Prevents reentrancy into the transaction execution function.
  * @author Richard Meissner - @rmeissner
  */
-contract ReentrancyTransactionGuard is BaseGuard, BaseModuleGuard {
+contract ReentrancyTransactionGuard is BaseGuard {
     bytes32 internal constant GUARD_STORAGE_SLOT = keccak256("reentrancy_guard.guard.struct");
 
     struct GuardValue {
@@ -65,7 +63,7 @@ contract ReentrancyTransactionGuard is BaseGuard, BaseModuleGuard {
      * @notice Called by the Safe contract after a transaction is executed.
      * @dev Resets the guard value.
      */
-    function checkAfterExecution(bytes32, bool) external override(Guard, IModuleGuard) {
+    function checkAfterExecution(bytes32, bool) external override {
         getGuard().active = false;
     }
 
@@ -77,7 +75,7 @@ contract ReentrancyTransactionGuard is BaseGuard, BaseModuleGuard {
      * @param operation Operation type of Safe transaction.
      * @param module Account executing the transaction.
      */
-    function checkTransaction(
+    function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
@@ -89,12 +87,5 @@ contract ReentrancyTransactionGuard is BaseGuard, BaseModuleGuard {
         GuardValue storage guard = getGuard();
         require(!guard.active, "Reentrancy detected");
         guard.active = true;
-    }
-
-    function supportsInterface(bytes4 interfaceId) external view virtual override(BaseGuard, BaseModuleGuard) returns (bool) {
-        return
-            interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
-            interfaceId == type(IModuleGuard).interfaceId || // 0xd7e8e3a4
-            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }

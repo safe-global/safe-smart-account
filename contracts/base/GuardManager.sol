@@ -49,7 +49,7 @@ interface Guard is IERC165 {
     function checkAfterExecution(bytes32 hash, bool success) external;
 }
 
-abstract contract BaseGuard is Guard {
+abstract contract BaseTransactionGuard is Guard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
             interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
