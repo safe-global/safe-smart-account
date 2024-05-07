@@ -8,9 +8,9 @@ import {IERC165} from "../interfaces/IERC165.sol";
 import {IGuardManager} from "../interfaces/IGuardManager.sol";
 
 /**
- * @title Guard Interface
+ * @title ITransactionGuard Interface
  */
-interface Guard is IERC165 {
+interface ITransactionGuard is IERC165 {
     /**
      * @notice Checks the transaction details.
      * @dev The function needs to implement transaction validation logic.
@@ -49,10 +49,10 @@ interface Guard is IERC165 {
     function checkAfterExecution(bytes32 hash, bool success) external;
 }
 
-abstract contract BaseTransactionGuard is Guard {
+abstract contract BaseTransactionGuard is ITransactionGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(Guard).interfaceId || // 0xe6d7a83a
+            interfaceId == type(ITransactionGuard).interfaceId || // 0xe6d7a83a
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -69,7 +69,8 @@ abstract contract GuardManager is SelfAuthorized, IGuardManager {
      * @inheritdoc IGuardManager
      */
     function setGuard(address guard) external override authorized {
-        if (guard != address(0) && !Guard(guard).supportsInterface(type(Guard).interfaceId)) revertWithError("GS300");
+        if (guard != address(0) && !ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId))
+            revertWithError("GS300");
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {

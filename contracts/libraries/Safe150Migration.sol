@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {Guard} from "../base/GuardManager.sol";
+import {ITransactionGuard} from "../base/GuardManager.sol";
 import {ISafe} from "../interfaces/ISafe.sol";
 /**
  * @title Migration Contract for Safe Upgrade
@@ -52,7 +52,7 @@ contract Safe150Migration is SafeStorage {
         address guard = getGuard();
 
         if (guard != address(0)) {
-            require(Guard(guard).supportsInterface(type(Guard).interfaceId), "GS300");
+            require(ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId), "GS300");
         }
     }
 

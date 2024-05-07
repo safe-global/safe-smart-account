@@ -23,7 +23,7 @@ describe("GuardManager", () => {
         const signers = await ethers.getSigners();
         const [, user2] = signers;
 
-        const guardContract = await hre.ethers.getContractAt("Guard", AddressZero);
+        const guardContract = await hre.ethers.getContractAt("ITransactionGuard", AddressZero);
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
         await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
         const safe = await getSafeWithOwners([user2.address]);
@@ -38,7 +38,7 @@ describe("GuardManager", () => {
     });
 
     describe("setGuard", () => {
-        it("reverts if the guard does not implement the ERC165 Guard Interface", async () => {
+        it("reverts if the guard does not implement the ERC165 ITransactionGuard Interface", async () => {
             const {
                 signers: [user1, user2],
             } = await setupWithTemplate();
@@ -81,7 +81,7 @@ describe("GuardManager", () => {
                 "0x" + validGuardMockAddress.toLowerCase().slice(2).padStart(64, "0"),
             );
 
-            // Guard should not be called, as it was not set before the transaction execution
+            // Transaction Guard should not be called, as it was not set before the transaction execution
             expect(await validGuardMock.invocationCount()).to.be.eq(invocationCountBefore);
         });
 
@@ -114,7 +114,7 @@ describe("GuardManager", () => {
             );
 
             expect(await validGuardMock.invocationCount()).to.be.eq(invocationCountBefore + 2n);
-            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
+            const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
                 safeTx.to,
                 safeTx.value,
@@ -129,7 +129,7 @@ describe("GuardManager", () => {
                 user1.address,
             ]);
             expect(await validGuardMock.invocationCountForCalldata.staticCall(checkTxData)).to.be.eq(1);
-            // Guard should also be called for post exec check, even if it is removed with the Safe tx
+            // Transaction Guard should also be called for post exec check, even if it is removed with the Safe tx
             const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [
                 calculateSafeTransactionHash(safeAddress, safeTx, await chainId()),
                 true,
@@ -151,7 +151,7 @@ describe("GuardManager", () => {
             const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
-            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
+            const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
                 safeTx.to,
                 safeTx.value,
@@ -195,7 +195,7 @@ describe("GuardManager", () => {
             const safeTx = buildSafeTransaction({ to: validGuardMockAddress, data: "0xbaddad42", nonce: await safe.nonce() });
             const signature = await safeApproveHash(user2, safe, safeTx);
             const signatureBytes = buildSignatureBytes([signature]);
-            const guardInterface = (await hre.ethers.getContractAt("Guard", validGuardMockAddress)).interface;
+            const guardInterface = (await hre.ethers.getContractAt("ITransactionGuard", validGuardMockAddress)).interface;
             const checkTxData = guardInterface.encodeFunctionData("checkTransaction", [
                 safeTx.to,
                 safeTx.value,
