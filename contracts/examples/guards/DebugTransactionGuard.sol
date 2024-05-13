@@ -30,7 +30,7 @@ contract DebugTransactionGuard is BaseGuard {
         address executor
     );
 
-    event ModuleTransasctionDetails(
+    event ModuleTransactionDetails(
         bytes32 indexed txHash,
         address to,
         uint256 value,
