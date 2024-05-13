@@ -20,9 +20,5 @@ abstract contract BaseGuard is BaseTransactionGuard, BaseModuleGuard {
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 
-    /**
-     * @notice Called by the Safe contract after a transaction is executed.
-     *         This function definition is required here to avoid compilation errors as both ITransactionGuard and IModuleGuard have identical function declaration.
-     */
-    function checkAfterExecution(bytes32, bool) external virtual override(ITransactionGuard, IModuleGuard) {}
+    function checkAfterExecution(bytes32, bool) external virtual override(ITransactionGuard, IModuleGuard);
 }

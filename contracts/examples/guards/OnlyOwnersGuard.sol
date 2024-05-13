@@ -41,5 +41,9 @@ contract OnlyOwnersGuard is BaseTransactionGuard {
         require(ISafe(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
     }
 
+    /**
+     * @notice Called by the Safe contract after a transaction is executed.
+     * @dev No-op.
+     */
     function checkAfterExecution(bytes32, bool) external view override {}
 }
