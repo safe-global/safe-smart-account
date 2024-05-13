@@ -111,6 +111,6 @@ contract DebugTransactionGuard is BaseGuard {
     ) external override returns (bytes32 moduleTxHash) {
         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, msgSender));
 
-        emit ModuleTransasctionDetails(moduleTxHash, to, value, data, operation, msgSender);
+        emit ModuleTransactionDetails(moduleTxHash, to, value, data, operation, msgSender);
     }
 }
