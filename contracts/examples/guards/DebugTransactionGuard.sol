@@ -30,14 +30,7 @@ contract DebugTransactionGuard is BaseGuard {
         address executor
     );
 
-    event ModuleTransactionDetails(
-        bytes32 indexed txHash,
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation,
-        address module
-    );
+    event ModuleTransactionDetails(bytes32 indexed txHash, address to, uint256 value, bytes data, Enum.Operation operation, address module);
 
     event GasUsage(address indexed safe, bytes32 indexed txHash, uint256 indexed nonce, bool success);
 
@@ -95,22 +88,23 @@ contract DebugTransactionGuard is BaseGuard {
     }
 
     /**
-     * @notice Called by the Safe contract before a module transaction is executed.
-     * @param to The address to which the transaction is intended.
-     * @param value The value of the transaction in Wei.
-     * @param data The transaction data.
-     * @param operation The type of operation of the module transaction.
-     * @param msgSender The address of the message sender.
+     * @notice Called by the Safe contract before a transaction is executed via a module.
+     * @param to Destination address of Safe transaction.
+     * @param value Ether value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param module Account executing the transaction.
+     * @return moduleTxHash Hash of the module transaction.
      */
     function checkModuleTransaction(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
-        address msgSender
+        address module
     ) external override returns (bytes32 moduleTxHash) {
-        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, msgSender));
+        moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
 
-        emit ModuleTransactionDetails(moduleTxHash, to, value, data, operation, msgSender);
+        emit ModuleTransactionDetails(moduleTxHash, to, value, data, operation, module);
     }
 }
