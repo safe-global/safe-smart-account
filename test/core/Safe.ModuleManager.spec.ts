@@ -17,7 +17,7 @@ describe("ModuleManager", () => {
 
         const validModuleGuardMock = await getMock();
         const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xe1ab3a1a"]);
+        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0x58401ed8"]);
         await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
 
         return {
@@ -276,14 +276,17 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const guardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkAfterExecutionTxData = guardInterface.encodeFunctionData("checkAfterExecution", [`0x${"0".repeat(64)}`, true]);
+            const checkAfterModuleExecutionTxData = guardInterface.encodeFunctionData("checkAfterModuleExecution", [
+                `0x${"0".repeat(64)}`,
+                true,
+            ]);
 
-            await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterExecutionTxData, "Computer says Nah");
+            await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterModuleExecutionTxData, "Computer says Nah");
 
             await expect(safe.execTransactionFromModule(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
-        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterModuleExecution", async () => {
             const {
                 safe,
                 validModuleGuardMock,
@@ -305,12 +308,12 @@ describe("ModuleManager", () => {
                 user2.address,
             ]);
 
-            const checkAfterExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
+            const checkAfterModuleExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [hash, true]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
             await safe.connect(user2).execTransactionFromModule(user2.address, 0, "0xbeef73", 1);
 
-            expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
+            expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterModuleExecutionTxData)).to.equal(1);
         });
     });
 
@@ -430,11 +433,11 @@ describe("ModuleManager", () => {
                 user2.address,
             ]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxDataByGuard, ethers.ZeroHash);
-            const checkAfterExecutionTxDataByGuard = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [
+            const checkAfterModuleExecutionTxDataByGuard = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [
                 ethers.ZeroHash,
                 true,
             ]);
-            await validModuleGuardMock.givenCalldataReturn(checkAfterExecutionTxDataByGuard, "0x1337");
+            await validModuleGuardMock.givenCalldataReturn(checkAfterModuleExecutionTxDataByGuard, "0x1337");
 
             await expect(
                 await safe.connect(user2).execTransactionFromModuleReturnData.staticCall(mockAddress, 0, callData, 0),
@@ -474,14 +477,17 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkAfterExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [`0x${"0".repeat(64)}`, true]);
+            const checkAfterModuleExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [
+                `0x${"0".repeat(64)}`,
+                true,
+            ]);
 
-            await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterExecutionTxData, "Computer says Nah");
+            await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterModuleExecutionTxData, "Computer says Nah");
 
             await expect(safe.execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
-        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterExecution", async () => {
+        it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterModuleExecution", async () => {
             const {
                 safe,
                 validModuleGuardMock,
@@ -503,12 +509,12 @@ describe("ModuleManager", () => {
                 user2.address,
             ]);
 
-            const checkAfterExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [hash, true]);
+            const checkAfterModuleExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [hash, true]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
             await safe.connect(user2).execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1);
 
-            expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterExecutionTxData)).to.equal(1);
+            expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterModuleExecutionTxData)).to.equal(1);
         });
     });
 
@@ -652,7 +658,7 @@ describe("ModuleManager", () => {
 
             expect(await validModuleGuardMock.invocationCountForCalldata.staticCall(checkTxData)).to.be.eq(1);
             // Module Guard should also be called for post exec check, even if it is removed with the Safe tx
-            const checkExecData = moduleGuardInterface.encodeFunctionData("checkAfterExecution", [guardHash, true]);
+            const checkExecData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [guardHash, true]);
 
             expect(await validModuleGuardMock.invocationCountForCalldata.staticCall(checkExecData)).to.be.eq(1);
         });

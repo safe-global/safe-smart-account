@@ -107,4 +107,10 @@ contract DebugTransactionGuard is BaseGuard {
 
         emit ModuleTransactionDetails(moduleTxHash, to, value, data, operation, module);
     }
+
+    /**
+     * @notice Called by the Safe contract after a module transaction is executed.
+     * @dev No-op.
+     */
+    function checkAfterModuleExecution(bytes32 txHash, bool success) external override {}
 }

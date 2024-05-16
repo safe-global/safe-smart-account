@@ -68,4 +68,10 @@ contract DelegateCallTransactionGuard is BaseGuard {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
     }
+
+    /**
+     * @notice Called by the Safe contract after a module transaction is executed.
+     * @dev No-op.
+     */
+    function checkAfterModuleExecution(bytes32, bool) external view override {}
 }

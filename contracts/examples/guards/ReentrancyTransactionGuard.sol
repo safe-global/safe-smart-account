@@ -88,4 +88,12 @@ contract ReentrancyTransactionGuard is BaseGuard {
         require(!guard.active, "Reentrancy detected");
         guard.active = true;
     }
+
+    /**
+     * @notice Called by the Safe contract after a module transaction is executed.
+     * @dev Resets the guard value.
+     */
+    function checkAfterModuleExecution(bytes32, bool) external override {
+        getGuard().active = false;
+    }
 }

@@ -35,13 +35,13 @@ interface IModuleGuard is IERC165 {
      * @param txHash The hash of the module transaction.
      * @param success The status of the module transaction execution.
      */
-    function checkAfterExecution(bytes32 txHash, bool success) external;
+    function checkAfterModuleExecution(bytes32 txHash, bool success) external;
 }
 
 abstract contract BaseModuleGuard is IModuleGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(IModuleGuard).interfaceId || // 0xe1ab3a1a
+            interfaceId == type(IModuleGuard).interfaceId || // 0x58401ed8
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -113,7 +113,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
-            IModuleGuard(guard).checkAfterExecution(guardHash, success);
+            IModuleGuard(guard).checkAfterModuleExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);

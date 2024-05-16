@@ -43,19 +43,9 @@ describe("Safe150Migration library", () => {
 
         const guardContract = await hre.ethers.getContractAt("ITransactionGuard", AddressZero);
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
-        const validGuardMock = await getMock();
-        await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
 
         const invalidGuardMock = await getMock();
         await invalidGuardMock.givenCalldataReturnBool(guardEip165Calldata, false);
-
-        const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0xe1ab3a1a"]);
-        const validModuleGuardMock = await getMock();
-        await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
-
-        const invalidModuleGuardMock = await getMock();
-        await invalidModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, false);
 
         const safeWith1967Proxy = await getSafeSingletonAt(
             await hre.ethers
@@ -84,10 +74,7 @@ describe("Safe150Migration library", () => {
             safeWith1967Proxy,
             migration,
             signers,
-            validGuardMock,
             invalidGuardMock,
-            validModuleGuardMock,
-            invalidModuleGuardMock,
         };
     });
 
