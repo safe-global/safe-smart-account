@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithSingleton, migrationContractTo150, getSafeSingletonAt, getMock } from "../utils/setup";
+import { getSafeWithSingleton, migrationContractTo150, getSafeSingletonAt } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
@@ -41,12 +41,6 @@ describe("Safe150Migration library", () => {
         const singleton130 = await getSafeSingletonAt(singleton130Address);
         const singleton130L2 = await getSafeSingletonAt(singleton130L2Address);
 
-        const guardContract = await hre.ethers.getContractAt("ITransactionGuard", AddressZero);
-        const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
-
-        const invalidGuardMock = await getMock();
-        await invalidGuardMock.givenCalldataReturnBool(guardEip165Calldata, false);
-
         const safeWith1967Proxy = await getSafeSingletonAt(
             await hre.ethers
                 .getContractFactory("UpgradeableProxy")
@@ -74,7 +68,6 @@ describe("Safe150Migration library", () => {
             safeWith1967Proxy,
             migration,
             signers,
-            invalidGuardMock,
         };
     });
 
@@ -107,22 +100,6 @@ describe("Safe150Migration library", () => {
 
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
             await expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_ADDRESS);
-        });
-
-        it("reverts when trying to migrate with a guard incompatible with 1.5.0 guard interface", async () => {
-            const {
-                safe130,
-                migration,
-                signers: [user1],
-                invalidGuardMock,
-            } = await setupTests();
-            const invalidGuardMockAddress = await invalidGuardMock.getAddress();
-
-            await executeContractCallWithSigners(safe130, safe130, "setGuard", [invalidGuardMockAddress], [user1]);
-
-            await expect(executeContractCallWithSigners(safe130, migration, "migrateSingleton", [], [user1], true)).to.be.revertedWith(
-                "GS013",
-            );
         });
 
         it("doesn't touch important storage slots", async () => {
@@ -180,22 +157,6 @@ describe("Safe150Migration library", () => {
 
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
             await expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_L2_ADDRESS);
-        });
-
-        it("reverts when trying to migrate with a guard incompatible with 1.5.0 guard interface", async () => {
-            const {
-                safe130l2,
-                migration,
-                signers: [user1],
-                invalidGuardMock,
-            } = await setupTests();
-            const invalidGuardMockAddress = await invalidGuardMock.getAddress();
-
-            await executeContractCallWithSigners(safe130l2, safe130l2, "setGuard", [invalidGuardMockAddress], [user1]);
-
-            await expect(executeContractCallWithSigners(safe130l2, migration, "migrateL2Singleton", [], [user1], true)).to.be.revertedWith(
-                "GS013",
-            );
         });
 
         it("doesn't touch important storage slots", async () => {
@@ -257,22 +218,6 @@ describe("Safe150Migration library", () => {
             );
         });
 
-        it("reverts when trying to migrate with a guard incompatible with 1.5.0 guard interface", async () => {
-            const {
-                safe130,
-                migration,
-                signers: [user1],
-                invalidGuardMock,
-            } = await setupTests();
-            const invalidGuardMockAddress = await invalidGuardMock.getAddress();
-
-            await executeContractCallWithSigners(safe130, safe130, "setGuard", [invalidGuardMockAddress], [user1]);
-
-            await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateWithFallbackHandler", [], [user1], true),
-            ).to.be.revertedWith("GS013");
-        });
-
         it("doesn't touch important storage slots", async () => {
             const {
                 safe130,
@@ -330,22 +275,6 @@ describe("Safe150Migration library", () => {
             expect(await safe130l2.getStorageAt(FALLBACK_HANDLER_STORAGE_SLOT, 1)).to.eq(
                 "0x" + COMPATIBILITY_FALLBACK_HANDLER_150.slice(2).toLowerCase().padStart(64, "0"),
             );
-        });
-
-        it("reverts when trying to migrate with a guard incompatible with 1.5.0 guard interface", async () => {
-            const {
-                safe130l2,
-                migration,
-                signers: [user1],
-                invalidGuardMock,
-            } = await setupTests();
-            const invalidGuardMockAddress = await invalidGuardMock.getAddress();
-
-            await executeContractCallWithSigners(safe130l2, safe130l2, "setGuard", [invalidGuardMockAddress], [user1]);
-
-            await expect(
-                executeContractCallWithSigners(safe130l2, migration, "migrateL2WithFallbackHandler", [], [user1], true),
-            ).to.be.revertedWith("GS013");
         });
 
         it("doesn't touch important storage slots", async () => {

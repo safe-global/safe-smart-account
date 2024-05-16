@@ -3,8 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {ITransactionGuard} from "../base/GuardManager.sol";
 import {ISafe} from "../interfaces/ISafe.sol";
+
 /**
  * @title Migration Contract for Safe Upgrade
  * @notice This contract facilitates the migration of a Safe contract from version 1.3.0/1.4.1 to 1.5.0.
@@ -25,9 +25,11 @@ contract Safe150Migration is SafeStorage {
     // TODO: Update this address when the Safe 1.5.0 Compatibility Fallback Handler is deployed
     address public constant SAFE_150_FALLBACK_HANDLER = address(0x8aa755cB169991fEDC3E306751dCb71964A041c7);
 
-    // the slot is defined as "keccak256("guard_manager.guard.address")" in the GuardManager contract
-    // reference: https://github.com/safe-global/safe-smart-account/blob/8ffae95faa815acf86ec8b50021ebe9f96abde10/contracts/base/GuardManager.sol#L76-L77
-    bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
+    /**
+     * @notice Event indicating a change of master copy address.
+     * @param singleton New master copy address
+     */
+    event ChangedMasterCopy(address singleton);
 
     /**
      * @notice Constructor
@@ -37,23 +39,6 @@ contract Safe150Migration is SafeStorage {
         require(isContract(SAFE_150_SINGLETON), "Safe 1.4.1 Singleton is not deployed");
         require(isContract(SAFE_150_SINGLETON_L2), "Safe 1.4.1 Singleton (L2) is not deployed");
         require(isContract(SAFE_150_FALLBACK_HANDLER), "Safe 1.4.1 Fallback Handler is not deployed");
-    }
-
-    /**
-     * @notice Event indicating a change of master copy address.
-     * @param singleton New master copy address
-     */
-    event ChangedMasterCopy(address singleton);
-
-    /**
-     * @dev Private function to check if a guard is supported.
-     */
-    function checkGuard() private view {
-        address guard = getGuard();
-
-        if (guard != address(0)) {
-            require(ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId), "GS300");
-        }
     }
 
     function checkCurrentSingleton() internal view {
@@ -70,8 +55,6 @@ contract Safe150Migration is SafeStorage {
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
     function migrateSingleton() public validSingletonOnly {
-        checkGuard();
-
         singleton = SAFE_150_SINGLETON;
         emit ChangedMasterCopy(singleton);
     }
@@ -90,8 +73,6 @@ contract Safe150Migration is SafeStorage {
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      */
     function migrateL2Singleton() public validSingletonOnly {
-        checkGuard();
-
         singleton = SAFE_150_SINGLETON_L2;
         emit ChangedMasterCopy(singleton);
     }
@@ -103,20 +84,6 @@ contract Safe150Migration is SafeStorage {
         migrateL2Singleton();
 
         ISafe(address(this)).setFallbackHandler(SAFE_150_FALLBACK_HANDLER);
-    }
-
-    /**
-     * @notice Get the address of the current guard.
-     * @return guard The address of the current guard contract.
-     */
-    function getGuard() internal view returns (address guard) {
-        bytes32 slot = GUARD_STORAGE_SLOT;
-        /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
-        assembly {
-            guard := sload(slot)
-        }
-        /* solhint-enable no-inline-assembly */
     }
 
     /**
