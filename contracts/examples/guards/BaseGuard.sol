@@ -9,9 +9,7 @@ import {BaseModuleGuard, IModuleGuard} from "../../base/ModuleManager.sol";
  */
 abstract contract BaseGuard is BaseTransactionGuard, BaseModuleGuard {
     /**
-     * @notice Checks if the contract supports an interface.
-     * @param interfaceId The interface identifier.
-     * @return True if the interfaceId matches the interfaceId of ITransactionGuard/IModuleGuard/IERC165, false otherwise.
+     * @inheritdoc IERC165.supportsInterface
      */
     function supportsInterface(bytes4 interfaceId) external view virtual override(BaseTransactionGuard, BaseModuleGuard) returns (bool) {
         return
