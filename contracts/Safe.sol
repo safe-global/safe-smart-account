@@ -25,8 +25,8 @@ import {ISafe} from "./interfaces/ISafe.sol";
  *      - Nonce: Each transaction should have a different nonce to prevent replay attacks.
  *      - Signature: A valid signature of an owner of the Safe for a transaction hash.
  *      - Guards: Guards are contracts that can execute pre- and post- transaction checks. There are two types of guards:
- *          1. Transaction Guard - Managed in `GuardManager`.
- *          2. Module Guard - Managed in `ModuleManager`.
+ *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
+ *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
  *      - Fallback: Fallback handler is a contract that can provide additional read-only functional for Safe. Managed in `FallbackManager`.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
