@@ -54,14 +54,14 @@ persistent ghost address ghostSingletonAddress {
     init_state axiom ghostSingletonAddress == 0;
 }
 
-hook Sstore SafeHarness.(slot 0) address newSingletonAddress STORAGE {
+hook Sstore SafeHarness.(slot 0) address newSingletonAddress {
     ghostSingletonAddress = newSingletonAddress;
 }
 
 // This is EIP-1967's singleton storage slot:
 // 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
 // converted to decimal because certora doesn't seem to support hex yet.
-hook Sstore SafeHarness.(slot 24440054405305269366569402256811496959409073762505157381672968839269610695612) address newSingletonAddress STORAGE {
+hook Sstore SafeHarness.(slot 24440054405305269366569402256811496959409073762505157381672968839269610695612) address newSingletonAddress {
     ghostSingletonAddress = newSingletonAddress;
 }
 
@@ -76,7 +76,7 @@ persistent ghost address fallbackHandlerAddress {
 // This is Safe's fallback handler storage slot:
 // 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5
 // converted to decimal because certora doesn't seem to support hex yet.
-hook Sstore SafeHarness.(slot 49122629484629529244014240937346711770925847994644146912111677022347558721749) address newFallbackHandlerAddress STORAGE {
+hook Sstore SafeHarness.(slot 49122629484629529244014240937346711770925847994644146912111677022347558721749) address newFallbackHandlerAddress {
     fallbackHandlerAddress = newFallbackHandlerAddress;
 }
 
