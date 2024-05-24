@@ -424,7 +424,7 @@ describe("ModuleManager", () => {
             const validModuleGuardMockAddress = await validModuleGuardMock.getAddress();
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
 
-            // Creating the calldata's for the Guard before & after Module TX Execution.
+            // Creating the calldata for the Guard before & after Module TX Execution.
             const checkModuleTxDataByGuard = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
                 user2.address,
                 0,

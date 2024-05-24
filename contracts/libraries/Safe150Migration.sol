@@ -15,15 +15,15 @@ import {ISafe} from "../interfaces/ISafe.sol";
 contract Safe150Migration is SafeStorage {
     // Address of Safe contract version 1.5.0 Singleton (L1)
     // TODO: Update this address when the Safe 1.5.0 Singleton is deployed
-    address public constant SAFE_150_SINGLETON = address(0x17a6234BcFa92e95AC768DF5487864F470979E00);
+    address public constant SAFE_150_SINGLETON = address(0x477C3fb2D564349E2F95a2EF1091bF9657b26145);
 
     // Address of Safe contract version 1.5.0 Singleton (L2)
     // TODO: Update this address when the Safe 1.5.0 Singleton (L2) is deployed
-    address public constant SAFE_150_SINGLETON_L2 = address(0x5AA0E22548aBDc5332177b468afd2FCfF89ed2F1);
+    address public constant SAFE_150_SINGLETON_L2 = address(0x551A2F9a71bF88cDBef3CBe60E95722f38eE0eAA);
 
     // Address of Safe contract version 1.5.0 Compatibility Fallback Handler
     // TODO: Update this address when the Safe 1.5.0 Compatibility Fallback Handler is deployed
-    address public constant SAFE_150_FALLBACK_HANDLER = address(0x8aa755cB169991fEDC3E306751dCb71964A041c7);
+    address public constant SAFE_150_FALLBACK_HANDLER = address(0x4c95c836D31d329d80d696cb679f3dEa028Ad4e5);
 
     /**
      * @notice Event indicating a change of master copy address.
