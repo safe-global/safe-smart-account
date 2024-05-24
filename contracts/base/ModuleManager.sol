@@ -1,10 +1,50 @@
 // SPDX-License-Identifier: LGPL-3.0-only
+/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 import {Enum} from "../libraries/Enum.sol";
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {Executor} from "./Executor.sol";
-import {GuardManager, Guard} from "./GuardManager.sol";
 import {IModuleManager} from "../interfaces/IModuleManager.sol";
+import {IERC165} from "../interfaces/IERC165.sol";
+
+/**
+ * @title IModuleGuard Interface
+ */
+interface IModuleGuard is IERC165 {
+    /**
+     * @notice Checks the module transaction details.
+     * @dev The function needs to implement module transaction validation logic.
+     * @param to The address to which the transaction is intended.
+     * @param value The value of the transaction in Wei.
+     * @param data The transaction data.
+     * @param operation The type of operation of the module transaction.
+     * @param module The module involved in the transaction.
+     * @return moduleTxHash The hash of the module transaction.
+     */
+    function checkModuleTransaction(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation,
+        address module
+    ) external returns (bytes32 moduleTxHash);
+
+    /**
+     * @notice Checks after execution of module transaction.
+     * @dev The function needs to implement a check after the execution of the module transaction.
+     * @param txHash The hash of the module transaction.
+     * @param success The status of the module transaction execution.
+     */
+    function checkAfterModuleExecution(bytes32 txHash, bool success) external;
+}
+
+abstract contract BaseModuleGuard is IModuleGuard {
+    function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
+        return
+            interfaceId == type(IModuleGuard).interfaceId || // 0x58401ed8
+            interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
+    }
+}
 
 /**
  * @title Module Manager - A contract managing Safe modules
@@ -15,8 +55,11 @@ import {IModuleManager} from "../interfaces/IModuleManager.sol";
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
-abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModuleManager {
+abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     address internal constant SENTINEL_MODULES = address(0x1);
+
+    // keccak256("module_manager.module_guard.address")
+    bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
     mapping(address => address) internal modules;
 
@@ -51,13 +94,13 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         bytes memory data,
         Enum.Operation operation
     ) internal returns (address guard, bytes32 guardHash) {
-        guard = getGuard();
+        guard = getModuleGuard();
 
         // Only whitelisted modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         if (guard != address(0)) {
-            guardHash = Guard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
+            guardHash = IModuleGuard(guard).checkModuleTransaction(to, value, data, operation, msg.sender);
         }
     }
 
@@ -70,7 +113,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
      */
     function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
-            Guard(guard).checkAfterExecution(guardHash, success);
+            IModuleGuard(guard).checkAfterModuleExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
@@ -111,6 +154,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         Enum.Operation operation
     ) public virtual override returns (bool success) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
+
         success = execute(to, value, data, operation, type(uint256).max);
         postModuleExecution(guard, guardHash, success);
     }
@@ -203,5 +247,32 @@ abstract contract ModuleManager is SelfAuthorized, Executor, GuardManager, IModu
         }
         /* solhint-enable no-inline-assembly */
         return size > 0;
+    }
+
+    /**
+     * @inheritdoc IModuleManager
+     */
+    function setModuleGuard(address moduleGuard) external override authorized {
+        if (moduleGuard != address(0) && !IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId))
+            revertWithError("GS301");
+
+        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            sstore(slot, moduleGuard)
+        }
+        emit ChangedModuleGuard(moduleGuard);
+    }
+
+    /**
+     * @dev Internal method to retrieve the current module guard
+     * @return moduleGuard The address of the guard
+     */
+    function getModuleGuard() internal view returns (address moduleGuard) {
+        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            moduleGuard := sload(slot)
+        }
     }
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Guard} from "./base/GuardManager.sol";
+import {ITransactionGuard, GuardManager} from "./base/GuardManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {OwnerManager} from "./base/OwnerManager.sol";
 import {FallbackManager} from "./base/FallbackManager.sol";
@@ -24,7 +24,9 @@ import {ISafe} from "./interfaces/ISafe.sol";
  *      - Transaction Hash: Hash of a transaction is calculated using the EIP-712 typed structured data hashing scheme.
  *      - Nonce: Each transaction should have a different nonce to prevent replay attacks.
  *      - Signature: A valid signature of an owner of the Safe for a transaction hash.
- *      - Guard: Guard is a contract that can execute pre- and post- transaction checks. Managed in `GuardManager`.
+ *      - Guards: Guards are contracts that can execute pre- and post- transaction checks. There are two types of guards:
+ *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
+ *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
  *      - Fallback: Fallback handler is a contract that can provide additional read-only functional for Safe. Managed in `FallbackManager`.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
@@ -36,6 +38,7 @@ contract Safe is
     Singleton,
     NativeCurrencyPaymentFallback,
     ModuleManager,
+    GuardManager,
     OwnerManager,
     SignatureDecoder,
     SecuredTokenTransfer,
@@ -140,7 +143,7 @@ contract Safe is
         address guard = getGuard();
         {
             if (guard != address(0)) {
-                Guard(guard).checkTransaction(
+                ITransactionGuard(guard).checkTransaction(
                     // Transaction info
                     to,
                     value,
@@ -182,7 +185,7 @@ contract Safe is
         }
         {
             if (guard != address(0)) {
-                Guard(guard).checkAfterExecution(txHash, success);
+                ITransactionGuard(guard).checkAfterExecution(txHash, success);
             }
         }
     }
