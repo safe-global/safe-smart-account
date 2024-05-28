@@ -157,7 +157,7 @@ definition updateSucc(address a, address b) returns bool = forall address X. for
 // hook to update the ghostModules and the reach ghost state whenever the modules field
 // in storage is written. 
 // This also checks that the reach_succ invariant is preserved. 
-hook Sstore currentContract.modules[KEY address key] address value STORAGE {
+hook Sstore currentContract.modules[KEY address key] address value {
     address valueOrNull;
     address someKey;
     require reach_succ(someKey, ghostModules[someKey]);
@@ -171,7 +171,7 @@ hook Sstore currentContract.modules[KEY address key] address value STORAGE {
 
 // Hook to match ghost state and storage state when reading modules from storage. 
 // This also provides the reach_succ invariant. 
-hook Sload address value currentContract.modules[KEY address key] STORAGE {
+hook Sload address value currentContract.modules[KEY address key] {
     require ghostModules[key] == value;
     require reach_succ(key, value);
 }
