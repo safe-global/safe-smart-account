@@ -73,7 +73,7 @@ contract SafeProxyFactory {
         bytes memory initializer,
         uint256 saltNonce
     ) public returns (SafeProxy proxy) {
-        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
+        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatenating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
         proxy = deployProxy(_singleton, initializer, salt);
         emit ProxyCreation(proxy, _singleton);
