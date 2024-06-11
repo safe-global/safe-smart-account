@@ -32,7 +32,7 @@ To be able to use `eth_sign` we need to take the parameters `r`, `s` and `v` fro
 
 `{32-bytes r}{32-bytes s}{1-byte v}`
 
-`r`, `s` and `v`are the required parts of the ECDSA signature to recover the signer. `v` will be substracted by `4` to calculate the signature.
+`r`, `s` and `v`are the required parts of the ECDSA signature to recover the signer. `v` will be subtracted by `4` to calculate the signature.
 
 #### Contract Signature \(EIP-1271\)
 
