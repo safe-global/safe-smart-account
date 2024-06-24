@@ -6,7 +6,12 @@ import {Safe, Enum} from "./Safe.sol";
 // Imports are required for NatSpec validation of the compiler, and falsely detected as unused by
 // the linter, so disable the `no-unused-imports` rule for the next line.
 // solhint-disable-next-line no-unused-import
-import {ISafe, IModuleManager} from "./interfaces/ISafe.sol";
+import {ISafe} from "./interfaces/ISafe.sol";
+
+// Imports are required for NatSpec validation of the compiler, and falsely detected as unused by
+// the linter, so disable the `no-unused-imports` rule for the next line.
+// solhint-disable-next-line no-unused-import
+import {IModuleManager} from "./interfaces/IModuleManager.sol";
 
 /**
  * @title SafeL2 - An implementation of the Safe contract that emits additional events on transaction executions.

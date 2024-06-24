@@ -147,21 +147,6 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     /**
      * @inheritdoc IModuleManager
      */
-    function execTransactionFromModule(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation
-    ) public virtual override returns (bool success) {
-        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
-
-        success = execute(to, value, data, operation, type(uint256).max);
-        postModuleExecution(guard, guardHash, success);
-    }
-
-    /**
-     * @inheritdoc IModuleManager
-     */
     function execTransactionFromModuleReturnData(
         address to,
         uint256 value,
