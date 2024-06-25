@@ -76,13 +76,13 @@ contract SafeL2 is Safe {
     /**
      * @inheritdoc ModuleManager
      */
-    function _onExecTransactionFromModule(
+    function _onAfterExecTransactionFromModule(
         address to,
         uint256 value,
         bytes memory data,
-        Enum.Operation operation
-    ) internal override returns (bool success) {
+        Enum.Operation operation,
+        bool /*success*/
+    ) internal override {
         emit SafeModuleTransaction(msg.sender, to, value, data, operation);
-        success = super._onExecTransactionFromModule(to, value, data, operation);
     }
 }
