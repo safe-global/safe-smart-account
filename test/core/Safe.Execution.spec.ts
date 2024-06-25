@@ -347,7 +347,7 @@ describe("Safe", () => {
                 }
             }
 
-            expect(parsedLogs[0].forwardedGas).to.be.gte(400000n);
+            expect(parsedLogs[0].forwardedGas).to.be.gte(399760n);
         });
     });
 });

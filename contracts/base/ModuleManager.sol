@@ -165,23 +165,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) public override returns (bool success, bytes memory returnData) {
-        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
-        success = execute(to, value, data, operation, type(uint256).max);
-        /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
-        assembly {
-            // Load free memory location
-            returnData := mload(0x40)
-            // We allocate memory for the return data by setting the free memory location to
-            // current free memory location + data size + 32 bytes for data size value
-            mstore(0x40, add(returnData, add(returndatasize(), 0x20)))
-            // Store the size
-            mstore(returnData, returndatasize())
-            // Store the data
-            returndatacopy(add(returnData, 0x20), 0, returndatasize())
-        }
-        /* solhint-enable no-inline-assembly */
-        postModuleExecution(guard, guardHash, success);
+        return _onExecTransactionFromModuleReturnData(to, value, data, operation);
     }
 
     /**
@@ -274,7 +258,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     }
 
     /**
-     * @notice This method gets called by execTransactionFromModule function.
+     * @notice This method gets called by execTransactionFromModule method.
      * @param to Destination address of module transaction.
      * @param value Ether value of module transaction.
      * @param data Data payload of module transaction.
@@ -287,4 +271,38 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) internal virtual returns (bool success);
+
+    /**
+     * @notice This method gets called by execTransactionFromModuleReturnData method.
+     * @param to Destination address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     * @return success Boolean flag indicating if the call succeeded.
+     * @return returnData Data returned by the call.
+     */
+    function _onExecTransactionFromModuleReturnData(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation
+    ) internal virtual returns (bool success, bytes memory returnData) {
+        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
+        success = execute(to, value, data, operation, type(uint256).max);
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
+        assembly {
+            // Load free memory location
+            returnData := mload(0x40)
+            // We allocate memory for the return data by setting the free memory location to
+            // current free memory location + data size + 32 bytes for data size value
+            mstore(0x40, add(returnData, add(returndatasize(), 0x20)))
+            // Store the size
+            mstore(returnData, returndatasize())
+            // Store the data
+            returndatacopy(add(returnData, 0x20), 0, returndatasize())
+        }
+        /* solhint-enable no-inline-assembly */
+        postModuleExecution(guard, guardHash, success);
+    }
 }
