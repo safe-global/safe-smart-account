@@ -147,6 +147,18 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     /**
      * @inheritdoc IModuleManager
      */
+    function execTransactionFromModule(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation
+    ) public override returns (bool success) {
+        return _onExecTransactionFromModule(to, value, data, operation);
+    }
+
+    /**
+     * @inheritdoc IModuleManager
+     */
     function execTransactionFromModuleReturnData(
         address to,
         uint256 value,
@@ -260,4 +272,19 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
             moduleGuard := sload(slot)
         }
     }
+
+    /**
+     * @notice This method gets called by execTransactionFromModule function.
+     * @param to Destination address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     * @return success Boolean flag indicating if the call succeeded.
+     */
+    function _onExecTransactionFromModule(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Enum.Operation operation
+    ) internal virtual returns (bool success);
 }

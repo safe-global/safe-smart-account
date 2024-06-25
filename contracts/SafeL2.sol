@@ -11,7 +11,7 @@ import {ISafe} from "./interfaces/ISafe.sol";
 // Imports are required for NatSpec validation of the compiler, and falsely detected as unused by
 // the linter, so disable the `no-unused-imports` rule for the next line.
 // solhint-disable-next-line no-unused-import
-import {IModuleManager} from "./interfaces/IModuleManager.sol";
+import {ModuleManager} from "./base/ModuleManager.sol";
 
 /**
  * @title SafeL2 - An implementation of the Safe contract that emits additional events on transaction executions.
@@ -74,15 +74,15 @@ contract SafeL2 is Safe {
     }
 
     /**
-     * @inheritdoc IModuleManager
+     * @inheritdoc ModuleManager
      */
-    function execTransactionFromModule(
+    function _onExecTransactionFromModule(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public override returns (bool success) {
+    ) internal override returns (bool success) {
         emit SafeModuleTransaction(msg.sender, to, value, data, operation);
-        success = super.execTransactionFromModule(to, value, data, operation);
+        success = super._onExecTransactionFromModule(to, value, data, operation);
     }
 }

@@ -15,11 +15,6 @@ import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/IS
 import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
 
-// Imports are required for NatSpec validation of the compiler, and falsely detected as unused by
-// the linter, so disable the `no-unused-imports` rule for the next line.
-// solhint-disable-next-line no-unused-import
-import {IModuleManager} from "./interfaces/IModuleManager.sol";
-
 /**
  * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
  * @dev Most important concepts:
@@ -444,16 +439,15 @@ contract Safe is
     }
 
     /**
-     * @inheritdoc IModuleManager
+     * @inheritdoc ModuleManager
      */
-    function execTransactionFromModule(
+    function _onExecTransactionFromModule(
         address to,
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public virtual override returns (bool success) {
+    ) internal virtual override returns (bool success) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
-
         success = execute(to, value, data, operation, type(uint256).max);
         postModuleExecution(guard, guardHash, success);
     }
