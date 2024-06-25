@@ -2,7 +2,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Safe, Enum} from "./Safe.sol";
-
 import {ISafe} from "./interfaces/ISafe.sol";
 
 // Imports are required for NatSpec validation of the compiler, and falsely detected as unused by
