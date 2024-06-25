@@ -437,18 +437,4 @@ contract Safe is
     ) public view override returns (bytes32) {
         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
-
-    /**
-     * @inheritdoc ModuleManager
-     */
-    function _onExecTransactionFromModule(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation
-    ) internal virtual override returns (bool success) {
-        (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
-        success = execute(to, value, data, operation, type(uint256).max);
-        postModuleExecution(guard, guardHash, success);
-    }
 }
