@@ -36,9 +36,9 @@ contract SafeL2 is Safe {
     event SafeModuleTransaction(address module, address to, uint256 value, bytes data, Enum.Operation operation);
 
     /**
-     * @inheritdoc ISafe
+     * @inheritdoc Safe
      */
-    function execTransaction(
+    function onAfterExecTransaction(
         address to,
         uint256 value,
         bytes calldata data,
@@ -48,11 +48,12 @@ contract SafeL2 is Safe {
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures
-    ) public payable override returns (bool) {
+        bytes memory signatures,
+        bool /*success*/
+    ) internal override {
         bytes memory additionalInfo;
         {
-            additionalInfo = abi.encode(nonce, msg.sender, threshold);
+            additionalInfo = abi.encode(nonce - 1, msg.sender, threshold);
         }
         emit SafeMultiSigTransaction(
             to,
@@ -67,7 +68,6 @@ contract SafeL2 is Safe {
             signatures,
             additionalInfo
         );
-        return super.execTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
     }
 
     /**

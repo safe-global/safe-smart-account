@@ -46,7 +46,7 @@ describe("SafeL2", () => {
             });
 
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
-            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.deep.eq(ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
             const additionalInfo = ethers.AbiCoder.defaultAbiCoder().encode(
                 ["uint256", "address", "uint256"],

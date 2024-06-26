@@ -188,6 +188,7 @@ contract Safe is
                 ITransactionGuard(guard).checkAfterExecution(txHash, success);
             }
         }
+        onAfterExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures, success);
     }
 
     /**
@@ -437,4 +438,26 @@ contract Safe is
     ) public view override returns (bytes32) {
         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
+
+    /**
+     * @notice A hook that gets called after execution of {execTransaction} method.
+     * @param to Destination address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     * @param success Boolean flag indicating if the call succeeded.
+     */
+    function onAfterExecTransaction(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver,
+        bytes memory signatures,
+        bool success
+    ) internal virtual {}
 }
