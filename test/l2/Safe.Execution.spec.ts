@@ -89,5 +89,22 @@ describe("SafeL2", () => {
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
         });
+
+        it("should emit SafeModuleTransaction event in execTransactionFromModuleReturnData", async () => {
+            const {
+                safe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
+            const user2Safe = safe.connect(user2);
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+
+            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
+                .to.emit(safe, "SafeModuleTransaction")
+                .withArgs(user2.address, mockAddress, 0, "0xbaddad", 0)
+                .to.emit(safe, "ExecutionFromModuleSuccess")
+                .withArgs(user2.address);
+        });
     });
 });
