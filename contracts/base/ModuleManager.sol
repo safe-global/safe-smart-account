@@ -111,21 +111,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @param guard Guard to be used for checking.
      * @dev Emits event based on module transaction success.
      */
-    function postModuleExecution(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address guard,
-        bytes32 guardHash,
-        bool success
-    ) internal {
+    function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
             IModuleGuard(guard).checkAfterModuleExecution(guardHash, success);
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
-        onAfterExecTransactionFromModule(to, value, data, operation, success);
     }
 
     /**
@@ -164,7 +155,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     ) public override returns (bool success) {
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
-        postModuleExecution(to, value, data, operation, guard, guardHash, success);
+        postModuleExecution(guard, guardHash, success);
+        onAfterExecTransactionFromModule(to, value, data, operation, success);
     }
 
     /**
@@ -192,7 +184,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
             returndatacopy(add(returnData, 0x20), 0, returndatasize())
         }
         /* solhint-enable no-inline-assembly */
-        postModuleExecution(to, value, data, operation, guard, guardHash, success);
+        postModuleExecution(guard, guardHash, success);
+        onAfterExecTransactionFromModule(to, value, data, operation, success);
     }
 
     /**
