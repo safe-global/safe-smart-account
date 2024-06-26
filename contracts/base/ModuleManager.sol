@@ -125,7 +125,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         }
         if (success) emit ExecutionFromModuleSuccess(msg.sender);
         else emit ExecutionFromModuleFailure(msg.sender);
-        _onAfterExecTransactionFromModule(to, value, data, operation, success);
+        onAfterExecTransactionFromModule(to, value, data, operation, success);
     }
 
     /**
