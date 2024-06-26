@@ -292,7 +292,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @param operation Operation type of module transaction.
      * @param success Boolean flag indicating if the call succeeded.
      */
-    function _onAfterExecTransactionFromModule(
+    function onAfterExecTransactionFromModule(
         address to,
         uint256 value,
         bytes memory data,
