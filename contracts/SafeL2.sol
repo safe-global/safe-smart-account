@@ -38,7 +38,7 @@ contract SafeL2 is Safe {
     /**
      * @inheritdoc Safe
      */
-    function onAfterExecTransaction(
+    function onBeforeExecTransaction(
         address to,
         uint256 value,
         bytes calldata data,
@@ -53,7 +53,7 @@ contract SafeL2 is Safe {
     ) internal override {
         bytes memory additionalInfo;
         {
-            additionalInfo = abi.encode(nonce - 1, msg.sender, threshold);
+            additionalInfo = abi.encode(nonce, msg.sender, threshold);
         }
         emit SafeMultiSigTransaction(
             to,

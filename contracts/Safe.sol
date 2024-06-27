@@ -120,6 +120,7 @@ contract Safe is
         address payable refundReceiver,
         bytes memory signatures
     ) public payable virtual override returns (bool success) {
+        onBeforeExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures, success);
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
@@ -188,7 +189,6 @@ contract Safe is
                 ITransactionGuard(guard).checkAfterExecution(txHash, success);
             }
         }
-        onAfterExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures, success);
     }
 
     /**
@@ -440,14 +440,14 @@ contract Safe is
     }
 
     /**
-     * @notice A hook that gets called after execution of {execTransaction} method.
+     * @notice A hook that gets called before execution of {execTransaction} method.
      * @param to Destination address of module transaction.
      * @param value Ether value of module transaction.
      * @param data Data payload of module transaction.
      * @param operation Operation type of module transaction.
      * @param success Boolean flag indicating if the call succeeded.
      */
-    function onAfterExecTransaction(
+    function onBeforeExecTransaction(
         address to,
         uint256 value,
         bytes calldata data,
