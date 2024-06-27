@@ -48,8 +48,7 @@ contract SafeL2 is Safe {
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures,
-        bool /*success*/
+        bytes memory signatures
     ) internal override {
         bytes memory additionalInfo;
         {

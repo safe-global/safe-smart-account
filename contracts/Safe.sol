@@ -445,7 +445,6 @@ contract Safe is
      * @param value Ether value of module transaction.
      * @param data Data payload of module transaction.
      * @param operation Operation type of module transaction.
-     * @param success Boolean flag indicating if the call succeeded.
      */
     function onBeforeExecTransaction(
         address to,
@@ -457,7 +456,6 @@ contract Safe is
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver,
-        bytes memory signatures,
-        bool success
+        bytes memory signatures
     ) internal virtual {}
 }
