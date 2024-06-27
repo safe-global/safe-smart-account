@@ -152,7 +152,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public override returns (bool success) {
+    ) external override returns (bool success) {
         onBeforeExecTransactionFromModule(to, value, data, operation);
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
