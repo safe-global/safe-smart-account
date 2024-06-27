@@ -94,6 +94,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) internal returns (address guard, bytes32 guardHash) {
+        onBeforeExecTransactionFromModule(to, value, data, operation);
         guard = getModuleGuard();
 
         // Only whitelisted modules are allowed.
@@ -153,7 +154,6 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) external override returns (bool success) {
-        onBeforeExecTransactionFromModule(to, value, data, operation);
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
         postModuleExecution(guard, guardHash, success);
@@ -168,7 +168,6 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) external override returns (bool success, bytes memory returnData) {
-        onBeforeExecTransactionFromModule(to, value, data, operation);
         (address guard, bytes32 guardHash) = preModuleExecution(to, value, data, operation);
         success = execute(to, value, data, operation, type(uint256).max);
         /* solhint-disable no-inline-assembly */
