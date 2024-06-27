@@ -119,7 +119,7 @@ contract Safe is
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    ) public payable virtual override returns (bool success) {
+    ) external payable override returns (bool success) {
         onBeforeExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
