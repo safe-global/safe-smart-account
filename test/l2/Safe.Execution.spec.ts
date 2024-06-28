@@ -37,11 +37,14 @@ describe("SafeL2", () => {
             } = await setupTests();
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
-                to: user1.address,
+                to: safeAddress,
                 nonce: await safe.nonce(),
                 operation: 0,
                 gasPrice: 1,
-                safeTxGas: 100000,
+                safeTxGas: 1000000,
+                // addOwnerWithThreshold is specifically chosen here in this test because additionalInfo in the SafeMultiSigTransaction event has threshold value.
+                // The test here also checks if the threshold value prior to Safe state change is emitted in the event.
+                data: safe.interface.encodeFunctionData("addOwnerWithThreshold", [user2.address, 2]),
                 refundReceiver: user2.address,
             });
 

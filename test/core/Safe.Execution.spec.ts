@@ -203,7 +203,7 @@ describe("Safe", () => {
 
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
-            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(ethers.parseEther("1"));
 
             let executedTx: any;
             await expect(
@@ -212,9 +212,12 @@ describe("Safe", () => {
                     return tx;
                 }),
             ).to.emit(safe, "ExecutionSuccess");
+
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const receiptLogs = receipt?.logs ?? [];
+
             const logIndex = receiptLogs.length - 1;
+
             const successEvent = safe.interface.decodeEventLog(
                 "ExecutionSuccess",
                 receiptLogs[logIndex].data,
@@ -223,7 +226,7 @@ describe("Safe", () => {
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safeAddress, tx, await chainId()));
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
             expect(successEvent.payment).to.be.lte(5000n);
-            await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + successEvent.payment);
+            expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + successEvent.payment);
         });
 
         it("should emit payment in failure event", async () => {

@@ -119,7 +119,8 @@ contract Safe is
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    ) public payable virtual override returns (bool success) {
+    ) external payable override returns (bool success) {
+        onBeforeExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
@@ -437,4 +438,24 @@ contract Safe is
     ) public view override returns (bytes32) {
         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
+
+    /**
+     * @notice A hook that gets called before execution of {execTransaction} method.
+     * @param to Destination address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     */
+    function onBeforeExecTransaction(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver,
+        bytes memory signatures
+    ) internal virtual {}
 }
