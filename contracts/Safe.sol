@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Guard} from "./base/GuardManager.sol";
+import {ITransactionGuard, GuardManager} from "./base/GuardManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {OwnerManager} from "./base/OwnerManager.sol";
 import {FallbackManager} from "./base/FallbackManager.sol";
@@ -24,7 +24,9 @@ import {ISafe} from "./interfaces/ISafe.sol";
  *      - Transaction Hash: Hash of a transaction is calculated using the EIP-712 typed structured data hashing scheme.
  *      - Nonce: Each transaction should have a different nonce to prevent replay attacks.
  *      - Signature: A valid signature of an owner of the Safe for a transaction hash.
- *      - Guard: Guard is a contract that can execute pre- and post- transaction checks. Managed in `GuardManager`.
+ *      - Guards: Guards are contracts that can execute pre- and post- transaction checks. There are two types of guards:
+ *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
+ *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
  *      - Fallback: Fallback handler is a contract that can provide additional read-only functional for Safe. Managed in `FallbackManager`.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
@@ -36,6 +38,7 @@ contract Safe is
     Singleton,
     NativeCurrencyPaymentFallback,
     ModuleManager,
+    GuardManager,
     OwnerManager,
     SignatureDecoder,
     SecuredTokenTransfer,
@@ -116,7 +119,8 @@ contract Safe is
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    ) public payable virtual override returns (bool success) {
+    ) external payable override returns (bool success) {
+        onBeforeExecTransaction(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
@@ -140,7 +144,7 @@ contract Safe is
         address guard = getGuard();
         {
             if (guard != address(0)) {
-                Guard(guard).checkTransaction(
+                ITransactionGuard(guard).checkTransaction(
                     // Transaction info
                     to,
                     value,
@@ -182,7 +186,7 @@ contract Safe is
         }
         {
             if (guard != address(0)) {
-                Guard(guard).checkAfterExecution(txHash, success);
+                ITransactionGuard(guard).checkAfterExecution(txHash, success);
             }
         }
     }
@@ -434,4 +438,24 @@ contract Safe is
     ) public view override returns (bytes32) {
         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
+
+    /**
+     * @notice A hook that gets called before execution of {execTransaction} method.
+     * @param to Destination address of module transaction.
+     * @param value Ether value of module transaction.
+     * @param data Data payload of module transaction.
+     * @param operation Operation type of module transaction.
+     */
+    function onBeforeExecTransaction(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        Enum.Operation operation,
+        uint256 safeTxGas,
+        uint256 baseGas,
+        uint256 gasPrice,
+        address gasToken,
+        address payable refundReceiver,
+        bytes memory signatures
+    ) internal virtual {}
 }

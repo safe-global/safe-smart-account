@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard} from "../../base/GuardManager.sol";
+import {BaseGuard} from "./BaseGuard.sol";
 
 /**
  * @title DelegateCallTransactionGuard - Limits delegate calls to a specific target.
@@ -23,7 +23,7 @@ contract DelegateCallTransactionGuard is BaseGuard {
 
     /**
      * @notice Called by the Safe contract before a transaction is executed.
-     * @dev  Reverts if the transaction is a delegate call to contract other than the allowed one.
+     * @dev Reverts if the transaction is a delegate call to contract other than the allowed one.
      * @param to Destination address of Safe transaction.
      * @param operation Operation type of Safe transaction.
      */
@@ -44,6 +44,10 @@ contract DelegateCallTransactionGuard is BaseGuard {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
     }
 
+    /**
+     * @notice Called by the Safe contract after a transaction is executed.
+     * @dev No-op.
+     */
     function checkAfterExecution(bytes32, bool) external view override {}
 
     /**
@@ -64,4 +68,10 @@ contract DelegateCallTransactionGuard is BaseGuard {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
         moduleTxHash = keccak256(abi.encodePacked(to, value, data, operation, module));
     }
+
+    /**
+     * @notice Called by the Safe contract after a module transaction is executed.
+     * @dev No-op.
+     */
+    function checkAfterModuleExecution(bytes32, bool) external view override {}
 }

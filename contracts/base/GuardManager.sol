@@ -7,21 +7,25 @@ import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IERC165} from "../interfaces/IERC165.sol";
 import {IGuardManager} from "../interfaces/IGuardManager.sol";
 
-/// @title Guard Interface
-interface Guard is IERC165 {
-    /// @notice Checks the transaction details.
-    /// @dev The function needs to implement transaction validation logic.
-    /// @param to The address to which the transaction is intended.
-    /// @param value The value of the transaction in Wei.
-    /// @param data The transaction data.
-    /// @param operation The type of operation of the transaction.
-    /// @param safeTxGas Gas used for the transaction.
-    /// @param baseGas The base gas for the transaction.
-    /// @param gasPrice The price of gas in Wei for the transaction.
-    /// @param gasToken The token used to pay for gas.
-    /// @param refundReceiver The address which should receive the refund.
-    /// @param signatures The signatures of the transaction.
-    /// @param msgSender The address of the message sender.
+/**
+ * @title ITransactionGuard Interface
+ */
+interface ITransactionGuard is IERC165 {
+    /**
+     * @notice Checks the transaction details.
+     * @dev The function needs to implement transaction validation logic.
+     * @param to The address to which the transaction is intended.
+     * @param value The value of the transaction in Wei.
+     * @param data The transaction data.
+     * @param operation The type of operation of the transaction.
+     * @param safeTxGas Gas used for the transaction.
+     * @param baseGas The base gas for the transaction.
+     * @param gasPrice The price of gas in Wei for the transaction.
+     * @param gasToken The token used to pay for gas.
+     * @param refundReceiver The address which should receive the refund.
+     * @param signatures The signatures of the transaction.
+     * @param msgSender The address of the message sender.
+     */
     function checkTransaction(
         address to,
         uint256 value,
@@ -36,33 +40,19 @@ interface Guard is IERC165 {
         address msgSender
     ) external;
 
-    /// @notice Checks the module transaction details.
-    /// @dev The function needs to implement module transaction validation logic.
-    /// @param to The address to which the transaction is intended.
-    /// @param value The value of the transaction in Wei.
-    /// @param data The transaction data.
-    /// @param operation The type of operation of the transaction.
-    /// @param module The module involved in the transaction.
-    /// @return moduleTxHash The hash of the module transaction.
-    function checkModuleTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address module
-    ) external returns (bytes32 moduleTxHash);
-
-    /// @notice Checks after execution of transaction.
-    /// @dev The function needs to implement a check after the execution of the transaction.
-    /// @param hash The hash of the transaction.
-    /// @param success The status of the transaction execution.
+    /**
+     * @notice Checks after execution of transaction.
+     * @dev The function needs to implement a check after the execution of the transaction.
+     * @param hash The hash of the transaction.
+     * @param success The status of the transaction execution.
+     */
     function checkAfterExecution(bytes32 hash, bool success) external;
 }
 
-abstract contract BaseGuard is Guard {
+abstract contract BaseTransactionGuard is ITransactionGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(Guard).interfaceId || // 0x945b8148
+            interfaceId == type(ITransactionGuard).interfaceId || // 0xe6d7a83a
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -79,7 +69,8 @@ abstract contract GuardManager is SelfAuthorized, IGuardManager {
      * @inheritdoc IGuardManager
      */
     function setGuard(address guard) external override authorized {
-        if (guard != address(0) && !Guard(guard).supportsInterface(type(Guard).interfaceId)) revertWithError("GS300");
+        if (guard != address(0) && !ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId))
+            revertWithError("GS300");
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {

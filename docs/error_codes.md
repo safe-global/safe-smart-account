@@ -42,7 +42,8 @@
 - `GS205`: `Invalid prevOwner, owner pair provided`
 
 ### Guard management related
-- `GS300`: `Guard does not implement IERC165`
+- `GS300`: `Transaction Guard does not implement IERC165`
+- `GS301`: `Module Guard does not implement IERC165`
 
 ### Fallback handler related
 - `GS400`: `Fallback handler cannot be set to self`

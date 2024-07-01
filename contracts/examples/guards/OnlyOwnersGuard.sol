@@ -3,14 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {Enum} from "../../libraries/Enum.sol";
-import {BaseGuard} from "../../base/GuardManager.sol";
+import {BaseTransactionGuard} from "../../base/GuardManager.sol";
 import {ISafe} from "../../interfaces/ISafe.sol";
 
 /**
  * @title OnlyOwnersGuard - Only allows owners to execute transactions.
  * @author Richard Meissner - @rmeissner
  */
-contract OnlyOwnersGuard is BaseGuard {
+contract OnlyOwnersGuard is BaseTransactionGuard {
     constructor() {}
 
     // solhint-disable-next-line payable-fallback
@@ -41,21 +41,9 @@ contract OnlyOwnersGuard is BaseGuard {
         require(ISafe(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
     }
 
-    function checkAfterExecution(bytes32, bool) external view override {}
-
     /**
-     * @notice Called by the Safe contract before a transaction is executed via a module.
-     * @param to Destination address of Safe transaction.
-     * @param value Ether value of Safe transaction.
-     * @param data Data payload of Safe transaction.
-     * @param operation Operation type of Safe transaction.
-     * @param module Module executing the transaction.
+     * @notice Called by the Safe contract after a transaction is executed.
+     * @dev No-op.
      */
-    function checkModuleTransaction(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation,
-        address module
-    ) external override returns (bytes32) {}
+    function checkAfterExecution(bytes32, bool) external view override {}
 }
