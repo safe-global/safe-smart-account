@@ -227,6 +227,7 @@ contract Safe is
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.
      * @param offset Offset to the start of the contract signature in the signatures byte array
+     * @return newOffset The new offset that points to the end of the contract signature
      */
     function checkContractSignature(
         address owner,
@@ -298,9 +299,7 @@ contract Safe is
                 // When handling contract signatures the address of the contract is encoded into r
                 currentOwner = address(uint160(uint256(r)));
 
-                // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
-                // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
-                // Here we only check that the pointer is not pointing inside the part that is being processed
+                // Require that the signature data pointer is pointing to the expected location, at the end of processed contract signatures.
                 if (uint256(s) != offset) revertWithError("GS021");
 
                 // The contract signature check is extracted to a separate function for better compatibility with formal verification
@@ -328,7 +327,7 @@ contract Safe is
             lastOwner = currentOwner;
         }
         // if the signature is longer than the offset, it means that there are extra bytes not used in the signature
-
+        // A side effect of this check is that it will fail if the signatures count sent in the transaction is more than the required threshold
         if (signatures.length != offset) revertWithError("GS028");
     }
 
