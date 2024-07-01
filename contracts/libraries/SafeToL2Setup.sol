@@ -5,6 +5,7 @@ import {SafeStorage} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Safe to L2 Setup Contract
+ * @dev We made the L1 "default" because on average the L2 price per gas is ~1000x cheaper than L1, so defaulting to L1 and going to L2 is overall more efficient.
  * @notice This contract facilitates the deployment of a Safe to the same address on all networks by
  *         automatically changing the singleton to the L2 version when not on chain ID 1.
  */
@@ -16,17 +17,17 @@ contract SafeToL2Setup is SafeStorage {
     address public immutable _SELF;
 
     /**
+     * @notice Event indicating a change of singleton address.
+     * @param singleton New singleton address
+     */
+    event ChangedSingleton(address singleton);
+
+    /**
      * @notice Initializes a new {SafeToL2Setup} instance.
      */
     constructor() {
         _SELF = address(this);
     }
-
-    /**
-     * @notice Event indicating a change of singleton address.
-     * @param singleton New singleton address
-     */
-    event ChangedSingleton(address singleton);
 
     /**
      * @notice Modifier ensure a function is only called via `DELEGATECALL`. Will revert otherwise.
@@ -68,7 +69,7 @@ contract SafeToL2Setup is SafeStorage {
     /**
      * @notice Returns the current chain ID.
      */
-    function _chainId() private pure returns (uint256 result) {
+    function _chainId() private view returns (uint256 result) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
