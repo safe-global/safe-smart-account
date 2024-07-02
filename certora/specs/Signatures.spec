@@ -11,7 +11,7 @@ methods {
 
     // summaries
     function SignatureDecoder.signatureSplit(bytes memory signatures, uint256 pos) internal returns (uint8,bytes32,bytes32) => signatureSplitGhost(signatures,pos);
-    function Safe.checkContractSignature(address, bytes32, bytes memory, uint256) internal => NONDET;
+    function Safe.checkContractSignature(address, bytes32, bytes memory, uint256) internal returns (uint256) => NONDET;
     // needed for the execTransaction <> signatures rule
     function Safe.getTransactionHash(
         address to,

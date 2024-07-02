@@ -117,12 +117,19 @@ describe("CompatibilityFallbackHandler", () => {
             const signerSafeMessageHash = calculateSafeMessageHash(signerSafeAddress, validatorSafeMessageHash, await chainId());
 
             const signerSafeOwnerSignature = await signHash(user1, signerSafeMessageHash);
-
             const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
 
-            expect(
-                await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([typedDataSig, ethSignSig, signerSafeSig])),
-            ).to.be.eq("0x1626ba7e");
+            expect(await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([typedDataSig, ethSignSig]))).to.be.eq(
+                "0x1626ba7e",
+            );
+
+            expect(await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([signerSafeSig, ethSignSig]))).to.be.eq(
+                "0x1626ba7e",
+            );
+
+            expect(await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([typedDataSig, signerSafeSig]))).to.be.eq(
+                "0x1626ba7e",
+            );
         });
     });
 

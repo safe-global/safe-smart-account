@@ -19,6 +19,9 @@
 - `GS024`: `Invalid contract signature provided`
 - `GS025`: `Hash has not been approved`
 - `GS026`: `Invalid owner provided`
+- `GS028`: `Invalid signature length`
+
+Deprecated:  `GS027`: `Invalid signature provided`
 
 ### General auth related
 - `GS030`: `Only owners can approve a hash`
