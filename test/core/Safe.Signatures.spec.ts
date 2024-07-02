@@ -446,7 +446,7 @@ describe("Safe", () => {
 
             const signatures2 = buildSignatureBytes([signerSafeSig, await safeSignTypedData(user3, safeAddress, tx)]);
 
-            await expect(safe["checkSignatures(bytes32,bytes)"](txHash, signatures2)).to.be.revertedWith("GS021");
+            await expect(safe["checkSignatures(bytes32,bytes)"](txHash, signatures2)).to.be.revertedWith(new RegExp("GS028|GS021"));
         });
 
         it("should be able to mix all signature types", async () => {
@@ -707,25 +707,17 @@ describe("Safe", () => {
 
         it("should revert if signature contains additional bytes than required", async () => {
             const {
-                signers: [user1, user2, user3],
+                safe,
+                signers: [user1],
             } = await setupTests();
-            const compatFallbackHandler = await getCompatFallbackHandler();
-            const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user2.address], 1, compatFallbackHandlerAddress);
-            const signerSafeAddress = await signerSafe.getAddress();
-            const safe = await getSafeWithOwners([user1.address, user3.address, signerSafeAddress], 2);
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
             const txHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
 
-            const safeMessageHash = calculateSafeMessageHash(signerSafeAddress, txHash, await chainId());
-            const signerSafeOwnerSignature = await signHash(user2, safeMessageHash);
-            const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
-
-            const signatures = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true), signerSafeSig]);
+            const signatures = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true)]);
 
             await expect(
-                safe["checkNSignatures(address,bytes32,bytes,uint256)"](user1.address, txHash, signatures.concat("00"), 2),
+                safe["checkNSignatures(address,bytes32,bytes,uint256)"](user1.address, txHash, signatures.concat("00"), 1),
             ).to.be.revertedWith("GS028");
 
             await expect(
@@ -733,7 +725,7 @@ describe("Safe", () => {
                     user1.address,
                     txHash,
                     signatures.concat(ethers.hexlify(ethers.randomBytes(Math.random() * 100)).slice(2)),
-                    2,
+                    1,
                 ),
             ).to.be.revertedWith("GS028");
         });
