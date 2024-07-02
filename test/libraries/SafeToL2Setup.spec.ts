@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, getChainId } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract } from "../utils/setup";
 import { sameString, alignHexString } from "../utils/strings";
 
