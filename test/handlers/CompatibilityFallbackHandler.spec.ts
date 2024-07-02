@@ -21,9 +21,15 @@ describe("CompatibilityFallbackHandler", () => {
         const handlerAddress = await handler.getAddress();
         const signers = await ethers.getSigners();
         const [user1, user2] = signers;
-        const signerSafe = await getSafeWithOwners([user1.address], 1, handlerAddress);
+        const signerSafe = await getSafeWithOwners([user1.address], 1, ethers.ZeroAddress, "0x", handlerAddress);
         const signerSafeAddress = await signerSafe.getAddress();
-        const safe = await getSafeWithOwners([user1.address, user2.address, signerSafeAddress], 2, handlerAddress);
+        const safe = await getSafeWithOwners(
+            [user1.address, user2.address, signerSafeAddress],
+            2,
+            ethers.ZeroAddress,
+            "0x",
+            handlerAddress,
+        );
         const safeAddress = await safe.getAddress();
         const validator = await getCompatFallbackHandler(safeAddress);
         const killLib = await killLibContract(user1);

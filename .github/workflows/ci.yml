@@ -71,7 +71,7 @@ jobs:
                 solidity: ["0.7.6", "0.8.24"]
                 include:
                     - solidity: "0.8.24"
-                      settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":1000000}}'
+                      settings: '{"viaIR":false,"optimizer":{"enabled":true,"runs":1000000}}'
         env:
             SOLIDITY_VERSION: ${{ matrix.solidity }}
             SOLIDITY_SETTINGS: ${{ matrix.settings }}

@@ -27,6 +27,8 @@ const generateTarget = async (owners: number, threshold: number, guardAddress: s
     const safe = await getSafeWithOwners(
         signers.map((owner) => owner.address),
         threshold,
+        ethers.ZeroAddress,
+        "0x",
         fallbackHandlerAddress,
         logGasUsage,
         saltNumber,
