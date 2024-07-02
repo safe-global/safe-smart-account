@@ -124,15 +124,17 @@ export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString(
 
 export const getSafeWithOwners = async (
     owners: string[],
-    threshold?: number,
-    fallbackHandler?: string,
-    logGasUsage?: boolean,
+    threshold: number = owners.length,
+    to: string = AddressZero,
+    data: string = "0x",
+    fallbackHandler: string = AddressZero,
+    logGasUsage: boolean = false,
     saltNumber: string = getRandomIntAsString(),
 ) => {
     const template = await getSafeTemplate(saltNumber);
     await logGas(
         `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
-        template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero),
+        template.setup(owners, threshold, to, data, fallbackHandler, AddressZero, 0, AddressZero),
         !logGasUsage,
     );
     return template;

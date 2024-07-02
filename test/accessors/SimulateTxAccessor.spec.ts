@@ -20,7 +20,7 @@ describe("SimulateTxAccessor", () => {
         const interactor = await deployContract(user1, source);
         const handler = await getCompatFallbackHandler();
         const handlerAddress = await handler.getAddress();
-        const safe = await getSafeWithOwners([user1.address], 1, handlerAddress);
+        const safe = await getSafeWithOwners([user1.address], 1, ethers.ZeroAddress, "0x", handlerAddress);
         const safeAddress = await safe.getAddress();
         const simulator = await getCompatFallbackHandler(safeAddress);
         return {
