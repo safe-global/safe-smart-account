@@ -994,6 +994,8 @@ describe("Safe", () => {
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address, user4.address, signerSafeAddress],
                 5,
+                ethers.ZeroAddress,
+                "0x",
                 compatFallbackHandlerAddress,
             );
             const safeAddress = await safe.getAddress();
