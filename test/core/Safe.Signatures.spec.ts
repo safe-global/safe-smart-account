@@ -420,6 +420,35 @@ describe("Safe", () => {
             await expect(safe["checkSignatures(bytes32,bytes)"](txHash, signatures)).to.be.revertedWith("GS026");
         });
 
+        it("should not be able pass more signatures than required threshold", async () => {
+            const {
+                signers: [user1, user2, user3, user4],
+            } = await setupTests();
+            const compatFallbackHandler = await getCompatFallbackHandler();
+            const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
+            const signerSafe = await getSafeWithOwners([user4.address], 1, compatFallbackHandlerAddress);
+            const signerSafeAddress = await signerSafe.getAddress();
+            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, signerSafeAddress], 1);
+            const safeAddress = await safe.getAddress();
+            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
+            const txHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
+
+            const safeMessageHash = calculateSafeMessageHash(signerSafeAddress, txHash, await chainId());
+            const signerSafeOwnerSignature = await signHash(user4, safeMessageHash);
+            const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
+
+            const signatures = buildSignatureBytes([
+                await safeApproveHash(user1, safe, tx, true),
+                await safeSignTypedData(user2, safeAddress, tx),
+            ]);
+
+            await expect(safe["checkSignatures(bytes32,bytes)"](txHash, signatures)).to.be.revertedWith("GS028");
+
+            const signatures2 = buildSignatureBytes([signerSafeSig, await safeSignTypedData(user3, safeAddress, tx)]);
+
+            await expect(safe["checkSignatures(bytes32,bytes)"](txHash, signatures2)).to.be.revertedWith("GS021");
+        });
+
         it("should be able to mix all signature types", async () => {
             const {
                 signers: [user1, user2, user3, user4, user5],
@@ -674,6 +703,39 @@ describe("Safe", () => {
             await expect(safe["checkNSignatures(address,bytes32,bytes,uint256)"](user1.address, txHash, signatures, 1)).to.be.revertedWith(
                 "GS023",
             );
+        });
+
+        it("should revert if signature contains additional bytes than required", async () => {
+            const {
+                signers: [user1, user2, user3],
+            } = await setupTests();
+            const compatFallbackHandler = await getCompatFallbackHandler();
+            const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
+            const signerSafe = await getSafeWithOwners([user2.address], 1, compatFallbackHandlerAddress);
+            const signerSafeAddress = await signerSafe.getAddress();
+            const safe = await getSafeWithOwners([user1.address, user3.address, signerSafeAddress], 2);
+            const safeAddress = await safe.getAddress();
+            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
+            const txHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
+
+            const safeMessageHash = calculateSafeMessageHash(signerSafeAddress, txHash, await chainId());
+            const signerSafeOwnerSignature = await signHash(user2, safeMessageHash);
+            const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
+
+            const signatures = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true), signerSafeSig]);
+
+            await expect(
+                safe["checkNSignatures(address,bytes32,bytes,uint256)"](user1.address, txHash, signatures.concat("00"), 2),
+            ).to.be.revertedWith("GS028");
+
+            await expect(
+                safe["checkNSignatures(address,bytes32,bytes,uint256)"](
+                    user1.address,
+                    txHash,
+                    signatures.concat(ethers.hexlify(ethers.randomBytes(Math.random() * 100)).slice(2)),
+                    2,
+                ),
+            ).to.be.revertedWith("GS028");
         });
 
         it("should not be able to use different chainId for signing", async () => {
