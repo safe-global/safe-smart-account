@@ -3,6 +3,7 @@ import hre, { deployments, ethers } from "hardhat";
 import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract, getSafeWithOwners } from "../utils/setup";
 import { sameHexString } from "../utils/strings";
 import { executeContractCallWithSigners } from "../../src";
+import { EXPECTED_SAFE_STORAGE_LAYOUT, getContractStorageLayout } from "../utils/storage";
 
 type HardhatTraceLog = {
     depth: number;
@@ -47,6 +48,12 @@ describe("SafeToL2Setup", () => {
         });
 
         describe("setupToL2", () => {
+            it("follows the expected storage layout", async () => {
+                const safeStorageLayout = await getContractStorageLayout(hre, "SafeToL2Setup");
+
+                expect(safeStorageLayout).to.deep.eq(EXPECTED_SAFE_STORAGE_LAYOUT);
+            });
+
             it("should emit an event", async () => {
                 const {
                     safeSingleton,
@@ -167,7 +174,7 @@ describe("SafeToL2Setup", () => {
 
                 // The SafeSetup event is emitted after the Safe is set up
                 // To get the storage snapshot after the Safe is set up, we need to find the LOG2 opcode with the topic input on the stack equal the SafeSetup event signature
-                const SAFE_SETUP_EVENT_SIGNATURE = ethers.id("SafeSetup(address,address[],uint256,address,address)");
+                const SAFE_SETUP_EVENT_SIGNATURE = safeSingleton.interface.getEvent("SafeSetup").topicHash;
                 const postSafeSetup = trace.structLogs.find(
                     (log, index) =>
                         log.op === "LOG2" &&
