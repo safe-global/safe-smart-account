@@ -271,7 +271,7 @@ describe("Safe", () => {
             } = await setupTests();
             const compatFallbackHandler = await getCompatFallbackHandler();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandlerAddress);
+            const signerSafe = await getSafeWithOwners([user5.address], 1, ethers.ZeroAddress, "0x", compatFallbackHandlerAddress);
             const signerSafeAddress = await signerSafe.getAddress();
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafeAddress]);
             const safeAddress = await safe.getAddress();
@@ -426,7 +426,7 @@ describe("Safe", () => {
             } = await setupTests();
             const compatFallbackHandler = await getCompatFallbackHandler();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandlerAddress);
+            const signerSafe = await getSafeWithOwners([user5.address], 1, ethers.ZeroAddress, "0x", compatFallbackHandlerAddress);
             const signerSafeAddress = await signerSafe.getAddress();
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafeAddress]);
             const safeAddress = await safe.getAddress();
@@ -545,6 +545,8 @@ describe("Safe", () => {
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address],
                 3,
+                ethers.ZeroAddress,
+                "0x",
                 await compatFallbackHandler.getAddress(),
             );
             const safeAddress = await safe.getAddress();
@@ -562,6 +564,8 @@ describe("Safe", () => {
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address],
                 3,
+                ethers.ZeroAddress,
+                "0x",
                 await compatFallbackHandler.getAddress(),
             );
             const safeAddress = await safe.getAddress();
@@ -582,11 +586,13 @@ describe("Safe", () => {
                 signers: [user1, user2, user3, user4, user5],
             } = await setupTests();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandlerAddress);
+            const signerSafe = await getSafeWithOwners([user5.address], 1, ethers.ZeroAddress, "0x", compatFallbackHandlerAddress);
             const signerSafeAddress = await signerSafe.getAddress();
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address, user4.address, signerSafeAddress],
                 5,
+                ethers.ZeroAddress,
+                "0x",
                 compatFallbackHandlerAddress,
             );
             const safeAddress = await safe.getAddress();
@@ -740,7 +746,7 @@ describe("Safe", () => {
             } = await setupTests();
             const compatFallbackHandler = await getCompatFallbackHandler();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandlerAddress);
+            const signerSafe = await getSafeWithOwners([user5.address], 1, ethers.ZeroAddress, "0x", compatFallbackHandlerAddress);
             const signerSafeAddress = await signerSafe.getAddress();
             const safe = await getSafeWithOwners([user1.address, user2.address, user3.address, user4.address, signerSafeAddress]);
             const safeAddress = await safe.getAddress();
@@ -938,7 +944,13 @@ describe("Safe", () => {
                 signers: [user1, user2, user3],
             } = await setupTests();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address], 3, compatFallbackHandlerAddress);
+            const safe = await getSafeWithOwners(
+                [user1.address, user2.address, user3.address],
+                3,
+                ethers.ZeroAddress,
+                "0x",
+                compatFallbackHandlerAddress,
+            );
             const safeAddress = await safe.getAddress();
 
             const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
@@ -952,7 +964,13 @@ describe("Safe", () => {
                 signers: [user1, user2, user3],
             } = await setupTests();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const safe = await getSafeWithOwners([user1.address, user2.address, user3.address], 3, compatFallbackHandlerAddress);
+            const safe = await getSafeWithOwners(
+                [user1.address, user2.address, user3.address],
+                3,
+                ethers.ZeroAddress,
+                "0x",
+                compatFallbackHandlerAddress,
+            );
             const safeAddress = await safe.getAddress();
 
             const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
@@ -971,11 +989,13 @@ describe("Safe", () => {
             } = await setupTests();
             const compatFallbackHandler = await getCompatFallbackHandler();
             const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
-            const signerSafe = await getSafeWithOwners([user5.address], 1, compatFallbackHandlerAddress);
+            const signerSafe = await getSafeWithOwners([user5.address], 1, ethers.ZeroAddress, "0x", compatFallbackHandlerAddress);
             const signerSafeAddress = await signerSafe.getAddress();
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address, user4.address, signerSafeAddress],
                 5,
+                ethers.ZeroAddress,
+                "0x",
                 compatFallbackHandlerAddress,
             );
             const safeAddress = await safe.getAddress();
@@ -1015,6 +1035,8 @@ describe("Safe", () => {
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address, user4.address],
                 4,
+                ethers.ZeroAddress,
+                "0x",
                 compatFallbackHandlerAddress,
             );
             const safeAddress = await safe.getAddress();
@@ -1035,6 +1057,8 @@ describe("Safe", () => {
             const safe = await getSafeWithOwners(
                 [user1.address, user2.address, user3.address, user4.address],
                 2,
+                ethers.ZeroAddress,
+                "0x",
                 compatFallbackHandlerAddress,
             );
             const safeAddress = await safe.getAddress();

@@ -16,7 +16,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS } = process.env;
+const { NODE_URL, INFURA_KEY, MNEMONIC, ETHERSCAN_API_KEY, PK, SOLIDITY_VERSION, SOLIDITY_SETTINGS, HARDHAT_CHAIN_ID } = process.env;
 
 const DEFAULT_MNEMONIC = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
@@ -78,6 +78,7 @@ const userConfig: HardhatUserConfig = {
             allowUnlimitedContractSize: true,
             blockGasLimit: 100000000,
             gas: 100000000,
+            chainId: typeof HARDHAT_CHAIN_ID === "string" && !Number.isNaN(parseInt(HARDHAT_CHAIN_ID)) ? parseInt(HARDHAT_CHAIN_ID) : 31337,
         },
         mainnet: {
             ...sharedNetworkConfig,
