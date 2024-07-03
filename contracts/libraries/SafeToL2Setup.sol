@@ -17,10 +17,10 @@ contract SafeToL2Setup is SafeStorage {
     address public immutable _SELF;
 
     /**
-     * @notice Event indicating a change of singleton address.
-     * @param singleton New singleton address
+     * @notice Event indicating a change of master copy address.
+     * @param singleton New master copy address
      */
-    event ChangedSingleton(address singleton);
+    event ChangedMasterCopy(address singleton);
 
     /**
      * @notice Initializes a new {SafeToL2Setup} instance.
@@ -62,7 +62,7 @@ contract SafeToL2Setup is SafeStorage {
     function setupToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero onlyContract(l2Singleton) {
         if (_chainId() != 1) {
             singleton = l2Singleton;
-            emit ChangedSingleton(l2Singleton);
+            emit ChangedMasterCopy(l2Singleton);
         }
     }
 

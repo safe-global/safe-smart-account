@@ -71,7 +71,7 @@ describe("SafeToL2Setup", () => {
                 const safeAddress = await proxyFactory.createProxyWithNonce.staticCall(safeSingleton.target, setupData, 0);
 
                 await expect(proxyFactory.createProxyWithNonce(safeSingleton.target, setupData, 0))
-                    .to.emit(safeToL2SetupLib.attach(safeAddress), "ChangedSingleton")
+                    .to.emit(safeToL2SetupLib.attach(safeAddress), "ChangedMasterCopy")
                     .withArgs(safeL2SingletonAddress);
             });
 
@@ -236,7 +236,7 @@ describe("SafeToL2Setup", () => {
 
             await expect(proxyFactory.createProxyWithNonce(safeSingeltonAddress, setupData, 0)).to.not.emit(
                 safeToL2SetupLib.attach(safeAddress),
-                "ChangedSingleton",
+                "ChangedMasterCopy",
             );
             const singletonInStorage = await hre.ethers.provider.getStorage(safeAddress, ethers.zeroPadValue("0x00", 32));
             expect(sameHexString(singletonInStorage, ethers.zeroPadValue(safeSingeltonAddress, 32))).to.be.true;
