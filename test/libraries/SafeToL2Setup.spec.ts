@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract } from "../utils/setup";
+import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract, getSafeWithOwners } from "../utils/setup";
 import { sameHexString } from "../utils/strings";
+import { executeContractCallWithSigners } from "../../src";
 
 type HardhatTraceLog = {
     depth: number;
@@ -74,11 +75,51 @@ describe("SafeToL2Setup", () => {
                     .withArgs(safeL2SingletonAddress);
             });
 
+            it("only allows singleton address that contains code", async () => {
+                const {
+                    safeSingleton,
+                    safeL2,
+                    proxyFactory,
+                    signers: [user1, user2],
+                    safeToL2SetupLib,
+                } = await setupTests();
+                const safeToL2SetupCall = safeToL2SetupLib.interface.encodeFunctionData("setupToL2", [user2.address]);
+
+                const setupData = safeL2.interface.encodeFunctionData("setup", [
+                    [user1.address],
+                    1,
+                    safeToL2SetupLib.target,
+                    safeToL2SetupCall,
+                    ethers.ZeroAddress,
+                    ethers.ZeroAddress,
+                    0,
+                    ethers.ZeroAddress,
+                ]);
+
+                // For some reason, hardhat can't infer the revert reason
+                await expect(proxyFactory.createProxyWithNonce(safeSingleton.target, setupData, 0)).to.be.reverted;
+            });
+
             it("can be used only via DELEGATECALL opcode", async () => {
                 const { safeToL2SetupLib } = await setupTests();
                 const randomAddress = ethers.hexlify(ethers.randomBytes(20));
 
-                await expect(safeToL2SetupLib.setupToL2(randomAddress)).to.be.rejectedWith("GS900");
+                await expect(safeToL2SetupLib.setupToL2(randomAddress)).to.be.rejectedWith(
+                    "SafeToL2Setup should only be called via delegatecall",
+                );
+            });
+
+            it("can only be used through Safe initialization process", async () => {
+                const {
+                    safeToL2SetupLib,
+                    signers: [user1],
+                } = await setupTests();
+                const safe = await getSafeWithOwners([user1.address]);
+                const safeToL2SetupLibAddress = await safeToL2SetupLib.getAddress();
+
+                await expect(
+                    executeContractCallWithSigners(safe, safeToL2SetupLib, "setupToL2", [safeToL2SetupLibAddress], [user1], true),
+                ).to.be.rejectedWith("GS013");
             });
 
             it("changes the expected storage slot without touching the most important ones", async () => {
