@@ -33,7 +33,7 @@ contract SafeToL2Setup is SafeStorage {
      * @notice Modifier ensure a function is only called via `DELEGATECALL`. Will revert otherwise.
      */
     modifier onlyDelegateCall() {
-        require(address(this) != _SELF, "GS900");
+        require(address(this) != _SELF, "SafeToL2Setup should only be called via delegatecall");
         _;
     }
 
@@ -41,7 +41,7 @@ contract SafeToL2Setup is SafeStorage {
      * @notice Modifier to prevent using initialized Safes.
      */
     modifier onlyNonceZero() {
-        require(nonce == 0, "GS901");
+        require(nonce == 0, "Safe must have not executed any tx");
         _;
     }
 
@@ -50,7 +50,7 @@ contract SafeToL2Setup is SafeStorage {
      *
      */
     modifier onlyContract(address account) {
-        require(_codeSize(account) != 0, "GS902");
+        require(_codeSize(account) != 0, "Account doesn't contain code");
         _;
     }
 

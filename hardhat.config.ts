@@ -78,7 +78,7 @@ const userConfig: HardhatUserConfig = {
             allowUnlimitedContractSize: true,
             blockGasLimit: 100000000,
             gas: 100000000,
-            chainId: typeof HARDHAT_CHAIN_ID === "string" ? parseInt(HARDHAT_CHAIN_ID) : 31337,
+            chainId: typeof HARDHAT_CHAIN_ID === "string" && !Number.isNaN(parseInt(HARDHAT_CHAIN_ID)) ? parseInt(HARDHAT_CHAIN_ID) : 31337,
         },
         mainnet: {
             ...sharedNetworkConfig,
