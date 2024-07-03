@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract } from "../utils/setup";
-import { sameString, alignHexString } from "../utils/strings";
+import { sameHexString } from "../utils/strings";
 
 type HardhatTraceLog = {
     depth: number;
@@ -120,15 +120,13 @@ describe("SafeToL2Setup", () => {
                 const delegateCallIntoTheLib = trace.structLogs.findIndex(
                     (log) =>
                         log.op === "DELEGATECALL" &&
-                        sameString(log.stack[log.stack.length - 2], alignHexString(safeToL2SetupLibAddress, 32)),
+                        sameHexString(log.stack[log.stack.length - 2], ethers.zeroPadValue(safeToL2SetupLibAddress, 32).slice(2)),
                 );
                 const preDelegateCallStorage = trace.structLogs[delegateCallIntoTheLib].storage;
 
                 // The SafeSetup event is emitted after the Safe is set up
                 // To get the storage snapshot after the Safe is set up, we need to find the LOG2 opcode with the topic input on the stack equal the SafeSetup event signature
-                const SAFE_SETUP_EVENT_SIGNATURE = ethers.keccak256(
-                    ethers.toUtf8Bytes("SafeSetup(address,address[],uint256,address,address)"),
-                );
+                const SAFE_SETUP_EVENT_SIGNATURE = ethers.id("SafeSetup(address,address[],uint256,address,address)");
                 const postSafeSetup = trace.structLogs.find(
                     (log, index) =>
                         log.op === "LOG2" &&
@@ -142,24 +140,24 @@ describe("SafeToL2Setup", () => {
 
                 for (const [key, value] of Object.entries(postSafeSetupStorage)) {
                     // The slot key 0 is the singleton storage slot, it must equal the L2 singleton address
-                    if (key === alignHexString("00", 32)) {
-                        expect(sameString(alignHexString(safeL2SingletonAddress, 32), value)).to.be.true;
+                    if (sameHexString(key, ethers.zeroPadValue("0x00", 32))) {
+                        expect(sameHexString(ethers.zeroPadValue(safeL2SingletonAddress, 32), value)).to.be.true;
                     } else {
                         // All other storage slots must be the same as before the DELEGATECALL
                         if (key in preDelegateCallStorage) {
-                            expect(sameString(preDelegateCallStorage[key], value)).to.be.true;
+                            expect(sameHexString(preDelegateCallStorage[key], value)).to.be.true;
                         } else {
                             // This special case is needed because the SafeToL2Setup library inherits the SafeStorage library
                             // And that makes the tracer report all the storage slots in the SafeStorage library as well
                             // Even though if they were not touched during the transaction
-                            expect(sameString(value, "0".repeat(64))).to.be.true;
+                            expect(sameHexString(value, "0".repeat(64))).to.be.true;
                         }
                     }
                 }
 
                 // Double-check that the storage slot was changed at the end of the transaction
-                const singletonInStorage = await hre.network.provider.send("eth_getStorageAt", [safeAddress, `0x${"0".repeat(64)}`]);
-                expect(sameString(singletonInStorage, `0x${alignHexString(safeL2SingletonAddress, 32)}`)).to.be.true;
+                const singletonInStorage = await hre.ethers.provider.getStorage(safeAddress, ethers.zeroPadValue("0x00", 32));
+                expect(sameHexString(singletonInStorage, ethers.zeroPadValue(safeL2SingletonAddress, 32))).to.be.true;
             });
         });
     });
@@ -199,8 +197,8 @@ describe("SafeToL2Setup", () => {
                 safeToL2SetupLib.attach(safeAddress),
                 "ChangedSingleton",
             );
-            const singletonInStorage = await hre.network.provider.send("eth_getStorageAt", [safeAddress, `0x${"0".repeat(64)}`]);
-            expect(sameString(singletonInStorage, `0x${alignHexString(safeSingeltonAddress, 32)}`)).to.be.true;
+            const singletonInStorage = await hre.ethers.provider.getStorage(safeAddress, ethers.zeroPadValue("0x00", 32));
+            expect(sameHexString(singletonInStorage, ethers.zeroPadValue(safeSingeltonAddress, 32))).to.be.true;
         });
     });
 });
