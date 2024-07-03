@@ -184,7 +184,7 @@ describe("SafeToL2Setup", () => {
                 if (!postSafeSetup) {
                     throw new Error("No SafeSetup event");
                 }
-                const postSafeSetupStorage = postSafeSetup?.storage;
+                const postSafeSetupStorage = postSafeSetup.storage;
 
                 for (const [key, value] of Object.entries(postSafeSetupStorage)) {
                     // The slot key 0 is the singleton storage slot, it must equal the L2 singleton address
