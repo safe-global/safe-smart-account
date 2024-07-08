@@ -32,9 +32,9 @@ abstract contract StorageAccessible {
      * @dev Performs a delegatecall on a targetContract in the context of self.
      * Internally reverts execution to avoid side effects (making it static).
      *
-     * This method reverts with data equal to `abi.encode(bool(success), bytes(response))`.
+     * This method reverts with data equal to `abi.encode(bool(success), uint256(gasUsed), bytes(response))`.
      * Specifically, the `returndata` after a call to this method will be:
-     * `success:bool || response.length:uint256 || response:bytes`.
+     * `success:bool || gasUsed:uint256 || response.length:uint256 || response:bytes`.
      *
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
@@ -43,13 +43,18 @@ abstract contract StorageAccessible {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
+            let gasBefore := gas()
             let success := delegatecall(gas(), targetContract, add(calldataPayload, 0x20), mload(calldataPayload), 0, 0)
+            let gasAfter := gas()
+            let gasUsed := sub(gasBefore, gasAfter)
+
             // Load free memory location
             let ptr := mload(0x40)
             mstore(ptr, success)
-            mstore(add(ptr, 0x20), returndatasize())
-            returndatacopy(add(ptr, 0x40), 0, returndatasize())
-            revert(ptr, add(returndatasize(), 0x40))
+            mstore(add(ptr, 0x20), gasUsed)
+            mstore(add(ptr, 0x40), returndatasize())
+            returndatacopy(add(ptr, 0x60), 0, returndatasize())
+            revert(ptr, add(returndatasize(), 0x60))
         }
         /* solhint-enable no-inline-assembly */
     }

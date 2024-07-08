@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {ExecutorExternal} from "./base/ExecutorExternal.sol";
 import {ITransactionGuard, GuardManager} from "./base/GuardManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {OwnerManager} from "./base/OwnerManager.sol";
@@ -190,97 +189,6 @@ contract Safe is
                 ITransactionGuard(guard).checkAfterExecution(txHash, success);
             }
         }
-    }
-
-    struct SimulateTransactionParams {
-        address to;
-        uint256 value;
-        Enum.Operation operation;
-        uint256 safeTxGas;
-        uint256 baseGas;
-        uint256 gasPrice;
-        address gasToken;
-        address payable refundReceiver;
-    }
-
-    struct SimulateTransactionResult {
-        bool success;
-        uint256 gasUsed;
-        bytes32 txHash;
-    }
-
-    function simulateTransaction(
-        address executorExternal, // NB: this is just for this PoC and should obviously be set immutably somewhere for security reasons
-        SimulateTransactionParams memory params,
-        bytes calldata data
-    ) external payable returns (SimulateTransactionResult memory result) {
-        result.txHash = getTransactionHash(
-            params.to,
-            params.value,
-            data,
-            params.operation,
-            params.safeTxGas,
-            params.baseGas,
-            params.gasPrice,
-            params.gasToken,
-            params.refundReceiver,
-            nonce // We use the current nonce value without incrementing it.
-        );
-
-        address guard = getGuard();
-        if (guard != address(0)) {
-            ITransactionGuard(guard).checkTransaction(
-                params.to,
-                params.value,
-                data,
-                params.operation,
-                params.safeTxGas,
-                params.baseGas,
-                params.gasPrice,
-                params.gasToken,
-                params.refundReceiver,
-                "",
-                msg.sender
-            );
-        }
-
-        if (gasleft() < ((params.safeTxGas * 64) / 63).max(params.safeTxGas + 2500) + 500) revertWithError("GS010");
-
-        uint256 initialGas = gasleft();
-
-        bytes memory delegatecallData = abi.encodeWithSignature(
-            "externalExecute(address,uint256,bytes,uint8,uint256)",
-            params.to,
-            params.value,
-            data,
-            params.operation,
-            params.gasPrice == 0 ? (gasleft() - 2500) : params.safeTxGas
-        );
-
-        (bool success, bytes memory returnData) = executorExternal.delegatecall(delegatecallData);
-
-        // Since externalExecute always reverts, we handle the revert reason to get the actual success status
-        if (!success) {
-            result.success = parseRevertReason(returnData);
-        } else {
-            result.success = false; // This should never happen as externalExecute always reverts
-        }
-        result.gasUsed = initialGas - gasleft() + params.baseGas;
-
-        if (guard != address(0)) {
-            ITransactionGuard(guard).checkAfterExecution(result.txHash, true);
-        }
-    }
-
-    function parseRevertReason(bytes memory reason) private pure returns (bool success) {
-        if (reason.length != 32) {
-            if (reason.length < 68) revert("Unexpected error");
-            assembly {
-                reason := add(reason, 0x04)
-            }
-            revert(abi.decode(reason, (string)));
-        }
-        return abi.decode(reason, (bool));
     }
 
     /**

@@ -1,6 +1,6 @@
 import { Signer, BigNumberish, BaseContract, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { Safe } from "../../typechain-types";
+import { Safe, SimulateTxAccessor } from "../../typechain-types";
 
 export const EIP_DOMAIN = {
     EIP712Domain: [
@@ -202,35 +202,46 @@ export const executeTx = async (safe: Safe, safeTx: SafeTransaction, signatures:
 
 export const simulateTx = async (
     safe: Safe,
-    executorExternal: string,
+    simulateTxAccessor: SimulateTxAccessor,
     safeTx: SafeTransaction,
     overrides?: any,
 ): Promise<{
     success: boolean;
     gasUsed: bigint;
-    txHash: string;
+    returndata: string;
 }> => {
-    const result = (await safe.simulateTransaction.staticCall(
-        executorExternal,
-        {
-            to: safeTx.to,
-            value: safeTx.value,
-            operation: safeTx.operation,
-            safeTxGas: safeTx.safeTxGas,
-            baseGas: safeTx.baseGas,
-            gasPrice: safeTx.gasPrice,
-            gasToken: safeTx.gasToken,
-            refundReceiver: safeTx.refundReceiver,
-        },
-        safeTx.data,
-        overrides || {},
-    )) as [boolean, bigint, string];
-
-    return {
-        success: result[0],
-        gasUsed: result[1],
-        txHash: result[2],
-    };
+    try {
+        const simulateTxAccessorAddress = await simulateTxAccessor.getAddress();
+        const simulateSafeTxEncodedPayload = simulateTxAccessor.interface.encodeFunctionData("simulate", [
+            safeTx.to,
+            safeTx.value,
+            safeTx.data,
+            safeTx.operation,
+        ]);
+        await safe.simulateAndRevert.staticCall(simulateTxAccessorAddress, simulateSafeTxEncodedPayload, overrides || {}); // must revert
+    } catch (error: any) {
+        // Extract the revert data
+        const revertData = error.data;
+        // Check if the data is present and has the expected format
+        if (revertData && revertData.length >= 98) {
+            // Decode the success flag (first 32 bytes)
+            const success = ethers.toBeHex(revertData.slice(0, 32)) === "0x1";
+            // Decode the gasUsed (next 32 bytes)
+            const gasUsed = ethers.toBigInt("0x" + revertData.slice(32, 64));
+            // Decode the response length (next 32 bytes)
+            const responseLength = Number(ethers.toBigInt("0x" + revertData.slice(64, 96)));
+            // Decode the response data (remaining bytes)
+            const returndata = revertData.slice(96, 96 + responseLength * 2);
+            return {
+                success,
+                gasUsed,
+                returndata, // Assuming the response contains the txHash
+            };
+        } else {
+            console.error("Unexpected revert data format", revertData);
+        }
+    }
+    throw new Error("simulateAndRevert must revert");
 };
 
 export const buildContractCall = async (
