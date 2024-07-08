@@ -148,8 +148,8 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     let dynamicBytes = "";
     for (const sig of signatures) {
         if (sig.dynamic) {
-            /* 
-                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended 
+            /*
+                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended
                 at the end of signature bytes.
                 The signature format is
                 Signature type == 0
@@ -198,6 +198,39 @@ export const executeTx = async (safe: Safe, safeTx: SafeTransaction, signatures:
         signatureBytes,
         overrides || {},
     );
+};
+
+export const simulateTx = async (
+    safe: Safe,
+    executorExternal: string,
+    safeTx: SafeTransaction,
+    overrides?: any,
+): Promise<{
+    success: boolean;
+    gasUsed: bigint;
+    txHash: string;
+}> => {
+    const result = (await safe.simulateTransaction.staticCall(
+        executorExternal,
+        {
+            to: safeTx.to,
+            value: safeTx.value,
+            operation: safeTx.operation,
+            safeTxGas: safeTx.safeTxGas,
+            baseGas: safeTx.baseGas,
+            gasPrice: safeTx.gasPrice,
+            gasToken: safeTx.gasToken,
+            refundReceiver: safeTx.refundReceiver,
+        },
+        safeTx.data,
+        overrides || {},
+    )) as [boolean, bigint, string];
+
+    return {
+        success: result[0],
+        gasUsed: result[1],
+        txHash: result[2],
+    };
 };
 
 export const buildContractCall = async (

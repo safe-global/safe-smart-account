@@ -9,6 +9,7 @@ import {
     executeTx,
     calculateSafeTransactionHash,
     buildContractCall,
+    simulateTx,
 } from "../../src/utils/execution";
 
 import { chainId } from "../utils/encoding";
@@ -41,12 +42,17 @@ describe("Safe", () => {
                 }
             }`;
         const reverter = await deployContract(user1, reverterSource);
+
+        const ExecutorExternal = await hre.ethers.getContractFactory("ExecutorExternal");
+        const executorExternal = await ExecutorExternal.deploy();
+
         return {
             safe: await getSafeWithOwners([user1.address]),
             reverter,
             storageSetter,
             nativeTokenReceiver,
             signers,
+            executorExternal,
         };
     });
 
@@ -181,15 +187,19 @@ describe("Safe", () => {
         });
 
         it("should revert on unknown operation", async () => {
-            const { safe, signers } = await setupTests();
+            const { safe, signers, executorExternal } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
+
+            const executorExternalAddress = await executorExternal.getAddress();
+
             const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce(), operation: 2 });
+            await expect(simulateTx(safe, executorExternalAddress, tx)).to.be.reverted;
             await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.be.reverted;
         });
 
         it("should emit payment in success event", async () => {
-            const { safe, signers } = await setupTests();
+            const { safe, signers, executorExternal } = await setupTests();
             const [user1, user2] = signers;
             const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
@@ -206,6 +216,11 @@ describe("Safe", () => {
             expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(ethers.parseEther("1"));
 
             let executedTx: any;
+
+            const executorExternalAddress = await executorExternal.getAddress();
+            const simulationResult = await simulateTx(safe, executorExternalAddress, tx);
+            expect(simulationResult.success).to.be.eq(true);
+
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => {
                     executedTx = tx;
@@ -223,6 +238,7 @@ describe("Safe", () => {
                 receiptLogs[logIndex].data,
                 receiptLogs[logIndex].topics,
             );
+            expect(successEvent.txHash).to.be.eq(simulationResult.txHash);
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safeAddress, tx, await chainId()));
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
             expect(successEvent.payment).to.be.lte(5000n);
@@ -230,7 +246,7 @@ describe("Safe", () => {
         });
 
         it("should emit payment in failure event", async () => {
-            const { safe, storageSetter, signers } = await setupTests();
+            const { safe, storageSetter, signers, executorExternal } = await setupTests();
             const [user1, user2] = signers;
             const safeAddress = await safe.getAddress();
             const storageSetterAddress = await storageSetter.getAddress();
@@ -249,6 +265,10 @@ describe("Safe", () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
 
+            const executorExternalAddress = await executorExternal.getAddress();
+            const simulationResult = await simulateTx(safe, executorExternalAddress, tx);
+
+            expect(simulationResult.success).to.be.eq(false);
             let executedTx: any;
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => {
@@ -264,6 +284,7 @@ describe("Safe", () => {
                 receiptLogs[logIndex].data,
                 receiptLogs[logIndex].topics,
             );
+            expect(successEvent.txHash).to.be.eq(simulationResult.txHash);
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safeAddress, tx, await chainId()));
             // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
             expect(successEvent.payment).to.be.lte(10000n);
@@ -271,16 +292,16 @@ describe("Safe", () => {
         });
 
         it("should be possible to manually increase gas", async () => {
-            const { safe, signers } = await setupTests();
+            const { safe, signers, executorExternal } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
             const gasUserSource = `
             contract GasUser {
-        
+
                 uint256[] public data;
-        
+
                 constructor() payable {}
-        
+
                 function nested(uint256 level, uint256 count) external {
                     if (level == 0) {
                         for (uint256 i = 0; i < count; i++) {
@@ -290,7 +311,7 @@ describe("Safe", () => {
                     }
                     this.nested(level - 1, count);
                 }
-        
+
                 function useGas(uint256 count) public {
                     this.nested(6, count);
                     this.nested(8, count);
@@ -301,18 +322,32 @@ describe("Safe", () => {
             const data = gasUser.interface.encodeFunctionData("useGas", [80]);
             const safeTxGas = 10000;
             const tx = buildSafeTransaction({ to, data, safeTxGas, nonce: await safe.nonce() });
+
+            const executorExternalAddress = await executorExternal.getAddress();
+
+            let simulationResult = await simulateTx(safe, executorExternalAddress, tx, { gasLimit: 170000 });
+            expect(simulationResult.success).to.be.eq(false);
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 170000 }),
                 "Safe transaction should fail with low gasLimit",
             ).to.emit(safe, "ExecutionFailure");
 
-            await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
-                "Safe transaction should succeed with high gasLimit",
-            ).to.emit(safe, "ExecutionSuccess");
+            simulationResult = await simulateTx(safe, executorExternalAddress, tx, { gasLimit: 6000000 });
+            expect(simulationResult.success).to.be.eq(true);
+            const executedTxPromise = executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 });
+            const executedTxResponse = await executedTxPromise;
+            const receipt = await hre.ethers.provider.getTransactionReceipt(executedTxResponse.hash);
+            // everything else(i.e. other than the safe tx gas which is being estimated by simulateTransaction)
+            // includes intrinsic/base gas cost and signature validation, etc
+            const maxGasForEverythingElse = 50_000n; // it's reasonable that this will take the most
+            expect(receipt?.gasUsed).to.be.gt(simulationResult.gasUsed);
+            expect(receipt?.gasUsed).to.be.lt(simulationResult.gasUsed + maxGasForEverythingElse);
+            await expect(executedTxPromise, "Safe transaction should succeed with high gasLimit").to.emit(safe, "ExecutionSuccess");
 
             // This should only work if the gasPrice is 0
             tx.gasPrice = 1;
+            simulationResult = await simulateTx(safe, executorExternalAddress, tx, { gasLimit: 6000000 });
+            expect(simulationResult.success).to.be.eq(false);
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
@@ -321,7 +356,7 @@ describe("Safe", () => {
         });
 
         it("should forward all the gas to the native token refund receiver", async () => {
-            const { safe, nativeTokenReceiver, signers } = await setupTests();
+            const { safe, nativeTokenReceiver, signers, executorExternal } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
             const nativeTokenReceiverAddress = await nativeTokenReceiver.getAddress();
@@ -338,6 +373,10 @@ describe("Safe", () => {
             await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
 
+            const executorExternalAddress = await executorExternal.getAddress();
+
+            const simulationResult = await simulateTx(safe, executorExternalAddress, tx);
+            expect(simulationResult.success).to.be.eq(true);
             const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 500000 });
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx.hash);
             const receiptLogs = receipt?.logs ?? [];
