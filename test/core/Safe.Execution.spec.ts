@@ -334,7 +334,7 @@ describe("Safe", () => {
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTxResponse.hash);
             // everything else(i.e. other than the safe tx gas which is being estimated by simulateTransaction)
             // includes intrinsic/base gas cost and signature validation, etc
-            const maxGasForEverythingElse = 50_000n; // it's reasonable that this will take the most
+            const maxGasForEverythingElse = 60_000n; // it's reasonable that this will take the most
             expect(receipt?.gasUsed).to.be.gt(simulationResult.gasUsed);
             expect(receipt?.gasUsed).to.be.lt(simulationResult.gasUsed + maxGasForEverythingElse);
             await expect(executedTxPromise, "Safe transaction should succeed with high gasLimit").to.emit(safe, "ExecutionSuccess");

@@ -222,23 +222,42 @@ export const simulateTx = async (
     } catch (error: any) {
         // Extract the revert data
         const revertData = error.data;
-        // Check if the data is present and has the expected format
-        if (revertData && revertData.length >= 98) {
-            // Decode the success flag (first 32 bytes)
-            const success = ethers.toBeHex(revertData.slice(0, 32)) === "0x1";
-            // Decode the gasUsed (next 32 bytes)
-            const gasUsed = ethers.toBigInt("0x" + revertData.slice(32, 64));
-            // Decode the response length (next 32 bytes)
-            const responseLength = Number(ethers.toBigInt("0x" + revertData.slice(64, 96)));
-            // Decode the response data (remaining bytes)
-            const returndata = revertData.slice(96, 96 + responseLength * 2);
+
+        if (revertData && revertData.length >= 194) {
+            // 0x + 96 bytes (32 bytes each for success flag, offset, and at least one more field)
+            // Decode the success flag of simulateAndRevert
+            const [success] = ethers.AbiCoder.defaultAbiCoder().decode(["bool"], revertData.slice(0, 66));
+
+            if (!success) {
+                throw new Error("simulateAndRevert failed");
+            }
+
+            // The actual data starts at position 128 (0x80)
+            const simulateReturnData = "0x" + revertData.slice(130);
+
+            // Decode the returned data from simulate function
+            const [estimate, simulateSuccess, returnData] = ethers.AbiCoder.defaultAbiCoder().decode(
+                ["uint256", "bool", "bytes"],
+                simulateReturnData,
+            );
+
+            return {
+                success: simulateSuccess,
+                gasUsed: BigInt(estimate),
+                returndata: returnData,
+            };
+        } else if (revertData && revertData.length === 130) {
+            // 0x + 64 bytes (32 bytes each for success flag and empty data)
+            // Decode the success flag of simulateAndRevert
+            const [success] = ethers.AbiCoder.defaultAbiCoder().decode(["bool"], revertData.slice(0, 66));
             return {
                 success,
-                gasUsed,
-                returndata, // Assuming the response contains the txHash
+                gasUsed: BigInt(0),
+                returndata: "",
             };
         } else {
-            console.error("Unexpected revert data format", revertData);
+            console.log(revertData);
+            throw new Error("Invalid revertData length");
         }
     }
     throw new Error("simulateAndRevert must revert");
