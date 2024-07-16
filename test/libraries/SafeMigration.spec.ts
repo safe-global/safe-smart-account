@@ -5,8 +5,10 @@ import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
-const SAFE_SINGLETON_150_ADDRESS = "0x477C3fb2D564349E2F95a2EF1091bF9657b26145";
-const SAFE_SINGLETON_150_L2_ADDRESS = "0x551A2F9a71bF88cDBef3CBe60E95722f38eE0eAA";
+const SAFE_SINGLETON_ADDRESS = "0x477C3fb2D564349E2F95a2EF1091bF9657b26145";
+const SAFE_SINGLETON_L2_ADDRESS = "0x551A2F9a71bF88cDBef3CBe60E95722f38eE0eAA";
+const COMPATIBILITY_FALLBACK_HANDLER = "0x4c95c836D31d329d80d696cb679f3dEa028Ad4e5";
+const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
 
 describe("SafeMigration Library", () => {
     const migratedInterface = new ethers.Interface(["function masterCopy() view returns(address)"]);
@@ -17,107 +19,321 @@ describe("SafeMigration Library", () => {
         const [user1] = signers;
 
         // Set the runtime code for hardcoded addresses, so the expected events are emitted
-        await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_ADDRESS, safeRuntimeBytecode.safe150]);
-        await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_L2_ADDRESS, safeRuntimeBytecode.safe150l2]);
+        await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_ADDRESS, safeRuntimeBytecode.safe150]);
+        await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_L2_ADDRESS, safeRuntimeBytecode.safe150l2]);
+        await hre.network.provider.send("hardhat_setCode", [
+            COMPATIBILITY_FALLBACK_HANDLER,
+            safeRuntimeBytecode.safe150CompatibilityFallbackHandler,
+        ]);
 
         const singleton130Address = (await (await user1.sendTransaction({ data: deploymentData.safe130 })).wait())?.contractAddress;
         const singleton130L2Address = (await (await user1.sendTransaction({ data: deploymentData.safe130l2 })).wait())?.contractAddress;
 
         if (!singleton130Address || !singleton130L2Address) {
-            throw new Error("Could not deploy Safe130 or Safe130L2");
+            throw new Error("Could not deploy safe or safeL2");
         }
         const singleton130 = await getSafeSingletonAt(singleton130Address);
         const singleton130L2 = await getSafeSingletonAt(singleton130L2Address);
 
-        const migration = await (await safeMigrationContract()).deploy(SAFE_SINGLETON_150_ADDRESS, SAFE_SINGLETON_150_L2_ADDRESS);
+        const migration = await (
+            await safeMigrationContract()
+        ).deploy(SAFE_SINGLETON_ADDRESS, SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER);
 
         return {
             signers,
-            safe130: await getSafeWithSingleton(singleton130, [user1.address]),
-            safe130l2: await getSafeWithSingleton(singleton130L2, [user1.address]),
+            safe: await getSafeWithSingleton(singleton130, [user1.address]),
+            safeL2: await getSafeWithSingleton(singleton130L2, [user1.address]),
             migration,
         };
     });
 
     describe("constructor", () => {
         it("reverts when Safe singleton is not a contract", async () => {
-            await expect(
-                (await safeMigrationContract()).deploy(SAFE_SINGLETON_150_ADDRESS, SAFE_SINGLETON_150_L2_ADDRESS),
-            ).to.be.revertedWith("Safe Singleton is not deployed");
-        });
-        it("reverts when SafeL2 singleton is not a contract", async () => {
-            // Set runtime code just for Safe Singleton
-            await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_ADDRESS, safeRuntimeBytecode.safe150]);
+            await setupTests();
 
             await expect(
-                (await safeMigrationContract()).deploy(SAFE_SINGLETON_150_ADDRESS, SAFE_SINGLETON_150_L2_ADDRESS),
+                (await safeMigrationContract()).deploy(ethers.ZeroAddress, SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER),
+            ).to.be.revertedWith("Safe Singleton is not deployed");
+        });
+
+        it("reverts when SafeL2 singleton is not a contract", async () => {
+            await setupTests();
+
+            await expect(
+                (await safeMigrationContract()).deploy(SAFE_SINGLETON_ADDRESS, ethers.ZeroAddress, COMPATIBILITY_FALLBACK_HANDLER),
             ).to.be.revertedWith("Safe Singleton (L2) is not deployed");
+        });
+
+        it("reverts when fallback handler is not a contract", async () => {
+            await setupTests();
+
+            await expect(
+                (await safeMigrationContract()).deploy(SAFE_SINGLETON_ADDRESS, SAFE_SINGLETON_L2_ADDRESS, ethers.ZeroAddress),
+            ).to.be.revertedWith("fallback handler is not deployed");
         });
     });
 
     describe("migrateSingleton", () => {
-        it("reverts on target singleton codehash mismatch", async () => {
+        it("reverts if not called via delegatecall", async () => {
             const {
-                safe130,
+                safe,
                 migration,
                 signers: [user1],
             } = await setupTests();
             await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateSingleton", [SAFE_SINGLETON_150_L2_ADDRESS], [user1], true),
+                executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_ADDRESS], [user1], false),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], true),
             ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton", async () => {
             const {
-                safe130,
+                safe,
                 migration,
                 signers: [user1],
             } = await setupTests();
-            const safeAddress = await safe130.getAddress();
+            const safeAddress = await safe.getAddress();
+            // The emit matcher checks the address, which is the Safe as delegatecall is used
+            const migrationSafe = migration.attach(safeAddress);
+
+            await expect(executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_ADDRESS], [user1], true))
+                .to.emit(migrationSafe, "ChangedMasterCopy")
+                .withArgs(SAFE_SINGLETON_ADDRESS);
+
+            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_ADDRESS);
+        });
+    });
+
+    describe("migrateWithFallbackHandler", () => {
+        it("reverts if not called via delegatecall", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateWithFallbackHandler",
+                    [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    false,
+                ),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateWithFallbackHandler",
+                    [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    true,
+                ),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("migrates the singleton", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe.getAddress();
             // The emit matcher checks the address, which is the Safe as delegatecall is used
             const migrationSafe = migration.attach(safeAddress);
 
             await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateSingleton", [SAFE_SINGLETON_150_ADDRESS], [user1], true),
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateWithFallbackHandler",
+                    [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    true,
+                ),
             )
                 .to.emit(migrationSafe, "ChangedMasterCopy")
-                .withArgs(SAFE_SINGLETON_150_ADDRESS);
+                .withArgs(SAFE_SINGLETON_ADDRESS)
+                .and.to.emit(safe, "ChangedFallbackHandler")
+                .withArgs(COMPATIBILITY_FALLBACK_HANDLER);
 
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
-            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_ADDRESS);
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_ADDRESS);
+
+            expect(await safe.getStorageAt(FALLBACK_HANDLER_STORAGE_SLOT, 1)).to.eq(
+                "0x" + COMPATIBILITY_FALLBACK_HANDLER.slice(2).toLowerCase().padStart(64, "0"),
+            );
         });
     });
 
     describe("migrateL2Singleton", () => {
-        it("reverts on target singleton codehash mismatch", async () => {
+        it("reverts if not called via delegatecall", async () => {
             const {
-                safe130,
+                safe,
                 migration,
                 signers: [user1],
             } = await setupTests();
             await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateL2Singleton", [SAFE_SINGLETON_150_ADDRESS], [user1], true),
+                executeContractCallWithSigners(safe, migration, "migrateL2Singleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], false),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(safe, migration, "migrateL2Singleton", [SAFE_SINGLETON_ADDRESS], [user1], true),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on fallback handler codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateWithFallbackHandler",
+                    [SAFE_SINGLETON_ADDRESS, SAFE_SINGLETON_L2_ADDRESS],
+                    [user1],
+                    true,
+                ),
             ).to.be.revertedWith("GS013");
         });
 
         it("migrates the singleton", async () => {
             const {
-                safe130l2,
+                safeL2,
                 migration,
                 signers: [user1],
             } = await setupTests();
-            const safeAddress = await safe130l2.getAddress();
+            const safeAddress = await safeL2.getAddress();
             // The emit matcher checks the address, which is the Safe as delegatecall is used
             const migrationSafe = migration.attach(safeAddress);
 
             await expect(
-                executeContractCallWithSigners(safe130l2, migration, "migrateL2Singleton", [SAFE_SINGLETON_150_L2_ADDRESS], [user1], true),
+                executeContractCallWithSigners(safeL2, migration, "migrateL2Singleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], true),
             )
                 .to.emit(migrationSafe, "ChangedMasterCopy")
-                .withArgs(SAFE_SINGLETON_150_L2_ADDRESS);
+                .withArgs(SAFE_SINGLETON_L2_ADDRESS);
 
             const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
-            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_L2_ADDRESS);
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_L2_ADDRESS);
+        });
+    });
+
+    describe("migrateL2WithFallbackHandler", () => {
+        it("reverts if not called via delegatecall", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateL2WithFallbackHandler",
+                    [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    false,
+                ),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateL2WithFallbackHandler",
+                    [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    true,
+                ),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("reverts on fallback handler codehash mismatch", async () => {
+            const {
+                safe,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(
+                    safe,
+                    migration,
+                    "migrateL2WithFallbackHandler",
+                    [SAFE_SINGLETON_L2_ADDRESS, SAFE_SINGLETON_ADDRESS],
+                    [user1],
+                    true,
+                ),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("migrates the singleton", async () => {
+            const {
+                safeL2,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safeL2.getAddress();
+            // The emit matcher checks the address, which is the Safe as delegatecall is used
+            const migrationSafe = migration.attach(safeAddress);
+
+            await expect(
+                executeContractCallWithSigners(
+                    safeL2,
+                    migration,
+                    "migrateL2WithFallbackHandler",
+                    [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
+                    [user1],
+                    true,
+                ),
+            )
+                .to.emit(migrationSafe, "ChangedMasterCopy")
+                .withArgs(SAFE_SINGLETON_L2_ADDRESS)
+                .and.to.emit(safeL2, "ChangedFallbackHandler")
+                .withArgs(COMPATIBILITY_FALLBACK_HANDLER);
+
+            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_L2_ADDRESS);
+
+            expect(await safeL2.getStorageAt(FALLBACK_HANDLER_STORAGE_SLOT, 1)).to.eq(
+                "0x" + COMPATIBILITY_FALLBACK_HANDLER.slice(2).toLowerCase().padStart(64, "0"),
+            );
         });
     });
 });
