@@ -3,8 +3,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {Safe} from "../Safe.sol";
-import {SafeL2} from "../SafeL2.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
