@@ -110,7 +110,7 @@ contract SafeMigration is SafeStorage {
      * It may return incorrect results in some edge cases (see documentation for details).
      * Developers should use caution when relying on the results of this function for critical decision-making.
      */
-    function isContract(address account) internal view returns (bool) {
+    function hasCode(address account) internal view returns (bool) {
         uint256 size;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
