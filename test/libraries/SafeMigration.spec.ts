@@ -111,18 +111,7 @@ describe("SafeMigration Library", () => {
                         signers: [user1],
                     } = await setupTests();
                     await expect(
-                        executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_ADDRESS], [user1], false),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on target singleton codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], true),
+                        executeContractCallWithSigners(safe, migration, "migrateSingleton", [], [user1], false),
                     ).to.be.revertedWith("GS013");
                 });
 
@@ -136,9 +125,7 @@ describe("SafeMigration Library", () => {
                     // The emit matcher checks the address, which is the Safe as delegatecall is used
                     const migrationSafe = migration.attach(safeAddress);
 
-                    await expect(
-                        executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_ADDRESS], [user1], true),
-                    )
+                    await expect(executeContractCallWithSigners(safe, migration, "migrateSingleton", [], [user1], true))
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_ADDRESS);
 
@@ -160,9 +147,7 @@ describe("SafeMigration Library", () => {
                     const guardBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT);
                     const fallbackHandlerBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT);
 
-                    expect(
-                        await executeContractCallWithSigners(safe, migration, "migrateSingleton", [SAFE_SINGLETON_ADDRESS], [user1], true),
-                    );
+                    expect(await executeContractCallWithSigners(safe, migration, "migrateSingleton", [], [user1], true));
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
@@ -184,32 +169,7 @@ describe("SafeMigration Library", () => {
                         signers: [user1],
                     } = await setupTests();
                     await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateWithFallbackHandler",
-                            [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            false,
-                        ),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on target singleton codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateWithFallbackHandler",
-                            [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
+                        executeContractCallWithSigners(safe, migration, "migrateWithFallbackHandler", [], [user1], false),
                     ).to.be.revertedWith("GS013");
                 });
 
@@ -223,16 +183,7 @@ describe("SafeMigration Library", () => {
                     // The emit matcher checks the address, which is the Safe as delegatecall is used
                     const migrationSafe = migration.attach(safeAddress);
 
-                    await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateWithFallbackHandler",
-                            [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
-                    )
+                    await expect(executeContractCallWithSigners(safe, migration, "migrateWithFallbackHandler", [], [user1], true))
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_ADDRESS)
                         .and.to.emit(safe, "ChangedFallbackHandler")
@@ -259,16 +210,7 @@ describe("SafeMigration Library", () => {
                     const nonceBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, 5);
                     const guardBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT);
 
-                    expect(
-                        await executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateWithFallbackHandler",
-                            [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
-                    );
+                    expect(await executeContractCallWithSigners(safe, migration, "migrateWithFallbackHandler", [], [user1], true));
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
@@ -287,36 +229,7 @@ describe("SafeMigration Library", () => {
                         signers: [user1],
                     } = await setupTests();
                     await expect(
-                        executeContractCallWithSigners(safe, migration, "migrateL2Singleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], false),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on target singleton codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(safe, migration, "migrateL2Singleton", [SAFE_SINGLETON_ADDRESS], [user1], true),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on fallback handler codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateWithFallbackHandler",
-                            [SAFE_SINGLETON_ADDRESS, SAFE_SINGLETON_L2_ADDRESS],
-                            [user1],
-                            true,
-                        ),
+                        executeContractCallWithSigners(safe, migration, "migrateL2Singleton", [], [user1], false),
                     ).to.be.revertedWith("GS013");
                 });
 
@@ -330,9 +243,7 @@ describe("SafeMigration Library", () => {
                     // The emit matcher checks the address, which is the Safe as delegatecall is used
                     const migrationSafe = migration.attach(safeAddress);
 
-                    await expect(
-                        executeContractCallWithSigners(safeL2, migration, "migrateL2Singleton", [SAFE_SINGLETON_L2_ADDRESS], [user1], true),
-                    )
+                    await expect(executeContractCallWithSigners(safeL2, migration, "migrateL2Singleton", [], [user1], true))
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_L2_ADDRESS);
 
@@ -354,16 +265,7 @@ describe("SafeMigration Library", () => {
                     const guardBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT);
                     const fallbackHandlerBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT);
 
-                    expect(
-                        await executeContractCallWithSigners(
-                            safeL2,
-                            migration,
-                            "migrateL2Singleton",
-                            [SAFE_SINGLETON_L2_ADDRESS],
-                            [user1],
-                            true,
-                        ),
-                    );
+                    expect(await executeContractCallWithSigners(safeL2, migration, "migrateL2Singleton", [], [user1], true));
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
@@ -385,50 +287,7 @@ describe("SafeMigration Library", () => {
                         signers: [user1],
                     } = await setupTests();
                     await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateL2WithFallbackHandler",
-                            [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            false,
-                        ),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on target singleton codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateL2WithFallbackHandler",
-                            [SAFE_SINGLETON_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
-                    ).to.be.revertedWith("GS013");
-                });
-
-                it("reverts on fallback handler codehash mismatch", async () => {
-                    const {
-                        safe,
-                        migration,
-                        signers: [user1],
-                    } = await setupTests();
-                    await expect(
-                        executeContractCallWithSigners(
-                            safe,
-                            migration,
-                            "migrateL2WithFallbackHandler",
-                            [SAFE_SINGLETON_L2_ADDRESS, SAFE_SINGLETON_ADDRESS],
-                            [user1],
-                            true,
-                        ),
+                        executeContractCallWithSigners(safe, migration, "migrateL2WithFallbackHandler", [], [user1], false),
                     ).to.be.revertedWith("GS013");
                 });
 
@@ -442,16 +301,7 @@ describe("SafeMigration Library", () => {
                     // The emit matcher checks the address, which is the Safe as delegatecall is used
                     const migrationSafe = migration.attach(safeAddress);
 
-                    await expect(
-                        executeContractCallWithSigners(
-                            safeL2,
-                            migration,
-                            "migrateL2WithFallbackHandler",
-                            [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
-                    )
+                    await expect(executeContractCallWithSigners(safeL2, migration, "migrateL2WithFallbackHandler", [], [user1], true))
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_L2_ADDRESS)
                         .and.to.emit(safeL2, "ChangedFallbackHandler")
@@ -478,16 +328,7 @@ describe("SafeMigration Library", () => {
                     const nonceBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, 5);
                     const guardBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT);
 
-                    expect(
-                        await executeContractCallWithSigners(
-                            safeL2,
-                            migration,
-                            "migrateL2WithFallbackHandler",
-                            [SAFE_SINGLETON_L2_ADDRESS, COMPATIBILITY_FALLBACK_HANDLER],
-                            [user1],
-                            true,
-                        ),
-                    );
+                    expect(await executeContractCallWithSigners(safeL2, migration, "migrateL2WithFallbackHandler", [], [user1], true));
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);

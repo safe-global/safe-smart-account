@@ -20,12 +20,18 @@ contract SafeMigration is SafeStorage {
      * @notice Address of this contract
      */
     address public immutable MIGRATION_SINGLETON;
-    // codehash of the Safe singleton implementation
-    bytes32 public immutable SAFE_SINGLETON_CODEHASH;
-    // codehash of the Safe singleton (L2) implementation
-    bytes32 public immutable SAFE_L2_SINGLETON_CODEHASH;
-    // codehash of the fallbackhandler
-    bytes32 public immutable SAFE_FALLBACK_HANDLER_CODEHASH;
+    /**
+     * @notice Address of the Safe singleton implementation
+     */
+    address public immutable SAFE_SINGLETON;
+    /**
+     * @notice Address of the Safe singleton (L2) implementation
+     */
+    address public immutable SAFE_L2_SINGLETON;
+    /**
+     * @notice Addresss of the fallbackhandler
+     */
+    address public immutable SAFE_FALLBACK_HANDLER;
 
     /**
      * @notice Event indicating a change of master copy address.
@@ -46,6 +52,7 @@ contract SafeMigration is SafeStorage {
      * @notice Constructor
      * @param safeSingleton Address of the Safe singleton implementation
      * @param safeL2Singleton Address of the SafeL2 singleton implementation
+     * @param fallbackHandler Address of the fallback handler implmentation
      */
     constructor(address safeSingleton, address safeL2Singleton, address fallbackHandler) {
         MIGRATION_SINGLETON = address(this);
@@ -54,52 +61,44 @@ contract SafeMigration is SafeStorage {
         require(isContract(safeL2Singleton), "Safe Singleton (L2) is not deployed");
         require(isContract(fallbackHandler), "fallback handler is not deployed");
 
-        SAFE_SINGLETON_CODEHASH = getCodehash(safeSingleton);
-        SAFE_L2_SINGLETON_CODEHASH = getCodehash(safeL2Singleton);
-        SAFE_FALLBACK_HANDLER_CODEHASH = getCodehash(fallbackHandler);
+        SAFE_SINGLETON = safeSingleton;
+        SAFE_L2_SINGLETON = safeL2Singleton;
+        SAFE_FALLBACK_HANDLER = fallbackHandler;
     }
 
     /**
      * @notice Migrate the Safe contract to a new Safe singleton implementation.
-     *         Checks whether the given target singleton address codehash matches the expected Safe/SafeL2 singleton codehash.
-     * @param target Address of the new Safe singleton implementation.
      */
-    function migrateSingleton(address target) public onlyDelegateCall {
-        require(getCodehash(target) == SAFE_SINGLETON_CODEHASH, "Invalid Safe singleton");
-        singleton = target;
-        emit ChangedMasterCopy(target);
+    function migrateSingleton() public onlyDelegateCall {
+        singleton = SAFE_SINGLETON;
+        emit ChangedMasterCopy(SAFE_SINGLETON);
     }
 
     /**
      * @notice Migrate to Safe Singleton and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateWithFallbackHandler(address target, address fallbackHandler) public onlyDelegateCall {
-        migrateSingleton(target);
-        require(getCodehash(fallbackHandler) == SAFE_FALLBACK_HANDLER_CODEHASH, "Invalid fallbackhandler");
-        ISafe(address(this)).setFallbackHandler(fallbackHandler);
+    function migrateWithFallbackHandler() public onlyDelegateCall {
+        migrateSingleton();
+        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
      * @notice Migrate the Safe contract to a new Safe singleton implementation.
      *         Checks whether the given target singleton address codehash matches the expected Safe/SafeL2 singleton codehash.
-     * @param target Address of the new Safe singleton implementation.
      */
-    function migrateL2Singleton(address target) public onlyDelegateCall {
-        require(getCodehash(target) == SAFE_L2_SINGLETON_CODEHASH, "Invalid SafeL2 singleton");
-        singleton = target;
-        emit ChangedMasterCopy(target);
+    function migrateL2Singleton() public onlyDelegateCall {
+        singleton = SAFE_L2_SINGLETON;
+        emit ChangedMasterCopy(SAFE_L2_SINGLETON);
     }
 
     /**
      * @notice Migrate to Safe Singleton (L2) and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateL2WithFallbackHandler(address target, address fallbackHandler) public onlyDelegateCall {
-        migrateL2Singleton(target);
-        require(getCodehash(fallbackHandler) == SAFE_FALLBACK_HANDLER_CODEHASH, "Invalid fallbackhandler");
-
-        ISafe(address(this)).setFallbackHandler(fallbackHandler);
+    function migrateL2WithFallbackHandler() public onlyDelegateCall {
+        migrateL2Singleton();
+        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
