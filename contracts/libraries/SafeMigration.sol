@@ -8,7 +8,7 @@ import {ISafe} from "../interfaces/ISafe.sol";
 /**
  * @title Migration Contract for Safe Upgrade
  * @notice This is a generic contract that facilitates the migration of a Safe and SafeL2 contracts.
- *         The supported target Safe version codehash is immutable and set in the constructor during the deployment of the contract.
+ *         The supported target Safe version is immutable and set in the constructor during the deployment of the contract.
  *         This contract also supports migration with fallback handler update.
  * @author @safe-global/safe-protocol
  * @dev IMPORTANT: The library is intended to be used with the Safe standard proxy that stores the singleton address
@@ -21,11 +21,11 @@ contract SafeMigration is SafeStorage {
      */
     address public immutable MIGRATION_SINGLETON;
     /**
-     * @notice Address of the Safe singleton implementation
+     * @notice Address of the Safe Singleton implementation
      */
     address public immutable SAFE_SINGLETON;
     /**
-     * @notice Address of the Safe singleton (L2) implementation
+     * @notice Address of the Safe Singleton (L2) implementation
      */
     address public immutable SAFE_L2_SINGLETON;
     /**
@@ -50,8 +50,8 @@ contract SafeMigration is SafeStorage {
 
     /**
      * @notice Constructor
-     * @param safeSingleton Address of the Safe singleton implementation
-     * @param safeL2Singleton Address of the SafeL2 singleton implementation
+     * @param safeSingleton Address of the Safe Singleton implementation
+     * @param safeL2Singleton Address of the SafeL2 Singleton implementation
      * @param fallbackHandler Address of the fallback handler implmentation
      */
     constructor(address safeSingleton, address safeL2Singleton, address fallbackHandler) {
@@ -67,7 +67,7 @@ contract SafeMigration is SafeStorage {
     }
 
     /**
-     * @notice Migrate the Safe contract to a new Safe singleton implementation.
+     * @notice Migrate the Safe contract to a new Safe Singleton implementation.
      */
     function migrateSingleton() public onlyDelegateCall {
         singleton = SAFE_SINGLETON;
@@ -84,8 +84,7 @@ contract SafeMigration is SafeStorage {
     }
 
     /**
-     * @notice Migrate the Safe contract to a new Safe singleton implementation.
-     *         Checks whether the given target singleton address codehash matches the expected Safe/SafeL2 singleton codehash.
+     * @notice Migrate the Safe contract to a new Safe Singleton (L2) implementation.
      */
     function migrateL2Singleton() public onlyDelegateCall {
         singleton = SAFE_L2_SINGLETON;
@@ -120,18 +119,5 @@ contract SafeMigration is SafeStorage {
 
         // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
         return size > 0;
-    }
-
-    /**
-     * @notice Get the codehash of an account.
-     * @param account The address of the account to get the codehash of
-     */
-    function getCodeHash(address account) internal view returns (bytes32 codeHash) {
-        /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
-        assembly {
-            codeHash := extcodehash(account)
-        }
-        /* solhint-enable no-inline-assembly */
     }
 }
