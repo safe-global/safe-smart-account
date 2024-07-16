@@ -7,10 +7,13 @@ import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
- * @notice This is a generic contract that facilitates the migration of a Safe contract.
+ * @notice This is a generic contract that facilitates the migration of a Safe and SafeL2 contracts.
  *         The supported target Safe version codehash is immutable and set in the constructor during the deployment of the contract.
- *         This contract supports both Safe and SafeL2 contracts.
+ *         This contract also supports migration with fallback handler update.
  * @author @safe-global/safe-protocol
+ * @dev IMPORTANT: The library is intended to be used with the Safe standard proxy that stores the singleton address
+ *      at the storage slot 0. Use at your own risk with custom proxy implementations. The contract will allow invocations
+ *      to the migration functions only via delegatecall.
  */
 contract SafeMigration is SafeStorage {
     // Address of this contract
