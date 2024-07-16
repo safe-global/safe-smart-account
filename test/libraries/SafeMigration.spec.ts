@@ -39,29 +39,34 @@ describe("SafeMigration Library", () => {
         };
     });
 
-    describe("migrateSingleton", async () => {
-        it("migrates the singleton", async () => {
-            const {
-                safe130l2,
-                migration,
-                signers: [user1],
-            } = await setupTests();
-            const safeAddress = await safe130l2.getAddress();
-            // The emit matcher checks the address, which is the Safe as delegatecall is used
-            const migrationSafe = migration.attach(safeAddress);
+    describe("constructor", () => {
+        it("reverts when Safe singleton is not a contract", async () => {
+            await expect(
+                (await safeMigrationContract()).deploy(SAFE_SINGLETON_150_ADDRESS, SAFE_SINGLETON_150_L2_ADDRESS),
+            ).to.be.revertedWith("Safe Singleton is not deployed");
+        });
+        it("reverts when SafeL2 singleton is not a contract", async () => {
+            // Set runtime code just for Safe Singleton
+            await hre.network.provider.send("hardhat_setCode", [SAFE_SINGLETON_150_ADDRESS, safeRuntimeBytecode.safe150]);
 
             await expect(
-                executeContractCallWithSigners(safe130l2, migration, "migrateSingleton", [SAFE_SINGLETON_150_ADDRESS], [user1], true),
-            )
-                .to.emit(migrationSafe, "ChangedMasterCopy")
-                .withArgs(SAFE_SINGLETON_150_ADDRESS);
-
-            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
-            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_ADDRESS);
+                (await safeMigrationContract()).deploy(SAFE_SINGLETON_150_ADDRESS, SAFE_SINGLETON_150_L2_ADDRESS),
+            ).to.be.revertedWith("Safe Singleton (L2) is not deployed");
         });
     });
 
-    describe("migrateL2Singleton", async () => {
+    describe("migrateSingleton", () => {
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe130,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(safe130, migration, "migrateSingleton", [SAFE_SINGLETON_150_L2_ADDRESS], [user1], true),
+            ).to.be.revertedWith("GS013");
+        });
+
         it("migrates the singleton", async () => {
             const {
                 safe130,
@@ -73,7 +78,40 @@ describe("SafeMigration Library", () => {
             const migrationSafe = migration.attach(safeAddress);
 
             await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateL2Singleton", [SAFE_SINGLETON_150_L2_ADDRESS], [user1], true),
+                executeContractCallWithSigners(safe130, migration, "migrateSingleton", [SAFE_SINGLETON_150_ADDRESS], [user1], true),
+            )
+                .to.emit(migrationSafe, "ChangedMasterCopy")
+                .withArgs(SAFE_SINGLETON_150_ADDRESS);
+
+            const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
+            expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_150_ADDRESS);
+        });
+    });
+
+    describe("migrateL2Singleton", () => {
+        it("reverts on target singleton codehash mismatch", async () => {
+            const {
+                safe130,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            await expect(
+                executeContractCallWithSigners(safe130, migration, "migrateL2Singleton", [SAFE_SINGLETON_150_ADDRESS], [user1], true),
+            ).to.be.revertedWith("GS013");
+        });
+
+        it("migrates the singleton", async () => {
+            const {
+                safe130l2,
+                migration,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe130l2.getAddress();
+            // The emit matcher checks the address, which is the Safe as delegatecall is used
+            const migrationSafe = migration.attach(safeAddress);
+
+            await expect(
+                executeContractCallWithSigners(safe130l2, migration, "migrateL2Singleton", [SAFE_SINGLETON_150_L2_ADDRESS], [user1], true),
             )
                 .to.emit(migrationSafe, "ChangedMasterCopy")
                 .withArgs(SAFE_SINGLETON_150_L2_ADDRESS);
