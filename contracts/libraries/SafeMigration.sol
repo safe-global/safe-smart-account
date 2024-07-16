@@ -57,9 +57,9 @@ contract SafeMigration is SafeStorage {
     constructor(address safeSingleton, address safeL2Singleton, address fallbackHandler) {
         MIGRATION_SINGLETON = address(this);
 
-        require(isContract(safeSingleton), "Safe Singleton is not deployed");
-        require(isContract(safeL2Singleton), "Safe Singleton (L2) is not deployed");
-        require(isContract(fallbackHandler), "fallback handler is not deployed");
+        require(hasCode(safeSingleton), "Safe Singleton is not deployed");
+        require(hasCode(safeL2Singleton), "Safe Singleton (L2) is not deployed");
+        require(hasCode(fallbackHandler), "fallback handler is not deployed");
 
         SAFE_SINGLETON = safeSingleton;
         SAFE_L2_SINGLETON = safeL2Singleton;
