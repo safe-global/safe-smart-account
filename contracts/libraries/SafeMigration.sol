@@ -16,7 +16,9 @@ import {ISafe} from "../interfaces/ISafe.sol";
  *      to the migration functions only via delegatecall.
  */
 contract SafeMigration is SafeStorage {
-    // Address of this contract
+    /**
+     * @notice Address of this contract
+     */
     address public immutable MIGRATION_SINGLETON;
     // codehash of the Safe singleton implementation
     bytes32 public immutable SAFE_SINGLETON_CODEHASH;
