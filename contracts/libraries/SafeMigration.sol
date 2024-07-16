@@ -81,7 +81,7 @@ contract SafeMigration is SafeStorage {
      * @notice Get the codehash of an account.
      * @param account The address of the account to get the codehash of
      */
-    function getCodehash(address account) private returns (bytes32 codeHash) {
+    function getCodehash(address account) internal view returns (bytes32 codeHash) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
