@@ -34,6 +34,15 @@ const migrationPaths = [
             fallbackHandlerRuntimeBytecode: safeRuntimeBytecode.safe141fallbackHandler,
         },
     },
+    {
+        testSuiteName: "1.4.0 to 1.5.0",
+        from: { safeDeploymentData: deploymentData.safe141, safeL2DeploymentData: deploymentData.safe141l2 },
+        to: {
+            safeRuntimeBytecode: safeRuntimeBytecode.safe150,
+            safeL2RuntimeBytecode: safeRuntimeBytecode.safe150l2,
+            fallbackHandlerRuntimeBytecode: safeRuntimeBytecode.safe150CompatibilityFallbackHandler,
+        },
+    },
 ];
 
 describe("SafeMigration Library", () => {
