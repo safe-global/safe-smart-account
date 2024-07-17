@@ -100,12 +100,11 @@ contract SafeMigration is SafeStorage {
     }
 
     /**
-     * @notice Checks whether an Ethereum address corresponds to a contract or an externally owned account (EOA).
-     * @param account The Ethereum address to be checked.
-     * @return A boolean value indicating whether the address is associated with a contract (true) or an EOA (false).
-     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address is a contract.
-     * It may return incorrect results in some edge cases (see documentation for details).
-     * Developers should use caution when relying on the results of this function for critical decision-making.
+     * @notice Checks whether an account has code.
+     * @param account The address of the account to be checked.
+     * @return A boolean value indicating whether the address has code (true) or not (false).
+     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address has code.
+     * It does not reliably determine whether or not an address is a smart contract or an EOA.
      */
     function hasCode(address account) internal view returns (bool) {
         uint256 size;
