@@ -5,11 +5,11 @@ import deploymentData from "../json/safeDeployment.json";
 import safeRuntimeBytecode from "../json/safeRuntimeBytecode.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
-const SAFE_SINGLETON_ADDRESS = "0x477C3fb2D564349E2F95a2EF1091bF9657b26145";
+const SAFE_SINGLETON_ADDRESS = ethers.getAddress(ethers.hexlify(ethers.randomBytes(20)));
 
-const SAFE_SINGLETON_L2_ADDRESS = "0x551A2F9a71bF88cDBef3CBe60E95722f38eE0eAA";
+const SAFE_SINGLETON_L2_ADDRESS = ethers.getAddress(ethers.hexlify(ethers.randomBytes(20)));
 
-const COMPATIBILITY_FALLBACK_HANDLER = "0x4c95c836D31d329d80d696cb679f3dEa028Ad4e5";
+const COMPATIBILITY_FALLBACK_HANDLER = ethers.getAddress(ethers.hexlify(ethers.randomBytes(20)));
 
 const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
 
@@ -17,12 +17,12 @@ const GUARD_STORAGE_SLOT = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbd
 
 const migrationPaths = [
     {
-        testSuiteName: "1.3.0 to 1.5.0",
+        testSuiteName: "1.3.0 to latest (1.5.0)",
         from: { safeDeploymentData: deploymentData.safe130, safeL2DeploymentData: deploymentData.safe130l2 },
         to: {
-            safeRuntimeBytecode: safeRuntimeBytecode.safe150,
-            safeL2RuntimeBytecode: safeRuntimeBytecode.safe150l2,
-            fallbackHandlerRuntimeBytecode: safeRuntimeBytecode.safe150CompatibilityFallbackHandler,
+            safeRuntimeBytecode: hre.artifacts.readArtifactSync("Safe").deployedBytecode,
+            safeL2RuntimeBytecode: hre.artifacts.readArtifactSync("SafeL2").deployedBytecode,
+            fallbackHandlerRuntimeBytecode: hre.artifacts.readArtifactSync("CompatibilityFallbackHandler").deployedBytecode,
         },
     },
     {
@@ -35,12 +35,12 @@ const migrationPaths = [
         },
     },
     {
-        testSuiteName: "1.4.1 to 1.5.0",
+        testSuiteName: "1.4.1 to latest (1.5.0)",
         from: { safeDeploymentData: deploymentData.safe141, safeL2DeploymentData: deploymentData.safe141l2 },
         to: {
-            safeRuntimeBytecode: safeRuntimeBytecode.safe150,
-            safeL2RuntimeBytecode: safeRuntimeBytecode.safe150l2,
-            fallbackHandlerRuntimeBytecode: safeRuntimeBytecode.safe150CompatibilityFallbackHandler,
+            safeRuntimeBytecode: hre.artifacts.readArtifactSync("Safe").deployedBytecode,
+            safeL2RuntimeBytecode: hre.artifacts.readArtifactSync("SafeL2").deployedBytecode,
+            fallbackHandlerRuntimeBytecode: hre.artifacts.readArtifactSync("CompatibilityFallbackHandler").deployedBytecode,
         },
     },
 ];

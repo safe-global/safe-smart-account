@@ -6,7 +6,7 @@ import {ISafe} from "../interfaces/ISafe.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
- * @notice This is a generic contract that facilitates the migration of a Safe and SafeL2 contracts.
+ * @notice This is a generic contract that facilitates Safe and SafeL2 proxy contracts to migrate their singleton address.
  *         The supported target Safe version is immutable and set in the constructor during the deployment of the contract.
  *         This contract also supports migration with fallback handler update.
  * @author @safe-global/safe-protocol
