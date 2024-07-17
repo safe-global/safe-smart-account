@@ -160,9 +160,7 @@ describe("SafeMigration Library", () => {
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(
-                        BigInt(nonceBeforeMigration) + 1n,
-                    );
+                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(BigInt(nonceBeforeMigration) + 1n);
                     expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).to.be.eq(
                         fallbackHandlerBeforeMigration,
@@ -223,9 +221,7 @@ describe("SafeMigration Library", () => {
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(
-                        ethers.toBigInt(nonceBeforeMigration) + ethers.toBigInt(1),
-                    );
+                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(BigInt(nonceBeforeMigration) + 1n);
                     expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
                 });
             });
@@ -278,9 +274,7 @@ describe("SafeMigration Library", () => {
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(
-                        ethers.toBigInt(nonceBeforeMigration) + ethers.toBigInt(1),
-                    );
+                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(BigInt(nonceBeforeMigration) + 1n);
                     expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).to.be.eq(
                         fallbackHandlerBeforeMigration,
@@ -341,9 +335,7 @@ describe("SafeMigration Library", () => {
 
                     expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
                     expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(
-                        ethers.toBigInt(nonceBeforeMigration) + ethers.toBigInt(1),
-                    );
+                    expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(BigInt(nonceBeforeMigration) + 1n);
                     expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
                 });
             });
