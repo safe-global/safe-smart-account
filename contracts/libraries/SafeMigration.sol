@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-/* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
