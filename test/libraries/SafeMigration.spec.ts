@@ -35,7 +35,7 @@ const migrationPaths = [
         },
     },
     {
-        testSuiteName: "1.4.0 to 1.5.0",
+        testSuiteName: "1.4.1 to 1.5.0",
         from: { safeDeploymentData: deploymentData.safe141, safeL2DeploymentData: deploymentData.safe141l2 },
         to: {
             safeRuntimeBytecode: safeRuntimeBytecode.safe150,
