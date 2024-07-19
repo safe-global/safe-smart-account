@@ -5,6 +5,7 @@ import solc from "solc";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
+import { Safe, SafeL2, SafeMigration } from "../../typechain-types";
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
@@ -72,6 +73,12 @@ export const getCreateCall = async () => {
 
 export const migrationContract = async () => {
     return await hre.ethers.getContractFactory("Migration");
+};
+
+export const safeMigrationContract = async (): Promise<SafeMigration> => {
+    const SafeMigrationDeployment = await deployments.get("SafeMigration");
+    const SafeMigration = await hre.ethers.getContractAt("SafeMigration", SafeMigrationDeployment.address);
+    return SafeMigration;
 };
 
 export const getMock = async () => {
