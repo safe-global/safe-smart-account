@@ -137,6 +137,13 @@ const userConfig: HardhatUserConfig = {
             zksync: true,
             verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
         },
+        zkSyncSepolia: {
+            ...sharedNetworkConfig,
+            url: "https://sepolia.era.zksync.dev",
+            ethNetwork: "sepolia",
+            zksync: true,
+            verifyURL: 'https://explorer.sepolia.era.zksync.dev/contract_verification'
+        },
         zkSyncLocal: {
             chainId: 270,
             accounts: LOCAL_NODE_RICH_WALLETS.map((account) => account.privateKey),
