@@ -51,7 +51,37 @@ describe("SafeMigration Library", () => {
     let SAFE_SINGLETON_ADDRESS: string | null | undefined;
     let SAFE_SINGLETON_L2_ADDRESS: string | null | undefined;
     let COMPATIBILITY_FALLBACK_HANDLER: string | null | undefined;
-    let migration: SafeMigration;
+
+    describe("constructor", () => {
+        const setupTests = deployments.createFixture(async () => {
+            return {
+                singletonAddress: await getSafeSingletonContract(),
+                singletonL2Address: await getSafeL2SingletonContract(),
+                compatibilityFallbackHandlerAddress: await getCompatFallbackHandler(),
+            };
+        });
+
+        it("reverts when Safe singleton is not a contract", async () => {
+            const { singletonL2Address, compatibilityFallbackHandlerAddress } = await setupTests();
+            await expect(
+                hre.ethers.deployContract("SafeMigration", [ethers.ZeroAddress, singletonL2Address, compatibilityFallbackHandlerAddress]),
+            ).to.be.revertedWith("Safe Singleton is not deployed");
+        });
+
+        it("reverts when SafeL2 singleton is not a contract", async () => {
+            const { singletonAddress, compatibilityFallbackHandlerAddress } = await setupTests();
+            await expect(
+                hre.ethers.deployContract("SafeMigration", [singletonAddress, ethers.ZeroAddress, compatibilityFallbackHandlerAddress]),
+            ).to.be.revertedWith("Safe Singleton (L2) is not deployed");
+        });
+
+        it("reverts when fallback handler is not a contract", async () => {
+            const { singletonAddress, singletonL2Address } = await setupTests();
+            await expect(
+                hre.ethers.deployContract("SafeMigration", [singletonAddress, singletonL2Address, ethers.ZeroAddress]),
+            ).to.be.revertedWith("fallback handler is not deployed");
+        });
+    });
 
     migrationPaths.forEach(({ testSuiteName, from, to, latest }) => {
         describe(testSuiteName, () => {
@@ -59,6 +89,7 @@ describe("SafeMigration Library", () => {
                 await deployments.fixture();
                 const signers = await ethers.getSigners();
                 const [user1] = signers;
+                let migration: SafeMigration;
 
                 if (latest) {
                     migration = await safeMigrationContract();
@@ -89,7 +120,6 @@ describe("SafeMigration Library", () => {
                 }
                 const singleton = await getSafeSingletonAt(singletonAddress);
                 const singletonL2 = await getSafeSingletonAt(singletonL2Address);
-                console.log("ddssd");
 
                 return {
                     signers,
@@ -97,40 +127,6 @@ describe("SafeMigration Library", () => {
                     safeL2: await getSafeWithSingleton(singletonL2, [user1.address]),
                     migration,
                 };
-            });
-
-            describe("constructor", () => {
-                it("reverts when Safe singleton is not a contract", async () => {
-                    await setupTests();
-
-                    await expect(
-                        hre.ethers.deployContract("SafeMigration", [
-                            ethers.ZeroAddress,
-                            SAFE_SINGLETON_L2_ADDRESS,
-                            COMPATIBILITY_FALLBACK_HANDLER,
-                        ]),
-                    ).to.be.revertedWith("Safe Singleton is not deployed");
-                });
-
-                it("reverts when SafeL2 singleton is not a contract", async () => {
-                    await setupTests();
-
-                    await expect(
-                        hre.ethers.deployContract("SafeMigration", [
-                            SAFE_SINGLETON_ADDRESS,
-                            ethers.ZeroAddress,
-                            COMPATIBILITY_FALLBACK_HANDLER,
-                        ]),
-                    ).to.be.revertedWith("Safe Singleton (L2) is not deployed");
-                });
-
-                it("reverts when fallback handler is not a contract", async () => {
-                    await setupTests();
-
-                    await expect(
-                        hre.ethers.deployContract("SafeMigration", [SAFE_SINGLETON_ADDRESS, SAFE_SINGLETON_L2_ADDRESS, ethers.ZeroAddress]),
-                    ).to.be.revertedWith("fallback handler is not deployed");
-                });
             });
 
             describe("migrateSingleton", () => {
