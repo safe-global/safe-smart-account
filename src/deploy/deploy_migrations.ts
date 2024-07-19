@@ -26,5 +26,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 deploy.tags = ["not-l2-to-l2-migration", "migration"];
-deploy.dependencies = ["singleton", "l2"];
+deploy.dependencies = ["singleton", "l2", "handlers"];
 export default deploy;
