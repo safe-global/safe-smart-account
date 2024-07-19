@@ -51,7 +51,7 @@ contract SafeMigration is SafeStorage {
      * @notice Constructor
      * @param safeSingleton Address of the Safe Singleton implementation
      * @param safeL2Singleton Address of the SafeL2 Singleton implementation
-     * @param fallbackHandler Address of the standard fallback handler implementation
+     * @param fallbackHandler Address of the fallback handler implementation
      */
     constructor(address safeSingleton, address safeL2Singleton, address fallbackHandler) {
         MIGRATION_SINGLETON = address(this);
