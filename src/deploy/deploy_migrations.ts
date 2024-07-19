@@ -5,9 +5,10 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
     const { deploy } = deployments;
+
     const Safe = await deployments.get("Safe");
-    const SafeL2 = await deployments.get("Safe");
-    const CompatibilityFallbackHandler = await deployments.get("Safe");
+    const SafeL2 = await deployments.get("SafeL2");
+    const CompatibilityFallbackHandler = await deployments.get("CompatibilityFallbackHandler");
 
     await deploy("SafeToL2Migration", {
         from: deployer,
