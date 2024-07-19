@@ -33,7 +33,7 @@ contract SafeMigration is SafeStorage {
     address public immutable SAFE_FALLBACK_HANDLER;
 
     /**
-     * @notice Event indicating a change of master copy address.
+     * @notice Event indicating a change of a singleton address. Named master copy here for legacy reasons.
      * @param singleton New master copy address
      */
     event ChangedMasterCopy(address singleton);
