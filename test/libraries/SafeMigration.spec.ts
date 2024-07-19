@@ -27,7 +27,7 @@ const migrationPaths = [
     {
         testSuiteName: "1.3.0 to 1.4.1",
         from: { safeDeploymentData: deploymentData.safe130, safeL2DeploymentData: deploymentData.safe130l2 },
-        // `to` is used when the target contracts are not latest. So, we need to provide the runtime bytecode
+        // `to` is used when the target contracts are not latest. So, we need to provide the bytecode
         // of the old version of the contracts
         to: {
             safeDeploymentData: deploymentData.safe141,
