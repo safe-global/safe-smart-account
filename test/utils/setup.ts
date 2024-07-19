@@ -112,7 +112,9 @@ export const migrationContract = async () => {
 };
 
 export const safeMigrationContract = async () => {
-    return await hre.ethers.getContractFactory("SafeMigration");
+    const SafeMigrationDeployment = await deployments.get("SafeMigration");
+    const SafeMigration = await hre.ethers.getContractAt("SafeMigration", SafeMigrationDeployment.address);
+    return SafeMigration;
 };
 
 export const getMock = async () => {
