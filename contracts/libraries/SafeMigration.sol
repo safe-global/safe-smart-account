@@ -115,7 +115,6 @@ contract SafeMigration is SafeStorage {
         }
         /* solhint-enable no-inline-assembly */
 
-        // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
         return size > 0;
     }
 }
