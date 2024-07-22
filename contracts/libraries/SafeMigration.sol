@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {ISafe} from "../interfaces/ISafe.sol";
+import {Safe} from "../Safe.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade
@@ -79,7 +79,7 @@ contract SafeMigration is SafeStorage {
      */
     function migrateWithFallbackHandler() public onlyDelegateCall {
         migrateSingleton();
-        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        Safe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
@@ -96,7 +96,7 @@ contract SafeMigration is SafeStorage {
      */
     function migrateL2WithFallbackHandler() public onlyDelegateCall {
         migrateL2Singleton();
-        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        Safe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
