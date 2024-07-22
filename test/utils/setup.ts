@@ -7,6 +7,16 @@ import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2, SafeMigration } from "../../typechain-types";
 
+type safeWithFullConfig = {
+    readonly owners: string[];
+    threshold?: number;
+    to?: string;
+    data?: string;
+    fallbackHandler?: string;
+    logGasUsage?: boolean;
+    saltNumber?: string;
+};
+
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
 };
@@ -132,46 +142,30 @@ export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString(
     return Safe.attach(template) as Safe | SafeL2;
 };
 
-export const getSafeWithOwners = async (
-    owners: string[],
-    threshold: number = owners.length,
-    to: string = AddressZero,
-    data: string = "0x",
-    fallbackHandler: string = AddressZero,
-    logGasUsage: boolean = false,
-    saltNumber: string = getRandomIntAsString(),
-) => {
-    const template = await getSafeTemplate(saltNumber);
+export const getSafeWithOwners = async (safe: safeWithFullConfig) => {
+    if (typeof safe.threshold === "undefined") safe.threshold = safe.owners.length;
+    if (typeof safe.to === "undefined") safe.to = AddressZero;
+    if (typeof safe.data === "undefined") safe.data = "0x";
+    if (typeof safe.fallbackHandler === "undefined") safe.fallbackHandler = AddressZero;
+    if (typeof safe.logGasUsage === "undefined") safe.logGasUsage = false;
+    if (typeof safe.saltNumber === "undefined") safe.saltNumber = getRandomIntAsString();
+
+    const template = await getSafeTemplate(safe.saltNumber);
     await logGas(
-        `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
-        template.setup(owners, threshold, to, data, fallbackHandler, AddressZero, 0, AddressZero),
-        !logGasUsage,
+        `Setup Safe with ${safe.owners.length} owner(s)${safe.fallbackHandler && safe.fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
+        template.setup(safe.owners, safe.threshold, safe.to, safe.data, safe.fallbackHandler, AddressZero, 0, AddressZero),
+        !safe.logGasUsage,
     );
     return template;
 };
 
-export const getSafeWithSingleton = async (
-    singleton: Safe | SafeL2,
-    owners: string[],
-    threshold?: number,
-    fallbackHandler?: string,
-    saltNumber: string = getRandomIntAsString(),
-) => {
+export const getSafeWithSingleton = async (singleton: Safe | SafeL2, owners: string[], saltNumber: string = getRandomIntAsString()) => {
     const factory = await getFactory();
     const singletonAddress = await singleton.getAddress();
     const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
     await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
     const safeProxy = singleton.attach(template) as Safe | SafeL2;
-    await safeProxy.setup(
-        owners,
-        threshold || owners.length,
-        AddressZero,
-        "0x",
-        fallbackHandler || AddressZero,
-        AddressZero,
-        0,
-        AddressZero,
-    );
+    await safeProxy.setup(owners, owners.length, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
 
     return safeProxy;
 };

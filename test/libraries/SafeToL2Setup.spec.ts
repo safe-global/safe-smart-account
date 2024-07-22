@@ -121,7 +121,7 @@ describe("SafeToL2Setup", () => {
                     safeToL2SetupLib,
                     signers: [user1],
                 } = await setupTests();
-                const safe = await getSafeWithOwners([user1.address]);
+                const safe = await getSafeWithOwners({ owners: [user1.address] });
                 const safeToL2SetupLibAddress = await safeToL2SetupLib.getAddress();
 
                 await expect(

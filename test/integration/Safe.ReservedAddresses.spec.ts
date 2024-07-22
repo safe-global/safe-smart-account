@@ -8,7 +8,7 @@ describe("Safe - Reserved Addresses", () => {
         await deployments.fixture();
         const [user1] = await ethers.getSigners();
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
         };
     });
 

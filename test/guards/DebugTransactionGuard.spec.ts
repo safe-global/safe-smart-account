@@ -10,7 +10,7 @@ describe("DebugTransactionGuard", () => {
         await deployments.fixture();
         const signers = await ethers.getSigners();
         const [user1] = signers;
-        const safe = await getSafeWithOwners([user1.address]);
+        const safe = await getSafeWithOwners({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("DebugTransactionGuard");
         const guard = await guardFactory.deploy();
         const guardAddress = await guard.getAddress();
