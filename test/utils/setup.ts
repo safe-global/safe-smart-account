@@ -29,9 +29,15 @@ export const getSafeSingleton = async () => {
 };
 
 export const getSafeSingletonContract = async () => {
-    const safeSingleton = await hre.ethers.getContractFactory(safeContractUnderTest());
+    const safeSingletonDeployment = await deployments.get("Safe");
+    const Safe = await hre.ethers.getContractAt("Safe", safeSingletonDeployment.address);
+    return Safe;
+};
 
-    return safeSingleton;
+export const getSafeL2SingletonContract = async () => {
+    const safeSingletonDeployment = await deployments.get("SafeL2");
+    const Safe = await hre.ethers.getContractAt("SafeL2", safeSingletonDeployment.address);
+    return Safe;
 };
 
 export const getFactoryContract = async () => {
@@ -74,9 +80,20 @@ export const migrationContract = async () => {
     return await hre.ethers.getContractFactory("Migration");
 };
 
+export const safeMigrationContract = async () => {
+    const SafeMigrationDeployment = await deployments.get("SafeMigration");
+    const SafeMigration = await hre.ethers.getContractAt("SafeMigration", SafeMigrationDeployment.address);
+    return SafeMigration;
+};
+
 export const getMock = async () => {
     const Mock = await hre.ethers.getContractFactory("MockContract");
     return await Mock.deploy();
+};
+
+export const getSafeSingletonAt = async (address: string) => {
+    const safe = await hre.ethers.getContractAt(safeContractUnderTest(), address);
+    return safe;
 };
 
 export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString()) => {
@@ -102,6 +119,32 @@ export const getSafeWithOwners = async (
         !logGasUsage,
     );
     return template;
+};
+
+export const getSafeWithSingleton = async (
+    singleton: Contract,
+    owners: string[],
+    threshold?: number,
+    fallbackHandler?: string,
+    saltNumber: string = getRandomIntAsString(),
+) => {
+    const factory = await getFactory();
+    const singletonAddress = singleton.address;
+    const template = await factory.callStatic.createProxyWithNonce(singletonAddress, "0x", saltNumber);
+    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
+    const safeProxy = singleton.attach(template);
+    await safeProxy.setup(
+        owners,
+        threshold || owners.length,
+        AddressZero,
+        "0x",
+        fallbackHandler || AddressZero,
+        AddressZero,
+        0,
+        AddressZero,
+    );
+
+    return safeProxy;
 };
 
 export const getTokenCallbackHandler = async () => {
