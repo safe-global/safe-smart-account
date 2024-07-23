@@ -26,10 +26,10 @@ const generateTarget = async (owners: number, threshold: number, guardAddress: s
     const signers = (await ethers.getSigners()).slice(0, owners);
     const safe = await getSafeWithOwners({
         owners: signers.map((owner) => owner.address),
-        threshold: threshold,
+        threshold,
         fallbackHandler: fallbackHandlerAddress,
-        logGasUsage: logGasUsage,
-        saltNumber: saltNumber,
+        logGasUsage,
+        saltNumber,
     });
     await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], signers);
     return safe;

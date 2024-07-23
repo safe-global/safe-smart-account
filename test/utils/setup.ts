@@ -7,15 +7,20 @@ import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2, SafeMigration } from "../../typechain-types";
 
-type safeWithFullConfig = {
+type SafeWithSetupConfig = {
     readonly owners: string[];
-    threshold?: number;
-    to?: string;
-    data?: string;
-    fallbackHandler?: string;
-    logGasUsage?: boolean;
-    saltNumber?: string;
+    readonly threshold?: number;
+    readonly to?: string;
+    readonly data?: string;
+    readonly fallbackHandler?: string;
+    readonly saltNumber?: string;
 };
+
+type LogGas = {
+    readonly logGasUsage?: boolean;
+};
+
+type SafeCreationWithGasLog = SafeWithSetupConfig & LogGas;
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
@@ -142,19 +147,22 @@ export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString(
     return Safe.attach(template) as Safe | SafeL2;
 };
 
-export const getSafeWithOwners = async (safe: safeWithFullConfig) => {
-    if (typeof safe.threshold === "undefined") safe.threshold = safe.owners.length;
-    if (typeof safe.to === "undefined") safe.to = AddressZero;
-    if (typeof safe.data === "undefined") safe.data = "0x";
-    if (typeof safe.fallbackHandler === "undefined") safe.fallbackHandler = AddressZero;
-    if (typeof safe.logGasUsage === "undefined") safe.logGasUsage = false;
-    if (typeof safe.saltNumber === "undefined") safe.saltNumber = getRandomIntAsString();
+export const getSafeWithOwners = async (safe: SafeCreationWithGasLog) => {
+    const {
+        owners,
+        threshold = owners.length,
+        to = AddressZero,
+        data = "0x",
+        fallbackHandler = AddressZero,
+        logGasUsage = false,
+        saltNumber = getRandomIntAsString(),
+    } = safe;
 
-    const template = await getSafeTemplate(safe.saltNumber);
+    const template = await getSafeTemplate(saltNumber);
     await logGas(
-        `Setup Safe with ${safe.owners.length} owner(s)${safe.fallbackHandler && safe.fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
-        template.setup(safe.owners, safe.threshold, safe.to, safe.data, safe.fallbackHandler, AddressZero, 0, AddressZero),
-        !safe.logGasUsage,
+        `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
+        template.setup(owners, threshold, to, data, fallbackHandler, AddressZero, 0, AddressZero),
+        !logGasUsage,
     );
     return template;
 };
