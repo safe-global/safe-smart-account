@@ -11,7 +11,7 @@ describe("SignMessageLib", () => {
         const signers = await ethers.getSigners();
         const [user1, user2] = signers;
         return {
-            safe: await getSafeWithOwners([user1.address, user2.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address, user2.address] }),
             lib,
             signers,
         };

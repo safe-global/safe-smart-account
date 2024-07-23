@@ -26,7 +26,7 @@ describe("GuardManager", () => {
         const guardContract = await hre.ethers.getContractAt("ITransactionGuard", AddressZero);
         const guardEip165Calldata = guardContract.interface.encodeFunctionData("supportsInterface", ["0xe6d7a83a"]);
         await validGuardMock.givenCalldataReturnBool(guardEip165Calldata, true);
-        const safe = await getSafeWithOwners([user2.address]);
+        const safe = await getSafeWithOwners({ owners: [user2.address] });
         await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user2]);
 
         return {
@@ -42,7 +42,7 @@ describe("GuardManager", () => {
             const {
                 signers: [user1, user2],
             } = await setupWithTemplate();
-            const safe = await getSafeWithOwners([user1.address]);
+            const safe = await getSafeWithOwners({ owners: [user1.address] });
 
             await expect(executeContractCallWithSigners(safe, safe, "setGuard", [user2.address], [user1])).to.be.revertedWith("GS013");
         });
@@ -53,7 +53,7 @@ describe("GuardManager", () => {
                 signers: [user1],
             } = await setupWithTemplate();
             const validGuardMockAddress = await validGuardMock.getAddress();
-            const safe = await getSafeWithOwners([user1.address]);
+            const safe = await getSafeWithOwners({ owners: [user1.address] });
 
             await expect(executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user1]))
                 .to.emit(safe, "ChangedGuard")
@@ -72,7 +72,7 @@ describe("GuardManager", () => {
 
             const invocationCountBefore = await validGuardMock.invocationCount();
             const validGuardMockAddress = await validGuardMock.getAddress();
-            const safe = await getSafeWithOwners([user1.address]);
+            const safe = await getSafeWithOwners({ owners: [user1.address] });
 
             await executeContractCallWithSigners(safe, safe, "setGuard", [validGuardMockAddress], [user1]);
 

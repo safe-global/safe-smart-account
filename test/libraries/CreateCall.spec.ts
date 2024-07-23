@@ -22,7 +22,7 @@ describe("CreateCall", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             createCall: await getCreateCall(),
             testContract,
             signers,

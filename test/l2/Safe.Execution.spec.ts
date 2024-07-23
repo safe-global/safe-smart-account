@@ -23,7 +23,7 @@ describe("SafeL2", () => {
         await deployments.fixture();
         const mock = await getMock();
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             mock,
             signers,
         };

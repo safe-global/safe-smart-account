@@ -24,15 +24,13 @@ const generateTarget = async (owners: number, threshold: number, guardAddress: s
     const fallbackHandler = await getTokenCallbackHandler();
     const fallbackHandlerAddress = await fallbackHandler.getAddress();
     const signers = (await ethers.getSigners()).slice(0, owners);
-    const safe = await getSafeWithOwners(
-        signers.map((owner) => owner.address),
+    const safe = await getSafeWithOwners({
+        owners: signers.map((owner) => owner.address),
         threshold,
-        ethers.ZeroAddress,
-        "0x",
-        fallbackHandlerAddress,
+        fallbackHandler: fallbackHandlerAddress,
         logGasUsage,
         saltNumber,
-    );
+    });
     await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], signers);
     return safe;
 };

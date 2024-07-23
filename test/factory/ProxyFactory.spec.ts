@@ -37,7 +37,7 @@ describe("ProxyFactory", () => {
         const [user1] = signers;
         const singleton = await deployContract(user1, SINGLETON_SOURCE);
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             factory: await getFactory(),
             mock: await getMock(),
             singleton,

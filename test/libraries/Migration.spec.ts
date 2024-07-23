@@ -24,7 +24,7 @@ describe("Migration", () => {
         return {
             singleton: await getSafeSingleton(),
             singleton120,
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             migration,
             signers,
         };

@@ -30,7 +30,7 @@ describe("MultiSendCallOnly", () => {
         const [user1] = signers;
         const storageSetter = await deployContract(user1, setterSource);
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             multiSend: await getMultiSendCallOnly(),
             mock: await getMock(),
             delegateCaller: await getDelegateCaller(),

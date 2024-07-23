@@ -9,7 +9,7 @@ describe("StorageAccessible", () => {
         const [user1, user2] = await ethers.getSigners();
         const killLib = await killLibContract(user1);
         return {
-            safe: await getSafeWithOwners([user1.address, user2.address], 1),
+            safe: await getSafeWithOwners({ owners: [user1.address, user2.address], threshold: 1 }),
             killLib,
         };
     });

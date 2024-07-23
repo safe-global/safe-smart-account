@@ -11,7 +11,7 @@ describe("OwnerManager", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             signers,
         };
     });

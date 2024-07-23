@@ -42,7 +42,7 @@ describe("Safe", () => {
             }`;
         const reverter = await deployContract(user1, reverterSource);
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafeWithOwners({ owners: [user1.address] }),
             reverter,
             storageSetter,
             nativeTokenReceiver,
