@@ -62,22 +62,22 @@ describe("SafeToL2Setup", () => {
                     signers: [user1],
                     safeToL2SetupLib,
                 } = await setupTests();
-                const safeL2SingletonAddress = await safeL2.getAddress();
+                const safeL2SingletonAddress = safeL2.address;
                 const safeToL2SetupCall = safeToL2SetupLib.interface.encodeFunctionData("setupToL2", [safeL2SingletonAddress]);
 
                 const setupData = safeL2.interface.encodeFunctionData("setup", [
                     [user1.address],
                     1,
-                    safeToL2SetupLib.target,
+                    safeToL2SetupLib.address,
                     safeToL2SetupCall,
-                    ethers.ZeroAddress,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
+                    ethers.constants.AddressZero,
                     0,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
                 ]);
-                const safeAddress = await proxyFactory.createProxyWithNonce.staticCall(safeSingleton.target, setupData, 0);
+                const safeAddress = await proxyFactory.callStatic.createProxyWithNonce(safeSingleton.address, setupData, 0);
 
-                await expect(proxyFactory.createProxyWithNonce(safeSingleton.target, setupData, 0))
+                await expect(proxyFactory.createProxyWithNonce(safeSingleton.address, setupData, 0))
                     .to.emit(safeToL2SetupLib.attach(safeAddress), "ChangedMasterCopy")
                     .withArgs(safeL2SingletonAddress);
             });
@@ -95,23 +95,23 @@ describe("SafeToL2Setup", () => {
                 const setupData = safeL2.interface.encodeFunctionData("setup", [
                     [user1.address],
                     1,
-                    safeToL2SetupLib.target,
+                    safeToL2SetupLib.address,
                     safeToL2SetupCall,
-                    ethers.ZeroAddress,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
+                    ethers.constants.AddressZero,
                     0,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
                 ]);
 
                 // For some reason, hardhat can't infer the revert reason
-                await expect(proxyFactory.createProxyWithNonce(safeSingleton.target, setupData, 0)).to.be.reverted;
+                await expect(proxyFactory.createProxyWithNonce(safeSingleton.address, setupData, 0)).to.be.reverted;
             });
 
             it("can be used only via DELEGATECALL opcode", async () => {
                 const { safeToL2SetupLib } = await setupTests();
-                const randomAddress = ethers.hexlify(ethers.randomBytes(20));
+                const randomAddress = ethers.utils.hexlify(ethers.utils.randomBytes(20));
 
-                await expect(safeToL2SetupLib.setupToL2(randomAddress)).to.be.rejectedWith(
+                await expect(safeToL2SetupLib.setupToL2(randomAddress)).to.be.revertedWith(
                     "SafeToL2Setup should only be called via delegatecall",
                 );
             });
@@ -122,11 +122,11 @@ describe("SafeToL2Setup", () => {
                     signers: [user1],
                 } = await setupTests();
                 const safe = await getSafeWithOwners([user1.address]);
-                const safeToL2SetupLibAddress = await safeToL2SetupLib.getAddress();
+                const safeToL2SetupLibAddress = safeToL2SetupLib.address;
 
                 await expect(
                     executeContractCallWithSigners(safe, safeToL2SetupLib, "setupToL2", [safeToL2SetupLibAddress], [user1], true),
-                ).to.be.rejectedWith("GS013");
+                ).to.be.revertedWith("GS013");
             });
 
             it("changes the expected storage slot without touching the most important ones", async () => {
@@ -138,43 +138,48 @@ describe("SafeToL2Setup", () => {
                     safeToL2SetupLib,
                 } = await setupTests();
 
-                const safeL2SingletonAddress = await safeL2.getAddress();
-                const safeToL2SetupLibAddress = await safeToL2SetupLib.getAddress();
+                const safeL2SingletonAddress = safeL2.address;
+                const safeToL2SetupLibAddress = safeToL2SetupLib.address;
                 const safeToL2SetupCall = safeToL2SetupLib.interface.encodeFunctionData("setupToL2", [safeL2SingletonAddress]);
 
                 const setupData = safeL2.interface.encodeFunctionData("setup", [
                     [user1.address],
                     1,
-                    safeToL2SetupLib.target,
+                    safeToL2SetupLib.address,
                     safeToL2SetupCall,
-                    ethers.ZeroAddress,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
+                    ethers.constants.AddressZero,
                     0,
-                    ethers.ZeroAddress,
+                    ethers.constants.AddressZero,
                 ]);
-                const safeAddress = await proxyFactory.createProxyWithNonce.staticCall(safeSingleton.target, setupData, 0);
+                const safeAddress = await proxyFactory.callStatic.createProxyWithNonce(safeSingleton.address, setupData, 0);
 
-                const transaction = await (await proxyFactory.createProxyWithNonce(safeSingleton.target, setupData, 0)).wait();
-                if (!transaction?.hash) {
+                const transaction = await (await proxyFactory.createProxyWithNonce(safeSingleton.address, setupData, 0)).wait();
+                if (!transaction?.transactionHash) {
                     throw new Error("No transaction hash");
                 }
                 // I decided to use tracing for this test because it gives an overview of all the storage slots involved in the transaction
                 // Alternatively, one could use `eth_getStorageAt` to check storage slots directly
                 // But that would not guarantee that other storage slots were not touched during the transaction
-                const trace = (await hre.network.provider.send("debug_traceTransaction", [transaction.hash])) as HardhatTrace;
+                const trace = (await hre.network.provider.send("debug_traceTransaction", [transaction.transactionHash])) as HardhatTrace;
                 // Hardhat uses the most basic struct/opcode logger tracer: https://geth.ethereum.org/docs/developers/evm-tracing/built-in-tracers#struct-opcode-logger
                 // To find the "snapshot" of the storage before the DELEGATECALL into the library, we need to find the first DELEGATECALL opcode calling into the library
                 // To do that, we search for the DELEGATECALL opcode with the stack input pointing to the library address
                 const delegateCallIntoTheLib = trace.structLogs.findIndex(
                     (log) =>
                         log.op === "DELEGATECALL" &&
-                        sameHexString(log.stack[log.stack.length - 2], ethers.zeroPadValue(safeToL2SetupLibAddress, 32).slice(2)),
+                        sameHexString(
+                            log.stack[log.stack.length - 2],
+                            ethers.utils.hexlify(ethers.utils.zeroPad(safeToL2SetupLibAddress, 32)).slice(2),
+                        ),
                 );
                 const preDelegateCallStorage = trace.structLogs[delegateCallIntoTheLib].storage;
 
                 // The SafeSetup event is emitted after the Safe is set up
                 // To get the storage snapshot after the Safe is set up, we need to find the LOG2 opcode with the topic input on the stack equal the SafeSetup event signature
-                const SAFE_SETUP_EVENT_SIGNATURE = safeSingleton.interface.getEvent("SafeSetup").topicHash;
+                const SAFE_SETUP_EVENT_SIGNATURE = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes(safeSingleton.interface.getEvent("SafeSetup").format("sighash")),
+                );
                 const postSafeSetup = trace.structLogs.find(
                     (log, index) =>
                         log.op === "LOG2" &&
@@ -188,8 +193,8 @@ describe("SafeToL2Setup", () => {
 
                 for (const [key, value] of Object.entries(postSafeSetupStorage)) {
                     // The slot key 0 is the singleton storage slot, it must equal the L2 singleton address
-                    if (sameHexString(key, ethers.zeroPadValue("0x00", 32))) {
-                        expect(sameHexString(ethers.zeroPadValue(safeL2SingletonAddress, 32), value)).to.be.true;
+                    if (sameHexString(key, ethers.utils.hexlify(ethers.utils.zeroPad("0x00", 32)))) {
+                        expect(sameHexString(ethers.utils.hexlify(ethers.utils.zeroPad(safeL2SingletonAddress, 32)), value)).to.be.true;
                     } else {
                         // All other storage slots must be the same as before the DELEGATECALL
                         if (key in preDelegateCallStorage) {
@@ -204,8 +209,9 @@ describe("SafeToL2Setup", () => {
                 }
 
                 // Double-check that the storage slot was changed at the end of the transaction
-                const singletonInStorage = await hre.ethers.provider.getStorage(safeAddress, ethers.zeroPadValue("0x00", 32));
-                expect(sameHexString(singletonInStorage, ethers.zeroPadValue(safeL2SingletonAddress, 32))).to.be.true;
+                const singletonInStorage = await hre.ethers.provider.getStorageAt(safeAddress, ethers.utils.zeroPad("0x00", 32));
+                expect(sameHexString(singletonInStorage, ethers.utils.hexlify(ethers.utils.zeroPad(safeL2SingletonAddress, 32)))).to.be
+                    .true;
             });
         });
     });
@@ -225,28 +231,28 @@ describe("SafeToL2Setup", () => {
                 signers: [user1],
                 safeToL2SetupLib,
             } = await setupTests();
-            const safeSingeltonAddress = await safeSingleton.getAddress();
-            const safeL2SingletonAddress = await safeL2.getAddress();
+            const safeSingeltonAddress = safeSingleton.address;
+            const safeL2SingletonAddress = safeL2.address;
             const safeToL2SetupCall = safeToL2SetupLib.interface.encodeFunctionData("setupToL2", [safeL2SingletonAddress]);
 
             const setupData = safeL2.interface.encodeFunctionData("setup", [
                 [user1.address],
                 1,
-                safeToL2SetupLib.target,
+                safeToL2SetupLib.address,
                 safeToL2SetupCall,
-                ethers.ZeroAddress,
-                ethers.ZeroAddress,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
                 0,
-                ethers.ZeroAddress,
+                ethers.constants.AddressZero,
             ]);
-            const safeAddress = await proxyFactory.createProxyWithNonce.staticCall(safeSingleton.target, setupData, 0);
+            const safeAddress = await proxyFactory.callStatic.createProxyWithNonce(safeSingleton.address, setupData, 0);
 
             await expect(proxyFactory.createProxyWithNonce(safeSingeltonAddress, setupData, 0)).to.not.emit(
                 safeToL2SetupLib.attach(safeAddress),
                 "ChangedMasterCopy",
             );
-            const singletonInStorage = await hre.ethers.provider.getStorage(safeAddress, ethers.zeroPadValue("0x00", 32));
-            expect(sameHexString(singletonInStorage, ethers.zeroPadValue(safeSingeltonAddress, 32))).to.be.true;
+            const singletonInStorage = await hre.ethers.provider.getStorageAt(safeAddress, ethers.utils.zeroPad("0x00", 32));
+            expect(sameHexString(singletonInStorage, ethers.utils.hexlify(ethers.utils.zeroPad(safeSingeltonAddress, 32)))).to.be.true;
         });
     });
 });

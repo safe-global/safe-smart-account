@@ -16,7 +16,8 @@
     "scripts": {
         "build": "hardhat compile",
         "build:ts": "yarn rimraf dist && tsc -p tsconfig.prod.json",
-        "test": "hardhat test",
+        "test": "hardhat test && npm run test:SafeToL2Setup:L1",
+        "test:SafeToL2Setup:L1": "HARDHAT_CHAIN_ID=1 hardhat test --grep \"SafeToL2Setup\"",
         "coverage": "hardhat coverage",
         "benchmark": "yarn test benchmark/*.ts",
         "deploy-custom": "rm -rf deployments/custom && yarn deploy-all custom",
