@@ -1,0 +1,1 @@
+certora-cli==7.10.1
