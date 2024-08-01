@@ -11,6 +11,9 @@ import {IOwnerManager} from "../interfaces/IOwnerManager.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
+    // SENTINEL_OWNERS is used to traverse `owners`, so that:
+    //      1. `owners[SENTINEL_OWNERS]` contains the first owner
+    //      2. `owners[last_owner]` points back to SENTINEL_OWNERS
     address internal constant SENTINEL_OWNERS = address(0x1);
 
     mapping(address => address) internal owners;
