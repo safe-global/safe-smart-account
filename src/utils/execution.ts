@@ -1,6 +1,6 @@
 import { Signer, BigNumberish, BaseContract, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { Safe } from "../../typechain-types";
+import { Safe, SimulateTxAccessor } from "../../typechain-types";
 
 export const EIP_DOMAIN = {
     EIP712Domain: [
@@ -148,8 +148,8 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     let dynamicBytes = "";
     for (const sig of signatures) {
         if (sig.dynamic) {
-            /* 
-                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended 
+            /*
+                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended
                 at the end of signature bytes.
                 The signature format is
                 Signature type == 0
@@ -198,6 +198,69 @@ export const executeTx = async (safe: Safe, safeTx: SafeTransaction, signatures:
         signatureBytes,
         overrides || {},
     );
+};
+
+export const simulateTx = async (
+    safe: Safe,
+    simulateTxAccessor: SimulateTxAccessor,
+    safeTx: SafeTransaction,
+    overrides?: any,
+): Promise<{
+    success: boolean;
+    gasUsed: bigint;
+    returndata: string;
+}> => {
+    try {
+        const simulateTxAccessorAddress = await simulateTxAccessor.getAddress();
+        const simulateSafeTxEncodedPayload = simulateTxAccessor.interface.encodeFunctionData("simulate", [
+            safeTx.to,
+            safeTx.value,
+            safeTx.data,
+            safeTx.operation,
+        ]);
+        await safe.simulateAndRevert.staticCall(simulateTxAccessorAddress, simulateSafeTxEncodedPayload, overrides || {}); // must revert
+    } catch (error: any) {
+        // Extract the revert data
+        const revertData = error.data;
+
+        if (revertData && revertData.length >= 194) {
+            // 0x + 96 bytes (32 bytes each for success flag, offset, and at least one more field)
+            // Decode the success flag of simulateAndRevert
+            const [success] = ethers.AbiCoder.defaultAbiCoder().decode(["bool"], revertData.slice(0, 66));
+
+            if (!success) {
+                throw new Error("simulateAndRevert failed");
+            }
+
+            // The actual data starts at position 128 (0x80)
+            const simulateReturnData = "0x" + revertData.slice(130);
+
+            // Decode the returned data from simulate function
+            const [estimate, simulateSuccess, returnData] = ethers.AbiCoder.defaultAbiCoder().decode(
+                ["uint256", "bool", "bytes"],
+                simulateReturnData,
+            );
+
+            return {
+                success: simulateSuccess,
+                gasUsed: BigInt(estimate),
+                returndata: returnData,
+            };
+        } else if (revertData && revertData.length === 130) {
+            // 0x + 64 bytes (32 bytes each for success flag and empty data)
+            // Decode the success flag of simulateAndRevert
+            const [success] = ethers.AbiCoder.defaultAbiCoder().decode(["bool"], revertData.slice(0, 66));
+            return {
+                success,
+                gasUsed: BigInt(0),
+                returndata: "",
+            };
+        } else {
+            console.log(revertData);
+            throw new Error("Invalid revertData length");
+        }
+    }
+    throw new Error("simulateAndRevert must revert");
 };
 
 export const buildContractCall = async (
