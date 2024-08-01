@@ -56,6 +56,9 @@ abstract contract BaseModuleGuard is IModuleGuard {
  * @author Richard Meissner - @rmeissner
  */
 abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
+    // SENTINEL_MODULES is used to traverse `modules`, so that:
+    //      1. `modules[SENTINEL_MODULES]` contains the first module
+    //      2. `modules[last_module]` points back to SENTINEL_MODULES
     address internal constant SENTINEL_MODULES = address(0x1);
 
     // keccak256("module_manager.module_guard.address")
