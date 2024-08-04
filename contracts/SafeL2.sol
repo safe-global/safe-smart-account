@@ -8,7 +8,14 @@ import "./Safe.sol";
  * @notice For a more complete description of the Safe contract, please refer to the main Safe contract `Safe.sol`.
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
- */
+ */                // Check if the contract signature is in bounds: start of data is s + 32 and end is start + signature length
+                uint256 contractSignatureLen;
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    contractSignatureLen := mload(add(add(signatures, s), 0x20))
+                }
+                require(uint256(s).add(32).add(contractSignatureLen) <= signatures.length, "GS023");
+
 contract SafeL2 is Safe {
     event SafeMultiSigTransaction(
         address to,
