@@ -94,5 +94,8 @@
   },
   "resolutions": {
     "hardhat-deploy/@ethersproject/contracts": "5.5.0"
+  },
+  "dependencies": {
+    "@safe-global/safe-singleton-factory": "^1.0.30"
   }
 }
