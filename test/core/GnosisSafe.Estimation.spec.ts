@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getSafeWithOwners, getWallets } from "../utils/setup";
 import { BigNumber } from "ethers";
 
 describe("GnosisSafe", async () => {
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -44,7 +44,7 @@ describe("GnosisSafe", async () => {
                     reverter.address, 0, data, 0,
                     { from: safe.address }
                 )
-            ).to.be.revertedWith("Transaction reverted without a reason")
+            ).to.be.revertedWith(hre.network.zksync ? "execution reverted" : "Transaction reverted without a reason")
         })
 
         it('should always revert', async () => {

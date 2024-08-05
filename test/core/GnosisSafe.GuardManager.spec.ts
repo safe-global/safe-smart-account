@@ -1,21 +1,21 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildContractCall, buildSafeTransaction, buildSignatureBytes, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("GuardManager", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const mock = await getMock();
         const safe = await getSafeWithOwners([user2.address])
-        await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
+        await (await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])).wait()
         return {
             safe,
             mock
@@ -29,14 +29,14 @@ describe("GuardManager", async () => {
 
             const slot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("guard_manager.guard.address"))
 
-            await executeContractCallWithSigners(safe, safe, "setGuard", [AddressZero], [user2])
+            await (await executeContractCallWithSigners(safe, safe, "setGuard", [AddressZero], [user2])).wait()
 
             // Check fallback handler
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, slot)
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
-            await mock.reset()
+            await (await mock.reset()).wait()
 
             await expect(
                 await executeContractCallWithSigners(safe, safe, "setGuard", [mock.address], [user2])
@@ -101,14 +101,14 @@ describe("GuardManager", async () => {
                 safeTx.baseGas, safeTx.gasPrice, safeTx.gasToken, safeTx.refundReceiver,
                 signatureBytes, user1.address
             ])
-            await mock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah")
+            await (await mock.givenCalldataRevertWithMessage(checkTxData, "Computer says Nah")).wait()
             const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId()), true])
 
             await expect(
                 executeTx(safe, safeTx, [signature])
             ).to.be.revertedWith("Computer says Nah")
 
-            await mock.reset()
+            await (await mock.reset()).wait()
 
             await expect(
                 executeTx(safe, safeTx, [signature])
@@ -133,13 +133,13 @@ describe("GuardManager", async () => {
                 signatureBytes, user1.address
             ])
             const checkExecData = guardInterface.encodeFunctionData("checkAfterExecution", [calculateSafeTransactionHash(safe, safeTx, await chainId()), true])
-            await mock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah")
+            await (await mock.givenCalldataRevertWithMessage(checkExecData, "Computer says Nah")).wait()
 
             await expect(
                 executeTx(safe, safeTx, [signature])
             ).to.be.revertedWith("Computer says Nah")
 
-            await mock.reset()
+            await (await mock.reset()).wait()
 
             await expect(
                 executeTx(safe, safeTx, [signature])

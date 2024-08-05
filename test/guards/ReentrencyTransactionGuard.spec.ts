@@ -1,20 +1,24 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getContractFactoryByName, getMock, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildSafeTransaction, buildSignatureBytes, executeContractCallWithSigners, executeTx, executeTxWithSigners, safeSignTypedData } from "../../src/utils/execution";
 
 describe("ReentrancyTransactionGuard", async () => {
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const safe = await getSafeWithOwners([user1.address])
-        const guardFactory = await hre.ethers.getContractFactory("ReentrancyTransactionGuard");
+        const guardFactory = await getContractFactoryByName("ReentrancyTransactionGuard");
         const guard = await guardFactory.deploy()
+        await guard.deployed()
         const mock = await getMock()
-        await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
+        await (
+            await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1])
+        ).wait();
+
         return {
             safe,
             mock,
@@ -76,8 +80,8 @@ describe("ReentrancyTransactionGuard", async () => {
             const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce: nonce.add(1) })
             const signatures = [await safeSignTypedData(user1, safe, safeTx)]
 
-            await executeTxWithSigners(safe, buildSafeTransaction({ to: safe.address, data: "0x", nonce: nonce }), [user1])
-            await executeTx(safe, safeTx, signatures)
+            await (await executeTxWithSigners(safe, buildSafeTransaction({ to: safe.address, data: "0x", nonce: nonce }), [user1])).wait()
+            await (await executeTx(safe, safeTx, signatures)).wait()
 
             expect(await mock.callStatic.invocationCount()).to.be.eq(1);
             expect(await mock.callStatic.invocationCountForCalldata("0xbaddad42")).to.be.eq(1);

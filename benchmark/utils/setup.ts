@@ -20,7 +20,7 @@ const generateTarget = async (owners: Wallet[], threshold: number, guardAddress:
     return safe
 }
 
-export const configs = [
+export const configs: { name: string, signers: Wallet[], threshold: number, useGuard?: boolean }[] = [
     { name: "single owner", signers: [user1], threshold: 1 },
     { name: "single owner and guard", signers: [user1], threshold: 1, useGuard: true },
     { name: "2 out of 23", signers: [user1, user2], threshold: 2 },

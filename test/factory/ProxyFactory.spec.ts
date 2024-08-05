@@ -1,11 +1,15 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getFactory, getMock, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getFactory, getMock, getSafeWithOwners, getSafeProxyRuntimeCode, getWallets } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber, Contract } from "ethers";
 import { calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
 import { getAddress } from "ethers/lib/utils";
+import { utils } from "zksync-web3";
+
+const NONCE_HOLDER_SYSTEM_CONTRACT = "0x0000000000000000000000000000000000008003";
+const NONCE_HOLDER_SYSTEM_CONTRACT_ABI = [ "function getDeploymentNonce(address _address) external view returns (uint256 deploymentNonce)" ];
 
 describe("ProxyFactory", async () => {
 
@@ -33,7 +37,7 @@ describe("ProxyFactory", async () => {
         }
     }`
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture()
@@ -59,13 +63,20 @@ describe("ProxyFactory", async () => {
             const { factory, singleton } = await setupTests()
             await expect(
                 factory.createProxy(singleton.address, "0x42baddad")
-            ).to.be.revertedWith("Transaction reverted without a reason")
+            ).to.be.revertedWith(hre.network.zksync ? "execution reverted" : "Transaction reverted without a reason")
         })
 
         it('should emit event without initializing', async () => {
             const { factory, singleton } = await setupTests()
-            const factoryNonce = await ethers.provider.getTransactionCount(factory.address)
-            const proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
+            let proxyAddress;
+            if (!hre.network.zksync){
+                const factoryNonce = await ethers.provider.getTransactionCount(factory.address)
+                proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
+            } else {
+                const nonceHolderContract = new ethers.Contract(NONCE_HOLDER_SYSTEM_CONTRACT, NONCE_HOLDER_SYSTEM_CONTRACT_ABI, user1);
+                const factoryNonce = await nonceHolderContract.getDeploymentNonce(factory.address);
+                proxyAddress = utils.createAddress(factory.address, ethers.BigNumber.from(factoryNonce));
+            }
             await expect(
                 factory.createProxy(singleton.address, "0x")
             ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
@@ -74,13 +85,20 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode())
         })
 
         it('should emit event with initializing', async () => {
             const { factory, singleton } = await setupTests()
-            const factoryNonce = await ethers.provider.getTransactionCount(factory.address)
-            const proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
+            let proxyAddress;
+            if (!hre.network.zksync){
+                const factoryNonce = await ethers.provider.getTransactionCount(factory.address)
+                proxyAddress = ethers.utils.getContractAddress({ from: factory.address, nonce: factoryNonce })
+            } else {
+                const nonceHolderContract = new ethers.Contract(NONCE_HOLDER_SYSTEM_CONTRACT, NONCE_HOLDER_SYSTEM_CONTRACT_ABI, user1);
+                const factoryNonce = await nonceHolderContract.getDeploymentNonce(factory.address);
+                proxyAddress = utils.createAddress(factory.address, ethers.BigNumber.from(factoryNonce));
+            }
             await expect(
                 factory.createProxy(singleton.address, singleton.interface.encodeFunctionData("init", []))
             ).to.emit(factory, "ProxyCreation").withArgs(proxyAddress, singleton.address)
@@ -89,7 +107,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(true)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode())
         })
     })
 
@@ -108,7 +126,7 @@ describe("ProxyFactory", async () => {
             const { factory, singleton } = await setupTests()
             await expect(
                 factory.createProxyWithNonce(singleton.address, "0x42baddad", saltNonce)
-            ).to.be.revertedWith("Transaction reverted without a reason")
+            ).to.be.revertedWith(hre.network.zksync ? "execution reverted" : "Transaction reverted without a reason")
         })
 
         it('should emit event without initializing', async () => {
@@ -123,7 +141,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode())
         })
 
         it('should emit event with initializing', async () => {
@@ -138,7 +156,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(true)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode())
         })
 
         it('should not be able to deploy same proxy twice', async () => {
@@ -178,13 +196,15 @@ describe("ProxyFactory", async () => {
         it('check callback error cancels deployment', async () => {
             const { factory, mock, singleton } = await setupTests()
             const initCode = "0x"
-            await mock.givenAnyRevert()
+            let tx = await mock.givenAnyRevert()
+            await tx.wait()
             await expect(
                 factory.createProxyWithCallback(singleton.address, initCode, saltNonce, mock.address),
                 "Should fail if callback fails"
             ).to.be.reverted
 
-            await mock.reset()
+            tx = await mock.reset()
+            await tx.wait()
             // Should be successfull now
             const proxyAddress = await calculateProxyAddressWithCallback(factory, singleton.address, initCode, saltNonce, mock.address)
             await expect(
@@ -204,7 +224,7 @@ describe("ProxyFactory", async () => {
             expect(await proxy.isInitialized()).to.be.eq(false)
             expect(await proxy.masterCopy()).to.be.eq(singleton.address)
             expect(await singleton.masterCopy()).to.be.eq(AddressZero)
-            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await factory.proxyRuntimeCode())
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode())
         })
     })
 
