@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
     buildSafeTransaction,
@@ -23,7 +23,7 @@ describe("SafeL2", () => {
         await deployments.fixture();
         const mock = await getMock();
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             mock,
             signers,
         };

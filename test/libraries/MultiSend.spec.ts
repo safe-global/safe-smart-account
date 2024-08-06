@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getMock, getMultiSend, getSafeWithOwners, getDelegateCaller } from "../utils/setup";
+import { deployContract, getMock, getMultiSend, getSafe, getDelegateCaller } from "../utils/setup";
 import {
     buildContractCall,
     buildSafeTransaction,
@@ -30,7 +30,7 @@ describe("MultiSend", () => {
         const [user1] = signers;
         const storageSetter = await deployContract(user1, setterSource);
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             multiSend: await getMultiSend(),
             mock: await getMock(),
             delegateCaller: await getDelegateCaller(),

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { ethers, deployments } from "hardhat";
 import {
-    getSafeWithSingleton,
+    getSafe,
     getSafeSingletonAt,
     safeMigrationContract,
     getSafeSingletonContract,
@@ -123,8 +123,8 @@ describe("SafeMigration Library", () => {
 
                 return {
                     signers,
-                    safe: await getSafeWithSingleton(singleton, [user1.address]),
-                    safeL2: await getSafeWithSingleton(singletonL2, [user1.address]),
+                    safe: await getSafe({ singleton: singleton, owners: [user1.address] }),
+                    safeL2: await getSafe({ singleton: singletonL2, owners: [user1.address] }),
                     migration,
                 };
             });

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract, getSafeWithOwners } from "../utils/setup";
+import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract, getSafe } from "../utils/setup";
 import { sameHexString } from "../utils/strings";
 import { executeContractCallWithSigners } from "../../src";
 import { EXPECTED_SAFE_STORAGE_LAYOUT, getContractStorageLayout } from "../utils/storage";
@@ -121,7 +121,7 @@ describe("SafeToL2Setup", () => {
                     safeToL2SetupLib,
                     signers: [user1],
                 } = await setupTests();
-                const safe = await getSafeWithOwners({ owners: [user1.address] });
+                const safe = await getSafe({ owners: [user1.address] });
                 const safeToL2SetupLibAddress = await safeToL2SetupLib.getAddress();
 
                 await expect(

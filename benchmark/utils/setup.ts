@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { BigNumberish } from "ethers";
-import { getTokenCallbackHandler, getSafeWithOwners } from "../../test/utils/setup";
+import { getTokenCallbackHandler, getSafe } from "../../test/utils/setup";
 import {
     logGas,
     executeTx,
@@ -24,7 +24,7 @@ const generateTarget = async (owners: number, threshold: number, guardAddress: s
     const fallbackHandler = await getTokenCallbackHandler();
     const fallbackHandlerAddress = await fallbackHandler.getAddress();
     const signers = (await ethers.getSigners()).slice(0, owners);
-    const safe = await getSafeWithOwners({
+    const safe = await getSafe({
         owners: signers.map((owner) => owner.address),
         threshold,
         fallbackHandler: fallbackHandlerAddress,

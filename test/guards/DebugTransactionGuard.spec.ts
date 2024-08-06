@@ -1,7 +1,7 @@
 import { signHash } from "./../../src/utils/execution";
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import { getMock, getSafe } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
@@ -10,7 +10,7 @@ describe("DebugTransactionGuard", () => {
         await deployments.fixture();
         const signers = await ethers.getSigners();
         const [user1] = signers;
-        const safe = await getSafeWithOwners({ owners: [user1.address] });
+        const safe = await getSafe({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("DebugTransactionGuard");
         const guard = await guardFactory.deploy();
         const guardAddress = await guard.getAddress();
