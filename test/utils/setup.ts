@@ -24,7 +24,7 @@ type LogGas = {
     readonly logGasUsage?: boolean;
 };
 
-type SafeWithCustomSingletonAndGasLog = SafeSingleton & SafeWithSetupConfig & LogGas;
+type GetSafeParameters = SafeSingleton & SafeWithSetupConfig & LogGas;
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
@@ -146,7 +146,7 @@ export const getSafeTemplateWithSingleton = async (singleton: Contract | Safe, s
     return singleton.attach(template) as Safe | SafeL2;
 };
 
-export const getSafe = async (safe: SafeWithCustomSingletonAndGasLog) => {
+export const getSafe = async (safe: GetSafeParameters) => {
     const {
         singleton = await getSafeSingleton(),
         owners,
