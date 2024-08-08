@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
     buildSignatureBytes,
@@ -42,7 +42,7 @@ describe("Safe", () => {
             }`;
         const reverter = await deployContract(user1, reverterSource);
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             reverter,
             storageSetter,
             nativeTokenReceiver,

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
-import { getSafeSingleton, getSafeWithOwners } from "../utils/setup";
+import { getSafeSingleton, getSafe } from "../utils/setup";
 import { killLibContract } from "../utils/contracts";
 
 describe("StorageAccessible", () => {
@@ -9,7 +9,7 @@ describe("StorageAccessible", () => {
         const [user1, user2] = await ethers.getSigners();
         const killLib = await killLibContract(user1);
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address, user2.address], threshold: 1 }),
+            safe: await getSafe({ owners: [user1.address, user2.address], threshold: 1 }),
             killLib,
         };
     });

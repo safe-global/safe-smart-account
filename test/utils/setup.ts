@@ -7,6 +7,10 @@ import { safeContractUnderTest } from "./config";
 import { getRandomIntAsString } from "./numbers";
 import { Safe, SafeL2, SafeMigration } from "../../typechain-types";
 
+type SafeSingleton = {
+    readonly singleton?: Safe | SafeL2;
+};
+
 type SafeWithSetupConfig = {
     readonly owners: string[];
     readonly threshold?: number;
@@ -20,7 +24,7 @@ type LogGas = {
     readonly logGasUsage?: boolean;
 };
 
-type SafeCreationWithGasLog = SafeWithSetupConfig & LogGas;
+type GetSafeParameters = SafeSingleton & SafeWithSetupConfig & LogGas;
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
     return await deployments.get("TokenCallbackHandler");
@@ -66,14 +70,6 @@ export const getSafeL2SingletonContractFactory = async () => {
     const safeSingleton = await hre.ethers.getContractFactory("SafeL2");
 
     return safeSingleton;
-};
-
-export const getSafeSingletonContractFactoryFromEnvVariable = async () => {
-    if (safeContractUnderTest() === "SafeL2") {
-        return await getSafeL2SingletonContractFactory();
-    }
-
-    return await getSafeSingletonContractFactory();
 };
 
 export const getSafeSingletonAt = async (address: string) => {
@@ -139,16 +135,20 @@ export const getMock = async () => {
 
 export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString()) => {
     const singleton = await getSafeSingleton();
+    return getSafeTemplateWithSingleton(singleton, saltNumber);
+};
+
+export const getSafeTemplateWithSingleton = async (singleton: Contract | Safe, saltNumber: string = getRandomIntAsString()) => {
     const singletonAddress = await singleton.getAddress();
     const factory = await getFactory();
     const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
     await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
-    const Safe = await getSafeSingletonContractFactoryFromEnvVariable();
-    return Safe.attach(template) as Safe | SafeL2;
+    return singleton.attach(template) as Safe | SafeL2;
 };
 
-export const getSafeWithOwners = async (safe: SafeCreationWithGasLog) => {
+export const getSafe = async (safe: GetSafeParameters) => {
     const {
+        singleton = await getSafeSingleton(),
         owners,
         threshold = owners.length,
         to = AddressZero,
@@ -158,24 +158,13 @@ export const getSafeWithOwners = async (safe: SafeCreationWithGasLog) => {
         saltNumber = getRandomIntAsString(),
     } = safe;
 
-    const template = await getSafeTemplate(saltNumber);
+    const template = await getSafeTemplateWithSingleton(singleton, saltNumber);
     await logGas(
         `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
         template.setup(owners, threshold, to, data, fallbackHandler, AddressZero, 0, AddressZero),
         !logGasUsage,
     );
     return template;
-};
-
-export const getSafeWithSingleton = async (singleton: Safe | SafeL2, owners: string[], saltNumber: string = getRandomIntAsString()) => {
-    const factory = await getFactory();
-    const singletonAddress = await singleton.getAddress();
-    const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
-    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
-    const safeProxy = singleton.attach(template) as Safe | SafeL2;
-    await safeProxy.setup(owners, owners.length, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero);
-
-    return safeProxy;
 };
 
 export const getTokenCallbackHandler = async (address?: string) => {

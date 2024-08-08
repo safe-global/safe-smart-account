@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { Contract } from "ethers";
-import { deployContract, getFactory, getMock, getSafeWithOwners, getSafeProxyRuntimeCode } from "../utils/setup";
+import { deployContract, getFactory, getMock, getSafe, getSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
 import { calculateChainSpecificProxyAddress, calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
 import { chainId } from "./../utils/encoding";
@@ -37,7 +37,7 @@ describe("ProxyFactory", () => {
         const [user1] = signers;
         const singleton = await deployContract(user1, SINGLETON_SOURCE);
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             factory: await getFactory(),
             mock: await getMock(),
             singleton,

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafe } from "../utils/setup";
 import { buildContractCall, executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
@@ -10,7 +10,7 @@ describe("DelegateCallTransactionGuard", () => {
         await deployments.fixture();
         const signers = await ethers.getSigners();
         const [user1] = signers;
-        const safe = await getSafeWithOwners({ owners: [user1.address] });
+        const safe = await getSafe({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("DelegateCallTransactionGuard");
         const guard = await guardFactory.deploy(AddressZero);
         const guardAddress = await guard.getAddress();

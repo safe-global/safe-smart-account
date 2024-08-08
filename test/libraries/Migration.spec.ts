@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners, getSafeSingleton, migrationContract } from "../utils/setup";
+import { getSafe, getSafeSingleton, migrationContract } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
@@ -24,7 +24,7 @@ describe("Migration", () => {
         return {
             singleton: await getSafeSingleton(),
             singleton120,
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             migration,
             signers,
         };

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafe } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
@@ -11,7 +11,7 @@ describe("OwnerManager", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             signers,
         };
     });

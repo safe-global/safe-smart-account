@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { compile, getCreateCall, getSafeWithOwners } from "../utils/setup";
+import { compile, getCreateCall, getSafe } from "../utils/setup";
 import { buildContractCall, executeTx, safeApproveHash } from "../../src/utils/execution";
 
 const CONTRACT_SOURCE = `
@@ -22,7 +22,7 @@ describe("CreateCall", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address] }),
+            safe: await getSafe({ owners: [user1.address] }),
             createCall: await getCreateCall(),
             testContract,
             signers,

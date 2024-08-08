@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafe } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
@@ -11,7 +11,7 @@ describe("SignMessageLib", () => {
         const signers = await ethers.getSigners();
         const [user1, user2] = signers;
         return {
-            safe: await getSafeWithOwners({ owners: [user1.address, user2.address] }),
+            safe: await getSafe({ owners: [user1.address, user2.address] }),
             lib,
             signers,
         };

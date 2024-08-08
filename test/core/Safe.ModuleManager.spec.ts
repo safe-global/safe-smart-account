@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { getSafeWithOwners, getMock } from "../utils/setup";
+import { getSafe, getMock } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
@@ -13,7 +13,7 @@ describe("ModuleManager", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
 
-        const safe = await getSafeWithOwners({ owners: [user1.address] });
+        const safe = await getSafe({ owners: [user1.address] });
 
         const validModuleGuardMock = await getMock();
         const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
@@ -577,7 +577,7 @@ describe("ModuleManager", () => {
             const {
                 signers: [user1, user2],
             } = await setupTests();
-            const safe = await getSafeWithOwners({ owners: [user1.address] });
+            const safe = await getSafe({ owners: [user1.address] });
 
             await expect(executeContractCallWithSigners(safe, safe, "setModuleGuard", [user2.address], [user1])).to.be.revertedWith(
                 "GS013",
@@ -590,7 +590,7 @@ describe("ModuleManager", () => {
                 signers: [user1],
             } = await setupTests();
             const validGuardMockAddress = await validModuleGuardMock.getAddress();
-            const safe = await getSafeWithOwners({ owners: [user1.address] });
+            const safe = await getSafe({ owners: [user1.address] });
 
             await expect(executeContractCallWithSigners(safe, safe, "setModuleGuard", [validGuardMockAddress], [user1]))
                 .to.emit(safe, "ChangedModuleGuard")
@@ -609,7 +609,7 @@ describe("ModuleManager", () => {
 
             const invocationCountBefore = await validModuleGuardMock.invocationCount();
             const validModuleGuardMockAddress = await validModuleGuardMock.getAddress();
-            const safe = await getSafeWithOwners({ owners: [user1.address] });
+            const safe = await getSafe({ owners: [user1.address] });
 
             await executeContractCallWithSigners(safe, safe, "setModuleGuard", [validModuleGuardMockAddress], [user1]);
 
