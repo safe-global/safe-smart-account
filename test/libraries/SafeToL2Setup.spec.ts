@@ -217,7 +217,7 @@ describe("SafeToL2Setup", () => {
             }
         });
 
-        it("should be a noop when the chain id is 1", async () => {
+        it("should be a noop when the chain id is 1 [@L1]", async () => {
             const {
                 safeSingleton,
                 safeL2,

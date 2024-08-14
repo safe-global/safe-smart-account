@@ -205,13 +205,8 @@ describe("Safe", () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(ethers.parseEther("1"));
 
-            let executedTx: any;
-            await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => {
-                    executedTx = tx;
-                    return tx;
-                }),
-            ).to.emit(safe, "ExecutionSuccess");
+            const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);
+            await expect(executedTx).to.emit(safe, "ExecutionSuccess");
 
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const receiptLogs = receipt?.logs ?? [];
@@ -249,13 +244,8 @@ describe("Safe", () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
 
-            let executedTx: any;
-            await expect(
-                executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => {
-                    executedTx = tx;
-                    return tx;
-                }),
-            ).to.emit(safe, "ExecutionFailure");
+            const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);
+            await expect(executedTx).to.emit(safe, "ExecutionFailure");
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const receiptLogs = receipt?.logs ?? [];
             const logIndex = receiptLogs.length - 1;

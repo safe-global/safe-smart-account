@@ -1,6 +1,7 @@
 import { Signer, BigNumberish, BaseContract, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { Safe } from "../../typechain-types";
+import { PayableOverrides } from "../../typechain-types/common";
 
 export const EIP_DOMAIN = {
     EIP712Domain: [
@@ -175,15 +176,27 @@ export const buildSignatureBytes = (signatures: SafeSignature[]): string => {
     return signatureBytes + dynamicBytes;
 };
 
-export const logGas = async (message: string, tx: Promise<any>, skip?: boolean): Promise<any> => {
+export const logGas = async (
+    message: string,
+    tx: Promise<ethers.TransactionResponse>,
+    skip?: boolean,
+): Promise<ethers.TransactionResponse> => {
     return tx.then(async (result) => {
         const receipt = await result.wait();
+        if (receipt === null) {
+            throw new Error("transaction not mined");
+        }
         if (!skip) console.log("           Used", receipt.gasUsed, `gas for >${message}<`);
         return result;
     });
 };
 
-export const executeTx = async (safe: Safe, safeTx: SafeTransaction, signatures: SafeSignature[], overrides?: any): Promise<any> => {
+export const executeTx = async (
+    safe: Safe,
+    safeTx: SafeTransaction,
+    signatures: SafeSignature[],
+    overrides?: PayableOverrides,
+): Promise<ethers.ContractTransactionResponse> => {
     const signatureBytes = buildSignatureBytes(signatures);
     return safe.execTransaction(
         safeTx.to,
@@ -203,7 +216,7 @@ export const executeTx = async (safe: Safe, safeTx: SafeTransaction, signatures:
 export const buildContractCall = async (
     contract: BaseContract,
     method: string,
-    params: any[],
+    params: unknown[],
     nonce: BigNumberish,
     delegateCall?: boolean,
     overrides?: Partial<SafeTransaction>,
@@ -224,7 +237,7 @@ export const buildContractCall = async (
     );
 };
 
-export const executeTxWithSigners = async (safe: Safe, tx: SafeTransaction, signers: Signer[], overrides?: any) => {
+export const executeTxWithSigners = async (safe: Safe, tx: SafeTransaction, signers: Signer[], overrides?: PayableOverrides) => {
     const safeAddress = await safe.getAddress();
     const sigs = await Promise.all(signers.map((signer) => safeSignTypedData(signer, safeAddress, tx)));
     return executeTx(safe, tx, sigs, overrides);
@@ -234,7 +247,7 @@ export const executeContractCallWithSigners = async (
     safe: Safe,
     contract: BaseContract,
     method: string,
-    params: any[],
+    params: unknown[],
     signers: Signer[],
     delegateCall?: boolean,
     overrides?: Partial<SafeTransaction>,
