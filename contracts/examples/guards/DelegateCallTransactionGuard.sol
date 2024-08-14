@@ -63,6 +63,7 @@ contract DelegateCallTransactionGuard is BaseGuard {
         uint256 value,
         bytes memory data,
         Enum.Operation operation,
+        bytes memory /* context */,
         address module
     ) external view override returns (bytes32 moduleTxHash) {
         require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
