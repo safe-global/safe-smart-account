@@ -345,7 +345,7 @@ describe("Safe", () => {
             for (const log of receiptLogs) {
                 try {
                     parsedLogs.push(nativeTokenReceiver.interface.decodeEventLog("BreadReceived", log.data, log.topics));
-                } catch (e) {
+                } catch {
                     continue;
                 }
             }
