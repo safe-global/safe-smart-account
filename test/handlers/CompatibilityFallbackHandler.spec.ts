@@ -172,7 +172,6 @@ describe("CompatibilityFallbackHandler", () => {
     });
 
     describe("simulate", () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         it.skip("can be called for any Safe", async () => {});
 
         it("should revert changes", async () => {

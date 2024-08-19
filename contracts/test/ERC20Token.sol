@@ -11,7 +11,7 @@ contract ERC20Token is ERC20 {
     /**
      * @dev Constructor that sets the name and symbol of the token and mints an initial supply to the contract deployer.
      */
-    constructor() public ERC20("TestToken", "TT") {
+    constructor() ERC20("TestToken", "TT") {
         _mint(msg.sender, 1000000000000000);
     }
 }

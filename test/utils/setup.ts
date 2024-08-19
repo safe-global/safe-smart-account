@@ -142,7 +142,7 @@ export const getSafeTemplateWithSingleton = async (singleton: Contract | Safe, s
     const singletonAddress = await singleton.getAddress();
     const factory = await getFactory();
     const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
-    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
+    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx) => tx.wait());
     return singleton.attach(template) as Safe | SafeL2;
 };
 
