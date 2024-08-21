@@ -31,7 +31,7 @@ describe("Safe - Reserved Addresses", () => {
         ).to.be.reverted;
 
         await expect(
-            readOnlySafe.execTransactionFromModule.staticCall(AddressOne, 0, "0x", 0, {
+            readOnlySafe["execTransactionFromModule(address,uint256,bytes,uint8)"].staticCall(AddressOne, 0, "0x", 0, {
                 from: "0x0000000000000000000000000000000000000001",
             }),
             "Should not be able to execute transaction from sentinel as module",

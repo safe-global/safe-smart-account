@@ -42,7 +42,7 @@ interface IModuleGuard is IERC165 {
 abstract contract BaseModuleGuard is IModuleGuard {
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
-            interfaceId == type(IModuleGuard).interfaceId || // 0x58401ed8
+            interfaceId == type(IModuleGuard).interfaceId || // 0x2ab5a34f
             interfaceId == type(IERC165).interfaceId; // 0x01ffc9a7
     }
 }
@@ -170,7 +170,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) external override returns (bool success) {
-        success = _execTransactionFromModule(to, value, data, operation, "");
+        success = _execTransactionFromModule(to, value, data, operation, msg.data[:0]);
     }
 
     function _execTransactionFromModule(
@@ -194,7 +194,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         bytes memory data,
         Enum.Operation operation
     ) external override returns (bool success, bytes memory returnData) {
-        (success, returnData) = _execTransactionFromModuleReturnData(to, value, data, operation, "");
+        (success, returnData) = _execTransactionFromModuleReturnData(to, value, data, operation, msg.data[:0]);
     }
 
     /**

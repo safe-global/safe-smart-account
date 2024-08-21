@@ -17,7 +17,7 @@ describe("ModuleManager", () => {
 
         const validModuleGuardMock = await getMock();
         const moduleGuardContract = await hre.ethers.getContractAt("IModuleGuard", AddressZero);
-        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0x58401ed8"]);
+        const moduleGuardEip165Calldata = moduleGuardContract.interface.encodeFunctionData("supportsInterface", ["0x2ab5a34f"]);
         await validModuleGuardMock.givenCalldataReturnBool(moduleGuardEip165Calldata, true);
 
         return {
@@ -195,7 +195,9 @@ describe("ModuleManager", () => {
             const mockAddress = await mock.getAddress();
             const readOnlySafe = safe.connect(hre.ethers.provider);
             await expect(
-                readOnlySafe.execTransactionFromModule.staticCall(mockAddress, 0, "0xbaddad", 0, { from: AddressOne }),
+                readOnlySafe["execTransactionFromModule(address,uint256,bytes,uint8)"].staticCall(mockAddress, 0, "0xbaddad", 0, {
+                    from: AddressOne,
+                }),
             ).to.be.revertedWith("GS104");
         });
 
@@ -207,7 +209,9 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0)).to.be.revertedWith("GS104");
+            await expect(
+                user2Safe["execTransactionFromModule(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0),
+            ).to.be.revertedWith("GS104");
         });
 
         it("emits event on execution success", async () => {
@@ -220,7 +224,7 @@ describe("ModuleManager", () => {
             const user2Safe = safe.connect(user2);
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
-            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
+            await expect(user2Safe["execTransactionFromModule(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0))
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
             expect(await mock.invocationCountForCalldata.staticCall("0xbaddad")).to.equal(1n);
@@ -237,7 +241,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             await mock.givenAnyRevert();
-            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
+            await expect(user2Safe["execTransactionFromModule(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0))
                 .to.emit(safe, "ExecutionFromModuleFailure")
                 .withArgs(user2.address);
         });
@@ -257,12 +261,13 @@ describe("ModuleManager", () => {
                 0,
                 "0xbeef73",
                 1,
+                "0x",
                 user2.address,
             ]);
 
             await validModuleGuardMock.givenCalldataRevertWithMessage(checkModuleTxData, "Computer says Nah");
 
-            await expect(safe.execTransactionFromModule(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
+            await expect(safe["execTransactionFromModule(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
         it("reverts if the post hook of the module guard reverts", async () => {
@@ -283,7 +288,7 @@ describe("ModuleManager", () => {
 
             await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterModuleExecutionTxData, "Computer says Nah");
 
-            await expect(safe.execTransactionFromModule(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
+            await expect(safe["execTransactionFromModule(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1)).to.be.reverted;
         });
 
         it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterModuleExecution", async () => {
@@ -305,13 +310,14 @@ describe("ModuleManager", () => {
                 0,
                 "0xbeef73",
                 1,
+                "0x",
                 user2.address,
             ]);
 
             const checkAfterModuleExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [hash, true]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
-            await safe.connect(user2).execTransactionFromModule(user2.address, 0, "0xbeef73", 1);
+            await safe.connect(user2)["execTransactionFromModule(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1);
 
             expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterModuleExecutionTxData)).to.equal(1);
         });
@@ -323,7 +329,9 @@ describe("ModuleManager", () => {
             const mockAddress = await mock.getAddress();
             const readOnlySafe = safe.connect(hre.ethers.provider);
             await expect(
-                readOnlySafe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, "0xbaddad", 0, { from: AddressOne }),
+                readOnlySafe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"].staticCall(mockAddress, 0, "0xbaddad", 0, {
+                    from: AddressOne,
+                }),
             ).to.be.revertedWith("GS104");
         });
 
@@ -335,7 +343,9 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
-            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0)).to.be.revertedWith("GS104");
+            await expect(
+                user2Safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0),
+            ).to.be.revertedWith("GS104");
         });
 
         it("emits event on execution failure", async () => {
@@ -349,7 +359,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             await mock.givenAnyRevert();
-            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
+            await expect(user2Safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0))
                 .to.emit(safe, "ExecutionFromModuleFailure")
                 .withArgs(user2.address);
         });
@@ -364,7 +374,7 @@ describe("ModuleManager", () => {
             const user2Safe = safe.connect(user2);
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
-            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
+            await expect(user2Safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](mockAddress, 0, "0xbaddad", 0))
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
             expect(await mock.invocationCountForCalldata.staticCall("0xbaddad")).to.equal(1n);
@@ -381,10 +391,14 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             await mock.givenCalldataReturn("0xbaddad", "0xdeaddeed");
-            await expect(await user2Safe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, "0xbaddad", 0)).to.be.deep.eq([
-                true,
-                "0xdeaddeed",
-            ]);
+            await expect(
+                await user2Safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"].staticCall(
+                    mockAddress,
+                    0,
+                    "0xbaddad",
+                    0,
+                ),
+            ).to.be.deep.eq([true, "0xdeaddeed"]);
         });
 
         it("Returns expected from contract on failure", async () => {
@@ -398,7 +412,14 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
             await mock.givenCalldataRevertWithMessage("0xbaddad", "Some random message");
-            await expect(await user2Safe.execTransactionFromModuleReturnData.staticCall(mockAddress, 0, "0xbaddad", 0)).to.be.deep.eq([
+            await expect(
+                await user2Safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"].staticCall(
+                    mockAddress,
+                    0,
+                    "0xbaddad",
+                    0,
+                ),
+            ).to.be.deep.eq([
                 false,
                 "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000013536f6d652072616e646f6d206d65737361676500000000000000000000000000",
             ]);
@@ -430,6 +451,7 @@ describe("ModuleManager", () => {
                 0,
                 callData,
                 0,
+                "0x",
                 user2.address,
             ]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxDataByGuard, ethers.ZeroHash);
@@ -440,7 +462,9 @@ describe("ModuleManager", () => {
             await validModuleGuardMock.givenCalldataReturn(checkAfterModuleExecutionTxDataByGuard, "0x1337");
 
             await expect(
-                await safe.connect(user2).execTransactionFromModuleReturnData.staticCall(mockAddress, 0, callData, 0),
+                await safe
+                    .connect(user2)
+                    ["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"].staticCall(mockAddress, 0, callData, 0),
             ).to.be.deep.eq([true, returnBytes]);
         });
 
@@ -459,12 +483,14 @@ describe("ModuleManager", () => {
                 0,
                 "0xbeef73",
                 1,
+                "0x",
                 user2.address,
             ]);
 
             await validModuleGuardMock.givenCalldataRevertWithMessage(checkModuleTxData, "Computer says Nah");
 
-            await expect(safe.execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
+            await expect(safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1)).to.be
+                .reverted;
         });
 
         it("reverts if the post hook of the module guard reverts", async () => {
@@ -484,7 +510,8 @@ describe("ModuleManager", () => {
 
             await validModuleGuardMock.givenCalldataRevertWithMessage(checkAfterModuleExecutionTxData, "Computer says Nah");
 
-            await expect(safe.execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1)).to.be.reverted;
+            await expect(safe["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1)).to.be
+                .reverted;
         });
 
         it("preserves the hash returned by checkModuleTransaction and passes it to checkAfterModuleExecution", async () => {
@@ -506,13 +533,14 @@ describe("ModuleManager", () => {
                 0,
                 "0xbeef73",
                 1,
+                "0x",
                 user2.address,
             ]);
 
             const checkAfterModuleExecutionTxData = moduleGuardInterface.encodeFunctionData("checkAfterModuleExecution", [hash, true]);
             await validModuleGuardMock.givenCalldataReturnBytes32(checkModuleTxData, hash);
 
-            await safe.connect(user2).execTransactionFromModuleReturnData(user2.address, 0, "0xbeef73", 1);
+            await safe.connect(user2)["execTransactionFromModuleReturnData(address,uint256,bytes,uint8)"](user2.address, 0, "0xbeef73", 1);
 
             expect(await validModuleGuardMock.invocationCountForCalldata(checkAfterModuleExecutionTxData)).to.equal(1);
         });
@@ -641,13 +669,20 @@ describe("ModuleManager", () => {
             const data = safe.interface.encodeFunctionData("setModuleGuard", [AddressZero]);
 
             const moduleGuardInterface = (await hre.ethers.getContractAt("IModuleGuard", validModuleGuardMockAddress)).interface;
-            const checkTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [safe.target, 0, data, 0, user1.address]);
+            const checkTxData = moduleGuardInterface.encodeFunctionData("checkModuleTransaction", [
+                safe.target,
+                0,
+                data,
+                0,
+                "0x",
+                user1.address,
+            ]);
 
             const guardHash = ethers.randomBytes(32);
 
             await validModuleGuardMock.givenCalldataReturnBytes32(checkTxData, guardHash);
 
-            await expect(await safe.connect(user1).execTransactionFromModule(safe, 0, data, 0))
+            await expect(await safe.connect(user1)["execTransactionFromModule(address,uint256,bytes,uint8)"](safe, 0, data, 0))
                 .to.emit(safe, "ChangedModuleGuard")
                 .withArgs(AddressZero);
 
