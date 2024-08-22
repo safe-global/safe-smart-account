@@ -100,7 +100,7 @@ contract SafeToL2Migration is SafeStorage {
             "", // We cannot detect signatures
             additionalInfo
         );
-        emit ChangedMasterCopy(singleton);
+        emit ChangedMasterCopy(l2Singleton);
     }
 
     /**
@@ -110,8 +110,9 @@ contract SafeToL2Migration is SafeStorage {
      * Singletons versions will be compared, so it implies that contracts exist
      */
     function migrateToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero {
-        require(address(singleton) != l2Singleton, "Safe is already using the singleton");
-        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
+        address _singleton = singleton;
+        require(_singleton != l2Singleton, "Safe is already using the singleton");
+        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(_singleton).VERSION()));
         bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
@@ -121,7 +122,7 @@ contract SafeToL2Migration is SafeStorage {
             "Provided singleton version is not supported"
         );
 
-        // 0xef2624ae - keccak("migrateToL2(address)")
+        // 0xef2624ae - bytes4(keccak256("migrateToL2(address)"))
         bytes memory functionData = abi.encodeWithSelector(0xef2624ae, l2Singleton);
         migrate(l2Singleton, functionData);
     }
@@ -149,9 +150,9 @@ contract SafeToL2Migration is SafeStorage {
         safe.setFallbackHandler(fallbackHandler);
 
         // Safes < 1.3.0 did not emit SafeSetup, so Safe Tx Service backend needs the event to index the Safe
-        emit SafeSetup(MIGRATION_SINGLETON, safe.getOwners(), safe.getThreshold(), address(0), fallbackHandler);
+        emit SafeSetup(MIGRATION_SINGLETON, getOwners(), threshold, address(0), fallbackHandler);
 
-        // 0xd9a20812 - keccak("migrateFromV111(address,address)")
+        // 0xd9a20812 - bytes4(keccak256("migrateFromV111(address,address)"))
         bytes memory functionData = abi.encodeWithSelector(0xd9a20812, l2Singleton, fallbackHandler);
         migrate(l2Singleton, functionData);
     }
@@ -173,5 +174,23 @@ contract SafeToL2Migration is SafeStorage {
 
         // If the code size is greater than 0, it is a contract; otherwise, it is an EOA.
         return size > 0;
+    }
+
+    /**
+     * @notice Returns a list of Safe owners.
+     * @return Array of Safe owners.
+     */
+    function getOwners() internal view returns (address[] memory) {
+        address[] memory array = new address[](ownerCount);
+        address sentinelOwners = address(0x1);
+        // populate return array
+        uint256 index = 0;
+        address currentOwner = owners[sentinelOwners];
+        while (currentOwner != sentinelOwners) {
+            array[index] = currentOwner;
+            currentOwner = owners[currentOwner];
+            index++;
+        }
+        return array;
     }
 }

@@ -12,6 +12,7 @@ solc
 coverage/
 coverage.json
 yarn-error.log
+.vscode
 
 # Certora Formal Verification related files
 .certora_internal
