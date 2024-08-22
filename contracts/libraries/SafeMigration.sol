@@ -28,7 +28,7 @@ contract SafeMigration is SafeStorage {
      */
     address public immutable SAFE_L2_SINGLETON;
     /**
-     * @notice Addresss of the Fallback Handler
+     * @notice Address of the Fallback Handler
      */
     address public immutable SAFE_FALLBACK_HANDLER;
 

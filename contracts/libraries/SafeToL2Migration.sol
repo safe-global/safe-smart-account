@@ -132,7 +132,7 @@ contract SafeToL2Migration is SafeStorage {
      * Safe is required to have nonce 0 so backend can support it after the migration
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      * Singletons version will be checked, so it implies that contracts exist.
-     * A valid and compatible fallbackHandler needs to be provided, only existance will be checked.
+     * A valid and compatible fallbackHandler needs to be provided, only existence will be checked.
      */
     function migrateFromV111(address l2Singleton, address fallbackHandler) public onlyDelegateCall onlyNonceZero {
         require(isContract(fallbackHandler), "fallbackHandler is not a contract");
@@ -178,6 +178,10 @@ contract SafeToL2Migration is SafeStorage {
 
     /**
      * @notice Returns a list of Safe owners.
+     * @dev This function is copied from `OwnerManager.sol` and takes advantage of the fact that
+     * migration happens with a `DELEGATECALL` in the context of the migrating account, which allows
+     * us to read the owners directly from storage and avoid the additional overhead of a `CALL`
+     * into the account implementation.
      * @return Array of Safe owners.
      */
     function getOwners() internal view returns (address[] memory) {
