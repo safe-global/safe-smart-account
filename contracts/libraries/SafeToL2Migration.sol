@@ -10,10 +10,6 @@ interface ISafe {
     function VERSION() external view returns (string memory);
 
     function setFallbackHandler(address handler) external;
-
-    function getOwners() external view returns (address[] memory);
-
-    function getThreshold() external view returns (uint256);
 }
 
 /**
