@@ -177,7 +177,7 @@ contract SafeToL2Migration is SafeStorage {
      * @dev This function is copied from `OwnerManager.sol` and takes advantage of the fact that
      * migration happens with a `DELEGATECALL` in the context of the migrating account, which allows
      * us to read the owners directly from storage and avoid the additional overhead of a `CALL`
-     * into the account implementation.
+     * into the account implementation. Note that we can rely on the memory layout of the {owners}
      * @return Array of Safe owners.
      */
     function getOwners() internal view returns (address[] memory) {
