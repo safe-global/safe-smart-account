@@ -105,7 +105,7 @@ contract SafeToL2Migration is SafeStorage {
      * @dev This function should only be called via a delegatecall to perform the upgrade.
      * Singletons versions will be compared, so it implies that contracts exist
      */
-    function migrateToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero {
+    function migrateToL2(address l2Singleton) external onlyDelegateCall onlyNonceZero {
         address _singleton = singleton;
         require(_singleton != l2Singleton, "Safe is already using the singleton");
         bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(_singleton).VERSION()));
@@ -130,7 +130,7 @@ contract SafeToL2Migration is SafeStorage {
      * Singletons version will be checked, so it implies that contracts exist.
      * A valid and compatible fallbackHandler needs to be provided, only existence will be checked.
      */
-    function migrateFromV111(address l2Singleton, address fallbackHandler) public onlyDelegateCall onlyNonceZero {
+    function migrateFromV111(address l2Singleton, address fallbackHandler) external onlyDelegateCall onlyNonceZero {
         require(isContract(fallbackHandler), "fallbackHandler is not a contract");
 
         bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));

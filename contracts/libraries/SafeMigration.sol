@@ -80,7 +80,7 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateWithFallbackHandler() public onlyDelegateCall {
+    function migrateWithFallbackHandler() external onlyDelegateCall {
         migrateSingleton();
         ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
@@ -97,7 +97,7 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton (L2) and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateL2WithFallbackHandler() public onlyDelegateCall {
+    function migrateL2WithFallbackHandler() external onlyDelegateCall {
         migrateL2Singleton();
         ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }

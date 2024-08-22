@@ -61,7 +61,7 @@ contract SafeToL2Setup is SafeStorage {
      * @dev This function checks that the chain ID is not 1, and if it isn't updates the singleton
      *      to the provided L2 singleton.
      */
-    function setupToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero onlyContract(l2Singleton) {
+    function setupToL2(address l2Singleton) external onlyDelegateCall onlyNonceZero onlyContract(l2Singleton) {
         if (chainId() != 1) {
             singleton = l2Singleton;
             emit ChangedMasterCopy(l2Singleton);
