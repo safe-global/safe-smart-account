@@ -91,8 +91,8 @@ contract SafeToL2Migration is SafeStorage {
             0,
             0,
             0,
-            payable(address(0)),
             address(0),
+            payable(address(0)),
             "", // We cannot detect signatures
             additionalInfo
         );
