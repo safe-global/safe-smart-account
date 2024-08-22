@@ -16,7 +16,7 @@ contract SafeToL2Setup is SafeStorage {
      * @notice Address of the contract.
      * @dev This is used to ensure that the contract is only ever `DELEGATECALL`-ed.
      */
-    address public immutable _SELF;
+    address public immutable SELF;
 
     /**
      * @notice Event indicating a change of master copy address.
@@ -28,14 +28,14 @@ contract SafeToL2Setup is SafeStorage {
      * @notice Initializes a new {SafeToL2Setup} instance.
      */
     constructor() {
-        _SELF = address(this);
+        SELF = address(this);
     }
 
     /**
      * @notice Modifier ensure a function is only called via `DELEGATECALL`. Will revert otherwise.
      */
     modifier onlyDelegateCall() {
-        require(address(this) != _SELF, "SafeToL2Setup should only be called via delegatecall");
+        require(address(this) != SELF, "SafeToL2Setup should only be called via delegatecall");
         _;
     }
 
