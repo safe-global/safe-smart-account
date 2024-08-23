@@ -2,7 +2,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {Safe} from "../Safe.sol";
+
+interface ISafe {
+    function setFallbackHandler(address handler) external;
+}
 
 /**
  * @title Migration Contract for Safe Upgrade
@@ -28,7 +31,7 @@ contract SafeMigration is SafeStorage {
      */
     address public immutable SAFE_L2_SINGLETON;
     /**
-     * @notice Addresss of the Fallback Handler
+     * @notice Address of the Fallback Handler
      */
     address public immutable SAFE_FALLBACK_HANDLER;
 
@@ -77,9 +80,9 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateWithFallbackHandler() public onlyDelegateCall {
+    function migrateWithFallbackHandler() external onlyDelegateCall {
         migrateSingleton();
-        Safe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
@@ -94,9 +97,9 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton (L2) and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateL2WithFallbackHandler() public onlyDelegateCall {
+    function migrateL2WithFallbackHandler() external onlyDelegateCall {
         migrateL2Singleton();
-        Safe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
