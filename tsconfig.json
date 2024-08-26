@@ -20,6 +20,14 @@
         "skipLibCheck": true
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["./src/index.ts", "./types", "./test/**/*", "./typechain-types/", "./benchmark/**/*", "./src/deploy/**/*", "src/utils/deploy.ts"],
+    "include": [
+        "./src/index.ts",
+        "./types",
+        "./test/**/*",
+        "./typechain-types/",
+        "./benchmark/**/*",
+        "./src/deploy/**/*",
+        "src/utils/**/*"
+    ],
     "files": ["./hardhat.config.ts"]
 }
