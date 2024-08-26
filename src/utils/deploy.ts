@@ -10,6 +10,8 @@ export const getDeployerAccount = async (hre: HardhatRuntimeEnvironment) => {
     const { deployer } = await hre.getNamedAccounts();
 
     let deployerAccount = deployer;
+    // hardhat-deploy only supports zksync (or zksync only supports hardhat-deploy) if the private key of the deployer is provided
+    // it cannot fetch the private key from hardhat's environment
     if (hre.network.zksync) {
         if (process.env.ZKSYNC_DEPLOYER_PK) {
             deployerAccount = process.env.ZKSYNC_DEPLOYER_PK;

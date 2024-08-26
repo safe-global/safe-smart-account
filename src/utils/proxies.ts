@@ -1,5 +1,4 @@
 import { ethers, BigNumberish } from "ethers";
-import hre from "hardhat";
 import * as zk from "zksync-ethers";
 import { SafeProxyFactory } from "../../typechain-types";
 
@@ -24,12 +23,18 @@ export const getZkSyncBytecodeHashFromDeployerCallHeader = (proxyCreationCode: s
     return decodedHeader[1];
 };
 
-export const calculateProxyAddress = async (factory: SafeProxyFactory, singleton: string, inititalizer: string, nonce: number | string) => {
+export const calculateProxyAddress = async (
+    factory: SafeProxyFactory,
+    singleton: string,
+    inititalizer: string,
+    nonce: number | string,
+    zkSync: boolean = false,
+) => {
     const salt = ethers.solidityPackedKeccak256(["bytes32", "uint256"], [ethers.solidityPackedKeccak256(["bytes"], [inititalizer]), nonce]);
     const factoryAddress = await factory.getAddress();
     const proxyCreationCode = await factory.proxyCreationCode();
 
-    if (hre.network.zksync) {
+    if (zkSync) {
         const bytecodeHash = getZkSyncBytecodeHashFromDeployerCallHeader(proxyCreationCode);
         const input = new ethers.AbiCoder().encode(["address"], [singleton]);
         return zk.utils.create2Address(factoryAddress, bytecodeHash, salt, input);
@@ -45,9 +50,10 @@ export const calculateProxyAddressWithCallback = async (
     inititalizer: string,
     nonce: number | string,
     callback: string,
+    zkSync: boolean = false,
 ) => {
     const saltNonceWithCallback = ethers.solidityPackedKeccak256(["uint256", "address"], [nonce, callback]);
-    return calculateProxyAddress(factory, singleton, inititalizer, saltNonceWithCallback);
+    return calculateProxyAddress(factory, singleton, inititalizer, saltNonceWithCallback, zkSync);
 };
 
 export const calculateChainSpecificProxyAddress = async (
@@ -56,6 +62,7 @@ export const calculateChainSpecificProxyAddress = async (
     inititalizer: string,
     nonce: number | string,
     chainId: BigNumberish,
+    zkSync: boolean = false,
 ) => {
     const salt = ethers.solidityPackedKeccak256(
         ["bytes32", "uint256", "uint256"],
@@ -64,7 +71,7 @@ export const calculateChainSpecificProxyAddress = async (
     const factoryAddress = await factory.getAddress();
     const proxyCreationCode = await factory.proxyCreationCode();
 
-    if (hre.network.zksync) {
+    if (zkSync) {
         const bytecodeHash = getZkSyncBytecodeHashFromDeployerCallHeader(proxyCreationCode);
         const input = new ethers.AbiCoder().encode(["address"], [singleton]);
         return zk.utils.create2Address(factoryAddress, bytecodeHash, salt, input);
