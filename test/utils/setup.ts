@@ -7,7 +7,7 @@ import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
 import { zkCompile } from "./zkSync";
 import { getRandomIntAsString } from "./numbers";
-import { DelegateCaller, MockContract, Safe, SafeL2, SafeMigration } from "../../typechain-types";
+import { MockContract, Safe, SafeL2 } from "../../typechain-types";
 
 type SafeSingleton = {
     readonly singleton?: Safe | SafeL2;
@@ -91,7 +91,7 @@ export const migrationContractFactory = async () => {
 
 export const safeMigrationContract = async () => {
     const safeMigration = await hre.ethers.getContractAt("SafeMigration", (await deployments.get("SafeMigration")).address);
-    return safeMigration as unknown as SafeMigration;
+    return safeMigration;
 };
 
 export const getMock = async (): Promise<MockContract> => {
@@ -164,7 +164,7 @@ export const getSafeProxyRuntimeCode = async (): Promise<string> => {
 
 export const getDelegateCaller = async () => {
     const DelegateCaller = await hre.ethers.getContractFactory("DelegateCaller");
-    return (await DelegateCaller.deploy()) as DelegateCaller;
+    return await DelegateCaller.deploy();
 };
 
 export const compile = async (source: string) => {
