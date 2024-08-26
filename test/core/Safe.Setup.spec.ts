@@ -1,16 +1,17 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 
 import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
 import { calculateSafeDomainSeparator } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
+import { getSenderAddressFromContractRunner } from "../utils/contracts";
 
 describe("Safe", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         return {
             template: await getSafeTemplate(),
             mock: await getMock(),
@@ -55,6 +56,8 @@ describe("Safe", () => {
                 signers: [user1, user2, user3],
             } = await setupTests();
             const templateAddress = await template.getAddress();
+            const safeMsgSender = await getSenderAddressFromContractRunner(template);
+
             await expect(
                 template.setup(
                     [user1.address, user2.address, user3.address],
@@ -68,7 +71,7 @@ describe("Safe", () => {
                 ),
             )
                 .to.emit(template, "SafeSetup")
-                .withArgs(user1.address, [user1.address, user2.address, user3.address], 2, AddressZero, AddressZero);
+                .withArgs(safeMsgSender, [user1.address, user2.address, user3.address], 2, AddressZero, AddressZero);
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(templateAddress, await chainId()));
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address]);
             await expect(await template.getThreshold()).to.be.deep.eq(2n);
@@ -79,16 +82,18 @@ describe("Safe", () => {
                 template,
                 signers: [user1, user2, user3],
             } = await setupTests();
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                0,
-                AddressZero,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    0,
+                    AddressZero,
+                )
+            ).wait();
             await expect(
                 template.setup(
                     [user1.address, user2.address, user3.address],
@@ -212,6 +217,8 @@ describe("Safe", () => {
                 signers: [user1, user2, user3],
             } = await setupTests();
             const templateAddress = await template.getAddress();
+            const safeMsgSender = await getSenderAddressFromContractRunner(template);
+
             const source = `
             contract Initializer {
                 function init(bytes4 data) public {
@@ -240,7 +247,7 @@ describe("Safe", () => {
                 ),
             )
                 .to.emit(template, "SafeSetup")
-                .withArgs(user1.address, [user1.address, user2.address, user3.address], 2, testIntializerAddress, AddressOne);
+                .withArgs(safeMsgSender, [user1.address, user2.address, user3.address], 2, testIntializerAddress, AddressOne);
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(templateAddress, await chainId()));
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address]);
             await expect(await template.getThreshold()).to.eq(2n);
@@ -312,24 +319,27 @@ describe("Safe", () => {
                 signers: [user1, user2, user3],
             } = await setupTests();
             const templateAddress = await template.getAddress();
+            const deployerAddress = await getSenderAddressFromContractRunner(template);
             const payment = ethers.parseEther("10");
             await user1.sendTransaction({ to: templateAddress, value: payment });
-            const userBalance = await hre.ethers.provider.getBalance(user1.address);
+            const userBalance = await hre.ethers.provider.getBalance(deployerAddress);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                AddressZero,
-            );
+            await (
+                await template.setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    AddressZero,
+                )
+            ).wait();
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
-            await expect(userBalance < (await hre.ethers.provider.getBalance(user1.address))).to.be.true;
+            await expect(userBalance < (await hre.ethers.provider.getBalance(deployerAddress))).to.be.true;
         });
 
         it("should work with ether payment to account", async () => {
@@ -393,8 +403,9 @@ describe("Safe", () => {
             } = await setupTests();
             const mockAddress = await mock.getAddress();
             const payment = 133742;
+            const deployerAddress = await getSenderAddressFromContractRunner(template);
 
-            const transferData = encodeTransfer(user1.address, payment);
+            const transferData = encodeTransfer(deployerAddress, payment);
             await mock.givenCalldataReturnBool(transferData, true);
             await template.setup(
                 [user1.address, user2.address, user3.address],

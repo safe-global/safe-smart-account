@@ -1,56 +1,70 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { deployContract, getSafe } from "../utils/setup";
 
 describe("Safe", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const source = `
-        contract Test {
-            function transferEth(address payable safe) public payable returns (bool success) {
-                safe.transfer(msg.value);
-            }
-            function sendEth(address payable safe) public payable returns (bool success) {
-                require(safe.send(msg.value));
-            }
-            function callEth(address payable safe) public payable returns (bool success) {
-                (bool success,) = safe.call{ value: msg.value }("");
-                require(success);
-            }
-        }`;
-        const signers = await ethers.getSigners();
+        const gasCappedTransferSource = `
+            contract Test {
+                function transferEth(address payable safe) public payable returns (bool success) {
+                    safe.transfer(msg.value);
+                }
+                function sendEth(address payable safe) public payable returns (bool success) {
+                    require(safe.send(msg.value));
+                }
+            }`;
+        const callSource = `
+            contract Test {
+                function callEth(address payable safe) public payable returns (bool success) {
+                    (bool success,) = safe.call{ value: msg.value }("");
+                    require(success);
+                }
+            }`;
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         return {
             safe: await getSafe({ owners: [user1.address] }),
-            caller: await deployContract(user1, source),
+            gasCappedTransferContract: hre.network.zksync ? null : await deployContract(user1, gasCappedTransferSource),
+            callContract: await deployContract(user1, callSource),
             signers,
         };
     });
 
     describe("fallback", () => {
         it("should be able to receive ETH via transfer", async () => {
-            const { safe, caller } = await setupTests();
+            if (hre.network.zksync) {
+                // zksync doesn't support .transfer
+                return;
+            }
+
+            const { safe, gasCappedTransferContract } = await setupTests();
             const safeAddress = await safe.getAddress();
 
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
-            await expect(caller.transferEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
+            await expect(gasCappedTransferContract?.transferEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
         });
 
         it("should be able to receive ETH via send", async () => {
-            const { safe, caller } = await setupTests();
+            if (hre.network.zksync) {
+                // zksync doesn't support .transfer
+                return;
+            }
+
+            const { safe, gasCappedTransferContract } = await setupTests();
             const safeAddress = await safe.getAddress();
 
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
-            await expect(caller.sendEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
+            await expect(gasCappedTransferContract?.sendEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
         });
 
         it("should be able to receive ETH via call", async () => {
-            const { safe, caller } = await setupTests();
+            const { safe, callContract } = await setupTests();
             const safeAddress = await safe.getAddress();
-            const callerAddress = await caller.getAddress();
+            const callerAddress = await callContract.getAddress();
 
             await expect(
-                caller.callEth(safeAddress, {
+                callContract.callEth(safeAddress, {
                     value: ethers.parseEther("1"),
                 }),
             )
@@ -84,7 +98,7 @@ describe("Safe", () => {
             } = await setupTests();
             const safeAddress = await safe.getAddress();
 
-            await expect(user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad" })).to.be.reverted;
+            await expect(user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad" })).to.be.revertedWithoutReason();
         });
     });
 });

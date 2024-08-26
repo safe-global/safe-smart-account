@@ -1,14 +1,15 @@
 import { signHash } from "./../../src/utils/execution";
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre from "hardhat";
 import { getMock, getSafe } from "../utils/setup";
 import { buildSafeTransaction, calculateSafeTransactionHash, executeContractCallWithSigners, executeTx } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
+import { getSenderAddressFromContractRunner } from "../utils/contracts";
 
 describe("DebugTransactionGuard", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         const safe = await getSafe({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("DebugTransactionGuard");
@@ -63,6 +64,7 @@ describe("DebugTransactionGuard", () => {
             } = await setupTests();
             const safeAddress = await safe.getAddress();
             const mockAddress = await mock.getAddress();
+            const senderAddress = await getSenderAddressFromContractRunner(safe);
             const nonce = await safe.nonce();
             const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
             const safeTxHash = calculateSafeTransactionHash(safeAddress, safeTx, await chainId());
@@ -81,7 +83,7 @@ describe("DebugTransactionGuard", () => {
                     false,
                     safeTx.nonce,
                     signature.data,
-                    user1.address,
+                    senderAddress,
                 )
                 .and.to.emit(guard, "GasUsage")
                 .withArgs(safeAddress, safeTxHash, nonce, true);

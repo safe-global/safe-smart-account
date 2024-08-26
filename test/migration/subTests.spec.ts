@@ -12,7 +12,7 @@ interface TestSetup {
 }
 
 export const verificationTests = async (setupTests: () => Promise<TestSetup>) => {
-    const [user1, user2, user3] = await ethers.getSigners();
+    const [user1, user2, user3] = await hre.ethers.getSigners();
 
     describe("execTransaction", () => {
         it("should be able to transfer ETH", async () => {

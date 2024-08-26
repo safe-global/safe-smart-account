@@ -1,13 +1,13 @@
 import { expect } from "chai";
-import { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { getSafeSingleton, getSafe } from "../utils/setup";
 import { killLibContract } from "../utils/contracts";
 
 describe("StorageAccessible", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const [user1, user2] = await ethers.getSigners();
-        const killLib = await killLibContract(user1);
+        const [user1, user2] = await hre.ethers.getSigners();
+        const killLib = await killLibContract(user1, hre.network.zksync);
         return {
             safe: await getSafe({ owners: [user1.address, user2.address], threshold: 1 }),
             killLib,
@@ -34,7 +34,14 @@ describe("StorageAccessible", () => {
     });
 
     describe("simulateAndRevert", () => {
-        it("should revert changes", async () => {
+        it("should revert changes", async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * The `SELFDESTRUCT` instruction is not supported
+             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { safe, killLib } = await setupTests();
             const killLibAddress = await killLib.getAddress();
 

@@ -1,15 +1,17 @@
 import hre from "hardhat";
 import { expect } from "chai";
 import { AddressZero } from "@ethersproject/constants";
-import { getFactoryAt, getSafeSingletonAt } from "../utils/setup";
+import { getFactory, getSafeSingletonAt } from "../utils/setup";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
+const nonEmptyString = (value?: string) => typeof value !== "undefined" && value !== "";
+
 const ERC4337_TEST_ENV_VARIABLES_DEFINED =
-    typeof process.env.ERC4337_TEST_BUNDLER_URL !== "undefined" &&
-    typeof process.env.ERC4337_TEST_NODE_URL !== "undefined" &&
-    typeof process.env.ERC4337_TEST_SAFE_FACTORY_ADDRESS !== "undefined" &&
-    typeof process.env.ERC4337_TEST_SINGLETON_ADDRESS !== "undefined" &&
-    typeof process.env.MNEMONIC !== "undefined";
+    nonEmptyString(process.env.ERC4337_TEST_BUNDLER_URL) &&
+    nonEmptyString(process.env.ERC4337_TEST_NODE_URL) &&
+    nonEmptyString(process.env.ERC4337_TEST_SAFE_FACTORY_ADDRESS) &&
+    nonEmptyString(process.env.ERC4337_TEST_SINGLETON_ADDRESS) &&
+    nonEmptyString(process.env.MNEMONIC);
 
 const itif = ERC4337_TEST_ENV_VARIABLES_DEFINED ? it : it.skip;
 const SAFE_FACTORY_ADDRESS = process.env.ERC4337_TEST_SAFE_FACTORY_ADDRESS;
@@ -36,7 +38,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("Safe.ERC4337", () => {
     const setupTests = async () => {
-        const factory = await getFactoryAt(SAFE_FACTORY_ADDRESS as string);
+        const factory = await getFactory(SAFE_FACTORY_ADDRESS as string);
         const singleton = await getSafeSingletonAt(SINGLETON_ADDRESS as string);
         const bundlerProvider = new hre.ethers.JsonRpcProvider(BUNDLER_URL);
         const provider = new hre.ethers.JsonRpcProvider(NODE_URL);

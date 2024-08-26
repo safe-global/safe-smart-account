@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { deployContract, getFactory, getMock, getSafe, getSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
@@ -31,9 +31,9 @@ describe("ProxyFactory", () => {
         }
     }`;
 
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         const singleton = await deployContract(user1, SINGLETON_SOURCE);
         return {

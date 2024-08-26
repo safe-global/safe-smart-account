@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { getSafe } from "../utils/setup";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("Safe - Reserved Addresses", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const [user1] = await ethers.getSigners();
+        const [user1] = await hre.ethers.getSigners();
         return {
             safe: await getSafe({ owners: [user1.address] }),
         };

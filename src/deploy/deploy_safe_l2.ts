@@ -1,18 +1,19 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDeployerAccount } from "../utils/deploy";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getNamedAccounts } = hre;
-    const { deployer } = await getNamedAccounts();
+    const { deployments } = hre;
+    const deployerAccount = await getDeployerAccount(hre);
     const { deploy } = deployments;
 
     await deploy("SafeL2", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 };
 
-deploy.tags = ["l2", "l2-suite"];
+deploy.tags = ["l2", "l2-suite", "main-suite"];
 export default deploy;

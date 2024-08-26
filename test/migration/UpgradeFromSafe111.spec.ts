@@ -8,11 +8,18 @@ import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
 describe("Upgrade from Safe 1.1.1", () => {
+    before(function () {
+        /**
+         * ## There's no safe 1.1.1 on zkSync, so we skip this test
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
     const ChangeMasterCopyInterface = new ethers.Interface(["function changeMasterCopy(address target)"]);
 
     // We migrate the Safe and run the verification tests
     const setupTests = deployments.createFixture(async ({ deployments }) => {
-        const [user1] = await ethers.getSigners();
+        const [user1] = await hre.ethers.getSigners();
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();

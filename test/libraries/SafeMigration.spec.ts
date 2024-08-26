@@ -4,9 +4,9 @@ import {
     getSafe,
     getSafeSingletonAt,
     safeMigrationContract,
-    getSafeSingletonContract,
-    getSafeL2SingletonContract,
+    getSafeL2Singleton,
     getCompatFallbackHandler,
+    getSafeL1Singleton,
 } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import fallbackHandlerDeploymentData from "../json/fallbackHandlerDeployment.json";
@@ -46,6 +46,14 @@ const migrationPaths = [
 ];
 
 describe("SafeMigration Library", () => {
+    before(function () {
+        /**
+         * ## Migration tests are not working yet for zkSync: this test depends on the EVM bytecode
+         * which is not supported on zkSync. Tests will be adjusted.
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
     const migratedInterface = new ethers.Interface(["function masterCopy() view returns(address)"]);
 
     let SAFE_SINGLETON_ADDRESS: string | null | undefined;
@@ -54,9 +62,11 @@ describe("SafeMigration Library", () => {
 
     describe("constructor", () => {
         const setupTests = deployments.createFixture(async () => {
+            await deployments.fixture();
+
             return {
-                singletonAddress: await getSafeSingletonContract(),
-                singletonL2Address: await getSafeL2SingletonContract(),
+                singletonAddress: (await getSafeL1Singleton()).getAddress(),
+                singletonL2Address: (await getSafeL2Singleton()).getAddress(),
                 compatibilityFallbackHandlerAddress: await getCompatFallbackHandler(),
             };
         });
@@ -93,8 +103,8 @@ describe("SafeMigration Library", () => {
 
                 if (latest) {
                     migration = await safeMigrationContract();
-                    SAFE_SINGLETON_ADDRESS = await (await getSafeSingletonContract()).getAddress();
-                    SAFE_SINGLETON_L2_ADDRESS = await (await getSafeL2SingletonContract()).getAddress();
+                    SAFE_SINGLETON_ADDRESS = await (await getSafeL1Singleton()).getAddress();
+                    SAFE_SINGLETON_L2_ADDRESS = await (await getSafeL2Singleton()).getAddress();
                     COMPATIBILITY_FALLBACK_HANDLER = await (await getCompatFallbackHandler()).getAddress();
                 } else {
                     SAFE_SINGLETON_ADDRESS = (await (await user1.sendTransaction({ data: to?.safeDeploymentData })).wait())

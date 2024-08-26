@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { getFactory, getSafeL2SingletonContract, getSafeSingletonContract, getSafe } from "../utils/setup";
+import { getFactory, getSafe, getSafeL2Singleton, getSafeSingleton } from "../utils/setup";
 import { sameHexString } from "../utils/strings";
 import { executeContractCallWithSigners } from "../../src";
 import { EXPECTED_SAFE_STORAGE_LAYOUT, getContractStorageLayout } from "../utils/storage";
@@ -27,9 +27,9 @@ describe("SafeToL2Setup", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const safeToL2SetupLib = await (await hre.ethers.getContractFactory("SafeToL2Setup")).deploy();
-        const signers = await ethers.getSigners();
-        const safeSingleton = await getSafeSingletonContract();
-        const safeL2 = await getSafeL2SingletonContract();
+        const signers = await hre.ethers.getSigners();
+        const safeSingleton = await getSafeSingleton();
+        const safeL2 = await getSafeL2Singleton();
         const proxyFactory = await getFactory();
         return {
             safeToL2SetupLib,
@@ -130,6 +130,12 @@ describe("SafeToL2Setup", () => {
             });
 
             it("changes the expected storage slot without touching the most important ones", async () => {
+                if (hre.network.zksync) {
+                    // zksync doesn't support hardhat style traces
+                    // and their traces only include calls without the storage changes
+                    return;
+                }
+
                 const {
                     safeSingleton,
                     safeL2,

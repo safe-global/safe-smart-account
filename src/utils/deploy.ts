@@ -1,0 +1,23 @@
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+
+/**
+ * Retrieves the deployer account based on the current network environment.
+ *
+ * @param hre - The Hardhat Runtime Environment.
+ * @returns The deployer account address or private key.
+ */
+export const getDeployerAccount = async (hre: HardhatRuntimeEnvironment) => {
+    const { deployer } = await hre.getNamedAccounts();
+
+    let deployerAccount = deployer;
+    if (hre.network.zksync) {
+        if (process.env.ZKSYNC_DEPLOYER_PK) {
+            deployerAccount = process.env.ZKSYNC_DEPLOYER_PK;
+        } else {
+            console.warn("Using default ZkSync deployer private key");
+            process.env.ZKSYNC_DEPLOYER_PK = "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110";
+        }
+    }
+
+    return deployerAccount;
+};

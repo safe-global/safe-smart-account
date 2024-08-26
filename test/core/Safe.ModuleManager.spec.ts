@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import { ethers } from "ethers";
+import hre, { deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafe, getMock } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
@@ -10,7 +11,7 @@ describe("ModuleManager", () => {
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
 
         const safe = await getSafe({ owners: [user1.address] });

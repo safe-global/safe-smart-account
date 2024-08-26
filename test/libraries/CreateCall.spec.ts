@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { compile, getCreateCall, getSafe } from "../utils/setup";
 import { buildContractCall, executeTx, safeApproveHash } from "../../src/utils/execution";
 
@@ -16,10 +16,19 @@ contract Test {
 }`;
 
 describe("CreateCall", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    before(function () {
+        /**
+         * performCreate and performCreate2 functions of CreateCall.sol will not work on zkSync because the compiler
+         * needs to be aware of the code at compile time.
+         * @see https://docs.zksync.io/build/developer-reference/ethereum-differences/evm-instructions#create-create2
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const testContract = await compile(CONTRACT_SOURCE);
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         return {
             safe: await getSafe({ owners: [user1.address] }),
