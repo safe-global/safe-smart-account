@@ -81,7 +81,7 @@ describe("SimulateTxAccessor", () => {
 
         it("simulate revert", async () => {
             const { accessor, interactor, simulator, signers } = await setupTests();
-            const [, user2] = await signers;
+            const [, user2] = signers;
             const accessorAddress = await accessor.getAddress();
             const tx = await buildContractCall(interactor, "sendAndReturnBalance", [user2.address, ethers.parseEther("1")], 0, true);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
