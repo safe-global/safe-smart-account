@@ -110,9 +110,7 @@ describe("FallbackManager", () => {
             await expect(safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.rejected;
 
             // Setup Safe
-            await (
-                await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
-            ).wait();
+            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
 
             // Check callbacks
             expect(await safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
