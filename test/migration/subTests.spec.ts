@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
