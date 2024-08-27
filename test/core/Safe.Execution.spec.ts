@@ -272,7 +272,10 @@ describe("Safe", () => {
                 // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
                 // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i cant confirm this:
                 // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
-                // I reached out to the zksync team to confirm. Skipping this test for now.
+                // From zkSync team:
+                // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
+                // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
+                // TODO: update the node plugin when a new version is released
                 return;
             }
 
@@ -331,7 +334,10 @@ describe("Safe", () => {
                 // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
                 // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i cant confirm this:
                 // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
-                // I reached out to the zksync team to confirm. Skipping this test for now.
+                // From zkSync team:
+                // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
+                // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
+                // TODO: update the node plugin when a new version is released
                 return;
             }
 
