@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { ethers } from "hardhat";
+import { ethers } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
@@ -12,7 +12,7 @@ interface TestSetup {
 }
 
 export const verificationTests = async (setupTests: () => Promise<TestSetup>) => {
-    const [user1, user2, user3] = await hre.ethers.getSigners();
+    const [user1, user2, user3] = await ethers.getSigners();
 
     describe("execTransaction", () => {
         it("should be able to transfer ETH", async () => {
