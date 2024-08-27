@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate } from "../utils/setup";
 
 describe("HandlerContext", () => {
-    const setup = hre.deployments.createFixture(async ({ deployments }) => {
+    const setup = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const TestHandler = await hre.ethers.getContractFactory("TestHandler");
         const handler = await TestHandler.deploy();
-        const signers = await hre.ethers.getSigners();
+        const signers = await ethers.getSigners();
         return {
             safe: await getSafeTemplate(),
             handler,

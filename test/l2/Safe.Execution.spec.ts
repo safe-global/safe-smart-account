@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { getMock, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
@@ -17,8 +17,8 @@ describe("SafeL2", () => {
         }
     });
 
-    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
-        const signers = await hre.ethers.getSigners();
+    const setupTests = deployments.createFixture(async ({ deployments }) => {
+        const signers = await ethers.getSigners();
         const [user1] = signers;
         await deployments.fixture();
         const mock = await getMock();

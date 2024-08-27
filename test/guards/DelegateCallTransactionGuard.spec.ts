@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafe } from "../utils/setup";
 import { buildContractCall, executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("DelegateCallTransactionGuard", () => {
-    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
+    const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await hre.ethers.getSigners();
+        const signers = await ethers.getSigners();
         const [user1] = signers;
         const safe = await getSafe({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("DelegateCallTransactionGuard");

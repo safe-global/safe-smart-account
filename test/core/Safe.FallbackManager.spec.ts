@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { defaultTokenCallbackHandlerDeployment, deployContract, getSafeTemplate, getTokenCallbackHandler } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("FallbackManager", () => {
-    const setupWithTemplate = hre.deployments.createFixture(async ({ deployments }) => {
+    const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const source = `
         contract Mirror {
@@ -17,7 +17,7 @@ describe("FallbackManager", () => {
                 return msg.data;
             }
         }`;
-        const signers = await hre.ethers.getSigners();
+        const signers = await ethers.getSigners();
         const [user1] = signers;
         const mirror = await deployContract(user1, source);
         return {
