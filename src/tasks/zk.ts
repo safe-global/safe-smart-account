@@ -15,7 +15,7 @@ subtask(TASK_VERIFY_ZK_ALL).setAction(async (_, hre) => {
 
         try {
             console.log(`\nVerifying ${contract} at ${deployment.address}...`);
-            await hre.run(TASK_VERIFY_VERIFY, { address: deployment.address });
+            await hre.run(TASK_VERIFY_VERIFY, { address: deployment.address, constructorArguments: deployment.args || [] });
         } catch (error) {
             if (error instanceof Error && error.message.includes("contract is already verified")) {
                 console.log(`\x1b[32m${contract} is already verified!\x1b[0m`);

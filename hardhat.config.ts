@@ -51,7 +51,7 @@ if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].in
 import "./src/tasks/local_verify";
 import "./src/tasks/deploy_contracts";
 import "./src/tasks/show_codesize";
-import "./src/tasks/zk";
+// import "./src/tasks/zk";
 import { BigNumber } from "@ethersproject/bignumber";
 import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 
@@ -144,12 +144,12 @@ const userConfig: HardhatUserConfig = {
             zksync: true,
             verifyURL: "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
         },
-        zkSyncTestnet: {
+        zkSyncSepolia: {
             ...sharedNetworkConfig,
-            url: "https://testnet.era.zksync.dev",
+            url: "https://sepolia.era.zksync.dev",
             ethNetwork: "goerli",
             zksync: true,
-            verifyURL: "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+            verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
         },
     },
     deterministicDeployment,

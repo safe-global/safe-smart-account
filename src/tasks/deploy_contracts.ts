@@ -4,7 +4,10 @@ import { TASK_VERIFY_ZK_ALL } from "./zk";
 task("deploy-contracts", "Deploys and verifies Safe Smart Account contracts").setAction(async (_, hre) => {
     await hre.run("deploy");
     await hre.run("local-verify");
-    await hre.run("sourcify");
+    // sourcify is not supported on zkSync
+    if (!hre.network.zksync) {
+        await hre.run("sourcify");
+    }
 
     if (!hre.network.zksync) {
         await hre.run("etherscan-verify", { forceLicense: true, license: "LGPL-3.0" });
