@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import { deployments, ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafe } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("OwnerManager", () => {
-    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
+    const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await hre.ethers.getSigners();
+        const signers = await ethers.getSigners();
         const [user1] = signers;
         return {
             safe: await getSafe({ owners: [user1.address] }),
