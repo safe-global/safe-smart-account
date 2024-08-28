@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../libraries/Enum.sol";
-import {IModuleManager} from "./IModuleManager.sol";
-import {IOwnerManager} from "./IOwnerManager.sol";
+import {Enum} from "./../libraries/Enum.sol";
 import {IFallbackManager} from "./IFallbackManager.sol";
 import {IGuardManager} from "./IGuardManager.sol";
+import {IModuleManager} from "./IModuleManager.sol";
+import {IOwnerManager} from "./IOwnerManager.sol";
 
 /**
  * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.

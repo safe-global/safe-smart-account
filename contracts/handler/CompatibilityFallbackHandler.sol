@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
-import {ISignatureValidator} from "../interfaces/ISignatureValidator.sol";
-import {ISafe} from "../interfaces/ISafe.sol";
+import {ISafe} from "./../interfaces/ISafe.sol";
+import {ISignatureValidator} from "./../interfaces/ISignatureValidator.sol";
 import {HandlerContext} from "./HandlerContext.sol";
+import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
 
 /**
  * @title Compatibility Fallback Handler - Provides compatibility between pre 1.3.0 and 1.3.0+ Safe Smart Account contracts.

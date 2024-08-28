@@ -2,10 +2,10 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../libraries/Enum.sol";
-import {SelfAuthorized} from "../common/SelfAuthorized.sol";
-import {IERC165} from "../interfaces/IERC165.sol";
-import {IGuardManager} from "../interfaces/IGuardManager.sol";
+import {SelfAuthorized} from "./../common/SelfAuthorized.sol";
+import {IERC165} from "./../interfaces/IERC165.sol";
+import {IGuardManager} from "./../interfaces/IGuardManager.sol";
+import {Enum} from "./../libraries/Enum.sol";
 
 /**
  * @title ITransactionGuard Interface
