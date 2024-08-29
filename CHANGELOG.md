@@ -47,16 +47,6 @@ Solidity optimizer: `disabled`
 
 ### General
 
-### New contracts
-
-Issue: [#787](https://github.com/safe-global/safe-smart-account/issues/787)
-
-`SafeMigration` contract is a generalized migration contract that will facilitate Safe migrations. The contract takes target singleton and fallback handler addresses as constructor argument.
-
-PR: [#759](https://github.com/safe-global/safe-smart-account/pull/759)
-
-`SafeToL2Setup` contract facilitates the deployment of a Safe to the same address on all networks by automatically changing the singleton to the L2 version when not on chain ID 1.
-
 #### Use updated EIP-1271 function signature in the signature validation process
 
 Issue: [#391](https://github.com/safe-global/safe-smart-account/issues/391)
@@ -124,12 +114,25 @@ Solidity optimizer: `disabled`
 -   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
 -   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
 -   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+-   `SafeToL2Setup` at `0x80E0d1577aD3d982BF2F49aAB00BfA161AA763c4`
 
 ### Storage reader contracts
 
 -   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
 
 ## Changes
+
+### General
+
+#### New contracts
+
+Issue: [#787](https://github.com/safe-global/safe-smart-account/issues/787)
+
+`SafeMigration` contract is a generalized migration contract that will facilitate Safe migrations. The contract takes target singleton and fallback handler addresses as constructor argument.
+
+PR: [#759](https://github.com/safe-global/safe-smart-account/pull/759)
+
+`SafeToL2Setup` contract facilitates the deployment of a Safe to the same address on all networks by automatically changing the singleton to the L2 version when not on chain ID 1.
 
 ### Bugfixes
 
