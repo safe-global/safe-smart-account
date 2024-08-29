@@ -2,9 +2,9 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Enum} from "../../libraries/Enum.sol";
-import {BaseTransactionGuard} from "../../base/GuardManager.sol";
-import {ISafe} from "../../interfaces/ISafe.sol";
+import {BaseTransactionGuard} from "./../../base/GuardManager.sol";
+import {ISafe} from "./../../interfaces/ISafe.sol";
+import {Enum} from "./../../libraries/Enum.sol";
 
 /**
  * @title OnlyOwnersGuard - Only allows owners to execute transactions.

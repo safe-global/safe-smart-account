@@ -13,6 +13,7 @@
         "reason-string": "off",
         "no-empty-blocks": "off",
         "avoid-low-level-calls": "off",
-        "gas-custom-errors": "off"
+        "gas-custom-errors": "off",
+        "imports-order": "warn"
     }
 }

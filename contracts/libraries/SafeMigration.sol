@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {SafeStorage} from "../libraries/SafeStorage.sol";
-import {ISafe} from "../interfaces/ISafe.sol";
+import {ISafe} from "./../interfaces/ISafe.sol";
+import {SafeStorage} from "./../libraries/SafeStorage.sol";
 
 /**
  * @title Migration Contract for Safe Upgrade

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
-import {SafeMath} from "../external/SafeMath.sol";
+import {SafeMath} from "./../external/SafeMath.sol";
+import {ERC1155TokenReceiver} from "./../interfaces/ERC1155TokenReceiver.sol";
 
 /**
  * @title ERC1155Token - A test ERC1155 token contract

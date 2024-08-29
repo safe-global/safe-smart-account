@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
+import {FallbackManager} from "./base/FallbackManager.sol";
 import {ITransactionGuard, GuardManager} from "./base/GuardManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {OwnerManager} from "./base/OwnerManager.sol";
-import {FallbackManager} from "./base/FallbackManager.sol";
 import {NativeCurrencyPaymentFallback} from "./common/NativeCurrencyPaymentFallback.sol";
-import {Singleton} from "./common/Singleton.sol";
-import {SignatureDecoder} from "./common/SignatureDecoder.sol";
 import {SecuredTokenTransfer} from "./common/SecuredTokenTransfer.sol";
+import {SignatureDecoder} from "./common/SignatureDecoder.sol";
+import {Singleton} from "./common/Singleton.sol";
 import {StorageAccessible} from "./common/StorageAccessible.sol";
-import {Enum} from "./libraries/Enum.sol";
-import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
 import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
+import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
+import {Enum} from "./libraries/Enum.sol";
 
 /**
  * @title Safe - A multisignature wallet with support for confirmations using signed messages based on EIP-712.
