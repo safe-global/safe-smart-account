@@ -115,6 +115,8 @@ Solidity optimizer: `disabled`
 -   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
 -   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
 -   `SafeToL2Setup` at `0x80E0d1577aD3d982BF2F49aAB00BfA161AA763c4`
+-   `SafeToL2Migration` at `0x7Baec386CAF8e02B0BB4AFc98b4F9381EEeE283C`
+-   `SafeMigration` at `0x6881104d40E00942B216c63BccbaF3D1064b3970` (Target Safe version: v1.4.1)
 
 ### Storage reader contracts
 
