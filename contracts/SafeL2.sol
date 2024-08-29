@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-// the import is used in the @inheritdoc, false positive
+// The import is used in the @inheritdoc, false positive
 // solhint-disable-next-line no-unused-import
 import {ModuleManager} from "./base/ModuleManager.sol";
 import {Safe, Enum} from "./Safe.sol";
