@@ -65,8 +65,7 @@ Calls to `transfer` and `send` were removed to make the contract not depend on a
 
 Issue: [#544](https://github.com/safe-global/safe-smart-account/issues/544)
 
-The contracts couldn't be compiled with the solidity compiler versions 0.8.19+ because of the compiler optimizations that copy stack variables to memory to prevent stack-too-deep errors. In some assembly blocks, the scratch space was used, and that's not
-considered safe, so all the assembly blocks were adjusted to use safe memory allocation.
+The contracts couldn't be compiled with the solidity compiler versions 0.8.19+ because of the compiler optimizations that copy stack variables to memory to prevent stack-too-deep errors. In some assembly blocks, the scratch space was used, and that's not considered safe, so all the assembly blocks were adjusted to use safe memory allocation.
 
 #### Add module guard interface
 
