@@ -46,6 +46,8 @@ describe("SignMessageLib", () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
+            // ZkSync node will not even let you execute the always reverting transaction and just throw, so we can't test the revert reason
+            // .to.be.reverted works as a catch statement
             if (hre.network.zksync) {
                 await expect(lib.signMessage("0xbaddad")).to.be.reverted;
             } else {
