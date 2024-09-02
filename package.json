@@ -65,7 +65,7 @@
         "@openzeppelin/contracts": "^3.4.0",
         "@safe-global/mock-contract": "^4.1.0",
         "@safe-global/safe-singleton-factory": "^1.0.32",
-        "@types/chai": "^4.3.18",
+        "@types/chai": "^4.3.19",
         "@types/mocha": "^10.0.7",
         "@types/node": "^20.11.30",
         "@types/yargs": "^17.0.33",
@@ -89,6 +89,6 @@
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.3.0",
         "yargs": "^17.7.2",
-        "zksync-ethers": "^6.11.2"
+        "zksync-ethers": "6.11.2"
     }
 }

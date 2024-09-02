@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { ethers } from "hardhat";
+import hre from "hardhat";
 import { deployContract, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
@@ -72,7 +72,8 @@ describe("Safe", () => {
                 { gasLimit: 1000000 },
             );
 
-            // Reverted reason seems not properly returned by zkSync local node, though it is in fact GS010 when using debug_traceTransaction
+            // ZkSync node will not even let you execute the transaction with too little gas and just throw, so we can't test the revert reason
+            // .to.be.reverted works as a catch statement
             if (hre.network.zksync) {
                 await expect(txPromise).to.be.reverted;
             } else {
@@ -207,9 +208,9 @@ describe("Safe", () => {
                 refundReceiver: user2.address,
             });
 
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await user1.sendTransaction({ to: safeAddress, value: hre.ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
-            expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.eq(hre.ethers.parseEther("1"));
 
             const executedTx = await executeTx(safe.connect(user1), tx, [await safeApproveHash(user1, safe, tx, true)]);
             await expect(executedTx).to.emit(safe, "ExecutionSuccess");
@@ -245,9 +246,9 @@ describe("Safe", () => {
                 refundReceiver: user2.address,
             });
 
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await user1.sendTransaction({ to: safeAddress, value: hre.ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
-            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
+            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(hre.ethers.parseEther("1"));
 
             const executedTx = await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);
             await expect(executedTx).to.emit(safe, "ExecutionFailure");
@@ -276,7 +277,7 @@ describe("Safe", () => {
                 // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
                 // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
                 // TODO: update the node plugin when a new version is released
-                return;
+                // return;
             }
 
             const { safe, signers } = await setupTests();
@@ -321,7 +322,7 @@ describe("Safe", () => {
 
             // This should only work if the gasPrice is 0
             tx.gasPrice = 1;
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await user1.sendTransaction({ to: safeAddress, value: hre.ethers.parseEther("1") });
             await expect(
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 6000000 }),
                 "Safe transaction should fail with gasPrice 1 and high gasLimit",
@@ -355,8 +356,8 @@ describe("Safe", () => {
                 refundReceiver: nativeTokenReceiverAddress,
             });
 
-            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
-            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
+            await user1.sendTransaction({ to: safeAddress, value: hre.ethers.parseEther("1") });
+            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(hre.ethers.parseEther("1"));
 
             // await expect(await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)], { gasLimit: 5500000 })).to.emit(
             //     nativeTokenReceiver,
