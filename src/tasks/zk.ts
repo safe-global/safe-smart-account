@@ -1,4 +1,3 @@
-import "hardhat-deploy";
 import { TASK_VERIFY_VERIFY } from "@matterlabs/hardhat-zksync-verify/dist/src/constants";
 import { subtask } from "hardhat/config";
 
@@ -8,11 +7,9 @@ subtask(TASK_VERIFY_ZK_ALL).setAction(async (_, hre) => {
     if (!hre.network.zksync) throw new Error("Current subtask works only for zk networks!");
 
     console.log(`\nRunning zk verification on block explorer`);
+
     const deployedContracts = await hre.deployments.all();
-
-    for (const contract of Object.keys(deployedContracts)) {
-        const deployment = await hre.deployments.get(contract);
-
+    for (const [contract, deployment] of Object.entries(deployedContracts)) {
         try {
             console.log(`\nVerifying ${contract} at ${deployment.address}...`);
             await hre.run(TASK_VERIFY_VERIFY, { address: deployment.address, constructorArguments: deployment.args || [] });
