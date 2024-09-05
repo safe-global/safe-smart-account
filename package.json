@@ -59,7 +59,7 @@
         "@matterlabs/hardhat-zksync-deploy": "^1.5.0",
         "@matterlabs/hardhat-zksync-ethers": "^1.2.0-beta.3",
         "@matterlabs/hardhat-zksync-node": "^1.1.1",
-        "@matterlabs/hardhat-zksync-solc": "^1.2.3",
+        "@matterlabs/hardhat-zksync-solc": "^1.2.4",
         "@matterlabs/hardhat-zksync-verify": "^1.6.0",
         "@nomicfoundation/hardhat-toolbox": "^5.0.0",
         "@openzeppelin/contracts": "^3.4.0",

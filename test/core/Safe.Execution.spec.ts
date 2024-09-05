@@ -277,7 +277,7 @@ describe("Safe", () => {
                 // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
                 // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
                 // TODO: update the node plugin when a new version is released
-                // return;
+                return;
             }
 
             const { safe, signers } = await setupTests();
