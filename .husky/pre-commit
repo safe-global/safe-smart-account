@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 npm run lint:sol:prettier
 npm run lint:ts:prettier
 npm run lint:sol

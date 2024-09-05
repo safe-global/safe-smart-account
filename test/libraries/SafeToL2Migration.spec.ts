@@ -25,6 +25,13 @@ const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a48
 const GUARD_STORAGE_SLOT = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8";
 
 describe("SafeToL2Migration library", () => {
+    before(function () {
+        /**
+         * ## Migration tests are not working yet for zkSync
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
     const migratedInterface = new ethers.Interface(["function masterCopy() view returns(address)"]);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {

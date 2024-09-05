@@ -1,34 +1,35 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDeployerAccount } from "../utils/deploy";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getNamedAccounts } = hre;
-    const { deployer } = await getNamedAccounts();
+    const { deployments } = hre;
+    const deployerAccount = await getDeployerAccount(hre);
     const { deploy } = deployments;
 
     await deploy("CreateCall", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
     await deploy("MultiSend", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
     await deploy("MultiSendCallOnly", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
     await deploy("SignMessageLib", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,

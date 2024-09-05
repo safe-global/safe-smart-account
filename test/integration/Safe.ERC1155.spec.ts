@@ -1,20 +1,18 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { defaultTokenCallbackHandlerDeployment, getSafeTemplate } from "../utils/setup";
 
 describe("Safe", () => {
-    const mockErc1155 = async () => {
-        const Erc1155 = await hre.ethers.getContractFactory("ERC1155Token");
-        return await Erc1155.deploy();
-    };
-
-    const setupWithTemplate = deployments.createFixture(async ({ deployments }) => {
+    const setupWithTemplate = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
+
+        const mockErc1155 = await (await hre.ethers.getContractFactory("ERC1155Token")).deploy();
+
         return {
             safe: await getSafeTemplate(),
-            token: await mockErc1155(),
+            token: mockErc1155,
             signers,
         };
     });
@@ -38,7 +36,7 @@ describe("Safe", () => {
             await expect(token.mint(safeAddress, 23, 1337, "0x"), "Should not accept minted token if handler not set").to.be.reverted;
 
             await expect(
-                token.safeTransferFrom(user1.address, safeAddress, 23, 1337, "0x"),
+                token.connect(user1).safeTransferFrom(user1.address, safeAddress, 23, 1337, "0x"),
                 "Should not accept sent token if handler not set",
             ).to.be.reverted;
         });
@@ -61,7 +59,7 @@ describe("Safe", () => {
             await token.mint(user1.address, 23, 23, "0x");
             await expect(await token.balanceOf(user1.address, 23)).to.be.deep.eq(23n);
 
-            await token.safeTransferFrom(user1.address, safeAddress, 23, 23, "0x");
+            await token.connect(user1).safeTransferFrom(user1.address, safeAddress, 23, 23, "0x");
             await expect(await token.balanceOf(user1.address, 23)).to.be.deep.eq(0n);
             await expect(await token.balanceOf(safeAddress, 23)).to.be.deep.eq(1360n);
         });

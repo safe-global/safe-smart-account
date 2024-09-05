@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { deployContract, getFactory, getMock, getSafe, getSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
@@ -31,9 +31,9 @@ describe("ProxyFactory", () => {
         }
     }`;
 
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         const singleton = await deployContract(user1, SINGLETON_SOURCE);
         return {
@@ -65,7 +65,7 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = "0x";
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -84,7 +84,7 @@ describe("ProxyFactory", () => {
             const factoryAddress = await factory.getAddress();
 
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -101,7 +101,7 @@ describe("ProxyFactory", () => {
             const singletonAddress = await singleton.getAddress();
 
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -128,7 +128,7 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = "0x";
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -145,7 +145,7 @@ describe("ProxyFactory", () => {
             const singletonAddress = await singleton.getAddress();
             const factoryAddress = await factory.getAddress();
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -162,7 +162,14 @@ describe("ProxyFactory", () => {
             const singletonAddress = await singleton.getAddress();
             const provider = hre.ethers.provider;
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateChainSpecificProxyAddress(factory, singletonAddress, initCode, saltNonce, await chainId());
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
             expect(await provider.getCode(proxyAddress)).to.eq("0x");
 
             await factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce);
@@ -174,7 +181,7 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce);
+            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -194,7 +201,14 @@ describe("ProxyFactory", () => {
             const callback = await hre.ethers.getContractAt("IProxyCreationCallback", mockAddress);
             const initCode = singleton.interface.encodeFunctionData("init", []);
 
-            const proxyAddress = await calculateProxyAddressWithCallback(factory, singletonAddress, initCode, saltNonce, mockAddress);
+            const proxyAddress = await calculateProxyAddressWithCallback(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                mockAddress,
+                hre.network.zksync,
+            );
             await expect(factory.createProxyWithCallback(singletonAddress, initCode, saltNonce, mockAddress))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -218,7 +232,14 @@ describe("ProxyFactory", () => {
 
             await mock.reset();
             // Should be successfull now
-            const proxyAddress = await calculateProxyAddressWithCallback(factory, singletonAddress, initCode, saltNonce, mockAddress);
+            const proxyAddress = await calculateProxyAddressWithCallback(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                mockAddress,
+                hre.network.zksync,
+            );
             await expect(factory.createProxyWithCallback(singletonAddress, initCode, saltNonce, mockAddress))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
@@ -228,7 +249,14 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = "0x";
-            const proxyAddress = await calculateProxyAddressWithCallback(factory, singletonAddress, initCode, saltNonce, AddressZero);
+            const proxyAddress = await calculateProxyAddressWithCallback(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                AddressZero,
+                hre.network.zksync,
+            );
             await expect(factory.createProxyWithCallback(singletonAddress, initCode, saltNonce, AddressZero))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);

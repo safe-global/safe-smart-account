@@ -55,6 +55,7 @@ This will deploy the contracts deterministically and verify the contracts on eth
 Preparation:
 - Set `MNEMONIC` in `.env`
 - Set `INFURA_KEY` in `.env`
+- For zkSync, set `ZKSYNC_DEPLOYER_PK` in `.env`
 
 ```bash
 npm run deploy-all <network>

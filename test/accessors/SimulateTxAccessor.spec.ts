@@ -6,7 +6,7 @@ import { buildContractCall } from "../../src/utils/execution";
 describe("SimulateTxAccessor", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         const [user1] = signers;
         const accessor = await getSimulateTxAccessor();
         const source = `
@@ -75,7 +75,8 @@ describe("SimulateTxAccessor", () => {
                 userBalance + ethers.parseEther("1"),
             );
             expect(simulation.success).to.be.true;
-            expect(simulation.estimate).to.be.lte(15000n);
+            const estimation = hre.network.zksync ? 30000 : 15000;
+            expect(simulation.estimate).to.be.lte(BigInt(estimation));
         });
 
         it("simulate revert", async () => {

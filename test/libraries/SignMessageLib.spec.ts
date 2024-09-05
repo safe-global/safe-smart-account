@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, ethers } from "hardhat";
-import { getSafe } from "../utils/setup";
+import hre from "hardhat";
+import { getSafe, getSignMessageLib } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("SignMessageLib", () => {
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const lib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
-        const signers = await ethers.getSigners();
+        const lib = await getSignMessageLib();
+        const signers = await hre.ethers.getSigners();
         const [user1, user2] = signers;
         return {
             safe: await getSafe({ owners: [user1.address, user2.address] }),
@@ -46,10 +46,16 @@ describe("SignMessageLib", () => {
         it("can be used only via DELEGATECALL opcode", async () => {
             const { lib } = await setupTests();
 
-            // ethers v6 throws instead of reverting
-            await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith(
-                "function selector was not recognized and there's no fallback function",
-            );
+            // ZkSync node will not even let you execute the always reverting transaction and just throw, so we can't test the revert reason
+            // .to.be.reverted works as a catch statement
+            if (hre.network.zksync) {
+                await expect(lib.signMessage("0xbaddad")).to.be.reverted;
+            } else {
+                // ethers v6 throws instead of reverting
+                await expect(lib.signMessage("0xbaddad")).to.be.rejectedWith(
+                    "function selector was not recognized and there's no fallback function",
+                );
+            }
         });
 
         it("changes the expected storage slot without touching the most important ones", async () => {
