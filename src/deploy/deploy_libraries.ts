@@ -36,7 +36,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     await deploy("SafeToL2Setup", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
