@@ -34,6 +34,13 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         log: true,
         deterministicDeployment: true,
     });
+
+    await deploy("SafeToL2Setup", {
+        from: deployer,
+        args: [],
+        log: true,
+        deterministicDeployment: true,
+    });
 };
 
 deploy.tags = ["libraries", "l2-suite", "main-suite"];

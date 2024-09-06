@@ -2,7 +2,7 @@
 
 This changelog only contains changes starting from version 1.3.0
 
-# Version 1.5.0
+# Current version
 
 ## Rename repository
 
@@ -20,28 +20,30 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
--   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+-   `Safe` - TBD
+-   `SafeL2` - TBD
 
 ### Factory contracts
 
--   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+-   `SafeProxyFactory` - TBD
 
 ### Handler contracts
 
--   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
--   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
+-   `TokenCallbackHandler` - TBD
+-   `CompatibilityFallbackHandler` - TBD
 
 ### Lib contracts
 
--   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
--   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
--   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
--   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+-   `MultiSend` - TBD
+-   `MultiSendCallOnly` - TBD
+-   `CreateCall` - TBD
+-   `SignMessageLib` - TBD
+-   `SafeToL2Migration` - TBD
+-   `SafeMigration` - TBD (Target Safe version: v1.5.0)
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+-   `SimulateTxAccessor` - TBD
 
 ## Changes
 
@@ -63,14 +65,13 @@ Calls to `transfer` and `send` were removed to make the contract not depend on a
 
 Issue: [#544](https://github.com/safe-global/safe-smart-account/issues/544)
 
-The contracts couldn't be compiled with the solidity compiler versions 0.8.19+ because of the compiler optimizations that copy stack variables to memory to prevent stack-too-deep errors. In some assembly blocks, the scratch space was used, and that's not
-considered safe, so all the assembly blocks were adjusted to use safe memory allocation.
+The contracts couldn't be compiled with the solidity compiler versions 0.8.19+ because of the compiler optimizations that copy stack variables to memory to prevent stack-too-deep errors. In some assembly blocks, the scratch space was used, and that's not considered safe, so all the assembly blocks were adjusted to use safe memory allocation.
 
-#### Add `checkModuleTransaction` method to the guard
+#### Add module guard interface
 
-Issue: [#335](https://github.com/safe-global/safe-smart-account/issues/335)
+Issue: [#758](https://github.com/safe-global/safe-smart-account/issues/758)
 
-The `checkModuleTransaction` method was added to the guard to allow checking the module transactions before execution. The method is called before the `checkAfterExecution` method. While migrating, it should be checked if a Safe has an existing guard and if it implements the `checkModuleTransaction` method. If it doesn't, module transactions will be blocked.
+The `IModuleGuard` interface was added to allow checking the module transactions before and after execution.
 
 #### Add overloaded `checkNSignatures` method
 
@@ -114,12 +115,31 @@ Solidity optimizer: `disabled`
 -   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
 -   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
 -   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+-   `SafeToL2Setup` at `0x80E0d1577aD3d982BF2F49aAB00BfA161AA763c4`
+-   `SafeToL2Migration` at `0x7Baec386CAF8e02B0BB4AFc98b4F9381EEeE283C`
+-   `SafeMigration` at `0x6881104d40E00942B216c63BccbaF3D1064b3970` (target Safe version: v1.4.1)
 
 ### Storage reader contracts
 
 -   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
 
 ## Changes
+
+### General
+
+#### New contracts
+
+Issue: [#787](https://github.com/safe-global/safe-smart-account/issues/787)
+
+`SafeMigration` contract is a generalized migration contract that will facilitate Safe migrations. The contract takes target singleton and fallback handler addresses as constructor argument.
+
+PR: [#759](https://github.com/safe-global/safe-smart-account/pull/759)
+
+`SafeToL2Setup` contract facilitates the deployment of a Safe to the same address on all networks by automatically changing the singleton to the L2 version when not on chain ID 1.
+
+PR: [#685](https://github.com/safe-global/safe-smart-account/pull/685)
+
+`SafeToL2Migration` contract facilitates updating a Safe from 1.1.1/1.3.0/1.4.1 versions to a L2 version. This is useful when replaying a Safe from a non L2 network in a L2 network.
 
 ### Bugfixes
 
