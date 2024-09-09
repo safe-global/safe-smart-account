@@ -28,7 +28,7 @@ contract SafeMigration is SafeStorage {
      */
     address public immutable SAFE_L2_SINGLETON;
     /**
-     * @notice Addresss of the Fallback Handler
+     * @notice Address of the Fallback Handler
      */
     address public immutable SAFE_FALLBACK_HANDLER;
 
@@ -77,7 +77,7 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateWithFallbackHandler() public onlyDelegateCall {
+    function migrateWithFallbackHandler() external onlyDelegateCall {
         migrateSingleton();
         ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
@@ -94,7 +94,7 @@ contract SafeMigration is SafeStorage {
      * @notice Migrate to Safe Singleton (L2) and set the fallback handler. This function is intended to be used when migrating
      *         a Safe to a version which also requires updating fallback handler.
      */
-    function migrateL2WithFallbackHandler() public onlyDelegateCall {
+    function migrateL2WithFallbackHandler() external onlyDelegateCall {
         migrateL2Singleton();
         ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }

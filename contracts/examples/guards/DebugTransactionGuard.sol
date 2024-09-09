@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import {ISafe} from "./../../interfaces/ISafe.sol";
 import {Enum} from "./../../libraries/Enum.sol";
 import {BaseGuard} from "./BaseGuard.sol";
+
 /**
  * @title Debug Transaction Guard - Emits transaction events with extended information.
  * @dev This guard is only meant as a development tool and example

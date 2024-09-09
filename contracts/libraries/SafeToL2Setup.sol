@@ -13,10 +13,10 @@ import {SafeStorage} from "../libraries/SafeStorage.sol";
  */
 contract SafeToL2Setup is SafeStorage {
     /**
-     * @notice Address of the contract.
-     * @dev This is used to ensure that the contract is only ever `DELEGATECALL`-ed.
+     * @dev Address of the contract.
+     *      This is used to ensure that the contract is only ever `DELEGATECALL`-ed.
      */
-    address public immutable _SELF;
+    address private immutable SELF;
 
     /**
      * @notice Event indicating a change of master copy address.
@@ -28,14 +28,14 @@ contract SafeToL2Setup is SafeStorage {
      * @notice Initializes a new {SafeToL2Setup} instance.
      */
     constructor() {
-        _SELF = address(this);
+        SELF = address(this);
     }
 
     /**
      * @notice Modifier ensure a function is only called via `DELEGATECALL`. Will revert otherwise.
      */
     modifier onlyDelegateCall() {
-        require(address(this) != _SELF, "SafeToL2Setup should only be called via delegatecall");
+        require(address(this) != SELF, "SafeToL2Setup should only be called via delegatecall");
         _;
     }
 
@@ -52,7 +52,7 @@ contract SafeToL2Setup is SafeStorage {
      *
      */
     modifier onlyContract(address account) {
-        require(_codeSize(account) != 0, "Account doesn't contain code");
+        require(codeSize(account) != 0, "Account doesn't contain code");
         _;
     }
 
@@ -61,8 +61,8 @@ contract SafeToL2Setup is SafeStorage {
      * @dev This function checks that the chain ID is not 1, and if it isn't updates the singleton
      *      to the provided L2 singleton.
      */
-    function setupToL2(address l2Singleton) public onlyDelegateCall onlyNonceZero onlyContract(l2Singleton) {
-        if (_chainId() != 1) {
+    function setupToL2(address l2Singleton) external onlyDelegateCall onlyNonceZero onlyContract(l2Singleton) {
+        if (chainId() != 1) {
             singleton = l2Singleton;
             emit ChangedMasterCopy(l2Singleton);
         }
@@ -71,7 +71,7 @@ contract SafeToL2Setup is SafeStorage {
     /**
      * @notice Returns the current chain ID.
      */
-    function _chainId() private view returns (uint256 result) {
+    function chainId() private view returns (uint256 result) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -83,7 +83,7 @@ contract SafeToL2Setup is SafeStorage {
     /**
      * @notice Returns the code size of the specified account.
      */
-    function _codeSize(address account) internal view returns (uint256 result) {
+    function codeSize(address account) internal view returns (uint256 result) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
