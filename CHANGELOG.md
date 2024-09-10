@@ -32,6 +32,9 @@ Solidity optimizer: `disabled`
 -   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
 -   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
 -   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
+-   `SafeMigration` at `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` (target Safe version: v1.4.1)
+-   `SafeToL2Migration` at `0xfF83F6335d8930cBad1c0D439A841f01888D9f69`
+-   `SafeToL2Setup` at `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54`
 
 ### Storage reader contracts
 
