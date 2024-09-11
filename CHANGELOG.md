@@ -42,6 +42,22 @@ Solidity optimizer: `disabled`
 
 ## Changes
 
+### General
+
+#### New contracts
+
+Issue: [#787](https://github.com/safe-global/safe-smart-account/issues/787)
+
+`SafeMigration` contract is a generalized migration contract that will facilitate Safe migrations. The contract takes target singleton and fallback handler addresses as constructor argument.
+
+PR: [#759](https://github.com/safe-global/safe-smart-account/pull/759)
+
+`SafeToL2Setup` contract facilitates the deployment of a Safe to the same address on all networks by automatically changing the singleton to the L2 version when not on chain ID 1.
+
+PR: [#685](https://github.com/safe-global/safe-smart-account/pull/685)
+
+`SafeToL2Migration` contract facilitates updating a Safe from 1.1.1/1.3.0/1.4.1 versions to a L2 version. This is useful when replaying a Safe from a non L2 network in a L2 network.
+
 ### Bugfixes
 
 #### Remove `gasleft()` usage in `setupModules`
