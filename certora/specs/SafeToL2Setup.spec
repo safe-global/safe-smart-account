@@ -4,7 +4,7 @@ using SafeMock as SafeMock;
 // _SELF is always the current contract
 // if the "rule_sanity": "basic" flag is enabled this rule would fail sanity check
 invariant _SELFisAlwaysCurrentContract()
-    SafeToL2Setup._SELF == SafeToL2Setup;
+    SafeToL2Setup.SELF == SafeToL2Setup;
 
 
 // all the non-view functions will revert when called directly (only delegateCall is allowed)
