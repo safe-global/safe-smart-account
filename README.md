@@ -81,8 +81,7 @@ The resulting addresses should be on all networks the same.
 
 Note: Address will vary if contract code is changed or a different Solidity version is used.
 
-#### Replay protection (EIP-155)
-
+#### Replay protection [(EIP-155)](https://eips.ethereum.org/EIPS/eip-155)
 Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
 
 Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, run `npm i --save-dev @safe-global/safe-singleton-factory` before deployment. For more information, including deploying the factory to a new network, please refer to the factory repo.  
