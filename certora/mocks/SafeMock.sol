@@ -34,7 +34,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateCallSetupToL2(address l2Singleton) public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("setupToL2(address)", l2Singleton)
         );
 
@@ -44,7 +44,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateSingleton() public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateSingleton()")
         );
 
@@ -54,7 +54,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateWithFallbackHandler() public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateWithFallbackHandler()")
         );
 
@@ -64,7 +64,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateL2Singleton() public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateL2Singleton()")
         );
 
@@ -74,7 +74,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateL2WithFallbackHandler() public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateL2WithFallbackHandler()")
         );
 
@@ -84,7 +84,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateToL2(address l2Singleton) public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateToL2(address)", l2Singleton)
         );
 
@@ -94,7 +94,7 @@ contract SafeMock is SafeStorage {
     }
 
     function delegateMigrateFromV111(address l2Singleton, address fallbackHandlerAddr) public {
-        (bool success, bytes memory data) = impl.delegatecall(
+        (bool success, ) = impl.delegatecall(
             abi.encodeWithSignature("migrateFromV111(address,address)", l2Singleton, fallbackHandlerAddr)
         );
 
