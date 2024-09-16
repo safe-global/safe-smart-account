@@ -10,7 +10,7 @@ invariant MIGRATION_SINGLETONisAlwaysCurrentContract()
     SafeMigration.MIGRATION_SINGLETON == SafeMigration;
 
 
-// all the function that are not view function will revert (if it is not delegateCall)
+// All the function that are not view function will revert (if it is not delegateCall)
 rule allNonViewFunctionRevert(env e, method f, calldataarg args) filtered { f -> !f.isView } {
     requireInvariant MIGRATION_SINGLETONisAlwaysCurrentContract;
     SafeMigration.f@withrevert(e,args);

@@ -10,14 +10,14 @@ invariant MIGRATION_SINGLETONisAlwaysCurrentContract()
     SafeToL2Migration.MIGRATION_SINGLETON == SafeToL2Migration;
 
 
-// all the function that are not view function will revert (if it is not delegateCall)
+// All the function that are not view function will revert (if it is not delegateCall)
 rule allNonViewFunctionRevert(env e, method f, calldataarg args) filtered { f -> !f.isView } {
     requireInvariant MIGRATION_SINGLETONisAlwaysCurrentContract;
     SafeToL2Migration.f@withrevert(e,args);
     assert lastReverted;
 }
 
-// calls to migrateToL2() and migrateFromV111() can succeed only if Safe's nonce is correct
+// Calls to migrateToL2() and migrateFromV111() can succeed only if Safe's nonce is correct
 rule nonceMustBeCorrect(env e, method f, calldataarg args) filtered {
     f -> f.selector == sig:SafeMock.delegateMigrateToL2(address).selector
       || f.selector == sig:SafeMock.delegateMigrateFromV111(address,address).selector
@@ -31,7 +31,7 @@ rule nonceMustBeCorrect(env e, method f, calldataarg args) filtered {
     assert !callReverted => currentNonce == 1;
 }
 
-// correct update of Safe's singleton address by migrateToL2()
+// Correct update of Safe's singleton address by migrateToL2()
 rule singletonMigrateToL2Integrity(env e, address l2Singleton) {
     address singletonBefore = SafeMock.getSingleton(e);
 
@@ -45,7 +45,7 @@ rule singletonMigrateToL2Integrity(env e, address l2Singleton) {
 }
 
 
-// correct update of Safe's singleton address and fallbackHandler address by migrateFromV111()
+// Correct update of Safe's singleton address and fallbackHandler address by migrateFromV111()
 rule singletonMigrateFromV111Integrity(env e, address l2Singleton, address fallbackHandlerAddr) {
     address singletonBefore = SafeMock.getSingleton(e);
     address fallbackHandlerBefore = SafeMock.getFallbackHandler(e);
