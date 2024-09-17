@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 
-import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
+import { deployContractFromSource, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
 import { calculateSafeDomainSeparator } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
@@ -231,7 +231,7 @@ describe("Safe", () => {
                     /* solhint-enable no-inline-assembly */
                 }
             }`;
-            const testIntializer = await deployContract(user1, source);
+            const testIntializer = await deployContractFromSource(user1, source);
             const testIntializerAddress = await testIntializer.getAddress();
             const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"]);
             await expect(
@@ -272,7 +272,7 @@ describe("Safe", () => {
                     require(false, "Computer says nah");
                 }
             }`;
-            const testIntializer = await deployContract(user1, source);
+            const testIntializer = await deployContractFromSource(user1, source);
             const testIntializerAddress = await testIntializer.getAddress();
             const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"]);
             await expect(

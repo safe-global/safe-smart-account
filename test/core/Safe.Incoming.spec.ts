@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
-import { deployContract, getSafe } from "../utils/setup";
+import { deployContractFromSource, getSafe } from "../utils/setup";
 
 describe("Safe", () => {
     const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
@@ -25,8 +25,8 @@ describe("Safe", () => {
         const [user1] = signers;
         return {
             safe: await getSafe({ owners: [user1.address] }),
-            gasCappedTransferContract: hre.network.zksync ? null : await deployContract(user1, gasCappedTransferSource),
-            callContract: await deployContract(user1, callSource),
+            gasCappedTransferContract: hre.network.zksync ? null : await deployContractFromSource(user1, gasCappedTransferSource),
+            callContract: await deployContractFromSource(user1, callSource),
             signers,
         };
     });

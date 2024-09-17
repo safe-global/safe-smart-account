@@ -49,8 +49,8 @@ describe("SafeToL2Migration library", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
         const singleton111Address = (await (await user1.sendTransaction({ data: deploymentData.safe111 })).wait())?.contractAddress;
-        const singleton130Address = (await (await user1.sendTransaction({ data: deploymentData.safe130 })).wait())?.contractAddress;
-        const singleton130L2Address = (await (await user1.sendTransaction({ data: deploymentData.safe130l2 })).wait())?.contractAddress;
+        const singleton130Address = (await (await user1.sendTransaction({ data: deploymentData.safe130.evm })).wait())?.contractAddress;
+        const singleton130L2Address = (await (await user1.sendTransaction({ data: deploymentData.safe130l2.evm })).wait())?.contractAddress;
 
         if (!singleton111Address || !singleton130Address || !singleton130L2Address) {
             throw new Error("Could not deploy Safe111, Safe130 or Safe130L2");
