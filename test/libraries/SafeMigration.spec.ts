@@ -14,7 +14,6 @@ import fallbackHandlerDeploymentData from "../json/fallbackHandlerDeployment.jso
 
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 import { SafeMigration } from "../../typechain-types";
-import { getContractFactory } from "../utils/contracts";
 
 const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5";
 
@@ -114,14 +113,13 @@ describe("SafeMigration Library", () => {
                     const safeL2DeploymentData = zksync ? to?.safeL2DeploymentData.zksync : to?.safeL2DeploymentData.evm;
                     const safeCompatFallbackHandler = zksync ? to?.safeCompatFallbackHandler.zksync : to?.safeCompatFallbackHandler.evm;
 
-                    const safeContractFactory = getContractFactory(hre, await getAbi("Safe"), safeDeploymentData, user1);
+                    const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
                     SAFE_SINGLETON_ADDRESS = await (await safeContractFactory.deploy()).getAddress();
 
-                    const safeL2ContractFactory = getContractFactory(hre, await getAbi("Safe"), safeL2DeploymentData, user1);
+                    const safeL2ContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeL2DeploymentData, user1);
                     SAFE_SINGLETON_L2_ADDRESS = await (await safeL2ContractFactory.deploy()).getAddress();
 
-                    const fallbackHandlerContractFactory = getContractFactory(
-                        hre,
+                    const fallbackHandlerContractFactory = new hre.ethers.ContractFactory(
                         await getAbi("CompatibilityFallbackHandler"),
                         safeCompatFallbackHandler,
                         user1,
@@ -139,12 +137,10 @@ describe("SafeMigration Library", () => {
 
                 const safeDeploymentData = zksync ? from.safeDeploymentData.zksync : from.safeDeploymentData.evm;
                 const safeL2DeploymentData = zksync ? from.safeL2DeploymentData.zksync : from.safeL2DeploymentData.evm;
-                const singletonAddress = await getContractFactory(hre, await getAbi("Safe"), safeDeploymentData, user1)
-                    .deploy()
-                    .then((c) => c?.getAddress());
-                const singletonL2Address = await getContractFactory(hre, await getAbi("SafeL2"), safeL2DeploymentData, user1)
-                    .deploy()
-                    .then((c) => c?.getAddress());
+                const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
+                const singletonAddress = await (await safeContractFactory.deploy()).getAddress();
+                const safeL2ContractFactory = new hre.ethers.ContractFactory(await getAbi("SafeL2"), safeL2DeploymentData, user1);
+                const singletonL2Address = await (await safeL2ContractFactory.deploy()).getAddress();
                 if (!singletonAddress || !singletonL2Address) {
                     throw new Error("Could not deploy safe or safeL2");
                 }

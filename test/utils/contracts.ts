@@ -1,8 +1,5 @@
-import { Signer, BaseContract, ContractRunner } from "ethers";
+import { Signer, BaseContract } from "ethers";
 import { deployContractFromSource } from "./setup";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { InterfaceAbi, Interface } from "ethers";
-import { ContractFactory as zkContractFactory } from "zksync-ethers";
 
 export const killLibSource = `
 contract Test {
@@ -91,28 +88,4 @@ export const getSenderAddressFromContractRunner = (contract: BaseContract): stri
     } else {
         throw new Error("Failed to get sender address from contract runner");
     }
-};
-
-/**
- * Creates a ContractFactory instance based on the current network environment.
- *
- * @param hre - The Hardhat Runtime Environment.
- * @param abi - The ABI (Application Binary Interface) of the contract.
- * @param bytecode - The bytecode of the contract.
- * @param contractRunner - Optional ContractRunner instance.
- * @returns A ContractFactory instance appropriate for the current network.
- */
-export const getContractFactory = (
-    hre: HardhatRuntimeEnvironment,
-    abi: Interface | InterfaceAbi,
-    bytecode: string,
-    contractRunner?: ContractRunner,
-) => {
-    if (hre.network.zksync) {
-        // we cannot use hre.zksyncEthers because it doesn't work
-        // Update when https://github.com/matter-labs/hardhat-zksync/issues/1420 is fixed
-        return new zkContractFactory(abi, bytecode, contractRunner);
-    }
-
-    return new hre.ethers.ContractFactory(abi, bytecode, contractRunner);
 };

@@ -81,7 +81,7 @@ The resulting addresses should be on all networks the same.
 
 Note: Address will vary if contract code is changed or a different Solidity version is used.
 
-#### Replay protection (EIP-155)
+#### Replay protection ([EIP-155](https://eips.ethereum.org/EIPS/eip-155))
 
 Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
 
