@@ -199,7 +199,7 @@ export const compile = async (source: string) => {
     };
 };
 
-export const deployContract = async (deployer: Signer, source: string): Promise<ethers.Contract> => {
+export const deployContractFromSource = async (deployer: Signer, source: string): Promise<ethers.Contract> => {
     if (!hre.network.zksync) {
         const output = await compile(source);
         const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
@@ -213,7 +213,7 @@ export const deployContract = async (deployer: Signer, source: string): Promise<
     } else {
         const output = await zkCompile(hre, source);
         const signers = await hre.ethers.getSigners();
-        const factory = new zk.ContractFactory(output.abi, output.data, signers[0], "create");
+        const factory = new zk.ContractFactory(output.abi, output.bytecode, signers[0], "create");
         const contract = await factory.deploy();
 
         return contract as ethers.Contract;
@@ -225,4 +225,13 @@ export const getSignMessageLib = async () => {
     const SignMessageLib = await hre.ethers.getContractAt("SignMessageLib", SignMessageLibDeployment.address);
 
     return SignMessageLib;
+};
+
+export const getAbi = async (name: string) => {
+    const artifact = await hre.artifacts.readArtifact(name);
+    if (!artifact) {
+        throw Error(`Could not read artifact for ${name}`);
+    }
+
+    return artifact.abi;
 };

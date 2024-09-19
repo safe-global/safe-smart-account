@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import { deployContract, getSafe } from "../utils/setup";
+import { deployContractFromSource, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
     buildSignatureBytes,
@@ -30,7 +30,7 @@ describe("Safe", () => {
                     /* solhint-enable no-inline-assembly */
                 }
             }`;
-        const storageSetter = await deployContract(user1, setterSource);
+        const storageSetter = await deployContractFromSource(user1, setterSource);
         const TestNativeTokenReceiver = await hre.ethers.getContractFactory("TestNativeTokenReceiver");
         const nativeTokenReceiver = await TestNativeTokenReceiver.deploy();
 
@@ -40,7 +40,7 @@ describe("Safe", () => {
                     require(false, "Shit happens");
                 }
             }`;
-        const reverter = await deployContract(user1, reverterSource);
+        const reverter = await deployContractFromSource(user1, reverterSource);
         return {
             safe: await getSafe({ owners: [user1.address] }),
             reverter,
@@ -305,7 +305,7 @@ describe("Safe", () => {
                     this.nested(8, count);
                 }
             }`;
-            const gasUser = await deployContract(user1, gasUserSource);
+            const gasUser = await deployContractFromSource(user1, gasUserSource);
             const to = await gasUser.getAddress();
             const data = gasUser.interface.encodeFunctionData("useGas", [80]);
             const safeTxGas = 10000;

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
-import { deployContract, getMock, getMultiSend, getSafe, getDelegateCaller } from "../utils/setup";
+import { deployContractFromSource, getMock, getMultiSend, getSafe, getDelegateCaller } from "../utils/setup";
 import {
     buildContractCall,
     buildSafeTransaction,
@@ -28,7 +28,7 @@ describe("MultiSend", () => {
             }`;
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const storageSetter = await deployContract(user1, setterSource);
+        const storageSetter = await deployContractFromSource(user1, setterSource);
         return {
             safe: await getSafe({ owners: [user1.address] }),
             multiSend: await getMultiSend(),
@@ -58,7 +58,7 @@ describe("MultiSend", () => {
                     selfdestruct(payable(msg.sender));
                 }
             }`;
-            const killLib = await deployContract(user1, source);
+            const killLib = await deployContractFromSource(user1, source);
 
             const nestedTransactionData = encodeMultiSend([await buildContractCall(killLib, "killme", [], 0)]);
 

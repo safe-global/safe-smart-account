@@ -24,7 +24,7 @@ async function getSolcBuild(hre: HardhatRuntimeEnvironment) {
 export async function zkCompile(
     hre: HardhatRuntimeEnvironment,
     source: string,
-): Promise<{ data: string; abi: ReadonlyArray<JsonFragment> }> {
+): Promise<{ bytecode: string; abi: ReadonlyArray<JsonFragment> }> {
     const zkSolcCompilerPath = hre.config.zksolc.settings.compilerPath;
     const solcBuild = await getSolcBuild(hre);
 
@@ -75,7 +75,7 @@ export async function zkCompile(
     const fileOutput = output["contracts"]["tmp.sol"];
     const contractOutput = fileOutput[Object.keys(fileOutput)[0]];
     const abi = contractOutput["abi"];
-    const data = "0x" + contractOutput["evm"]["bytecode"]["object"];
+    const bytecode = "0x" + contractOutput["evm"]["bytecode"]["object"];
 
-    return { data, abi };
+    return { bytecode, abi };
 }

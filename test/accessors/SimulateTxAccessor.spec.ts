@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { deployments, ethers } from "hardhat";
-import { deployContract, getSimulateTxAccessor, getSafe, getCompatFallbackHandler } from "../utils/setup";
+import { deployContractFromSource, getSimulateTxAccessor, getSafe, getCompatFallbackHandler } from "../utils/setup";
 import { buildContractCall } from "../../src/utils/execution";
 
 describe("SimulateTxAccessor", () => {
@@ -17,7 +17,7 @@ describe("SimulateTxAccessor", () => {
                 return target.balance;
             }
         }`;
-        const interactor = await deployContract(user1, source);
+        const interactor = await deployContractFromSource(user1, source);
         const handler = await getCompatFallbackHandler();
         const handlerAddress = await handler.getAddress();
         const safe = await getSafe({ owners: [user1.address], threshold: 1, fallbackHandler: handlerAddress });
