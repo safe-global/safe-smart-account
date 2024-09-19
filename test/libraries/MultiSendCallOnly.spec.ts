@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
-import { deployContract, getMock, getMultiSendCallOnly, getSafe, getDelegateCaller } from "../utils/setup";
+import { deployContractFromSource, getMock, getMultiSendCallOnly, getSafe, getDelegateCaller } from "../utils/setup";
 import {
     buildContractCall,
     buildSafeTransaction,
@@ -28,7 +28,7 @@ describe("MultiSendCallOnly", () => {
             }`;
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const storageSetter = await deployContract(user1, setterSource);
+        const storageSetter = await deployContractFromSource(user1, setterSource);
         return {
             safe: await getSafe({ owners: [user1.address] }),
             multiSend: await getMultiSendCallOnly(),

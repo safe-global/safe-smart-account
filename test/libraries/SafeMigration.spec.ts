@@ -7,6 +7,7 @@ import {
     getSafeL2Singleton,
     getCompatFallbackHandler,
     getSafeL1Singleton,
+    getAbi,
 } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
 import fallbackHandlerDeploymentData from "../json/fallbackHandlerDeployment.json";
@@ -21,53 +22,50 @@ const GUARD_STORAGE_SLOT = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbd
 const migrationPaths = [
     {
         testSuiteName: "1.3.0 to latest (1.5.0)",
-        from: { safeDeploymentData: deploymentData.safe130, safeL2DeploymentData: deploymentData.safe130l2 },
+        from: {
+            safeDeploymentData: { evm: deploymentData.safe130.evm, zksync: deploymentData.safe130.zksync },
+            safeL2DeploymentData: { evm: deploymentData.safe130l2.evm, zksync: deploymentData.safe130l2.zksync },
+        },
         latest: true,
     },
     {
         testSuiteName: "1.3.0 to 1.4.1",
-        from: { safeDeploymentData: deploymentData.safe130, safeL2DeploymentData: deploymentData.safe130l2 },
+        from: {
+            safeDeploymentData: { evm: deploymentData.safe130.evm, zksync: deploymentData.safe130.zksync },
+            safeL2DeploymentData: { evm: deploymentData.safe130l2.evm, zksync: deploymentData.safe130l2.zksync },
+        },
         // `to` is used when the target contracts are not latest. So, we need to provide the bytecode
         // of the old version of the contracts
         to: {
-            safeDeploymentData: deploymentData.safe141,
-            safeL2DeploymentData: deploymentData.safe141l2,
-            safeCompatFallbackHandler: fallbackHandlerDeploymentData.compatibilityFallbackHandler141,
+            safeDeploymentData: { evm: deploymentData.safe141.evm, zksync: deploymentData.safe141.zksync },
+            safeL2DeploymentData: { evm: deploymentData.safe141l2.evm, zksync: deploymentData.safe141l2.zksync },
+            safeCompatFallbackHandler: {
+                evm: fallbackHandlerDeploymentData.compatibilityFallbackHandler141.evm,
+                zksync: fallbackHandlerDeploymentData.compatibilityFallbackHandler141.zksync,
+            },
         },
     },
     {
         testSuiteName: "1.4.1 to latest (1.5.0)",
         from: {
-            safeDeploymentData: deploymentData.safe141,
-            safeL2DeploymentData: deploymentData.safe141l2,
+            safeDeploymentData: { evm: deploymentData.safe141.evm, zksync: deploymentData.safe141.zksync },
+            safeL2DeploymentData: { evm: deploymentData.safe141l2.evm, zksync: deploymentData.safe141l2.zksync },
         },
         latest: true,
     },
 ];
 
 describe("SafeMigration Library", () => {
-    before(function () {
-        /**
-         * ## Migration tests are not working yet for zkSync: this test depends on the EVM bytecode
-         * which is not supported on zkSync. Tests will be adjusted.
-         */
-        if (hre.network.zksync) this.skip();
-    });
-
     const migratedInterface = new ethers.Interface(["function masterCopy() view returns(address)"]);
-
-    let SAFE_SINGLETON_ADDRESS: string | null | undefined;
-    let SAFE_SINGLETON_L2_ADDRESS: string | null | undefined;
-    let COMPATIBILITY_FALLBACK_HANDLER: string | null | undefined;
 
     describe("constructor", () => {
         const setupTests = deployments.createFixture(async () => {
             await deployments.fixture();
 
             return {
-                singletonAddress: (await getSafeL1Singleton()).getAddress(),
-                singletonL2Address: (await getSafeL2Singleton()).getAddress(),
-                compatibilityFallbackHandlerAddress: await getCompatFallbackHandler(),
+                singletonAddress: await (await getSafeL1Singleton()).getAddress(),
+                singletonL2Address: await (await getSafeL2Singleton()).getAddress(),
+                compatibilityFallbackHandlerAddress: await (await getCompatFallbackHandler()).getAddress(),
             };
         });
 
@@ -94,8 +92,12 @@ describe("SafeMigration Library", () => {
     });
 
     migrationPaths.forEach(({ testSuiteName, from, to, latest }) => {
+        let SAFE_SINGLETON_ADDRESS: string | undefined;
+        let SAFE_SINGLETON_L2_ADDRESS: string | undefined;
+        let COMPATIBILITY_FALLBACK_HANDLER_ADDRESS: string | undefined;
+
         describe(testSuiteName, () => {
-            const setupTests = deployments.createFixture(async ({ deployments }) => {
+            const setupTests = deployments.createFixture(async ({ deployments, network: { zksync } }) => {
                 await deployments.fixture();
                 const signers = await ethers.getSigners();
                 const [user1] = signers;
@@ -105,29 +107,44 @@ describe("SafeMigration Library", () => {
                     migration = await safeMigrationContract();
                     SAFE_SINGLETON_ADDRESS = await (await getSafeL1Singleton()).getAddress();
                     SAFE_SINGLETON_L2_ADDRESS = await (await getSafeL2Singleton()).getAddress();
-                    COMPATIBILITY_FALLBACK_HANDLER = await (await getCompatFallbackHandler()).getAddress();
-                } else {
-                    SAFE_SINGLETON_ADDRESS = (await (await user1.sendTransaction({ data: to?.safeDeploymentData })).wait())
-                        ?.contractAddress;
-                    SAFE_SINGLETON_L2_ADDRESS = (await (await user1.sendTransaction({ data: to?.safeL2DeploymentData })).wait())
-                        ?.contractAddress;
-                    COMPATIBILITY_FALLBACK_HANDLER = (await (await user1.sendTransaction({ data: to?.safeL2DeploymentData })).wait())
-                        ?.contractAddress;
+                    COMPATIBILITY_FALLBACK_HANDLER_ADDRESS = await (await getCompatFallbackHandler()).getAddress();
+                } else if (to) {
+                    const safeDeploymentData = zksync ? to?.safeDeploymentData.zksync : to?.safeDeploymentData.evm;
+                    const safeL2DeploymentData = zksync ? to?.safeL2DeploymentData.zksync : to?.safeL2DeploymentData.evm;
+                    const safeCompatFallbackHandler = zksync ? to?.safeCompatFallbackHandler.zksync : to?.safeCompatFallbackHandler.evm;
+
+                    const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
+                    SAFE_SINGLETON_ADDRESS = await (await safeContractFactory.deploy()).getAddress();
+
+                    const safeL2ContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeL2DeploymentData, user1);
+                    SAFE_SINGLETON_L2_ADDRESS = await (await safeL2ContractFactory.deploy()).getAddress();
+
+                    const fallbackHandlerContractFactory = new hre.ethers.ContractFactory(
+                        await getAbi("CompatibilityFallbackHandler"),
+                        safeCompatFallbackHandler,
+                        user1,
+                    );
+                    COMPATIBILITY_FALLBACK_HANDLER_ADDRESS = await (await fallbackHandlerContractFactory.deploy()).getAddress();
 
                     migration = (await hre.ethers.deployContract("SafeMigration", [
                         SAFE_SINGLETON_ADDRESS,
                         SAFE_SINGLETON_L2_ADDRESS,
-                        COMPATIBILITY_FALLBACK_HANDLER,
+                        COMPATIBILITY_FALLBACK_HANDLER_ADDRESS,
                     ])) as unknown as SafeMigration;
+                } else {
+                    throw new Error("Invalid migration path");
                 }
 
-                const singletonAddress = (await (await user1.sendTransaction({ data: from.safeDeploymentData })).wait())?.contractAddress;
-                const singletonL2Address = (await (await user1.sendTransaction({ data: from.safeL2DeploymentData })).wait())
-                    ?.contractAddress;
-
+                const safeDeploymentData = zksync ? from.safeDeploymentData.zksync : from.safeDeploymentData.evm;
+                const safeL2DeploymentData = zksync ? from.safeL2DeploymentData.zksync : from.safeL2DeploymentData.evm;
+                const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
+                const singletonAddress = await (await safeContractFactory.deploy()).getAddress();
+                const safeL2ContractFactory = new hre.ethers.ContractFactory(await getAbi("SafeL2"), safeL2DeploymentData, user1);
+                const singletonL2Address = await (await safeL2ContractFactory.deploy()).getAddress();
                 if (!singletonAddress || !singletonL2Address) {
                     throw new Error("Could not deploy safe or safeL2");
                 }
+
                 const singleton = await getSafeSingletonAt(singletonAddress);
                 const singletonL2 = await getSafeSingletonAt(singletonL2Address);
 
@@ -221,13 +238,13 @@ describe("SafeMigration Library", () => {
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_ADDRESS)
                         .and.to.emit(safe, "ChangedFallbackHandler")
-                        .withArgs(COMPATIBILITY_FALLBACK_HANDLER);
+                        .withArgs(COMPATIBILITY_FALLBACK_HANDLER_ADDRESS);
 
                     const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
                     expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_ADDRESS);
 
                     expect(await safe.getStorageAt(FALLBACK_HANDLER_STORAGE_SLOT, 1)).to.eq(
-                        "0x" + COMPATIBILITY_FALLBACK_HANDLER?.slice(2).toLowerCase().padStart(64, "0"),
+                        "0x" + COMPATIBILITY_FALLBACK_HANDLER_ADDRESS?.slice(2).toLowerCase().padStart(64, "0"),
                     );
                 });
 
@@ -335,13 +352,13 @@ describe("SafeMigration Library", () => {
                         .to.emit(migrationSafe, "ChangedMasterCopy")
                         .withArgs(SAFE_SINGLETON_L2_ADDRESS)
                         .and.to.emit(safeL2, "ChangedFallbackHandler")
-                        .withArgs(COMPATIBILITY_FALLBACK_HANDLER);
+                        .withArgs(COMPATIBILITY_FALLBACK_HANDLER_ADDRESS);
 
                     const singletonResp = await user1.call({ to: safeAddress, data: migratedInterface.encodeFunctionData("masterCopy") });
                     expect(migratedInterface.decodeFunctionResult("masterCopy", singletonResp)[0]).to.eq(SAFE_SINGLETON_L2_ADDRESS);
 
                     expect(await safeL2.getStorageAt(FALLBACK_HANDLER_STORAGE_SLOT, 1)).to.eq(
-                        "0x" + COMPATIBILITY_FALLBACK_HANDLER?.slice(2).toLowerCase().padStart(64, "0"),
+                        "0x" + COMPATIBILITY_FALLBACK_HANDLER_ADDRESS?.slice(2).toLowerCase().padStart(64, "0"),
                     );
                 });
 

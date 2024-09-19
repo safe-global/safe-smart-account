@@ -1,5 +1,5 @@
 import { Signer, BaseContract } from "ethers";
-import { deployContract } from "./setup";
+import { deployContractFromSource } from "./setup";
 
 export const killLibSource = `
 contract Test {
@@ -63,9 +63,9 @@ contract Test {
 
 export const killLibContract = async (deployer: Signer, zkSync?: boolean) => {
     // selfdestruct is not supported by zkSync and compilation cannot be completed, therefore we have to ditch it
-    if (zkSync) return deployContract(deployer, killLibSourceZk);
+    if (zkSync) return deployContractFromSource(deployer, killLibSourceZk);
 
-    return deployContract(deployer, killLibSource);
+    return deployContractFromSource(deployer, killLibSource);
 };
 
 /**

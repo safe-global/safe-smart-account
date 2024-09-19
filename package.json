@@ -60,14 +60,14 @@
     "devDependencies": {
         "@eslint/js": "^9.9.1",
         "@matterlabs/hardhat-zksync-deploy": "^1.5.0",
-        "@matterlabs/hardhat-zksync-ethers": "^1.2.0-beta.3",
+        "@matterlabs/hardhat-zksync-ethers": "^1.2.1",
         "@matterlabs/hardhat-zksync-node": "^1.1.1",
         "@matterlabs/hardhat-zksync-solc": "^1.2.4",
         "@matterlabs/hardhat-zksync-verify": "^1.6.0",
         "@nomicfoundation/hardhat-toolbox": "^5.0.0",
         "@openzeppelin/contracts": "^3.4.0",
         "@safe-global/mock-contract": "^4.1.0",
-        "@safe-global/safe-singleton-factory": "^1.0.32",
+        "@safe-global/safe-singleton-factory": "^1.0.33",
         "@types/chai": "^4.3.19",
         "@types/mocha": "^10.0.7",
         "@types/node": "^20.11.30",
@@ -92,6 +92,6 @@
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.4.0",
         "yargs": "^17.7.2",
-        "zksync-ethers": "6.11.2"
+        "zksync-ethers": "6.12.1"
     }
 }
