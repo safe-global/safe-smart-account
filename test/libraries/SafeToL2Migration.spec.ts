@@ -16,21 +16,13 @@ const FALLBACK_HANDLER_STORAGE_SLOT = "0x6c9a6c4a39284e37ed1cf53d337577d14212a48
 
 const GUARD_STORAGE_SLOT = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8";
 
-describe.only("SafeToL2Migration library", () => {
-    let SAFE_SINGLETON_111_ADDRESS: string | undefined,
-        SAFE_SINGLETON_130_ADDRESS: string,
+describe("SafeToL2Migration library", () => {
+    let SAFE_SINGLETON_130_ADDRESS: string,
         SAFE_SINGLETON_130_L2_ADDRESS: string,
         SAFE_SINGLETON_141_ADDRESS: string,
         SAFE_SINGLETON_141_L2_ADDRESS: string,
         SAFE_L2_SINGLETON_LATEST_ADDRESS: string,
         COMPATIBILITY_FALLBACK_HANDLER_LATEST_ADDRESS: string;
-
-    before(function () {
-        /**
-         * ## Migration tests are not working yet for zkSync
-         */
-        if (hre.network.zksync) this.skip();
-    });
 
     const migratedInterface = new ethers.Interface(["function masterCopy() view returns(address)"]);
 
@@ -54,23 +46,31 @@ describe.only("SafeToL2Migration library", () => {
         SAFE_SINGLETON_141_ADDRESS = await new hre.ethers.ContractFactory(await getAbi("Safe"), safe141DeploymentData, user1)
             .deploy()
             .then((c) => c.getAddress());
-
         SAFE_SINGLETON_141_L2_ADDRESS = await new hre.ethers.ContractFactory(await getAbi("SafeL2"), safe141L2DeploymentData, user1)
             .deploy()
             .then((c) => c.getAddress());
-
         SAFE_L2_SINGLETON_LATEST_ADDRESS = await getSafeL2Singleton().then((c) => c.getAddress());
         COMPATIBILITY_FALLBACK_HANDLER_LATEST_ADDRESS = await getCompatFallbackHandler().then((c) => c.getAddress());
 
-        // We do not check for 1.1.1 here on purpose because it was not deployed to zksync
-        if (!SAFE_SINGLETON_130_ADDRESS || !SAFE_SINGLETON_130_L2_ADDRESS || SAFE_SINGLETON_141_ADDRESS || SAFE_SINGLETON_141_L2_ADDRESS) {
+        if (
+            !SAFE_SINGLETON_130_ADDRESS ||
+            !SAFE_SINGLETON_130_L2_ADDRESS ||
+            !SAFE_SINGLETON_141_ADDRESS ||
+            !SAFE_SINGLETON_141_L2_ADDRESS
+        ) {
             throw new Error("Could not deploy Safe130, Safe130L2 or Safe141, Safe141L2");
         }
 
         let singleton111: Safe | SafeL2 | undefined;
         let safe111: Safe | SafeL2 | undefined;
-        if (SAFE_SINGLETON_111_ADDRESS) {
-            singleton111 = await getSafeSingletonAt(SAFE_SINGLETON_111_ADDRESS);
+        if (!hre.network.zksync) {
+            const singleton111Address = await user1
+                .sendTransaction({ data: deploymentData.safe111 })
+                .then((tx) => tx.wait())
+                .then((receipt) => receipt?.contractAddress);
+            if (!singleton111Address) throw new Error("Could not deploy Safe111");
+
+            singleton111 = await getSafeSingletonAt(singleton111Address);
             safe111 = await getSafe({ singleton: singleton111, owners: [user1.address] });
         }
         const singleton130 = await getSafeSingletonAt(SAFE_SINGLETON_130_ADDRESS);
