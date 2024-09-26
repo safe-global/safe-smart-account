@@ -120,7 +120,7 @@ contract SafeProxyFactory {
      * @notice Returns the ID of the chain the contract is currently deployed on.
      * @return The ID of the current chain as a uint256.
      */
-    function getChainId() public view returns (uint256) {
+    function getChainId() public pure returns (uint256) {
         uint256 id;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
