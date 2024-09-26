@@ -41,7 +41,7 @@
         "fmt:sol": "prettier 'contracts/**/*.sol' -w",
         "fmt:ts": "prettier 'src/**/*.ts' 'test/**/*.ts' -w",
         "prepack": "npm run build",
-        "prepare": "husky install",
+        "prepare": "husky",
         "prepublish": "rimraf build && npm run build && npm run build:zk && npm run build:ts"
     },
     "repository": {
