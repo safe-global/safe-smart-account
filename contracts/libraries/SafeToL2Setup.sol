@@ -71,7 +71,7 @@ contract SafeToL2Setup is SafeStorage {
     /**
      * @notice Returns the current chain ID.
      */
-    function chainId() private view returns (uint256 result) {
+    function chainId() private pure returns (uint256 result) {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
