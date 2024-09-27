@@ -45,6 +45,24 @@ jobs:
                   cache: "npm"
             - run: npm ci
             - run: npm run build
+            - run: npm run test
+
+    coverage:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                contract-name: ["Safe", "SafeL2"]
+        env:
+            SAFE_CONTRACT_UNDER_TEST: ${{ matrix.contract-name }}
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run build
             - run: npm run coverage
             - name: Send coverage to Coveralls (parallel)
               uses: coverallsapp/github-action@v2
