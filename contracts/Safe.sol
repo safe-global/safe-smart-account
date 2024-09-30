@@ -177,9 +177,11 @@ contract Safe is
             // This makes it possible to use `estimateGas` without issues, as it searches for the minimum gas where the tx doesn't revert
             if (!success && safeTxGas == 0 && gasPrice == 0) {
                 /* solhint-disable no-inline-assembly */
+                /// @solidity memory-safe-assembly
                 assembly {
-                    returndatacopy(0, 0, returndatasize())
-                    revert(0, returndatasize())
+                    let p := mload(0x40)
+                    returndatacopy(p, 0, returndatasize())
+                    revert(p, returndatasize())
                 }
                 /* solhint-enable no-inline-assembly */
             }
