@@ -1,76 +1,104 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
-import { parseEther } from "@ethersproject/units";
+import hre, { ethers } from "hardhat";
+import { deployContractFromSource, getSafe } from "../utils/setup";
 
-describe("Safe", async () => {
-    const [user1] = waffle.provider.getWallets();
-
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+describe("Safe", () => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const source = `
-        contract Test {
-            function transferEth(address payable safe) public payable returns (bool success) {
-                safe.transfer(msg.value);
-            }
-            function sendEth(address payable safe) public payable returns (bool success) {
-                require(safe.send(msg.value));
-            }
-            function callEth(address payable safe) public payable returns (bool success) {
-                (bool success,) = safe.call{ value: msg.value }("");
-                require(success);
-            }
-        }`;
+        const gasCappedTransferSource = `
+            contract Test {
+                function transferEth(address payable safe) public payable returns (bool success) {
+                    safe.transfer(msg.value);
+                }
+                function sendEth(address payable safe) public payable returns (bool success) {
+                    require(safe.send(msg.value));
+                }
+            }`;
+        const callSource = `
+            contract Test {
+                function callEth(address payable safe) public payable returns (bool success) {
+                    (bool success,) = safe.call{ value: msg.value }("");
+                    require(success);
+                }
+            }`;
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
         return {
-            safe: await getSafeWithOwners([user1.address]),
-            caller: await deployContract(user1, source),
+            safe: await getSafe({ owners: [user1.address] }),
+            gasCappedTransferContract: hre.network.zksync ? null : await deployContractFromSource(user1, gasCappedTransferSource),
+            callContract: await deployContractFromSource(user1, callSource),
+            signers,
         };
     });
 
-    describe("fallback", async () => {
+    describe("fallback", () => {
         it("should be able to receive ETH via transfer", async () => {
-            const { safe, caller } = await setupTests();
+            if (hre.network.zksync) {
+                // zksync doesn't support .transfer
+                return;
+            }
+
+            const { safe, gasCappedTransferContract } = await setupTests();
+            const safeAddress = await safe.getAddress();
+
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
-            await expect(caller.transferEth(safe.address, { value: parseEther("1") })).to.be.reverted;
+            await expect(gasCappedTransferContract?.transferEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
         });
 
         it("should be able to receive ETH via send", async () => {
-            const { safe, caller } = await setupTests();
+            if (hre.network.zksync) {
+                // zksync doesn't support .transfer
+                return;
+            }
+
+            const { safe, gasCappedTransferContract } = await setupTests();
+            const safeAddress = await safe.getAddress();
+
             // Notes: It is not possible to load storage + a call + emit event with 2300 gas
-            await expect(caller.sendEth(safe.address, { value: parseEther("1") })).to.be.reverted;
+            await expect(gasCappedTransferContract?.sendEth(safeAddress, { value: ethers.parseEther("1") })).to.be.reverted;
         });
 
         it("should be able to receive ETH via call", async () => {
-            const { safe, caller } = await setupTests();
+            const { safe, callContract } = await setupTests();
+            const safeAddress = await safe.getAddress();
+            const callerAddress = await callContract.getAddress();
+
             await expect(
-                caller.callEth(safe.address, {
-                    value: parseEther("1"),
+                callContract.callEth(safeAddress, {
+                    value: ethers.parseEther("1"),
                 }),
             )
                 .to.emit(safe, "SafeReceived")
-                .withArgs(caller.address, parseEther("1"));
-            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"));
+                .withArgs(callerAddress, ethers.parseEther("1"));
+            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
         });
 
         it("should be able to receive ETH via transaction", async () => {
-            const { safe } = await setupTests();
+            const {
+                safe,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe.getAddress();
+
             await expect(
                 user1.sendTransaction({
-                    to: safe.address,
-                    value: parseEther("1"),
+                    to: safeAddress,
+                    value: ethers.parseEther("1"),
                 }),
             )
                 .to.emit(safe, "SafeReceived")
-                .withArgs(user1.address, parseEther("1"));
-            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"));
+                .withArgs(user1.address, ethers.parseEther("1"));
+            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.eq(ethers.parseEther("1"));
         });
 
         it("should throw for incoming eth with data", async () => {
-            const { safe } = await setupTests();
-            await expect(user1.sendTransaction({ to: safe.address, value: 23, data: "0xbaddad" })).to.be.revertedWith(
-                "fallback function is not payable and was called with value 23",
-            );
+            const {
+                safe,
+                signers: [user1],
+            } = await setupTests();
+            const safeAddress = await safe.getAddress();
+
+            await expect(user1.sendTransaction({ to: safeAddress, value: 23, data: "0xbaddad" })).to.be.revertedWithoutReason();
         });
     });
 });

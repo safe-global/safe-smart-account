@@ -1,5 +1,4 @@
-Safe Contracts
-==============
+# Safe Contracts
 
 [![npm version](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts.svg)](https://badge.fury.io/js/%40gnosis.pm%2Fsafe-contracts)
 [![Build Status](https://github.com/safe-global/safe-contracts/workflows/safe-contracts/badge.svg?branch=development)](https://github.com/safe-global/safe-contracts/actions)
@@ -7,12 +6,12 @@ Safe Contracts
 
 > :warning: **This branch contains changes that are under development** To use the latest audited version make sure to use the correct commit. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-contracts/releases).
 
-Usage
------
-### Install requirements with yarn:
+## Usage
+
+### Install requirements with npm:
 
 ```bash
-yarn
+npm i
 ```
 
 ### Testing
@@ -20,8 +19,8 @@ yarn
 To run the tests:
 
 ```bash
-yarn build
-yarn test
+npm run build
+npm run test
 ```
 
 Optionally, if you want to run the ERC-4337 compatibility test, it uses a live bundler and node, so it contains some pre-requisites:
@@ -42,7 +41,7 @@ MNEMONIC=
 
 A collection of the different Safe contract deployments and their addresses can be found in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository.
 
-To add support for a new network follow the steps of the ``Deploy`` section and create a PR in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository. 
+To add support for a new network follow the steps of the `Deploy` section and create a PR in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository.
 
 ### Deploy
 
@@ -53,28 +52,29 @@ To add support for a new network follow the steps of the ``Deploy`` section and 
 This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
 Preparation:
-- Set `MNEMONIC` in `.env`
-- Set `INFURA_KEY` in `.env`
+
+-   Set `MNEMONIC` in `.env`
+-   Set `INFURA_KEY` in `.env`
 
 ```bash
-yarn deploy-all <network>
+npm run deploy-all <network>
 ```
 
 This will perform the following steps
 
 ```bash
-yarn build
-yarn hardhat --network <network> deploy
-yarn hardhat --network <network> sourcify
-yarn hardhat --network <network> etherscan-verify
-yarn hardhat --network <network> local-verify
+npm run build
+npm run hardhat --network <network> deploy
+npm run hardhat --network <network> sourcify
+npm run hardhat --network <network> etherscan-verify
+npm run hardhat --network <network> local-verify
 ```
 
 #### Custom Networks
 
 It is possible to use the `NODE_URL` env var to connect to any EVM based network via an RPC endpoint. This connection then can be used with the `custom` network.
 
-E.g. to deploy the Safe contract suite on that network you would run `yarn deploy-all custom`. 
+E.g. to deploy the Safe contract suite on that network you would run `npm run deploy-all custom`.
 
 The resulting addresses should be on all networks the same.
 
@@ -82,43 +82,45 @@ Note: Address will vary if contract code is changed or a different Solidity vers
 
 #### Replay protection (EIP-155)
 
-Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
+Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy).
 
-Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, run `yarn add -D @safe-global/safe-singleton-factory` before deployment. For more information, including deploying the factory to a new network, please refer to the factory repo.  
+Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, run `npm i -D @safe-global/safe-singleton-factory` before deployment. For more information, including deploying the factory to a new network, please refer to the factory repo.
 
 Note: This will result in different addresses compared to hardhat's default deterministic deployment process.
 
 ### Verify contract
 
 This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
+
 ```bash
-yarn hardhat --network <network> local-verify
+npx hardhat --network <network> local-verify
 ```
 
 This command will upload the contract source to Etherescan
+
 ```bash
-yarn hardhat --network <network> etherscan-verify
+npx hardhat --network <network> etherscan-verify
 ```
 
-Documentation
--------------
-- [Safe developer portal](http://docs.safe.global)
-- [Error codes](docs/error_codes.md)
-- [Coding guidelines](docs/guidelines.md)
+## Documentation
 
-Audits/ Formal Verification
----------
-- [for Version 1.4.0/1.4.1 by Ackee Blockchain](docs/audit_1_4_0.md)
-- [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
-- [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
-- [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
-- [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
-- [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
+-   [Safe developer portal](http://docs.safe.global)
+-   [Error codes](docs/error_codes.md)
+-   [Coding guidelines](docs/guidelines.md)
 
-Security and Liability
-----------------------
+## Audits/ Formal Verification
+
+-   [for Version 1.4.0/1.4.1 by Ackee Blockchain](docs/audit_1_4_0.md)
+-   [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
+-   [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
+-   [for Version 1.1.1 by G0 Group](docs/audit_1_1_1.md)
+-   [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
+-   [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
+
+## Security and Liability
+
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-License
--------
+## License
+
 All smart contracts are released under LGPL-3.0

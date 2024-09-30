@@ -1,9 +1,10 @@
-import { Contract, utils } from "ethers";
+import { ethers, BigNumberish } from "ethers";
 import { buildContractCall, MetaTransaction, SafeTransaction } from "./execution";
+import { MultiSend } from "../../typechain-types";
 
 const encodeMetaTransaction = (tx: MetaTransaction): string => {
-    const data = utils.arrayify(tx.data);
-    const encoded = utils.solidityPack(
+    const data = ethers.getBytes(tx.data);
+    const encoded = ethers.solidityPacked(
         ["uint8", "address", "uint256", "uint256", "bytes"],
         [tx.operation, tx.to, tx.value, data.length, data],
     );
@@ -14,11 +15,11 @@ export const encodeMultiSend = (txs: MetaTransaction[]): string => {
     return "0x" + txs.map((tx) => encodeMetaTransaction(tx)).join("");
 };
 
-export const buildMultiSendSafeTx = (
-    multiSend: Contract,
+export const buildMultiSendSafeTx = async (
+    multiSend: MultiSend,
     txs: MetaTransaction[],
-    nonce: number,
+    nonce: BigNumberish,
     overrides?: Partial<SafeTransaction>,
-): SafeTransaction => {
+): Promise<SafeTransaction> => {
     return buildContractCall(multiSend, "multiSend", [encodeMultiSend(txs)], nonce, true, overrides);
 };
