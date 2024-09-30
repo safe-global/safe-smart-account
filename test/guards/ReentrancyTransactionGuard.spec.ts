@@ -93,7 +93,7 @@ describe("ReentrancyTransactionGuard", () => {
                     ],
                     [user1],
                 ),
-            ).to.be.revertedWith("GS013");
+            ).to.be.revertedWith("Reentrancy detected");
 
             expect(await mock.invocationCount()).to.be.eq(0);
         });

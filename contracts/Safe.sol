@@ -175,7 +175,16 @@ contract Safe is
             gasUsed = gasUsed.sub(gasleft());
             // If no safeTxGas and no gasPrice was set (e.g. both are 0), then the internal tx is required to be successful
             // This makes it possible to use `estimateGas` without issues, as it searches for the minimum gas where the tx doesn't revert
-            if (!success && safeTxGas == 0 && gasPrice == 0) revertWithError("GS013");
+            if (!success && safeTxGas == 0 && gasPrice == 0) {
+                /* solhint-disable no-inline-assembly */
+                /// @solidity memory-safe-assembly
+                assembly {
+                    let p := mload(0x40)
+                    returndatacopy(p, 0, returndatasize())
+                    revert(p, returndatasize())
+                }
+                /* solhint-enable no-inline-assembly */
+            }
             // We transfer the calculated tx costs to the tx.origin to avoid sending it to intermediate contracts that have made calls
             uint256 payment = 0;
             if (gasPrice > 0) {

@@ -126,7 +126,7 @@ describe("SafeToL2Setup", () => {
 
                 await expect(
                     executeContractCallWithSigners(safe, safeToL2SetupLib, "setupToL2", [safeToL2SetupLibAddress], [user1], true),
-                ).to.be.rejectedWith("GS013");
+                ).to.be.rejectedWith("Safe must have not executed any tx");
             });
 
             it("changes the expected storage slot without touching the most important ones", async () => {

@@ -69,7 +69,7 @@ describe("CreateCall", () => {
             } = await setupTests();
 
             const tx = await buildContractCall(createCall, "performCreate", [1, testContract.data], await safe.nonce(), true);
-            await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("GS013");
+            await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("Could not deploy contract");
         });
 
         it("should successfully create contract and emit event", async () => {
@@ -165,7 +165,7 @@ describe("CreateCall", () => {
             } = await setupTests();
 
             const tx = await buildContractCall(createCall, "performCreate2", [1, testContract.data, salt], await safe.nonce(), true);
-            await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("GS013");
+            await expect(executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)])).to.revertedWith("Could not deploy contract");
         });
 
         it("should successfully create contract and emit event", async () => {

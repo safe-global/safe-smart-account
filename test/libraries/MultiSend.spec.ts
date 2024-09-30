@@ -78,9 +78,9 @@ describe("MultiSend", () => {
 
             const txs = [buildSafeTransaction({ to: user2.address, operation: 2, nonce: 0 })];
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
-            await expect(executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)])).to.revertedWith(
-                "GS013",
-            );
+            await expect(
+                executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)]),
+            ).to.revertedWithoutReason();
         });
 
         it("Can execute empty multisend", async () => {
