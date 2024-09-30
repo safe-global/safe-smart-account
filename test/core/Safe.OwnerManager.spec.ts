@@ -33,7 +33,7 @@ describe("OwnerManager", () => {
             const safeAddress = await safe.getAddress();
 
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [safeAddress, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS203",
             );
         });
 
@@ -44,7 +44,7 @@ describe("OwnerManager", () => {
             } = await setupTests();
 
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [AddressOne, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS203",
             );
         });
 
@@ -54,7 +54,7 @@ describe("OwnerManager", () => {
                 signers: [user1],
             } = await setupTests();
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [AddressZero, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS203",
             );
         });
 
@@ -66,7 +66,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
 
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS204",
             );
         });
 
@@ -76,7 +76,7 @@ describe("OwnerManager", () => {
                 signers: [user1, user2],
             } = await setupTests();
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 0], [user1])).to.revertedWith(
-                "GS013",
+                "GS202",
             );
         });
 
@@ -86,7 +86,7 @@ describe("OwnerManager", () => {
                 signers: [user1, user2],
             } = await setupTests();
             await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 3], [user1])).to.revertedWith(
-                "GS013",
+                "GS201",
             );
         });
 
@@ -139,7 +139,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
 
             await expect(executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, AddressOne, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS203",
             );
         });
 
@@ -151,7 +151,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
 
             await expect(executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, AddressZero, 1], [user1])).to.revertedWith(
-                "GS013",
+                "GS203",
             );
         });
 
@@ -163,7 +163,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, user1.address, 1], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("Invalid prevOwner, owner pair provided - Invalid sentinel", async () => {
@@ -174,7 +174,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressZero, user2.address, 1], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("Invalid prevOwner, owner pair provided - Invalid source", async () => {
@@ -185,7 +185,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user1.address, user2.address, 1], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("can not remove owner and change threshold to larger number than new owner count", async () => {
@@ -196,7 +196,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 2], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS201");
         });
 
         it("can not remove owner and change threshold to 0", async () => {
@@ -207,7 +207,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 0], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS202");
         });
 
         it("can not remove owner only owner", async () => {
@@ -217,7 +217,7 @@ describe("OwnerManager", () => {
             } = await setupTests();
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [AddressOne, user1.address, 1], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS201");
         });
 
         it("emits event for removed owner and threshold if changed", async () => {
@@ -263,7 +263,7 @@ describe("OwnerManager", () => {
             await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [user2.address, 1], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "removeOwner", [user2.address, user1.address, 2], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS201");
         });
     });
 
@@ -285,7 +285,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, safeAddress], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS203");
         });
 
         it("can not swap in sentinel", async () => {
@@ -296,7 +296,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, AddressOne], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS203");
         });
 
         it("can not swap in 0 Address", async () => {
@@ -307,7 +307,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, AddressZero], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS203");
         });
 
         it("can not swap in existing owner", async () => {
@@ -318,7 +318,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user1.address, user1.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS204");
         });
 
         it("can not swap out sentinel", async () => {
@@ -329,7 +329,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user1.address, AddressOne, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS203");
         });
 
         it("can not swap out 0 address", async () => {
@@ -340,7 +340,7 @@ describe("OwnerManager", () => {
 
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user3.address, AddressZero, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS203");
         });
 
         it("Invalid prevOwner, owner pair provided - Invalid target", async () => {
@@ -350,7 +350,7 @@ describe("OwnerManager", () => {
             } = await setupTests();
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressOne, user3.address, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("Invalid prevOwner, owner pair provided - Invalid sentinel", async () => {
@@ -360,7 +360,7 @@ describe("OwnerManager", () => {
             } = await setupTests();
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [AddressZero, user1.address, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("Invalid prevOwner, owner pair provided - Invalid source", async () => {
@@ -370,7 +370,7 @@ describe("OwnerManager", () => {
             } = await setupTests();
             await expect(
                 executeContractCallWithSigners(safe, safe, "swapOwner", [user2.address, user1.address, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS205");
         });
 
         it("emits event for replacing owner", async () => {

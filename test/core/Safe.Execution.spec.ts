@@ -131,7 +131,7 @@ describe("Safe", () => {
         it("should revert for failed call execution if gasPrice == 0 and safeTxGas == 0", async () => {
             const { safe, reverter, signers } = await setupTests();
             const [user1] = signers;
-            await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1])).to.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1])).to.revertedWith("Shit happens");
         });
 
         it("should emit event for successful delegatecall execution", async () => {
@@ -184,7 +184,7 @@ describe("Safe", () => {
         it("should emit event for failed delegatecall execution if gasPrice == 0 and safeTxGas == 0", async () => {
             const { safe, reverter, signers } = await setupTests();
             const [user1] = signers;
-            await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true)).to.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true)).to.revertedWith("Shit happens");
         });
 
         it("should revert on unknown operation", async () => {

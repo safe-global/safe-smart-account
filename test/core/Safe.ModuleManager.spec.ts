@@ -43,7 +43,7 @@ describe("ModuleManager", () => {
                 signers: [user1],
             } = await setupTests();
 
-            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [AddressOne], [user1])).to.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [AddressOne], [user1])).to.revertedWith("GS101");
         });
 
         it("can not set 0 Address", async () => {
@@ -51,7 +51,7 @@ describe("ModuleManager", () => {
                 safe,
                 signers: [user1],
             } = await setupTests();
-            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [AddressZero], [user1])).to.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [AddressZero], [user1])).to.revertedWith("GS101");
         });
 
         it("can not add module twice", async () => {
@@ -62,7 +62,7 @@ describe("ModuleManager", () => {
             // Use module for execution to see error
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
-            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).to.revertedWith("GS013");
+            await expect(executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1])).to.revertedWith("GS102");
         });
 
         it("emits event for a new module", async () => {
@@ -116,7 +116,7 @@ describe("ModuleManager", () => {
             } = await setupTests();
 
             await expect(executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, AddressOne], [user1])).to.revertedWith(
-                "GS013",
+                "GS101",
             );
         });
 
@@ -126,7 +126,7 @@ describe("ModuleManager", () => {
                 signers: [user1],
             } = await setupTests();
             await expect(executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, AddressZero], [user1])).to.revertedWith(
-                "GS013",
+                "GS101",
             );
         });
 
@@ -137,7 +137,7 @@ describe("ModuleManager", () => {
             } = await setupTests();
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
             await expect(executeContractCallWithSigners(safe, safe, "disableModule", [AddressOne, user1.address], [user1])).to.revertedWith(
-                "GS013",
+                "GS103",
             );
         });
 
@@ -149,7 +149,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [AddressZero, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS103");
         });
 
         it("Invalid prevModule, module pair provided - Invalid source", async () => {
@@ -161,7 +161,7 @@ describe("ModuleManager", () => {
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
             await expect(
                 executeContractCallWithSigners(safe, safe, "disableModule", [user1.address, user2.address], [user1]),
-            ).to.revertedWith("GS013");
+            ).to.revertedWith("GS103");
         });
 
         it("emits event for disabled module", async () => {
@@ -579,9 +579,9 @@ describe("ModuleManager", () => {
             } = await setupTests();
             const safe = await getSafe({ owners: [user1.address] });
 
-            await expect(executeContractCallWithSigners(safe, safe, "setModuleGuard", [user2.address], [user1])).to.be.revertedWith(
-                "GS013",
-            );
+            await expect(
+                executeContractCallWithSigners(safe, safe, "setModuleGuard", [user2.address], [user1]),
+            ).to.be.revertedWithoutReason();
         });
 
         it("emits an event when the module guard is changed", async () => {
