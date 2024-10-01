@@ -1,9 +1,8 @@
-import "@nomiclabs/hardhat-ethers";
-import { setupBenchmarkContracts } from "./utils/setup"
+import { setupBenchmarkContracts } from "./utils/setup";
 
-const contractSetup = setupBenchmarkContracts(undefined, true)
-describe("Safe", async () => {
+const contractSetup = setupBenchmarkContracts(undefined, true);
+describe("Safe", () => {
     it("creation", async () => {
-        await contractSetup()
-    })
-})
+        await contractSetup();
+    });
+});

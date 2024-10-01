@@ -1,41 +1,60 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners } from "../utils/setup";
-import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners } from "../../src/utils/execution";
+import hre from "hardhat";
+import { getMock, getSafe } from "../utils/setup";
+import {
+    buildSafeTransaction,
+    executeContractCallWithSigners,
+    executeTx,
+    executeTxWithSigners,
+    safeSignTypedData,
+} from "../../src/utils/execution";
 
-describe("OnlyOwnersGuard", async () => {
-    const [user1, user2] = waffle.provider.getWallets();
-
-    const setupTests = deployments.createFixture(async ({ deployments }) => {
+describe("OnlyOwnersGuard", () => {
+    const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const safe = await getSafeWithOwners([user1.address]);
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
+        const safe = await getSafe({ owners: [user1.address] });
         const guardFactory = await hre.ethers.getContractFactory("OnlyOwnersGuard");
         const guard = await guardFactory.deploy();
+        const guardAddress = await guard.getAddress();
         const mock = await getMock();
-        await executeContractCallWithSigners(safe, safe, "setGuard", [guard.address], [user1]);
+        await executeContractCallWithSigners(safe, safe, "setGuard", [guardAddress], [user1]);
 
         return {
             safe,
             mock,
+            signers,
         };
     });
 
-    describe("only owners should be able to exec transactions", async () => {
+    describe("only owners should be able to exec transactions", () => {
         it("should allow an owner to exec", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
             const nonce = await safe.nonce();
-            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce });
+            const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
 
-            executeTxWithSigners(safe, safeTx, [user1]);
+            await executeTxWithSigners(safe.connect(user1), safeTx, [user1]);
         });
 
         it("should not allow a random user exec", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
             const nonce = await safe.nonce();
-            const safeTx = buildSafeTransaction({ to: mock.address, data: "0xbaddad42", nonce });
+            const mockAddress = await mock.getAddress();
+            const safeTx = buildSafeTransaction({ to: mockAddress, data: "0xbaddad42", nonce });
+            const signature = await safeSignTypedData(user1, await safe.getAddress(), safeTx);
+            const safeUser2 = await safe.connect(user2);
 
-            await expect(executeTxWithSigners(safe, safeTx, [user2])).to.be.reverted;
+            await expect(executeTx(safeUser2, safeTx, [signature])).to.be.revertedWith("msg sender is not allowed to exec");
         });
     });
 });

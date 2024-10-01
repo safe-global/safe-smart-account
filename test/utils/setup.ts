@@ -1,165 +1,170 @@
 import hre, { deployments } from "hardhat";
-import { Wallet, Contract } from "ethers";
+import { Contract, Signer, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";
+import * as zk from "zksync-ethers";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
+import { zkCompile } from "./zkSync";
 import { getRandomIntAsString } from "./numbers";
+import { MockContract, Safe, SafeL2 } from "../../typechain-types";
+
+type SafeSingleton = {
+    readonly singleton?: Safe | SafeL2;
+};
+
+type SafeWithSetupConfig = {
+    readonly owners: string[];
+    readonly threshold?: number;
+    readonly to?: string;
+    readonly data?: string;
+    readonly fallbackHandler?: string;
+    readonly saltNumber?: string;
+};
+
+type LogGas = {
+    readonly logGasUsage?: boolean;
+};
+
+type GetSafeParameters = SafeSingleton & SafeWithSetupConfig & LogGas;
 
 export const defaultTokenCallbackHandlerDeployment = async () => {
-    return await deployments.get("TokenCallbackHandler");
-};
-
-export const defaultTokenCallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("TokenCallbackHandler");
-};
-
-export const compatFallbackHandlerDeployment = async () => {
-    return await deployments.get("CompatibilityFallbackHandler");
-};
-
-export const compatFallbackHandlerContract = async () => {
-    return await hre.ethers.getContractFactory("CompatibilityFallbackHandler");
+    return deployments.get("TokenCallbackHandler");
 };
 
 export const getSafeSingleton = async () => {
-    const SafeDeployment = await deployments.get(safeContractUnderTest());
-    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
-    return Safe.attach(SafeDeployment.address);
+    const safeContractName = safeContractUnderTest();
+    const safe = await hre.ethers.getContractAt(safeContractUnderTest(), (await deployments.get(safeContractName)).address);
+    return safe as unknown as Safe | SafeL2;
 };
 
-export const getSafeSingletonContract = async () => {
+export const getSafeL1Singleton = async (): Promise<Safe> => {
     const safeSingletonDeployment = await deployments.get("Safe");
-    const safe = await hre.ethers.getContractAt("Safe", safeSingletonDeployment.address);
-
-    return safe;
+    const Safe = await hre.ethers.getContractAt("Safe", safeSingletonDeployment.address);
+    return Safe;
 };
 
-export const getSafeL2SingletonContract = async () => {
+export const getSafeL2Singleton = async (): Promise<SafeL2> => {
     const safeSingletonDeployment = await deployments.get("SafeL2");
     const Safe = await hre.ethers.getContractAt("SafeL2", safeSingletonDeployment.address);
     return Safe;
 };
 
-export const safeMigrationContract = async () => {
-    const SafeMigrationDeployment = await deployments.get("SafeMigration");
-    const SafeMigration = await hre.ethers.getContractAt("SafeMigration", SafeMigrationDeployment.address);
-    return SafeMigration;
-};
-
 export const getSafeSingletonAt = async (address: string) => {
     const safe = await hre.ethers.getContractAt(safeContractUnderTest(), address);
-    return safe;
+    return safe as unknown as Safe | SafeL2;
 };
 
-export const getSafeWithSingleton = async (
-    singleton: Contract,
-    owners: string[],
-    threshold?: number,
-    fallbackHandler?: string,
-    saltNumber: string = getRandomIntAsString(),
-) => {
-    const factory = await getFactory();
-    const singletonAddress = singleton.address;
-    const template = await factory.callStatic.createProxyWithNonce(singletonAddress, "0x", saltNumber);
-    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx: any) => tx.wait());
-    const safeProxy = singleton.attach(template);
-    await safeProxy.setup(
-        owners,
-        threshold || owners.length,
-        AddressZero,
-        "0x",
-        fallbackHandler || AddressZero,
-        AddressZero,
-        0,
-        AddressZero,
-    );
+export const getFactory = async (address?: string) => {
+    if (!address) {
+        const factoryDeployment = await deployments.get("SafeProxyFactory");
+        address = factoryDeployment.address;
+    }
 
-    return safeProxy;
-};
-
-export const getFactoryContract = async () => {
-    const factory = await hre.ethers.getContractFactory("SafeProxyFactory");
-
-    return factory;
-};
-
-export const getFactory = async () => {
-    const FactoryDeployment = await deployments.get("SafeProxyFactory");
-    const Factory = await hre.ethers.getContractFactory("SafeProxyFactory");
-    return Factory.attach(FactoryDeployment.address);
+    const Factory = await hre.ethers.getContractAt("SafeProxyFactory", address);
+    return Factory;
 };
 
 export const getSimulateTxAccessor = async () => {
-    const SimulateTxAccessorDeployment = await deployments.get("SimulateTxAccessor");
-    const SimulateTxAccessor = await hre.ethers.getContractFactory("SimulateTxAccessor");
-    return SimulateTxAccessor.attach(SimulateTxAccessorDeployment.address);
+    const SimulateTxAccessor = await hre.ethers.getContractAt("SimulateTxAccessor", (await deployments.get("SimulateTxAccessor")).address);
+    return SimulateTxAccessor;
 };
 
 export const getMultiSend = async () => {
-    const MultiSendDeployment = await deployments.get("MultiSend");
-    const MultiSend = await hre.ethers.getContractFactory("MultiSend");
-    return MultiSend.attach(MultiSendDeployment.address);
+    const MultiSend = await hre.ethers.getContractAt("MultiSend", (await deployments.get("MultiSend")).address);
+    return MultiSend;
 };
 
 export const getMultiSendCallOnly = async () => {
-    const MultiSendDeployment = await deployments.get("MultiSendCallOnly");
-    const MultiSend = await hre.ethers.getContractFactory("MultiSendCallOnly");
-    return MultiSend.attach(MultiSendDeployment.address);
+    const MultiSend = await hre.ethers.getContractAt("MultiSendCallOnly", (await deployments.get("MultiSendCallOnly")).address);
+    return MultiSend;
 };
 
 export const getCreateCall = async () => {
-    const CreateCallDeployment = await deployments.get("CreateCall");
-    const CreateCall = await hre.ethers.getContractFactory("CreateCall");
-    return CreateCall.attach(CreateCallDeployment.address);
+    const CreateCall = await hre.ethers.getContractAt("CreateCall", (await deployments.get("CreateCall")).address);
+    return CreateCall;
 };
 
-export const migrationContract = async () => {
+export const migrationContractFactory = async () => {
     return await hre.ethers.getContractFactory("Migration");
 };
 
-export const getMock = async () => {
-    const Mock = await hre.ethers.getContractFactory("MockContract");
-    return await Mock.deploy();
+export const safeMigrationContract = async () => {
+    const safeMigration = await hre.ethers.getContractAt("SafeMigration", (await deployments.get("SafeMigration")).address);
+    return safeMigration;
+};
+
+export const getMock = async (): Promise<MockContract> => {
+    const contractFactory = await hre.ethers.getContractFactory("MockContract");
+    const contract = await contractFactory.deploy();
+
+    return contract;
 };
 
 export const getSafeTemplate = async (saltNumber: string = getRandomIntAsString()) => {
     const singleton = await getSafeSingleton();
-    const factory = await getFactory();
-    const template = await factory.callStatic.createProxyWithNonce(singleton.address, "0x", saltNumber);
-    await factory.createProxyWithNonce(singleton.address, "0x", saltNumber).then((tx: any) => tx.wait());
-    const Safe = await hre.ethers.getContractFactory(safeContractUnderTest());
-    return Safe.attach(template);
+    return getSafeTemplateWithSingleton(singleton, saltNumber);
 };
 
-export const getSafeWithOwners = async (
-    owners: string[],
-    threshold?: number,
-    fallbackHandler?: string,
-    logGasUsage?: boolean,
-    saltNumber: string = getRandomIntAsString(),
-) => {
-    const template = await getSafeTemplate(saltNumber);
+export const getSafeTemplateWithSingleton = async (singleton: Contract | Safe, saltNumber: string = getRandomIntAsString()) => {
+    const singletonAddress = await singleton.getAddress();
+    const factory = await getFactory();
+    const template = await factory.createProxyWithNonce.staticCall(singletonAddress, "0x", saltNumber);
+    await factory.createProxyWithNonce(singletonAddress, "0x", saltNumber).then((tx) => tx.wait());
+    return singleton.attach(template) as Safe | SafeL2;
+};
+
+export const getSafe = async (safe: GetSafeParameters) => {
+    const {
+        singleton = await getSafeSingleton(),
+        owners,
+        threshold = owners.length,
+        to = AddressZero,
+        data = "0x",
+        fallbackHandler = AddressZero,
+        logGasUsage = false,
+        saltNumber = getRandomIntAsString(),
+    } = safe;
+
+    const template = await getSafeTemplateWithSingleton(singleton, saltNumber);
     await logGas(
         `Setup Safe with ${owners.length} owner(s)${fallbackHandler && fallbackHandler !== AddressZero ? " and fallback handler" : ""}`,
-        template.setup(owners, threshold || owners.length, AddressZero, "0x", fallbackHandler || AddressZero, AddressZero, 0, AddressZero),
+        template.setup(owners, threshold, to, data, fallbackHandler, AddressZero, 0, AddressZero),
         !logGasUsage,
     );
     return template;
 };
 
-export const getTokenCallbackHandler = async () => {
-    return (await defaultTokenCallbackHandlerContract()).attach((await defaultTokenCallbackHandlerDeployment()).address);
+export const getTokenCallbackHandler = async (address?: string) => {
+    if (!address) {
+        const tokenCallbackHandlerDeployment = await defaultTokenCallbackHandlerDeployment();
+        address = tokenCallbackHandlerDeployment.address;
+    }
+
+    const tokenCallbackHandler = await hre.ethers.getContractAt("TokenCallbackHandler", address);
+    return tokenCallbackHandler;
 };
 
-export const getCompatFallbackHandler = async () => {
-    return (await compatFallbackHandlerContract()).attach((await compatFallbackHandlerDeployment()).address);
+export const getCompatFallbackHandler = async (address?: string) => {
+    if (!address) {
+        const fallbackHandlerDeployment = await deployments.get("CompatibilityFallbackHandler");
+        address = fallbackHandlerDeployment.address;
+    }
+
+    const fallbackHandler = await hre.ethers.getContractAt("CompatibilityFallbackHandler", address);
+
+    return fallbackHandler;
 };
 
-export const getSafeProxyRuntimeCode = async () => {
+export const getSafeProxyRuntimeCode = async (): Promise<string> => {
     const proxyArtifact = await hre.artifacts.readArtifact("SafeProxy");
 
     return proxyArtifact.deployedBytecode;
+};
+
+export const getDelegateCaller = async () => {
+    const DelegateCaller = await hre.ethers.getContractFactory("DelegateCaller");
+    return await DelegateCaller.deploy();
 };
 
 export const compile = async (source: string) => {
@@ -194,9 +199,39 @@ export const compile = async (source: string) => {
     };
 };
 
-export const deployContract = async (deployer: Wallet, source: string): Promise<Contract> => {
-    const output = await compile(source);
-    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
-    const receipt = await transaction.wait();
-    return new Contract(receipt.contractAddress, output.interface, deployer);
+export const deployContractFromSource = async (deployer: Signer, source: string): Promise<ethers.Contract> => {
+    if (!hre.network.zksync) {
+        const output = await compile(source);
+        const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
+        const receipt = await transaction.wait();
+
+        if (!receipt?.contractAddress) {
+            throw Error("Could not deploy contract");
+        }
+
+        return new Contract(receipt.contractAddress, output.interface, deployer);
+    } else {
+        const output = await zkCompile(hre, source);
+        const signers = await hre.ethers.getSigners();
+        const factory = new zk.ContractFactory(output.abi, output.bytecode, signers[0], "create");
+        const contract = await factory.deploy();
+
+        return contract as ethers.Contract;
+    }
+};
+
+export const getSignMessageLib = async () => {
+    const SignMessageLibDeployment = await deployments.get("SignMessageLib");
+    const SignMessageLib = await hre.ethers.getContractAt("SignMessageLib", SignMessageLibDeployment.address);
+
+    return SignMessageLib;
+};
+
+export const getAbi = async (name: string) => {
+    const artifact = await hre.artifacts.readArtifact(name);
+    if (!artifact) {
+        throw Error(`Could not read artifact for ${name}`);
+    }
+
+    return artifact.abi;
 };

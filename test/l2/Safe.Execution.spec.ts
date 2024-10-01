@@ -1,7 +1,6 @@
 import { expect } from "chai";
-import hre, { deployments, ethers, waffle } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
-import { getMock, getSafeWithOwners } from "../utils/setup";
+import hre, { deployments, ethers } from "hardhat";
+import { getMock, getSafe } from "../utils/setup";
 import {
     safeApproveHash,
     buildSafeTransaction,
@@ -9,52 +8,57 @@ import {
     executeTx,
     executeContractCallWithSigners,
 } from "../../src/utils/execution";
-import { parseEther } from "@ethersproject/units";
 import { safeContractUnderTest } from "../utils/config";
 
-describe("SafeL2", async () => {
+describe("SafeL2", () => {
     before(function () {
         if (safeContractUnderTest() != "SafeL2") {
             this.skip();
         }
     });
 
-    const [user1, user2] = waffle.provider.getWallets();
-
     const setupTests = deployments.createFixture(async ({ deployments }) => {
+        const signers = await ethers.getSigners();
+        const [user1] = signers;
         await deployments.fixture();
         const mock = await getMock();
         return {
-            safe: await getSafeWithOwners([user1.address]),
+            safe: await getSafe({ owners: [user1.address] }),
             mock,
+            signers,
         };
     });
 
     describe("execTransactions", async () => {
         it("should emit SafeMultiSigTransaction event", async () => {
-            const { safe } = await setupTests();
+            const {
+                safe,
+                signers: [user1, user2],
+            } = await setupTests();
+            const safeAddress = await safe.getAddress();
             const tx = buildSafeTransaction({
-                to: user1.address,
+                to: safeAddress,
                 nonce: await safe.nonce(),
                 operation: 0,
                 gasPrice: 1,
-                safeTxGas: 100000,
+                safeTxGas: 1000000,
+                // addOwnerWithThreshold is specifically chosen here in this test because additionalInfo in the SafeMultiSigTransaction event has threshold value.
+                // The test here also checks if the threshold value prior to Safe state change is emitted in the event.
+                data: safe.interface.encodeFunctionData("addOwnerWithThreshold", [user2.address, 2]),
                 refundReceiver: user2.address,
             });
 
-            await user1.sendTransaction({ to: safe.address, value: parseEther("1") });
-            await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"));
+            await user1.sendTransaction({ to: safeAddress, value: ethers.parseEther("1") });
+            await expect(await hre.ethers.provider.getBalance(safeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
-            const additionalInfo = ethers.utils.defaultAbiCoder.encode(["uint256", "address", "uint256"], [tx.nonce, user1.address, 1]);
+            const additionalInfo = ethers.AbiCoder.defaultAbiCoder().encode(
+                ["uint256", "address", "uint256"],
+                [tx.nonce, user1.address, 1],
+            );
             const signatures = [await safeApproveHash(user1, safe, tx, true)];
             const signatureBytes = buildSignatureBytes(signatures).toLowerCase();
-            let executedTx: any;
-            await expect(
-                executeTx(safe, tx, signatures).then((tx) => {
-                    executedTx = tx;
-                    return tx;
-                }),
-            )
+
+            await expect(executeTx(safe, tx, signatures))
                 .to.emit(safe, "ExecutionSuccess")
                 .to.emit(safe, "SafeMultiSigTransaction")
                 .withArgs(
@@ -73,13 +77,35 @@ describe("SafeL2", async () => {
         });
 
         it("should emit SafeModuleTransaction event", async () => {
-            const { safe, mock } = await setupTests();
+            const {
+                safe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
             const user2Safe = safe.connect(user2);
             await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
 
-            await expect(user2Safe.execTransactionFromModule(mock.address, 0, "0xbaddad", 0))
+            await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
                 .to.emit(safe, "SafeModuleTransaction")
-                .withArgs(user2.address, mock.address, 0, "0xbaddad", 0)
+                .withArgs(user2.address, mockAddress, 0, "0xbaddad", 0)
+                .to.emit(safe, "ExecutionFromModuleSuccess")
+                .withArgs(user2.address);
+        });
+
+        it("should emit SafeModuleTransaction event in execTransactionFromModuleReturnData", async () => {
+            const {
+                safe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
+            const mockAddress = await mock.getAddress();
+            const user2Safe = safe.connect(user2);
+            await executeContractCallWithSigners(safe, safe, "enableModule", [user2.address], [user1]);
+
+            await expect(user2Safe.execTransactionFromModuleReturnData(mockAddress, 0, "0xbaddad", 0))
+                .to.emit(safe, "SafeModuleTransaction")
+                .withArgs(user2.address, mockAddress, 0, "0xbaddad", 0)
                 .to.emit(safe, "ExecutionFromModuleSuccess")
                 .withArgs(user2.address);
         });

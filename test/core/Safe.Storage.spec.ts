@@ -1,9 +1,8 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import "@nomiclabs/hardhat-ethers";
 import { getContractStorageLayout } from "../utils/storage";
 
-describe("Safe", async () => {
+describe("Safe", () => {
     it("follows storage layout defined by SafeStorage library", async () => {
         const safeStorageLayout = await getContractStorageLayout(hre, "SafeStorage");
         const safeSingletonStorageLayout = await getContractStorageLayout(hre, "Safe");

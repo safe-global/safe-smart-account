@@ -10,10 +10,10 @@ import "../../Safe.sol";
  * @author Richard Meissner - @rmeissner
  */
 contract DelegateCallTransactionGuard is BaseGuard {
-    address public immutable allowedTarget;
+    address public immutable ALLOWED_TARGET;
 
     constructor(address target) {
-        allowedTarget = target;
+        ALLOWED_TARGET = target;
     }
 
     // solhint-disable-next-line payable-fallback
@@ -42,7 +42,7 @@ contract DelegateCallTransactionGuard is BaseGuard {
         bytes memory,
         address
     ) external view override {
-        require(operation != Enum.Operation.DelegateCall || to == allowedTarget, "This call is restricted");
+        require(operation != Enum.Operation.DelegateCall || to == ALLOWED_TARGET, "This call is restricted");
     }
 
     function checkAfterExecution(bytes32, bool) external view override {}

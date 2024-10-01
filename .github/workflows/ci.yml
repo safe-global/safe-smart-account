@@ -4,6 +4,18 @@ on: [push, pull_request]
 jobs:
     tests:
         runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run build
+            - run: npm run test
+
+    coverage:
+        runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
@@ -11,14 +23,14 @@ jobs:
         env:
             SAFE_CONTRACT_UNDER_TEST: ${{ matrix.contract-name }}
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
-                  cache: "yarn"
-            - run: yarn --frozen-lockfile
-            - run: yarn build
-            - run: yarn coverage
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run build
+            - run: npm run coverage
             - name: Send coverage to Coveralls (parallel)
               uses: coverallsapp/github-action@v2
               with:
@@ -43,23 +55,20 @@ jobs:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2
               with:
-                  node-version: 16.7.0
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: yarn --frozen-lockfile
-            - run: yarn lint:sol
+                  node-version: 20.10.0
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run lint:sol
 
     benchmarks:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
-                solidity: ["0.7.6", "0.8.2"]
+                solidity: ["0.7.6", "0.8.24"]
                 include:
-                    - solidity: "0.8.2"
-                      settings: '{"viaIR":true,"optimizer":{"enabled":true,"runs":10000}}'
+                    - solidity: "0.8.24"
+                      settings: '{"viaIR":false,"optimizer":{"enabled":true,"runs":1000000}}'
         env:
             SOLIDITY_VERSION: ${{ matrix.solidity }}
             SOLIDITY_SETTINGS: ${{ matrix.settings }}
@@ -67,9 +76,9 @@ jobs:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2
               with:
-                  node-version: 16.7.0
-            - uses: actions/cache@v2
-              with:
-                  path: "**/node_modules"
-                  key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-            - run: (yarn --frozen-lockfile && yarn build && yarn hardhat codesize --contractname Safe && yarn benchmark) || echo "Benchmark failed"
+                  node-version: 20.10.0
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run build
+            - run: npm run codesize -- --contractname Safe
+            - run: npm run benchmark

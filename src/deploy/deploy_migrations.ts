@@ -1,9 +1,10 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDeployerAccount } from "../utils/deploy";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getNamedAccounts } = hre;
-    const { deployer } = await getNamedAccounts();
+    const { deployments } = hre;
+    const deployerAccount = await getDeployerAccount(hre);
     const { deploy } = deployments;
 
     const Safe = await deployments.get("Safe");
@@ -11,14 +12,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const CompatibilityFallbackHandler = await deployments.get("CompatibilityFallbackHandler");
 
     await deploy("SafeToL2Migration", {
-        from: deployer,
+        from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
     await deploy("SafeMigration", {
-        from: deployer,
+        from: deployerAccount,
         args: [Safe.address, SafeL2.address, CompatibilityFallbackHandler.address],
         log: true,
         deterministicDeployment: true,
