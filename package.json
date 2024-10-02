@@ -1,6 +1,6 @@
 {
     "name": "@safe-global/safe-contracts",
-    "version": "1.4.1-2",
+    "version": "1.4.1-3",
     "description": "Ethereum multisig contract",
     "homepage": "https://github.com/safe-global/safe-smart-account/",
     "license": "LGPL-3.0",
