@@ -4,6 +4,11 @@ This changelog only contains changes starting from version 1.3.0
 
 # Version 1.4.1
 
+## Release iterations
+
+-   1.4.1-2: Added `SafeToL2Migration`, `SafeMigration` and `SafeToL2Setup` contracts to facilitate migrations from previous Safe versions.
+-   1.4.1-3: Added zkSync support for all contracts.
+
 ## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-contracts/issues/251))
@@ -14,31 +19,31 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
--   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+-   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a` (EVM), `0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa` (zkSync)
+-   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762` (EVM), `0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380` (zkSync)
 
 ### Factory contracts
 
--   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67` (EVM), `0xc329D02fd8CB2fc13aa919005aF46320794a8629` (zkSync)
 
 ### Handler contracts
 
--   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
--   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
+-   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562` (EVM), `0xd508168Db968De1EBc6f288322e6C820137eeF79` (zkSync)
+-   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99` (EVM), `0x9301E98DD367135f21bdF66f342A249c9D5F9069` (zkSync)
 
 ### Lib contracts
 
--   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
--   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
--   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
--   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
--   `SafeMigration` at `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` (target Safe version: v1.4.1)
--   `SafeToL2Migration` at `0xfF83F6335d8930cBad1c0D439A841f01888D9f69`
--   `SafeToL2Setup` at `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54`
+-   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526` (EVM), `0x309D0B190FeCCa8e1D5D8309a16F7e3CB133E885` (zkSync)
+-   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2` (EVM), `0x0408EF011960d02349d50286D20531229BCef773` (zkSync)
+-   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52` (EVM), `0xAAA566Fe7978bB0fb0B5362B7ba23038f4428D8f` (zkSync)
+-   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9` (EVM), `0xAca1ec0a1A575CDCCF1DC3d5d296202Eb6061888` (zkSync)
+-   `SafeMigration` (target Safe version: v1.4.1) at `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` (EVM), `0x817756C6c555A94BCEE39eB5a102AbC1678b09A7` (zkSync)
+-   `SafeToL2Migration` at `0xfF83F6335d8930cBad1c0D439A841f01888D9f69` (EVM), `0xa26620d1f8f1a2433F0D25027F141aaCAFB3E590` (zkSync)
+-   `SafeToL2Setup` at `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54` (EVM), `0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39` (zkSync)
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+-   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199` (EVM), `0xdd35026932273768A3e31F4efF7313B5B7A7199d` (zkSync)
 
 ## Changes
 
