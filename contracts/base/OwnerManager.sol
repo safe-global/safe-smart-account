@@ -38,8 +38,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         for (uint256 i = 0; i < _owners.length; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
-            if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner)
-                revertWithError("GS203");
+            if (owner == address(0) || owner == SENTINEL_OWNERS || currentOwner == owner) revertWithError("GS203");
             // No duplicate owners allowed.
             if (owners[owner] != address(0)) revertWithError("GS204");
             owners[currentOwner] = owner;
