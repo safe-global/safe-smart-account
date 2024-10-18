@@ -387,18 +387,30 @@ contract Safe is
     }
 
     /**
-     * @notice Returns the pre-image of the transaction hash (see getTransactionHash).
-     * @param to Destination address.
-     * @param value Ether value.
-     * @param data Data payload.
-     * @param operation Operation type.
-     * @param safeTxGas Gas that should be used for the safe transaction.
-     * @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
-     * @param gasPrice Maximum gas price that should be used for this transaction.
-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param _nonce Transaction nonce.
-     * @return Transaction hash bytes.
+     * @notice Encodes transaction data according to EIP-712 typed structured data hashing scheme.
+     * @dev This function creates a hash of the transaction data using a specific structure and combines it
+     *      with the domain separator to create an EIP-712 compliant message. The function uses assembly
+     *      for gas optimization in memory allocation and struct hashing.
+     *
+     * @param to The target address where the transaction will be executed.
+     * @param value The amount of Ether (in wei) to be sent with the transaction.
+     * @param data The calldata to be executed at the target address.
+     * @param operation The type of operation to execute (e.g., Call or DelegateCall).
+     * @param safeTxGas Gas limit explicitly set for the safe transaction execution.
+     * @param baseGas Gas costs that are independent of the transaction execution
+     *        (e.g., base transaction fee, signature check, refund payment).
+     * @param gasPrice Maximum gas price (in wei) to be used for this transaction.
+     *        Used for refund calculation.
+     * @param gasToken Address of the token used for gas payment refunds.
+     *        Use address(0) for ETH.
+     * @param refundReceiver Address that should receive the gas payment refund.
+     *        Use address(0) to refund tx.origin.
+     * @param _nonce Sequential number used to prevent transaction reuse.
+     *
+     * @return result The encoded transaction data in the format:
+     *         [0x19, 0x01, domainSeparator, safeTxStructHash].
+     *         Total length is 66 bytes: 2 bytes for prefix + 32 bytes for domain separator
+     *         + 32 bytes for transaction struct hash.
      */
     function encodeTransactionData(
         address to,
@@ -411,23 +423,49 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) private view returns (bytes memory) {
-        bytes32 safeTxStructHash = keccak256(
-            abi.encode(
-                SAFE_TX_TYPEHASH,
-                to,
-                value,
-                keccak256(data),
-                operation,
-                safeTxGas,
-                baseGas,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                _nonce
-            )
-        );
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxStructHash);
+    ) private view returns (bytes memory result) {
+        bytes32 separatorHash = domainSeparator();
+
+        // The encoding is written in assembly to avoid memory re-allocations.
+        // Straightforward solidity implementation would allocate multiple times, but since the only reason it allocates is because it needs to hash the data,
+        // we can save gas by reusing the same memory block by overwriting the data.
+        /* solhint-disable no-inline-assembly */
+        assembly {
+            let freeMemoryPointer := mload(0x40)
+
+            // Copy the data from calldata to memory and calculate the hash
+            let calldataLength := data.length
+            calldatacopy(freeMemoryPointer, data.offset, calldataLength)
+            let calldataHash := keccak256(freeMemoryPointer, calldataLength)
+
+            // Prepare the SafeTX struct for hashing, overwriting the copied calldata
+            mstore(freeMemoryPointer, SAFE_TX_TYPEHASH)
+            mstore(add(freeMemoryPointer, 32), to)
+            mstore(add(freeMemoryPointer, 64), value)
+            mstore(add(freeMemoryPointer, 96), calldataHash)
+            mstore(add(freeMemoryPointer, 128), operation)
+            mstore(add(freeMemoryPointer, 160), safeTxGas)
+            mstore(add(freeMemoryPointer, 192), baseGas)
+            mstore(add(freeMemoryPointer, 224), gasPrice)
+            mstore(add(freeMemoryPointer, 256), gasToken)
+            mstore(add(freeMemoryPointer, 288), refundReceiver)
+            mstore(add(freeMemoryPointer, 320), _nonce)
+
+            // Hash the SafeTX struct and store it at the end of the result
+            // Hashing first so we can re-use the same memory block for the result
+            mstore(add(freeMemoryPointer, 66), keccak256(freeMemoryPointer, 352))
+            // Store the domain separator
+            mstore(add(freeMemoryPointer, 34), separatorHash)
+            // Store the EIP-712 prefix (0x1901)
+            mstore8(add(freeMemoryPointer, 33), 0x01)
+            mstore8(add(freeMemoryPointer, 32), 0x19)
+            // Store the length of the encoded data (always 66 bytes)
+            mstore(freeMemoryPointer, 66)
+
+            // Return the encoded transaction data (including the length)
+            result := freeMemoryPointer
+        }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
