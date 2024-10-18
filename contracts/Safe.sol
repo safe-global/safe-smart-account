@@ -412,7 +412,7 @@ contract Safe is
         address refundReceiver,
         uint256 _nonce
     ) private view returns (bytes memory) {
-        bytes32 safeTxHash = keccak256(
+        bytes32 safeTxStructHash = keccak256(
             abi.encode(
                 SAFE_TX_TYPEHASH,
                 to,
@@ -427,7 +427,7 @@ contract Safe is
                 _nonce
             )
         );
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
+        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxStructHash);
     }
 
     /**
