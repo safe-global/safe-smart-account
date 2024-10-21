@@ -431,39 +431,40 @@ contract Safe is
         // we can save gas by reusing the same memory block by overwriting the data.
         /* solhint-disable no-inline-assembly */
         assembly {
-            let freeMemoryPointer := mload(0x40)
+            let ptr := mload(0x40)
 
-            // Copy the data from calldata to memory and calculate the hash
-            let calldataLength := data.length
-            calldatacopy(freeMemoryPointer, data.offset, calldataLength)
-            let calldataHash := keccak256(freeMemoryPointer, calldataLength)
+            calldatacopy(ptr, data.offset, data.length)
+            let calldataHash := keccak256(ptr, data.length)
 
             // Prepare the SafeTX struct for hashing, overwriting the copied calldata
-            mstore(freeMemoryPointer, SAFE_TX_TYPEHASH)
-            mstore(add(freeMemoryPointer, 32), to)
-            mstore(add(freeMemoryPointer, 64), value)
-            mstore(add(freeMemoryPointer, 96), calldataHash)
-            mstore(add(freeMemoryPointer, 128), operation)
-            mstore(add(freeMemoryPointer, 160), safeTxGas)
-            mstore(add(freeMemoryPointer, 192), baseGas)
-            mstore(add(freeMemoryPointer, 224), gasPrice)
-            mstore(add(freeMemoryPointer, 256), gasToken)
-            mstore(add(freeMemoryPointer, 288), refundReceiver)
-            mstore(add(freeMemoryPointer, 320), _nonce)
+            mstore(ptr, SAFE_TX_TYPEHASH)
+            mstore(add(ptr, 32), to)
+            mstore(add(ptr, 64), value)
+            mstore(add(ptr, 96), calldataHash)
+            mstore(add(ptr, 128), operation)
+            mstore(add(ptr, 160), safeTxGas)
+            mstore(add(ptr, 192), baseGas)
+            mstore(add(ptr, 224), gasPrice)
+            mstore(add(ptr, 256), gasToken)
+            mstore(add(ptr, 288), refundReceiver)
+            mstore(add(ptr, 320), _nonce)
 
             // Hash the SafeTX struct and store it at the end of the result
             // Hashing first so we can re-use the same memory block for the result
-            mstore(add(freeMemoryPointer, 66), keccak256(freeMemoryPointer, 352))
+            mstore(add(ptr, 66), keccak256(ptr, 352))
+            // Store the EIP-712 prefix (0x1901), note that strings are right-padded.
+            // We write it before the domain separator and hash to use the remaining space.
+            mstore(add(ptr, 32), "\x19\x01")
             // Store the domain separator
-            mstore(add(freeMemoryPointer, 34), separatorHash)
-            // Store the EIP-712 prefix (0x1901)
-            mstore8(add(freeMemoryPointer, 33), 0x01)
-            mstore8(add(freeMemoryPointer, 32), 0x19)
+            mstore(add(ptr, 34), separatorHash)
             // Store the length of the encoded data (always 66 bytes)
-            mstore(freeMemoryPointer, 66)
+            mstore(ptr, 66)
+            // Allocate the memory with with alignment in mind, like Solidity would do.
+            // So it is 32 byte sizes + 66 bytes data = 98 = 128 bytes with padding
+            mstore(0x40, add(ptr, 128))
 
-            // Return the encoded transaction data (including the length)
-            result := freeMemoryPointer
+            // Point the result to the memory block
+            result := ptr
         }
         /* solhint-enable no-inline-assembly */
     }
