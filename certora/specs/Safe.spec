@@ -4,6 +4,7 @@ methods {
     function nonce() external returns (uint256) envfree;
     function signedMessages(bytes32) external returns (uint256) envfree;
     function isOwner(address) external returns (bool) envfree;
+    function getTransactionHashPublic(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,uint256) external returns (bytes32) envfree;
 
     // harnessed
     function getModule(address) external returns (address) envfree;
@@ -270,4 +271,26 @@ rule onlyModuleCanExecuteModuleThransactionsWithReturnData(
 
     execTransactionFromModuleReturnData@withrevert(e, to, value, data, operation);
     assert !lastReverted => getModule(e.msg.sender) != 0, "Only modules can execute module transactions";
+}
+
+rule transactionHashCantCollide() {
+    env e;
+
+    address to1; address to2;
+    uint256 value1; uint256 value2;
+    bytes data1; bytes data2;
+    Enum.Operation operation1; Enum.Operation operation2;
+    uint256 safeTxGas1; uint256 safeTxGas2;
+    uint256 baseGas1; uint256 baseGas2;
+    uint256 gasPrice1; uint256 gasPrice2;
+    address gasToken1; address gasToken2;
+    address refundReceiver1; address refundReceiver2;
+    uint256 nonce1; uint256 nonce2;
+
+    bytes32 hash1 = getTransactionHashPublic(to1, value1, data1, operation1, safeTxGas1, baseGas1, gasPrice1, gasToken1, refundReceiver1, nonce1);
+    bytes32 hash2 = getTransactionHashPublic(to2, value2, data2, operation2, safeTxGas2, baseGas2, gasPrice2, gasToken2, refundReceiver2, nonce2);
+
+    assert hash1 == hash2 => 
+        to1 == to2 && value1 == value2 && data1 == data2 && operation1 == operation2 && safeTxGas1 == safeTxGas2 
+        && baseGas1 == baseGas2 && gasPrice1 == gasPrice2 && gasToken1 == gasToken2 && refundReceiver1 == refundReceiver2 && nonce1 == nonce2;
 }
