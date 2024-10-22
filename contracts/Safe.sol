@@ -387,32 +387,9 @@ contract Safe is
     }
 
     /**
-     * @notice Encodes transaction data according to EIP-712 typed structured data hashing scheme.
-     * @dev This function creates a hash of the transaction data using a specific structure and combines it
-     *      with the domain separator to create an EIP-712 compliant message. The function uses assembly
-     *      for gas optimization in memory allocation and struct hashing.
-     *
-     * @param to The target address where the transaction will be executed.
-     * @param value The amount of Ether (in wei) to be sent with the transaction.
-     * @param data The calldata to be executed at the target address.
-     * @param operation The type of operation to execute (e.g., Call or DelegateCall).
-     * @param safeTxGas Gas limit explicitly set for the safe transaction execution.
-     * @param baseGas Gas costs that are independent of the transaction execution
-     *        (e.g., base transaction fee, signature check, refund payment).
-     * @param gasPrice Maximum gas price (in wei) to be used for this transaction.
-     *        Used for refund calculation.
-     * @param gasToken Address of the token used for gas payment refunds.
-     *        Use address(0) for ETH.
-     * @param refundReceiver Address that should receive the gas payment refund.
-     *        Use address(0) to refund tx.origin.
-     * @param _nonce Sequential number used to prevent transaction reuse.
-     *
-     * @return result The encoded transaction data in the format:
-     *         [0x19, 0x01, domainSeparator, safeTxStructHash].
-     *         Total length is 66 bytes: 2 bytes for prefix + 32 bytes for domain separator
-     *         + 32 bytes for transaction struct hash.
+     * @inheritdoc ISafe
      */
-    function encodeTransactionData(
+    function getTransactionHash(
         address to,
         uint256 value,
         bytes calldata data,
@@ -423,12 +400,8 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) private view returns (bytes memory result) {
+    ) public view override returns (bytes32 txHash) {
         bytes32 separatorHash = domainSeparator();
-
-        // The encoding is written in assembly to avoid memory re-allocations.
-        // Straightforward solidity implementation would allocate multiple times, but since the only reason it allocates is because it needs to hash the data,
-        // we can save gas by reusing the same memory block by overwriting the data.
         /* solhint-disable no-inline-assembly */
         assembly {
             let ptr := mload(0x40)
@@ -451,40 +424,17 @@ contract Safe is
 
             // Hash the SafeTX struct and store it at the end of the result
             // Hashing first so we can re-use the same memory block for the result
-            mstore(add(ptr, 66), keccak256(ptr, 352))
+            mstore(add(ptr, 34), keccak256(ptr, 352))
             // Store the EIP-712 prefix (0x1901), note that strings are right-padded.
             // We write it before the domain separator and hash to use the remaining space.
-            mstore(add(ptr, 32), "\x19\x01")
+            mstore(ptr, "\x19\x01")
             // Store the domain separator
-            mstore(add(ptr, 34), separatorHash)
-            // Store the length of the encoded data (always 66 bytes)
-            mstore(ptr, 66)
-            // Allocate the memory with with alignment in mind, like Solidity would do.
-            // So it is 32 byte sizes + 66 bytes data = 98 = 128 bytes with padding
-            mstore(0x40, add(ptr, 128))
+            mstore(add(ptr, 2), separatorHash)
 
-            // Point the result to the memory block
-            result := ptr
+            // Calculate the hash
+            txHash := keccak256(ptr, 66)
         }
         /* solhint-enable no-inline-assembly */
-    }
-
-    /**
-     * @inheritdoc ISafe
-     */
-    function getTransactionHash(
-        address to,
-        uint256 value,
-        bytes calldata data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address refundReceiver,
-        uint256 _nonce
-    ) public view override returns (bytes32) {
-        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
     }
 
     /**
