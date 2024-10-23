@@ -441,25 +441,15 @@ contract Safe is
             mstore(add(ptr, 320), _nonce)
 
             // Step 3: Calculate the final EIP-712 hash
-            // First hash the SafeTX struct (352 bytes total length)
-            mstore(add(ptr, 34), keccak256(ptr, 352))
-
-            // Store EIP-712 prefix (0x1901)
-            // Note that strings are right-padded.
-            mstore(ptr, "\x19\x01")
-
-            // Store domain separator hash
-            mstore(add(ptr, 2), domainHash)
-
-            // Calculate final hash:
-            // keccak256(
-            //     abi.encodePacked(
-            //         "\x19\x01",
-            //         domainHash,
-            //         safeTxHash
-            //     )
-            // )
-            txHash := keccak256(ptr, 66)
+            // First, hash the SafeTX struct (352 bytes total length)
+            mstore(add(ptr, 64), keccak256(ptr, 352))
+            // Store the EIP-712 prefix (0x1901), note that integers are left-padded
+            // so the EIP-712 encoded data starts at add(ptr, 30)
+            mstore(ptr, 0x1901)
+            // Store the domain separator
+            mstore(add(ptr, 32), domainHash)
+            // Calculate the hash
+            txHash := keccak256(add(ptr, 30), 66)
         }
         /* solhint-enable no-inline-assembly */
     }
