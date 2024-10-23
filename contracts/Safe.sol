@@ -401,15 +401,33 @@ contract Safe is
         address refundReceiver,
         uint256 _nonce
     ) public view override returns (bytes32 txHash) {
-        bytes32 separatorHash = domainSeparator();
+        bytes32 domainHash = domainSeparator();
+
+        // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
+        // allocates memory is inefficient. We only need to allocate memory for temporary variables to be used in the keccak256 call.
         /* solhint-disable no-inline-assembly */
         assembly {
+            // Get the free memory pointer
             let ptr := mload(0x40)
 
+            // Step 1: Hash the transaction data
+            // Copy transaction data to memory and hash it
             calldatacopy(ptr, data.offset, data.length)
             let calldataHash := keccak256(ptr, data.length)
 
-            // Prepare the SafeTX struct for hashing, overwriting the copied calldata
+            // Step 2: Prepare the SafeTX struct for hashing
+            // Layout in memory:
+            // ptr +   0: SAFE_TX_TYPEHASH (constant defining the struct hash)
+            // ptr +  32: to address
+            // ptr +  64: value
+            // ptr +  96: calldataHash
+            // ptr + 128: operation
+            // ptr + 160: safeTxGas
+            // ptr + 192: baseGas
+            // ptr + 224: gasPrice
+            // ptr + 256: gasToken
+            // ptr + 288: refundReceiver
+            // ptr + 320: nonce
             mstore(ptr, SAFE_TX_TYPEHASH)
             mstore(add(ptr, 32), to)
             mstore(add(ptr, 64), value)
@@ -422,16 +440,25 @@ contract Safe is
             mstore(add(ptr, 288), refundReceiver)
             mstore(add(ptr, 320), _nonce)
 
-            // Hash the SafeTX struct and store it at the end of the result
-            // Hashing first so we can re-use the same memory block for the result
+            // Step 3: Calculate the final EIP-712 hash
+            // First hash the SafeTX struct (352 bytes total length)
             mstore(add(ptr, 34), keccak256(ptr, 352))
-            // Store the EIP-712 prefix (0x1901), note that strings are right-padded.
-            // We write it before the domain separator and hash to use the remaining space.
-            mstore(ptr, "\x19\x01")
-            // Store the domain separator
-            mstore(add(ptr, 2), separatorHash)
 
-            // Calculate the hash
+            // Store EIP-712 prefix (0x1901)
+            // Note that strings are right-padded.
+            mstore(ptr, "\x19\x01")
+
+            // Store domain separator hash
+            mstore(add(ptr, 2), domainHash)
+
+            // Calculate final hash:
+            // keccak256(
+            //     abi.encodePacked(
+            //         "\x19\x01",
+            //         domainHash,
+            //         safeTxHash
+            //     )
+            // )
             txHash := keccak256(ptr, 66)
         }
         /* solhint-enable no-inline-assembly */
