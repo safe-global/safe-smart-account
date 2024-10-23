@@ -1,54 +1,7 @@
-diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2024-04-17 14:32:25.133704630 +0200
-+++ base/Executor.sol	2024-04-18 12:13:12.682392677 +0200
-@@ -26,12 +26,8 @@
-         uint256 txGas
-     ) internal returns (bool success) {
-         if (operation == Enum.Operation.DelegateCall) {
--            /* solhint-disable no-inline-assembly */
--            /// @solidity memory-safe-assembly
--            assembly {
--                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
--            }
--            /* solhint-enable no-inline-assembly */
-+            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
-+            return true;
-         } else {
-             /* solhint-disable no-inline-assembly */
-             /// @solidity memory-safe-assembly
-diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2024-04-18 13:33:47.817387950 +0200
-+++ interfaces/ISafe.sol	2024-04-24 12:56:22.448349149 +0200
-@@ -109,7 +109,7 @@
-      */
-     function domainSeparator() external view returns (bytes32);
- 
--    /**
-+    /*
-      * @notice Returns transaction hash to be signed by owners.
-      * @param to Destination address.
-      * @param value Ether value.
-@@ -122,7 +122,6 @@
-      * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-      * @param _nonce Transaction nonce.
-      * @return Transaction hash.
--     */
-     function getTransactionHash(
-         address to,
-         uint256 value,
-@@ -135,6 +134,8 @@
-         address refundReceiver,
-         uint256 _nonce
-     ) external view returns (bytes32);
-+     */
-+    // MUNGED: The function was made internal to enable CVL summaries.
- 
-     /**
-      * External getter function for state variables.
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2024-04-19 12:20:27.643013980 +0200
-+++ Safe.sol	2024-04-24 12:57:47.960375971 +0200
-@@ -72,22 +72,24 @@
+--- Safe.sol	2024-10-23 15:00:06
++++ Safe.sol	2024-10-23 15:04:05
+@@ -75,22 +75,24 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
           */
@@ -77,8 +30,8 @@ diff -druN Safe.sol Safe.sol
          // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -417,9 +419,6 @@
-         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxHash);
+@@ -386,9 +388,6 @@
+         return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
      }
  
 -    /**
@@ -87,13 +40,61 @@ diff -druN Safe.sol Safe.sol
      function getTransactionHash(
          address to,
          uint256 value,
-@@ -431,7 +430,8 @@
+@@ -400,7 +399,9 @@
          address gasToken,
          address refundReceiver,
          uint256 _nonce
--    ) public view override returns (bytes32) {
-+    ) internal view returns (bytes32) {
+-    ) public view override returns (bytes32 txHash) {
++    ) internal view returns (bytes32 txHash) {
 +        // MUNGED: The function was made internal to enable CVL summaries.
-         return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
-     }
- }
++
+         bytes32 domainHash = domainSeparator();
+ 
+         // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
+diff -druN base/Executor.sol base/Executor.sol
+--- base/Executor.sol	2024-10-18 15:20:48
++++ base/Executor.sol	2024-10-23 15:03:22
+@@ -26,12 +26,8 @@
+         uint256 txGas
+     ) internal returns (bool success) {
+         if (operation == Enum.Operation.DelegateCall) {
+-            /* solhint-disable no-inline-assembly */
+-            /// @solidity memory-safe-assembly
+-            assembly {
+-                success := delegatecall(txGas, to, add(data, 0x20), mload(data), 0, 0)
+-            }
+-            /* solhint-enable no-inline-assembly */
++            // MUNGED lets just be a bit more optimistic, `execute` does nothing for `DELEGATECALL` and always returns true
++            return true;
+         } else {
+             /* solhint-disable no-inline-assembly */
+             /// @solidity memory-safe-assembly
+diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
+--- interfaces/ISafe.sol	2024-10-18 15:20:48
++++ interfaces/ISafe.sol	2024-10-23 15:03:22
+@@ -110,7 +110,7 @@
+      */
+     function domainSeparator() external view returns (bytes32);
+ 
+-    /**
++    /*
+      * @notice Returns transaction hash to be signed by owners.
+      * @param to Destination address.
+      * @param value Ether value.
+@@ -123,7 +123,6 @@
+      * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
+      * @param _nonce Transaction nonce.
+      * @return Transaction hash.
+-     */
+     function getTransactionHash(
+         address to,
+         uint256 value,
+@@ -136,6 +135,8 @@
+         address refundReceiver,
+         uint256 _nonce
+     ) external view returns (bytes32);
++     */
++    // MUNGED: The function was made internal to enable CVL summaries.
+ 
+     /**
+      * External getter function for state variables.

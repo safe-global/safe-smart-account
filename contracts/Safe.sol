@@ -387,50 +387,6 @@ contract Safe is
     }
 
     /**
-     * @notice Returns the pre-image of the transaction hash (see getTransactionHash).
-     * @param to Destination address.
-     * @param value Ether value.
-     * @param data Data payload.
-     * @param operation Operation type.
-     * @param safeTxGas Gas that should be used for the safe transaction.
-     * @param baseGas Gas costs for that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
-     * @param gasPrice Maximum gas price that should be used for this transaction.
-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param _nonce Transaction nonce.
-     * @return Transaction hash bytes.
-     */
-    function encodeTransactionData(
-        address to,
-        uint256 value,
-        bytes calldata data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address refundReceiver,
-        uint256 _nonce
-    ) private view returns (bytes memory) {
-        bytes32 safeTxStructHash = keccak256(
-            abi.encode(
-                SAFE_TX_TYPEHASH,
-                to,
-                value,
-                keccak256(data),
-                operation,
-                safeTxGas,
-                baseGas,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                _nonce
-            )
-        );
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), safeTxStructHash);
-    }
-
-    /**
      * @inheritdoc ISafe
      */
     function getTransactionHash(
@@ -444,8 +400,58 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) public view override returns (bytes32) {
-        return keccak256(encodeTransactionData(to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, _nonce));
+    ) public view override returns (bytes32 txHash) {
+        bytes32 domainHash = domainSeparator();
+
+        // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
+        // allocates memory is inefficient. We only need to allocate memory for temporary variables to be used in the keccak256 call.
+        /* solhint-disable no-inline-assembly */
+        assembly {
+            // Get the free memory pointer
+            let ptr := mload(0x40)
+
+            // Step 1: Hash the transaction data
+            // Copy transaction data to memory and hash it
+            calldatacopy(ptr, data.offset, data.length)
+            let calldataHash := keccak256(ptr, data.length)
+
+            // Step 2: Prepare the SafeTX struct for hashing
+            // Layout in memory:
+            // ptr +   0: SAFE_TX_TYPEHASH (constant defining the struct hash)
+            // ptr +  32: to address
+            // ptr +  64: value
+            // ptr +  96: calldataHash
+            // ptr + 128: operation
+            // ptr + 160: safeTxGas
+            // ptr + 192: baseGas
+            // ptr + 224: gasPrice
+            // ptr + 256: gasToken
+            // ptr + 288: refundReceiver
+            // ptr + 320: nonce
+            mstore(ptr, SAFE_TX_TYPEHASH)
+            mstore(add(ptr, 32), to)
+            mstore(add(ptr, 64), value)
+            mstore(add(ptr, 96), calldataHash)
+            mstore(add(ptr, 128), operation)
+            mstore(add(ptr, 160), safeTxGas)
+            mstore(add(ptr, 192), baseGas)
+            mstore(add(ptr, 224), gasPrice)
+            mstore(add(ptr, 256), gasToken)
+            mstore(add(ptr, 288), refundReceiver)
+            mstore(add(ptr, 320), _nonce)
+
+            // Step 3: Calculate the final EIP-712 hash
+            // First, hash the SafeTX struct (352 bytes total length)
+            mstore(add(ptr, 64), keccak256(ptr, 352))
+            // Store the EIP-712 prefix (0x1901), note that integers are left-padded
+            // so the EIP-712 encoded data starts at add(ptr, 30)
+            mstore(ptr, 0x1901)
+            // Store the domain separator
+            mstore(add(ptr, 32), domainHash)
+            // Calculate the hash
+            txHash := keccak256(add(ptr, 30), 66)
+        }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
