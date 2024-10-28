@@ -2,6 +2,7 @@ import { getCompatFallbackHandler } from "./../utils/setup";
 import { calculateSafeMessageHash, signHash, buildContractSignature } from "./../../src/utils/execution";
 import { expect } from "chai";
 import hre from "hardhat";
+import crypto from "crypto";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafeTemplate, getSafe } from "../utils/setup";
 import {
@@ -46,22 +47,29 @@ describe("Safe", () => {
         it("should correctly calculate EIP-712 hash", async () => {
             const { safe } = await setupTests();
             const safeAddress = await safe.getAddress();
-            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
-            const typedDataHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
-            await expect(
-                await safe.getTransactionHash(
-                    tx.to,
-                    tx.value,
-                    tx.data,
-                    tx.operation,
-                    tx.safeTxGas,
-                    tx.baseGas,
-                    tx.gasPrice,
-                    tx.gasToken,
-                    tx.refundReceiver,
-                    tx.nonce,
-                ),
-            ).to.be.eq(typedDataHash);
+
+            for (let i = 0; i < 100; i++) {
+                const randomAddress = "0x" + crypto.randomBytes(20).toString("hex");
+                const randomValue = "0x" + crypto.randomBytes(32).toString("hex");
+                const randomData = "0x" + crypto.randomBytes(128).toString("hex");
+
+                const tx = buildSafeTransaction({ to: randomAddress, nonce: await safe.nonce(), value: randomValue, data: randomData });
+                const typedDataHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
+                await expect(
+                    await safe.getTransactionHash(
+                        tx.to,
+                        tx.value,
+                        tx.data,
+                        tx.operation,
+                        tx.safeTxGas,
+                        tx.baseGas,
+                        tx.gasPrice,
+                        tx.gasToken,
+                        tx.refundReceiver,
+                        tx.nonce,
+                    ),
+                ).to.be.eq(typedDataHash);
+            }
         });
     });
 
