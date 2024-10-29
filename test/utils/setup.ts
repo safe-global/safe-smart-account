@@ -156,6 +156,17 @@ export const getCompatFallbackHandler = async (address?: string) => {
     return fallbackHandler;
 };
 
+export const getExtensibleFallbackHandler = async (address?: string) => {
+    if (!address) {
+        const extensibleFallbackHandlerAddress = await deployments.get("ExtensibleFallbackHandler");
+        address = extensibleFallbackHandlerAddress.address;
+    }
+
+    const extensibleFallbackHandler = await hre.ethers.getContractAt("ExtensibleFallbackHandler", address);
+
+    return extensibleFallbackHandler;
+};
+
 export const getSafeProxyRuntimeCode = async (): Promise<string> => {
     const proxyArtifact = await hre.artifacts.readArtifact("SafeProxy");
 
