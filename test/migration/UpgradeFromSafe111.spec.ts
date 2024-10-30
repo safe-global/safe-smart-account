@@ -25,7 +25,7 @@ describe("Upgrade from Safe 1.1.1", () => {
         const mockAddress = await mock.getAddress();
         const singleton111 = (await (await user1.sendTransaction({ data: deploymentData.safe111 })).wait())?.contractAddress;
         if (!singleton111) throw new Error("Could not deploy Safe 1.1.1");
-        const singleton140 = await (await getSafeSingleton()).getAddress();
+        const singleton150 = await (await getSafeSingleton()).getAddress();
         const factory = await getFactory();
         const saltNonce = 42;
         const proxyAddress = await calculateProxyAddress(factory, singleton111, "0x", saltNonce);
@@ -36,10 +36,10 @@ describe("Upgrade from Safe 1.1.1", () => {
 
         expect(await safe.VERSION()).to.be.eq("1.1.1");
         const nonce = await safe.nonce();
-        const data = ChangeMasterCopyInterface.encodeFunctionData("changeMasterCopy", [singleton140]);
+        const data = ChangeMasterCopyInterface.encodeFunctionData("changeMasterCopy", [singleton150]);
         const tx = buildSafeTransaction({ to: await safe.getAddress(), data, nonce });
         await executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]);
-        expect(await safe.VERSION()).to.be.eq("1.4.1");
+        expect(await safe.VERSION()).to.be.eq("1.5.0");
 
         return {
             migratedSafe: safe,

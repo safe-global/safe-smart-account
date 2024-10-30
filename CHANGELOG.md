@@ -4,12 +4,6 @@ This changelog only contains changes starting from version 1.3.0
 
 # Current version
 
-## Rename repository
-
-Issue: [#719](https://github.com/safe-global/safe-smart-account/issues/719)
-
-The repository was renamed from `safe-contracts` to `safe-smart-account` to better reflect the purpose of the contracts. Also, the npm package name was changed from `@safe-global/safe-contracts` to `@safe-global/safe-smart-account`.
-
 ## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
@@ -45,9 +39,78 @@ Solidity optimizer: `disabled`
 
 -   `SimulateTxAccessor` - TBD
 
+# Version 1.5.0
+
+## Rename repository
+
+Issue: [#719](https://github.com/safe-global/safe-smart-account/issues/719)
+
+The repository was renamed from `safe-contracts` to `safe-smart-account` to better reflect the purpose of the contracts. Also, the npm package name was changed from `@safe-global/safe-contracts` to `@safe-global/safe-smart-account`.
+
+## Compiler settings
+
+Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
+
+Solidity optimizer: `disabled`
+
+## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
+
+### Core contracts
+
+-   `Safe` - `0x7097743807D6f33bfCA1AE02492Ddb9F8a62E10A`
+-   `SafeL2` - `0xA54CA5Ce293b521C24E0C89471643830CE293305`
+
+### Factory contracts
+
+-   `SafeProxyFactory` - `0x59ddD083Cf820f568eB3a40eD833AC715Db6D6B5`
+
+### Handler contracts
+
+-   `TokenCallbackHandler` - `0x45a03a27D4BA1B0CC9784E3961C5f6C16aCBd381`
+-   `CompatibilityFallbackHandler` - `0xdB8F1858aD82f8B01270E98F7223393EBb33182E`
+-   `ExtensibleFallbackHandler` - `0x35434014c4d137990314D867Ff1D92C4aae71f3C`
+
+### Lib contracts
+
+-   `MultiSend` - `0x228a04A59BEF23106Bcb2b4158422baAC60646Ce`
+-   `MultiSendCallOnly` - `0x50cafDD5E439994509202CfCd569DcA7E1fd9659`
+-   `CreateCall` - `0xB22D635D552eC95142E2Abe3FfB859eA7d7C0316`
+-   `SignMessageLib` - `0x8fcB4617eae6261Cea37e629244AA2A4d92940d1`
+-   `SafeToL2Setup` - `0x5941bAEf7a31933bF00B7f5Cc0Ae6abc6E41e3f0`
+-   `SafeToL2Migration` - `0x1844763966A9D5380801Dbd3554dc0aBa8B875C7`
+-   `SafeMigration` - `0x7492F7848615Eb509884B311BE41d8c5dff6a4b9` (Target Safe version: v1.5.0)
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` - `0x38710E559A67ef07bcF8EeA70B076ac8e756DE08`
+
 ## Changes
 
 ### General
+
+#### Introduce Extensible Fallback Handler
+
+PR: [#851](https://github.com/safe-global/safe-smart-account/pull/851)
+
+`ExtensibleFallbackHandler` originally created by the CoWSwap Team is used for bringing new features and capabilities to Safe Smart Account including, but not limited to swaps, TWAP orders, etc. More details can be found [here](https://cow.fi/learn/all-you-need-to-know-about-cow-swap-new-safe-fallback-handler).
+
+#### Using assembly for encoding transaction data in `getTransactionHash(...)`
+
+PR: [#847](https://github.com/safe-global/safe-smart-account/pull/847)
+
+Using assembly for encoding transaction data resulted is better gas savings per call as well as overall decrease in codesize.
+
+#### Event emitted with `initializer` and `saltNonce` for proxy creation
+
+PR: [849](https://github.com/safe-global/safe-smart-account/pull/849)
+
+An extra set of function which includes an event which mentions the `initializer` and `saltNonce` is introduced for better indexing for networks which lack advanced tracing facilities.
+
+#### Internal revert message propagation
+
+Issue: [#715](https://github.com/safe-global/safe-smart-account/issues/715)
+
+Implementation of error propagation for internal TX so the user/dev can know the reason for revert instead of generic `GS013`.
 
 #### Use updated EIP-1271 function signature in the signature validation process
 
