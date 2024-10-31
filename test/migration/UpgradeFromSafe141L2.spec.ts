@@ -7,22 +7,22 @@ import { verificationTests } from "./subTests.spec";
 import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
-describe("Upgrade from Safe 1.4.1", () => {
+describe("Upgrade from Safe 1.4.1 L2", () => {
     // We migrate the Safe and run the verification tests
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
         const [user1] = await hre.ethers.getSigners();
-        const safeDeploymentData = hre.network.zksync ? deploymentData.safe141.zksync : deploymentData.safe141.evm;
+        const safeDeploymentData = hre.network.zksync ? deploymentData.safe141l2.zksync : deploymentData.safe141l2.evm;
         const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
-        const singleton141 = await (await safeContractFactory.deploy()).getAddress();
-        if (!singleton141) throw new Error("Could not deploy Safe 1.4.1");
+        const singleton141L2 = await (await safeContractFactory.deploy()).getAddress();
+        if (!singleton141L2) throw new Error("Could not deploy Safe 1.4.1 L2");
 
         const factory = await getFactory();
         const saltNonce = 42;
-        const proxyAddress = await calculateProxyAddress(factory, singleton141, "0x", saltNonce, hre.network.zksync);
-        await factory.createProxyWithNonce(singleton141, "0x", saltNonce).then((tx) => tx.wait());
+        const proxyAddress = await calculateProxyAddress(factory, singleton141L2, "0x", saltNonce, hre.network.zksync);
+        await factory.createProxyWithNonce(singleton141L2, "0x", saltNonce).then((tx) => tx.wait());
 
         const safe = await hre.ethers.getContractAt("Safe", proxyAddress);
         await safe.setup([user1.address], 1, AddressZero, "0x", mockAddress, AddressZero, 0, AddressZero);
