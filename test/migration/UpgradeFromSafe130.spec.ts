@@ -8,17 +8,20 @@ import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
 describe("Upgrade from Safe 1.3.0", () => {
+    before(function () {
+        /**
+         * ## There's no safe 1.3.0 on zkSync, so we skip this test
+         */
+        if (hre.network.zksync) this.skip();
+    });
+
     // We migrate the Safe and run the verification tests
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
         const [user1] = await hre.ethers.getSigners();
-        const singleton130 = (
-            await (
-                await user1.sendTransaction({ data: hre.network.zksync ? deploymentData.safe130.zksync : deploymentData.safe130.evm })
-            ).wait()
-        )?.contractAddress;
+        const singleton130 = (await (await user1.sendTransaction({ data: deploymentData.safe130.evm })).wait())?.contractAddress;
         if (!singleton130) throw new Error("Could not deploy Safe 1.3.0");
 
         const factory = await getFactory();
@@ -45,7 +48,7 @@ describe("Upgrade from Safe 1.3.0", () => {
         };
     });
 
-    it("passes the Safe 1.4.1 tests", async () => {
+    it("passes the Safe 1.3.0 tests", async () => {
         await verificationTests(setupTests);
     });
 });
