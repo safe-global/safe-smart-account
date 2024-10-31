@@ -73,7 +73,6 @@ describe("ReentrancyTransactionGuard", () => {
             const signatures = [await safeSignTypedData(user1, safeAddress, safeTx)];
             const signatureBytes = buildSignatureBytes(signatures);
 
-            // We should revert with GS013 as the internal tx is reverted because of the reentrancy guard
             await expect(
                 executeContractCallWithSigners(
                     safe,
