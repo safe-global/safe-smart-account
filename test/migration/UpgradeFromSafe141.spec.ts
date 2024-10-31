@@ -1,6 +1,8 @@
 import { expect } from "chai";
+import { ethers } from "ethers";
 import hre, { deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
+import * as zk from "zksync-ethers";
 import { getFactory, getMock, getMultiSend } from "../utils/setup";
 import { buildSafeTransaction, executeTx, safeApproveHash } from "../../src/utils/execution";
 import { verificationTests } from "./subTests.spec";
@@ -14,11 +16,14 @@ describe("Upgrade from Safe 1.4.1", () => {
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
         const [user1] = await hre.ethers.getSigners();
-        const singleton141 = (
-            await (
-                await user1.sendTransaction({ data: hre.network.zksync ? deploymentData.safe141.zksync : deploymentData.safe141.evm })
-            ).wait()
-        )?.contractAddress;
+        let singleton141;
+        if (hre.network.zksync) {
+            const factory = new zk.ContractFactory(deploymentData.safe141.abi, deploymentData.safe141.zksync, user1, "create");
+            const contract = await factory.deploy();
+            singleton141 = await (contract as ethers.Contract).getAddress();
+        } else {
+            singleton141 = (await (await user1.sendTransaction({ data: deploymentData.safe141.evm })).wait())?.contractAddress;
+        }
         if (!singleton141) throw new Error("Could not deploy Safe 1.4.1");
 
         const factory = await getFactory();
