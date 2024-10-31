@@ -41,52 +41,64 @@ Solidity optimizer: `disabled`
 
 # Version 1.5.0
 
-## Rename repository
-
-Issue: [#719](https://github.com/safe-global/safe-smart-account/issues/719)
-
-The repository was renamed from `safe-contracts` to `safe-smart-account` to better reflect the purpose of the contracts. Also, the npm package name was changed from `@safe-global/safe-contracts` to `@safe-global/safe-smart-account`.
-
 ## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
 
 Solidity optimizer: `disabled`
 
+ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-solidity/releases/tag/1.5.3)
+
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
 ### Core contracts
 
--   `Safe` - `0x7097743807D6f33bfCA1AE02492Ddb9F8a62E10A`
--   `SafeL2` - `0xA54CA5Ce293b521C24E0C89471643830CE293305`
+| Contract Name | EVM                                          | ZKSync                                       |
+| ------------- | -------------------------------------------- | -------------------------------------------- |
+| `Safe`        | `0x7097743807D6f33bfCA1AE02492Ddb9F8a62E10A` | `0x7EDFAd23E11460AA2Ad7F65B60Dc9b47bC522B7b` |
+| `SafeL2`      | `0xA54CA5Ce293b521C24E0C89471643830CE293305` | `0x0011Ff113acFAE00d62120A350e1DA4f0730235a` |
 
 ### Factory contracts
 
--   `SafeProxyFactory` - `0x59ddD083Cf820f568eB3a40eD833AC715Db6D6B5`
+| Contract Name      | EVM                                          | ZKSync                                       |
+| ------------------ | -------------------------------------------- | -------------------------------------------- |
+| `SafeProxyFactory` | `0x59ddD083Cf820f568eB3a40eD833AC715Db6D6B5` | `0x94323010235E445F8967f88bd66Ce0f812875cA2` |
 
 ### Handler contracts
 
--   `TokenCallbackHandler` - `0x45a03a27D4BA1B0CC9784E3961C5f6C16aCBd381`
--   `CompatibilityFallbackHandler` - `0xdB8F1858aD82f8B01270E98F7223393EBb33182E`
--   `ExtensibleFallbackHandler` - `0x35434014c4d137990314D867Ff1D92C4aae71f3C`
+| Contract Name                  | EVM                                          | ZKSync                                       |
+| ------------------------------ | -------------------------------------------- | -------------------------------------------- |
+| `TokenCallbackHandler`         | `0x45a03a27D4BA1B0CC9784E3961C5f6C16aCBd381` | `0xbF50AD15C0041C1076Eb3Ac4a1DBF4C2A2682970` |
+| `CompatibilityFallbackHandler` | `0xdB8F1858aD82f8B01270E98F7223393EBb33182E` | `0xf6e48718fdA88133cb06f06312B0C04BCB4b2814` |
+| `ExtensibleFallbackHandler`    | `0x35434014c4d137990314D867Ff1D92C4aae71f3C` | `0xE54C2F72EFC8b3A4F95da5644E8386100a69C9dD` |
 
 ### Lib contracts
 
--   `MultiSend` - `0x228a04A59BEF23106Bcb2b4158422baAC60646Ce`
--   `MultiSendCallOnly` - `0x50cafDD5E439994509202CfCd569DcA7E1fd9659`
--   `CreateCall` - `0xB22D635D552eC95142E2Abe3FfB859eA7d7C0316`
--   `SignMessageLib` - `0x8fcB4617eae6261Cea37e629244AA2A4d92940d1`
--   `SafeToL2Setup` - `0x5941bAEf7a31933bF00B7f5Cc0Ae6abc6E41e3f0`
--   `SafeToL2Migration` - `0x1844763966A9D5380801Dbd3554dc0aBa8B875C7`
--   `SafeMigration` - `0x7492F7848615Eb509884B311BE41d8c5dff6a4b9` (Target Safe version: v1.5.0)
+| Contract Name                                   | EVM                                          | ZKSync                                       |
+| ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| `MultiSend`                                     | `0x228a04A59BEF23106Bcb2b4158422baAC60646Ce` | `0x0bc7CaB87e612195D1b7A735113Ac868988796B1` |
+| `MultiSendCallOnly`                             | `0x50cafDD5E439994509202CfCd569DcA7E1fd9659` | `0x5CE544A4E466fC52bF42c33B6f6ba6A6974b2BC8` |
+| `CreateCall`                                    | `0xB22D635D552eC95142E2Abe3FfB859eA7d7C0316` | `0xfb7A86b5e25C3A87104f26240911AA0558BB57C8` |
+| `SignMessageLib`                                | `0x8fcB4617eae6261Cea37e629244AA2A4d92940d1` | `0x6946f354B8461165A315F992782a3a90Df057594` |
+| `SafeToL2Setup`                                 | `0x5941bAEf7a31933bF00B7f5Cc0Ae6abc6E41e3f0` | `0x6FD702B4D2A24f26394a3b7761785F47E75BCB19` |
+| `SafeToL2Migration`                             | `0x1844763966A9D5380801Dbd3554dc0aBa8B875C7` | `0x51a7b1F0a0D9Fb4935Dc5af5BA6ef3bee119DABe` |
+| `SafeMigration` (Target Safe version: `v1.5.0`) | `0x7492F7848615Eb509884B311BE41d8c5dff6a4b9` | `0xdF3316AdD4191A7B26C5EA2D46a4a7D16E854975` |
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` - `0x38710E559A67ef07bcF8EeA70B076ac8e756DE08`
+| Contract Name        | EVM                                          | ZKSync                                       |
+| -------------------- | -------------------------------------------- | -------------------------------------------- |
+| `SimulateTxAccessor` | `0x38710E559A67ef07bcF8EeA70B076ac8e756DE08` | `0x2bec1716Df0F0790703f57695649a80Cc1b6b119` |
 
 ## Changes
 
 ### General
+
+#### Rename repository
+
+Issue: [#719](https://github.com/safe-global/safe-smart-account/issues/719)
+
+The repository was renamed from `safe-contracts` to `safe-smart-account` to better reflect the purpose of the contracts. Also, the npm package name was changed from `@safe-global/safe-contracts` to `@safe-global/safe-smart-account`.
 
 #### Introduce Extensible Fallback Handler
 
@@ -138,9 +150,10 @@ The `IModuleGuard` interface was added to allow checking the module transactions
 
 #### Add overloaded `checkNSignatures` method
 
-Issues: 
-- [#557](https://github.com/safe-global/safe-smart-account/pull/557)
-- [#589](https://github.com/safe-global/safe-smart-account/pull/589)
+Issues:
+
+-   [#557](https://github.com/safe-global/safe-smart-account/pull/557)
+-   [#589](https://github.com/safe-global/safe-smart-account/pull/589)
 
 Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was moved from the core contract to the `CompatibilityFallbackHandler`.
 
@@ -150,41 +163,62 @@ To fit all of the above changes into the bytecode size limit, the `encodeTransac
 
 # Version 1.4.1
 
+## Release iterations
+
+-   1.4.1-2: Added `SafeToL2Migration`, `SafeMigration` and `SafeToL2Setup` contracts to facilitate migrations from previous Safe versions.
+-   1.4.1-3: Added zkSync support for all contracts.
+
 ## Compiler settings
 
 Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
 
 Solidity optimizer: `disabled`
 
+ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-solidity/releases/tag/1.5.3)
+
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
 ### Core contracts
 
--   `Safe` at `0x41675C099F32341bf84BFc5382aF534df5C7461a`
--   `SafeL2` at `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+| Contract Name | EVM                                          | ZKSync                                       |
+| ------------- | -------------------------------------------- | -------------------------------------------- |
+| `Safe`        | `0x41675C099F32341bf84BFc5382aF534df5C7461a` | `0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa` |
+| `SafeL2`      | `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762` | `0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380` |
 
 ### Factory contracts
 
--   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+| Contract Name      | EVM                                          | ZKSync                                       |
+| ------------------ | -------------------------------------------- | -------------------------------------------- |
+| `SafeProxyFactory` | `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67` | `0xc329D02fd8CB2fc13aa919005aF46320794a8629` |
+
+### Factory contracts
+
+-   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67` (EVM), `0xc329D02fd8CB2fc13aa919005aF46320794a8629` (zkSync)
 
 ### Handler contracts
 
--   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
--   `CompatibilityFallbackHandler` at `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99`
+| Contract Name                  | EVM                                          | ZKSync                                       |
+| ------------------------------ | -------------------------------------------- | -------------------------------------------- |
+| `TokenCallbackHandler`         | `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562` | `0xd508168Db968De1EBc6f288322e6C820137eeF79` |
+| `CompatibilityFallbackHandler` | `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99` | `0x9301E98DD367135f21bdF66f342A249c9D5F9069` |
 
 ### Lib contracts
 
--   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
--   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
--   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
--   `SignMessageLib` at `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9`
--   `SafeMigration` at `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` (target Safe version: v1.4.1)
--   `SafeToL2Migration` at `0xfF83F6335d8930cBad1c0D439A841f01888D9f69`
--   `SafeToL2Setup` at `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54`
+| Contract Name                                   | EVM                                          | ZKSync                                       |
+| ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| `MultiSend`                                     | `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526` | `0x309D0B190FeCCa8e1D5D8309a16F7e3CB133E885` |
+| `MultiSendCallOnly`                             | `0x9641d764fc13c8B624c04430C7356C1C7C8102e2` | `0x0408EF011960d02349d50286D20531229BCef773` |
+| `CreateCall`                                    | `0x9b35Af71d77eaf8d7e40252370304687390A1A52` | `0xAAA566Fe7978bB0fb0B5362B7ba23038f4428D8f` |
+| `SignMessageLib`                                | `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9` | `0xAca1ec0a1A575CDCCF1DC3d5d296202Eb6061888` |
+| `SafeMigration` (Target Safe version: `v1.4.1`) | `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` | `0x817756C6c555A94BCEE39eB5a102AbC1678b09A7` |
+| `SafeToL2Migration`                             | `0xfF83F6335d8930cBad1c0D439A841f01888D9f69` | `0xa26620d1f8f1a2433F0D25027F141aaCAFB3E590` |
+| `SafeToL2Setup`                                 | `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54` | `0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39` |
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+| Contract Name        | EVM                                          | ZKSync                                       |
+| -------------------- | -------------------------------------------- | -------------------------------------------- |
+| `SimulateTxAccessor` | `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199` | `0xdd35026932273768A3e31F4efF7313B5B7A7199d` |
 
 ## Changes
 
@@ -211,7 +245,6 @@ PR: [#685](https://github.com/safe-global/safe-smart-account/pull/685)
 Issue: [#568](https://github.com/safe-global/safe-smart-account/issues/568)
 
 `setupModules` made a call to `gasleft()` that is invalid in the ERC-4337 standard. The call was replaced with `type(uint256).max` to forward all the available gas instead.
-
 
 # Version 1.4.0
 
@@ -383,40 +416,58 @@ Solidity optimizer: `disabled`
 ## Expected addresses with [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy) (default)
 
 ### Core contracts
-- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
-- `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+
+-   `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
+-   `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+
 ### Factory contracts
-- `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+
+-   `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+
 ### Handler contracts
-- `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
-- `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+
+-   `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
+-   `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+
 ### Lib contracts
-- `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
-- `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
-- `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
-- `SignMessageLib` at `0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2`
+
+-   `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
+-   `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
+-   `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+-   `SignMessageLib` at `0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2`
+
 ### Storage reader contracts
-- `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
+
+-   `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
 
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
 ### Core contracts
-- `GnosisSafe` at `0x69f4D1788e39c87893C980c06EdF4b7f686e2938`
-- `GnosisSafeL2` at `0xfb1bffC9d739B8D520DaF37dF666da4C687191EA`
-### Factory contracts
-- `GnosisSafeProxyFactory` at `0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC`
-### Handler contracts
-- `DefaultCallbackHandler` at `0x3d8E605B02032A941Cfe26897Ca94d77a5BC24b3`
-- `CompatibilityFallbackHandler` at `0x017062a1dE2FE6b99BE3d9d37841FeD19F573804`
-### Lib contracts
-- `MultiSend` at `0x998739BFdAAdde7C933B942a68053933098f9EDa`
-- `MultiSendCallOnly` at `0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`
-- `CreateCall` at `0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d`
-- `SignMessageLib` at `0x98FFBBF51bb33A056B08ddf711f289936AafF717`
-### Storage reader contracts
-- `SimulateTxAccessor` at `0x727a77a074D1E6c4530e814F89E618a3298FC044`
 
-## Changes 
+-   `GnosisSafe` at `0x69f4D1788e39c87893C980c06EdF4b7f686e2938`
+-   `GnosisSafeL2` at `0xfb1bffC9d739B8D520DaF37dF666da4C687191EA`
+
+### Factory contracts
+
+-   `GnosisSafeProxyFactory` at `0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC`
+
+### Handler contracts
+
+-   `DefaultCallbackHandler` at `0x3d8E605B02032A941Cfe26897Ca94d77a5BC24b3`
+-   `CompatibilityFallbackHandler` at `0x017062a1dE2FE6b99BE3d9d37841FeD19F573804`
+
+### Lib contracts
+
+-   `MultiSend` at `0x998739BFdAAdde7C933B942a68053933098f9EDa`
+-   `MultiSendCallOnly` at `0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`
+-   `CreateCall` at `0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d`
+-   `SignMessageLib` at `0x98FFBBF51bb33A056B08ddf711f289936AafF717`
+
+### Storage reader contracts
+
+-   `SimulateTxAccessor` at `0x727a77a074D1E6c4530e814F89E618a3298FC044`
+
+## Changes
 
 ### Deployment process
 
@@ -436,7 +487,6 @@ The library is meant as a compatibility tool for the removed `signMessage` funct
 
 #### GnosisSafeStorage
 
-
 File: [`contracts/libraries/GnosisSafeStorage.sol`](https://github.com/safe-global/safe-smart-account/blob/e57df14ea96dc7dabf93f041c7531f2ab6755c76/contracts/libraries/GnosisSafeStorage.sol)
 
 Expected behaviour:
@@ -454,26 +504,37 @@ Solidity optimizer: `disabled`
 ## Expected deterministic deployment addresses
 
 ### Core contracts
-- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
-- `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+
+-   `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
+-   `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+
 ### Factory contracts
-- `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+
+-   `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+
 ### Handler contracts
-- `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
-- `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+
+-   `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
+-   `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+
 ### Lib contracts
-- `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
-- `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
-- `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+
+-   `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
+-   `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
+-   `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+
 ### Storage reader contracts
-- `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
+
+-   `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
 
 ## Changes
 
 ### Core contract
+
 File: [`contracts/GnosisSafe.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/GnosisSafe.sol)
 
 #### Add chainId to transaction hash
+
 Issue: [#170](https://github.com/safe-global/safe-smart-account/issues/170)
 
 Expected behaviour:
@@ -481,6 +542,7 @@ Expected behaviour:
 The `chainId` has been added to the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) domain. In case of a change of the `chainId` (e.g. hardfork related) the new `chainId` will automatically be used for future signature checks.
 
 #### Add transaction guard
+
 Issue: [#224](https://github.com/safe-global/safe-smart-account/issues/224)
 
 Expected behaviour:
@@ -488,21 +550,24 @@ Expected behaviour:
 It is possible to add a transaction guard, which can check all of the parameters that have been sent to `execTransaction` prior to execution. For this check the `checkTransaction` needs to be implemented by the guard. In case that `checkTransaction` reverts, `execTransaction` will also revert. Another check that can be implemented by the guard is `checkAfterExecution`. This check is called at the very end of the execution and allows to perform checks on the final state of the Safe. The parameters passed to that check are the `safeTxHash` and a `success` boolean.
 
 #### Add StorageAccessible support
+
 Issue: [#201](https://github.com/safe-global/safe-smart-account/issues/201)
 
 Expected behaviour:
 
-It is possible to use `simulateDelegatecallInternal` to simulate logic on the Safe by providing a contract and calldata. This contract will then be called via a delegatecall and the result will be returned via a revert.The revert data will have the following format: 
-`success:bool || response.length:uint256 || response:bytes`. 
+It is possible to use `simulateDelegatecallInternal` to simulate logic on the Safe by providing a contract and calldata. This contract will then be called via a delegatecall and the result will be returned via a revert.The revert data will have the following format:
+`success:bool || response.length:uint256 || response:bytes`.
 
 Important: This method will always revert.
 
 #### Remove changeMasterCopy
+
 Expected behaviour:
 
 It is not possible anymore to change the singleton address (formerly known as master copy) via a method call. To make the implications of a singleton address change more visible it is required to use a delegatecall with a migration contract. (See example migration in libraries)
 
 #### Make checkSignature public
+
 Issue: [#248](https://github.com/safe-global/safe-smart-account/issues/248)
 
 Expected behaviour:
@@ -512,14 +577,16 @@ Another method that has been added to make the usage from external contracts eas
 Note: The storage allocated by `approveHash` will no longer be zeroed when being used in `checkSignature`. If this is required a delegatecall with a contract that zeroes past approved hashes should be used.
 
 #### Remove authorized from requiredTxGas
+
 Issue: [#247](https://github.com/safe-global/safe-smart-account/issues/247)
 
 Expected behaviour:
 
-To make it easier to interact with this method (e.g. by providing a wrapper). The requirement that the method can only be called by the Safe itself has been removed. The method will still always revert. 
+To make it easier to interact with this method (e.g. by providing a wrapper). The requirement that the method can only be called by the Safe itself has been removed. The method will still always revert.
 Note: This method is superseded by the `StorageAccessible` logic and will be removed in the next major version.
 
 #### Move EIP-1271 logic to fallback handler
+
 Issue: [#223](https://github.com/safe-global/safe-smart-account/issues/223)
 
 Expected behaviour:
@@ -528,14 +595,16 @@ As [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) is still changing the log
 Note: The `checkSignature` method still uses the previous version of [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) that uses the data to be signed instead of the hash of the data.
 
 #### Send along msg.sender to fallback handler
+
 Issue: [#246](https://github.com/safe-global/safe-smart-account/issues/246)
 
 Expected behaviour:
 
-When the Safe forwards a call to the fallback handler it will append the `msg.sender` to the calldata. This will allow the fallback handler to use this information. 
+When the Safe forwards a call to the fallback handler it will append the `msg.sender` to the calldata. This will allow the fallback handler to use this information.
 Note: Fallback handlers should make sure that the connected Safe supports this, else this can be used by the caller to influence the fallback handler (by specifying an arbitrary `msg.sender`)
 
 #### Revert on failure if safeTxGas and gasPrice are 0
+
 Issue: [#274](https://github.com/safe-global/safe-smart-account/issues/274)
 
 Expected behaviour:
@@ -543,6 +612,7 @@ Expected behaviour:
 If `safeTxGas` is 0 (therefore all available gas has been used for the internal tx) and `gasPrice` is also 0 (therefore no refund is involved) the transaction will revert when the internal tx fails. This makes it easier to interact with the Safe without having to estimate the internal transaction ahead of time.
 
 #### Add setup event
+
 Issue: [#233](https://github.com/safe-global/safe-smart-account/issues/233)
 
 Expected behaviour:
@@ -550,6 +620,7 @@ Expected behaviour:
 The Safe now emits an event that contains all setup information that influences the State of the nearly setup Safe. The initializer calldata is omitted to prevent excessive gas costs. And the refund information is omitted as they don’t have an influence on the internal contract state.
 
 #### Add incoming ETH event
+
 Issue: [#209](https://github.com/safe-global/safe-smart-account/issues/209)
 
 Expected behaviour:
@@ -560,6 +631,7 @@ Note: It will not be possible anymore to send ETH via the solidity calls transfe
 ### Layer 2
 
 #### Add contract version that emits Safe tx information via events
+
 File: [`contracts/GnosisSafeL2.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/GnosisSafeL2.sol)
 
 Expected behaviour:
@@ -575,15 +647,17 @@ Same can be done with the `SafeModuleTransaction` and `ExecutionFromModuleSucces
 ### Fallback handlers
 
 #### Add EIP-165 support to DefaultCallbackHandler
+
 Issue: [#161](https://github.com/safe-global/safe-smart-account/issues/161)
 
 File: [`contracts/handler/DefaultCallbackHandler.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/handler/DefaultCallbackHandler.sol)
 
 Expected behaviour:
 
-Indicate via the `supportsInterface` method of [EIP-165](https://eips.ethereum.org/EIPS/eip-165) that the [EIP-721](https://eips.ethereum.org/EIPS/eip-721) and [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) receiver interfaces are supported. 
+Indicate via the `supportsInterface` method of [EIP-165](https://eips.ethereum.org/EIPS/eip-165) that the [EIP-721](https://eips.ethereum.org/EIPS/eip-721) and [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) receiver interfaces are supported.
 
 #### Add CompatibilityFallbackHandler
+
 Issue: [#223](https://github.com/safe-global/safe-smart-account/issues/223)
 
 File: [`contracts/handler/CompatibilityFallbackHandler.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/handler/CompatibilityFallbackHandler.sol)
@@ -593,6 +667,7 @@ Expected behaviour:
 The `CompatibilityFallbackHandler` extends the `DefaultCallbackHandler` and implements support for some logic that has been removed from the core contracts. Namely [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) support and the non reverting method of the `StorageAccessible` contract. Also the fallback manager contains the logic to verify Safe messages.
 
 #### Add possibility to get sender in fallback handler
+
 File: [`contracts/handler/HandlerContext.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/handler/HandlerContext.sol)
 
 Expected behaviour:
@@ -602,6 +677,7 @@ The `HandlerContext` can be used to retrieve the `msg.sender` and the Safe (aka 
 ### Guard
 
 #### Add DelegateCallTransactionGuard
+
 File: [`contracts/examples/guards/DelegateCallTransactionGuard.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/DelegateCallTransactionGuard.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate a guard. This should not be used in production without further checks.**
@@ -611,6 +687,7 @@ Expected behaviour:
 This transaction guard can be used to prevent that Safe transactions that use a delegatecall operation are being executed. It is also possible to specify an exception when deploying the contract (e.g. a `MultiSendCallOnly` instance).
 
 #### Add DebugTransactionGuard
+
 File: [`contracts/examples/guards/DebugTransactionGuard.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/DebugTransactionGuard.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate a guard. This should not be used in production without further checks.**
@@ -620,6 +697,7 @@ Expected behaviour:
 This transaction guard can be used to log more details about a transaction. This is similar to what the L2 version of the Safe does, but implemented as a transaction guard. One event will be emitted containing the transaction details and another to track the status of a specific nonce.
 
 #### Add ReentrancyTransactionGuard
+
 File: [`contracts/examples/guards/ReentrancyTransactionGuard.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/ReentrancyTransactionGuard.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate a guard. This should not be used in production without further checks.**
@@ -631,6 +709,7 @@ This transaction guard can be used to prevent that Safe transactions can re-ente
 ### Libraries
 
 #### Make multiSend payable to avoid check on msg.value
+
 Issue: [#227](https://github.com/safe-global/safe-smart-account/issues/227)
 
 File: [`contracts/libraries/MultiSend.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/libraries/MultiSend.sol)
@@ -640,6 +719,7 @@ Expected behaviour:
 The `multiSend` is now payable therefore will enforce anymore that `msg.value` is 0. ETH that is not transferred out again will remain in `this` (the calling contract when used via a delegatecall or the contract when used via call, only possible with `MultiSendCallOnly`)
 
 #### Add MuliSend that disallows delegate operation
+
 File: [`contracts/libraries/MultiSendCallOnly.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/libraries/MultiSendCallOnly.sol)
 
 Expected behaviour:
@@ -648,6 +728,7 @@ The logic is the same as for the normal `MultiSend`, but when an attempt is made
 Note: The encoding of the data send to the `multiSend` method is exactly the same as for the normal `MultiSend`, this makes it easy to exchange the contracts depending on the use case.
 
 #### Add base contract for Safe storage layout
+
 File: [`contracts/examples/libraries/GnosisSafeStorage.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/GnosisSafeStorage.sol)
 
 Note: **This contract is meant as an example to demonstrate how to access the Safe state within a library contract. This should not be used in production without further checks.**
@@ -657,6 +738,7 @@ Expected behaviour:
 The contract contains the basic storage layout of the `GnosisSafe.sol` contract.
 
 #### Add contract to mark Safe messages as signed
+
 File: [`contracts/examples/libraries/SignMessage.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/SignMessage.sol)
 
 Note: **This contract is meant as an example to demonstrate how to mark Safe message as signed in the signedMessages mapping. This should not be used in production without further checks.**
@@ -666,6 +748,7 @@ Expected behaviour:
 The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the `signedMessages` mapping.
 
 #### Add Migration example to downgrade from 1.3.0 to 1.2.0
+
 File: [`contracts/examples/libraries/Migrate_1_3_0_to_1_2_0.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/libraries/Migrate_1_3_0_to_1_2_0.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate migration in the future. This should not be used in production without further checks.**
