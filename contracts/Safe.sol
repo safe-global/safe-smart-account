@@ -49,7 +49,7 @@ contract Safe is
 {
     using SafeMath for uint256;
 
-    string public constant override VERSION = "1.4.1";
+    string public constant override VERSION = "1.5.0";
 
     // keccak256(
     //     "EIP712Domain(uint256 chainId,address verifyingContract)"

@@ -166,6 +166,7 @@ if (NODE_URL) {
     userConfig.networks!.custom = {
         ...sharedNetworkConfig,
         url: NODE_URL,
+        zksync: HARDHAT_ENABLE_ZKSYNC === "1",
     };
 }
 export default userConfig;

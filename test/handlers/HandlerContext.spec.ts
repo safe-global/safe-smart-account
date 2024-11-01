@@ -47,4 +47,19 @@ describe("HandlerContext", () => {
 
         expect(handler.interface.decodeFunctionResult("dudududu", response)).to.be.deep.eq([user1.address, safeAddress]);
     });
+
+    it("reverts if calldata is less than 20 bytes", async () => {
+        const {
+            handler,
+            signers: [user1],
+        } = await setup();
+
+        const handlerAddress = await handler.getAddress();
+        await expect(
+            user1.call({
+                to: handlerAddress,
+                data: handler.interface.encodeFunctionData("dudududu"),
+            }),
+        ).to.be.revertedWith("Invalid calldata length");
+    });
 });

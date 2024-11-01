@@ -18,6 +18,7 @@ abstract contract HandlerContext {
      * @return sender Original caller address.
      */
     function _msgSender() internal pure returns (address sender) {
+        require(msg.data.length >= 20, "Invalid calldata length");
         // The assembly code is more direct than the Solidity version using `abi.decode`.
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
