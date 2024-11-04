@@ -161,7 +161,7 @@ Previously pre-approved signatures relying on the `msg.sender` variable couldn't
 
 PR: [#603](https://github.com/safe-global/safe-smart-account/pull/603)
 
-To fit all of the above changes into the bytecode size limit, the `encodeTransactionData` method was made private. Please note that in the subsequent PR [#847](https://github.com/safe-global/safe-smart-account/pull/847), the function `encodeTransactionData` has been completely removed and replaced with an optimized and inlined assembly version.
+The `encodeTransactionData` function has been refactored in two stages since the last release. Initially, due to bytecode size constraints, it was modified in PR [#603](https://github.com/safe-global/safe-smart-account/pull/603) to a `private` function. Subsequently, in PR [#847](https://github.com/safe-global/safe-smart-account/pull/847), `encodeTransactionData` was entirely removed and replaced with an optimized, inline-assembly implementation within the `getTransactionHash` function.
 
 # Version 1.4.1
 
