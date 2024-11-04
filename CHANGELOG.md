@@ -106,12 +106,6 @@ PR: [#851](https://github.com/safe-global/safe-smart-account/pull/851)
 
 `ExtensibleFallbackHandler` originally created by the CoWSwap Team is used for bringing new features and capabilities to Safe Smart Account including, but not limited to swaps, TWAP orders, etc. More details can be found [here](https://cow.fi/learn/all-you-need-to-know-about-cow-swap-new-safe-fallback-handler).
 
-#### Using assembly for encoding transaction data in `getTransactionHash(...)`
-
-PR: [#847](https://github.com/safe-global/safe-smart-account/pull/847)
-
-Using assembly for encoding transaction data resulted is better gas savings per call as well as overall decrease in codesize.
-
 #### Event emitted with `initializer` and `saltNonce` for proxy creation
 
 PR: [849](https://github.com/safe-global/safe-smart-account/pull/849)
@@ -157,7 +151,7 @@ Issues:
 
 Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was moved from the core contract to the `CompatibilityFallbackHandler`.
 
-#### `encodeTransactionData` public method removal
+#### Removal of `encodeTransactionData` and Inline-Assembly-Based Encoding in `getTransactionHash`
 
 PR: [#603](https://github.com/safe-global/safe-smart-account/pull/603)
 
