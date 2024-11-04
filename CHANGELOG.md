@@ -151,7 +151,7 @@ Issues:
 
 Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was moved from the core contract to the `CompatibilityFallbackHandler`.
 
-#### Removal of `encodeTransactionData` and Inline-Assembly-Based Encoding in `getTransactionHash`
+#### Remove `encodeTransactionData` and add inline-assembly-based encoding in `getTransactionHash`
 
 PR: [#603](https://github.com/safe-global/safe-smart-account/pull/603)
 
