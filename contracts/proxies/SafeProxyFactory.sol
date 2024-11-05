@@ -55,7 +55,7 @@ contract SafeProxyFactory {
      * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
      */
     function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce) public returns (SafeProxy proxy) {
-        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatinating it
+        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatenating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
         proxy = deployProxy(_singleton, initializer, salt);
         emit ProxyCreation(proxy, _singleton);
@@ -134,7 +134,7 @@ contract SafeProxyFactory {
     /**
      * @notice Returns true if `account` is a contract.
      * @dev This function will return false if invoked during the constructor of a contract,
-     *      as the code is not actually created until after the constructor finishes.
+     *      as the code is not created until after the constructor finishes.
      * @param account The address being queried
      * @return True if `account` is a contract
      */

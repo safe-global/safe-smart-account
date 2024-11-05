@@ -17,7 +17,7 @@ contract MultiSendCallOnly {
      *                     data length as a uint256 (=> 32 bytes),
      *                     data as bytes.
      *                     see abi.encodePacked for more information on packed encoding
-     * @notice The code is for most part the same as the normal MultiSend (to keep compatibility),
+     * @notice The code is for the most part the same as the normal MultiSend (to keep compatibility),
      *         but reverts if a transaction tries to use a delegatecall.
      * @notice This method is payable as delegatecalls keep the msg.value from the previous call
      *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise

@@ -110,7 +110,7 @@ PR: [#851](https://github.com/safe-global/safe-smart-account/pull/851)
 
 PR: [849](https://github.com/safe-global/safe-smart-account/pull/849)
 
-An extra set of function which includes an event which mentions the `initializer` and `saltNonce` is introduced for better indexing for networks which lack advanced tracing facilities.
+An extra set of functions which includes an event which mentions the `initializer` and `saltNonce` is introduced for better indexing for networks which lack advanced tracing facilities.
 
 #### Internal revert message propagation
 

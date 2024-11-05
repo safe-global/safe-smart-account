@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /**
  * @title Error Message - Contract which uses assembly to revert with a custom error message.
  * @author Shebin John - @remedcu
- * @notice The aim is to save gas using assembly to revert with custom error message.
+ * @notice The aim is to save gas using assembly to revert with a custom error message.
  */
 abstract contract ErrorMessage {
     /**
