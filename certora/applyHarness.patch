@@ -27,7 +27,7 @@ diff -druN Safe.sol Safe.sol
 +    ) public override {
 +        // MUNGED: had to change the method visibility and location of the variables to be able to call it from the harness
 +        // constructor
-         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
+         // setupOwners checks if the Threshold is already set, therefore preventing this method from being called more than once
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
 @@ -386,9 +388,6 @@
