@@ -86,8 +86,8 @@ interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManage
     /**
      * @notice Checks whether the signature provided is valid for the provided data and hash. Reverts otherwise.
      * @dev Since the EIP-1271 does an external call, be mindful of reentrancy attacks.
-     * @param executor Address that executing the transaction.
-     *        ⚠️⚠️⚠️ Make sure that the executor address is a legitmate executor.
+     * @param executor Address that executes the transaction.
+     *        ⚠️⚠️⚠️ Make sure that the executor address is a legitimate executor.
      *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param signatures Signature data that should be verified.

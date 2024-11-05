@@ -39,7 +39,7 @@ contract MultiSend {
                 // Post block is not used in "while mode"
             } {
                 // First byte of the data is the operation.
-                // We shift by 248 bits (256 - 8 [operation byte]) it right since mload will always load 32 bytes (a word).
+                // We shift by 248 bits (256 - 8 [operation byte]) right, since mload will always load 32 bytes (a word).
                 // This will also zero out unused data.
                 let operation := shr(0xf8, mload(add(transactions, i)))
                 // We offset the load address by 1 byte (operation byte)

@@ -41,7 +41,7 @@ interface ITransactionGuard is IERC165 {
     ) external;
 
     /**
-     * @notice Checks after execution of transaction.
+     * @notice Checks after execution of the transaction.
      * @dev The function needs to implement a check after the execution of the transaction.
      * @param hash The hash of the transaction.
      * @param success The status of the transaction execution.

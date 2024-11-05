@@ -31,7 +31,7 @@ contract SimulateTxAccessor is Executor {
      *      This returns the data equal to `abi.encode(uint256(estimate), bool(success), bytes(returnData))`.
      *      Specifically, the returndata will be:
      *      `estimate:uint256 || success:bool || returnData.length:uint256 || returnData:bytes`.
-     * @param to Destination address .
+     * @param to Destination address.
      * @param value Native token value.
      * @param data Data payload.
      * @param operation Operation type {Call, DelegateCall}.

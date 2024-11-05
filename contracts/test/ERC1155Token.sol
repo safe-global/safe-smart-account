@@ -17,7 +17,7 @@ contract ERC1155Token {
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     /**
-     * @dev Get the specified address' balance for token with specified ID.
+     * @dev Get the specified address' balance for a token with the specified ID.
      * @param owner The address of the token holder
      * @param id ID of the token
      * @return The owner's balance of the token type requested
@@ -68,7 +68,7 @@ contract ERC1155Token {
     /**
      * @notice Returns true if `account` is a contract.
      * @dev This function will return false if invoked during the constructor of a contract,
-     *      as the code is not actually created until after the constructor finishes.
+     *      as the code is not created until after the constructor finishes.
      * @param account The address being queried
      * @return True if `account` is a contract
      */

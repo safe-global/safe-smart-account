@@ -4,9 +4,9 @@
 
 New variables will use a hash based storage approach to avoid conflicts in the storage layout of the proxy contract when updating the master copy.
 
-For this a variable identifier should be defined (e.g. `fallback_manager.handler.address` for the handler address in the fallback manager contract) and hash this identifier to generate the storage location from where the data should be loaded.
+For this, a variable identifier should be defined (e.g. `fallback_manager.handler.address` for the handler address in the fallback manager contract) and hash this identifier to generate the storage location from where the data should be loaded.
 
-The data can be stored to this location with
+The data can be stored in this location with
 
 ```
 bytes32 slot = VARIABLE_SLOT;

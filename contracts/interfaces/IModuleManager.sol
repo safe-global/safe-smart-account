@@ -64,7 +64,7 @@ interface IModuleManager {
     ) external returns (bool success, bytes memory returnData);
 
     /**
-     * @notice Returns if an module is enabled
+     * @notice Returns if a module is enabled
      * @return True if the module is enabled
      */
     function isModuleEnabled(address module) external view returns (bool);
@@ -83,7 +83,7 @@ interface IModuleManager {
     /**
      * @dev Set a module guard that checks transactions initiated by the module before execution
      *      This can only be done via a Safe transaction.
-     *      ⚠️ IMPORTANT: Since a module guard has full power to block Safe transaction execution initiatied via a module,
+     *      ⚠️ IMPORTANT: Since a module guard has full power to block Safe transaction execution initiated via a module,
      *        a broken module guard can cause a denial of service for the Safe modules. Make sure to carefully
      *        audit the module guard code and design recovery mechanisms.
      * @notice Set Module Guard `moduleGuard` for the Safe. Make sure you trust the module guard.

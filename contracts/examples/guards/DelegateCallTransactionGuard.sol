@@ -23,7 +23,7 @@ contract DelegateCallTransactionGuard is BaseGuard {
 
     /**
      * @notice Called by the Safe contract before a transaction is executed.
-     * @dev Reverts if the transaction is a delegate call to contract other than the allowed one.
+     * @dev Reverts if the transaction is a delegate call to a contract other than the allowed one.
      * @param to Destination address of Safe transaction.
      * @param operation Operation type of Safe transaction.
      */

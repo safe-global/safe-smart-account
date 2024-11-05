@@ -26,7 +26,7 @@ contract SignMessageLib is SafeStorage {
     }
 
     /**
-     * @dev Returns hash of a message that can be signed by owners.
+     * @dev Returns the hash of a message that can be signed by owners.
      * @param message Message that should be hashed.
      * @return Message hash.
      */

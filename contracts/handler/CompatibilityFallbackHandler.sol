@@ -39,7 +39,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
     }
 
     /**
-     * @dev Returns hash of a message that can be signed by owners.
+     * @dev Returns the hash of a message that can be signed by owners.
      * @param safe Safe to which the message is targeted.
      * @param message Message that should be hashed.
      * @return Message hash.
@@ -116,7 +116,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             /**
              * `pop` is required here by the compiler, as top level expressions
              * can't have return values in inline assembly. `call` typically
-             * returns a 0 or 1 value indicated whether or not it reverted, but
+             * returns a 0 or 1 value indicating whether or not it reverted, but
              * since we know it will always revert, we can safely ignore it.
              */
             pop(
