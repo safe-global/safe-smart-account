@@ -1,6 +1,6 @@
 ### Safe Transaction Gas Limit (safeTxGas)
 
-This document will describe the behaviour of the internal gas limit (aka `safeTxGas`) for the [1.3.0](https://github.com/safe-global/safe-smart-account/releases/tag/v1.3.0-libs.0) version of the Safe Smart Account.
+In this document we describe the behaviour of the internal gas limit (aka `safeTxGas`) for the [1.3.0](https://github.com/safe-global/safe-smart-account/releases/tag/v1.3.0-libs.0) version of the Safe Smart Account.
 
 There have been changes to this behaviour with the [1.3.0](https://github.com/safe-global/safe-smart-account/blob/main/CHANGELOG.md#version-130) version of the Safe contract (see [#274](https://github.com/safe-global/safe-smart-account/issues/274))
 
