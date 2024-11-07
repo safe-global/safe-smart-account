@@ -14,7 +14,7 @@ All the signatures are sorted by the signer address and concatenated.
 
 `31 > signature type > 26`
 
-To be able to have the ECDSA signature without the need of additional data we use the signature type byte to encode `v`.
+To be able to have the ECDSA signature without the need for additional data we use the signature type byte to encode `v`.
 
 **Constant part:**
 
@@ -81,7 +81,7 @@ We assume that the following addresses generate the following signatures:
 
 The constant parts need to be sorted so that the recovered signers are sorted **ascending** \(natural order\) by address \(not checksummed\).
 
-The signatures bytes used for `execTransaction` would therefore be the following:
+The signature bytes used for `execTransaction` would therefore be the following:
 
 ```text
 "0x" +

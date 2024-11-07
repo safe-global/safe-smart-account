@@ -11,7 +11,7 @@ interface ERC1271 {
 /**
  * @title Safe Signature Verifier Interface
  * @author mfw78 <mfw78@rndlabs.xyz>
- * @notice This interface provides an standard for external contracts that are verifying signatures
+ * @notice This interface provides a standard for external contracts that verify signatures
  *         for a Safe.
  */
 interface ISafeSignatureVerifier {
@@ -146,7 +146,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     }
 
     /**
-     * Default Safe signature validation (approved hashes / threshold signatures)
+     * Default Safe signature validation (approved hashes/threshold signatures)
      * @param safe The safe being asked to validate the signature
      * @param _hash Hash of the data that is signed
      * @param signature The signature to be verified

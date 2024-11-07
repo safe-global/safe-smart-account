@@ -50,7 +50,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
 
     // @notice Forwards all calls to the fallback handler if set. Returns 0 if no handler is set.
     // @dev Appends the non-padded caller address to the calldata to be optionally used in the handler
-    //      The handler can make us of `HandlerContext.sol` to extract the address.
+    //      The handler can make use of `HandlerContext.sol` to extract the address.
     //      This is done because in the next call frame the `msg.sender` will be FallbackManager's address
     //      and having the original caller address may enable additional verification scenarios.
     // solhint-disable-next-line payable-fallback,no-complex-fallback
@@ -58,7 +58,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            // When compiled with the optimizer, the compiler relies on a certain assumptions on how the
+            // When compiled with the optimizer, the compiler relies on certain assumptions on how the
             // memory is used, therefore we need to guarantee memory safety (keeping the free memory point 0x40 slot intact,
             // not going beyond the scratch space, etc)
             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety

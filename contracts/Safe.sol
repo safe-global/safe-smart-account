@@ -28,7 +28,7 @@ import {Enum} from "./libraries/Enum.sol";
  *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
  *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
- *      - Fallback: Fallback handler is a contract that can provide additional read-only functional for Safe. Managed in `FallbackManager`.
+ *      - Fallback: Fallback handler is a contract that can provide additional read-only functionality for Safe. Managed in `FallbackManager`.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
  *      For the events-based implementation see `SafeL2.sol`.
  * @author Stefan George - @Georgi87
@@ -91,14 +91,14 @@ contract Safe is
         uint256 payment,
         address payable paymentReceiver
     ) external override {
-        // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
+        // setupOwners checks if the Threshold is already set, therefore preventing this method from being called more than once
         setupOwners(_owners, _threshold);
         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
         // As setupOwners can only be called if the contract has not been initialized we don't need a check for setupModules
         setupModules(to, data);
 
         if (payment > 0) {
-            // To avoid running into issues with EIP-170 we reuse the handlePayment function (to avoid adjusting code of that has been verified we do not adjust the method itself)
+            // To avoid running into issues with EIP-170 we reuse the handlePayment function (to avoid adjusting code that has been verified we do not adjust the method itself)
             // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
             handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
         }
@@ -164,7 +164,7 @@ contract Safe is
         }
 
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
-        // We also include the 1/64 in the check that is not send along with a call to counteract potential shortings because of EIP-150
+        // We also include the 1/64 in the check that is not sent along with a call to counteract potential shortings because of EIP-150
         if (gasleft() < ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500) revertWithError("GS010");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
@@ -301,7 +301,7 @@ contract Safe is
                 currentOwner = address(uint160(uint256(r)));
 
                 // Check that signature data pointer (s) is not pointing inside the static part of the signatures bytes
-                // This check is not completely accurate, since it is possible that more signatures than the threshold are send.
+                // This check is not completely accurate, since it is possible that more signatures than the threshold are sent.
                 // Here we only check that the pointer is not pointing inside the part that is being processed
                 if (uint256(s) < requiredSignatures.mul(65)) revertWithError("GS021");
 

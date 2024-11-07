@@ -9,7 +9,7 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 abstract contract StorageAccessible {
     /**
-     * @notice Reads `length` bytes of storage in the currents contract
+     * @notice Reads `length` bytes of storage in the current contract
      * @param offset - the offset in the current contract's storage in words to start reading from
      * @param length - the number of words (32 bytes) of data to read
      * @return the bytes that were read.
