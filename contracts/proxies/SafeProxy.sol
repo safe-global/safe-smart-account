@@ -31,7 +31,11 @@ contract SafeProxy {
 
     /// @dev Fallback function forwards all transactions and returns all received return data.
     fallback() external payable {
-        // solhint-disable-next-line no-inline-assembly
+        // Note that this assembly block is **intentionally** not marked as memory-safe. First of all, it isn't memory
+        // safe to begin with, and turning this into memory-safe assembly would just make it less gas efficient.
+        // Additionally, we noticed that converting this to memory-safe assembly had no affect on optimizations of other
+        // contracts (as it always gets compiles alone in its own compilation unit anyway).
+        /* solhint-disable no-inline-assembly */
         assembly {
             let _singleton := sload(0)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
@@ -42,10 +46,11 @@ contract SafeProxy {
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
-            if eq(success, 0) {
+            if iszero(success) {
                 revert(0, returndatasize())
             }
             return(0, returndatasize())
         }
+        /* solhint-enable no-inline-assembly */
     }
 }

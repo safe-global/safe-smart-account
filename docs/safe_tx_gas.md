@@ -56,9 +56,9 @@ if (!success && safeTxGas == 0 && gasPrice == 0) {
     /* solhint-disable no-inline-assembly */
     /// @solidity memory-safe-assembly
     assembly {
-        let p := mload(0x40)
-        returndatacopy(p, 0, returndatasize())
-        revert(p, returndatasize())
+        let ptr := mload(0x40)
+        returndatacopy(ptr, 0, returndatasize())
+        revert(ptr, returndatasize())
     }
     /* solhint-enable no-inline-assembly */
 }

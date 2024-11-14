@@ -107,10 +107,12 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
         // Check if the signature is for an `ISafeSignatureVerifier` and if it is valid for the domain.
         if (signature.length >= 4) {
             bytes4 sigSelector;
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
+            /// @solidity memory-safe-assembly
             assembly {
                 sigSelector := shl(224, shr(224, calldataload(signature.offset)))
             }
+            /* solhint-enable no-inline-assembly */
 
             // Guard against short signatures that would cause abi.decode to revert.
             if (sigSelector == SAFE_SIGNATURE_MAGIC_VALUE && signature.length >= 68) {
