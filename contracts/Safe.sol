@@ -179,9 +179,9 @@ contract Safe is
                 /* solhint-disable no-inline-assembly */
                 /// @solidity memory-safe-assembly
                 assembly {
-                    let p := mload(0x40)
-                    returndatacopy(p, 0, returndatasize())
-                    revert(p, returndatasize())
+                    let ptr := mload(0x40)
+                    returndatacopy(ptr, 0, returndatasize())
+                    revert(ptr, returndatasize())
                 }
                 /* solhint-enable no-inline-assembly */
             }
@@ -403,9 +403,10 @@ contract Safe is
     ) public view override returns (bytes32 txHash) {
         bytes32 domainHash = domainSeparator();
 
-        // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
-        // allocates memory is inefficient. We only need to allocate memory for temporary variables to be used in the keccak256 call.
+        // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+        // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
         /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             // Get the free memory pointer
             let ptr := mload(0x40)

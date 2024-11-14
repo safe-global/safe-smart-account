@@ -260,10 +260,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
             revertWithError("GS301");
 
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             sstore(slot, moduleGuard)
         }
+        /* solhint-enable no-inline-assembly */
         emit ChangedModuleGuard(moduleGuard);
     }
 
@@ -273,10 +275,12 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      */
     function getModuleGuard() internal view returns (address moduleGuard) {
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             moduleGuard := sload(slot)
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
