@@ -90,7 +90,7 @@ contract Safe is
         address paymentToken,
         uint256 payment,
         address payable paymentReceiver
-    ) external override {
+    ) external virtual override {
         // setupOwners checks if the Threshold is already set, therefore preventing that this method is called twice
         setupOwners(_owners, _threshold);
         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
@@ -214,7 +214,7 @@ contract Safe is
         uint256 gasPrice,
         address gasToken,
         address payable refundReceiver
-    ) private returns (uint256 payment) {
+    ) internal returns (uint256 payment) {
         // solhint-disable-next-line avoid-tx-origin
         address payable receiver = refundReceiver == address(0) ? payable(tx.origin) : refundReceiver;
         if (gasToken == address(0)) {
