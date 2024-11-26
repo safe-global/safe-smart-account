@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, deployContract, getMock, getSafeTemplate } from "../utils/setup";
+import { defaultCallbackHandlerContract, defaultCallbackHandlerDeployment, deployContract, getSafeTemplate, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("FallbackManager", async () => {
@@ -27,7 +27,7 @@ describe("FallbackManager", async () => {
         }
     })
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     describe("setFallbackManager", async () => {
         it('is correctly set on deployment', async () => {
@@ -40,7 +40,7 @@ describe("FallbackManager", async () => {
             ).to.be.eq("0x" + "".padStart(64, "0"))
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)).wait()
 
             // Check fallback handler
             await expect(
@@ -54,7 +54,7 @@ describe("FallbackManager", async () => {
             const handler = await defaultCallbackHandlerDeployment()
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait()
 
             // Check fallback handler
             await expect(
@@ -77,7 +77,7 @@ describe("FallbackManager", async () => {
             const handler = await defaultCallbackHandlerDeployment()
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait()
 
             // Check event
             await expect(
@@ -98,7 +98,7 @@ describe("FallbackManager", async () => {
             ).to.be.reverted
 
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)).wait()
 
             // Check callbacks
             await expect(
@@ -109,7 +109,7 @@ describe("FallbackManager", async () => {
         it('sends along msg.sender on simple call', async () => {
             const { safe, mirror } = await setupWithTemplate()
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirror.address, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirror.address, AddressZero, 0, AddressZero)).wait()
 
             const tx = {
                 to: safe.address,
@@ -128,7 +128,7 @@ describe("FallbackManager", async () => {
         it('sends along msg.sender on more complex call', async () => {
             const { safe, mirror } = await setupWithTemplate()
             // Setup Safe
-            await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirror.address, AddressZero, 0, AddressZero)
+            await (await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", mirror.address, AddressZero, 0, AddressZero)).wait()
 
             const tx = {
                 to: safe.address,

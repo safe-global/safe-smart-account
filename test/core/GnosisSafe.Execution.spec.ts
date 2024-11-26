@@ -1,14 +1,14 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments, network } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { deployContract, getSafeWithOwners } from "../utils/setup";
+import { deployContract, getSafeWithOwners, getWallets } from "../utils/setup";
 import { safeApproveHash, buildSignatureBytes, executeContractCallWithSigners, buildSafeTransaction, executeTx, calculateSafeTransactionHash, buildContractCall } from "../../src/utils/execution";
 import { parseEther } from "@ethersproject/units";
 import { chainId } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -43,20 +43,31 @@ describe("GnosisSafe", async () => {
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({ to: safe.address, safeTxGas: 1000000, nonce: await safe.nonce() })
             const signatureBytes = buildSignatureBytes([await safeApproveHash(user1, safe, tx, true)])
-            await expect(
-                safe.execTransaction(
-                    tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, signatureBytes,
-                    { gasLimit: 1000000 }
-                )
-            ).to.be.revertedWith("GS010")
+
+            // Reverted reason seems not properly returned by zkSync local node, though it is in fact GS010 when using debug_traceTransaction
+            if (hre.network.zksync) {
+                await expect(
+                    (await safe.execTransaction(
+                        tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, signatureBytes,
+                        { gasLimit: 1000000 }
+                    )).wait()
+                ).to.be.reverted
+            } else {
+                await expect(
+                    safe.execTransaction(
+                        tx.to, tx.value, tx.data, tx.operation, tx.safeTxGas, tx.baseGas, tx.gasPrice, tx.gasToken, tx.refundReceiver, signatureBytes,
+                        { gasLimit: 1000000 }
+                    )
+                ).to.be.revertedWith("GS010")
+            }
         })
 
         it('should emit event for successful call execution', async () => {
             const { safe, storageSetter } = await setupTests()
             const txHash = calculateSafeTransactionHash(safe, buildContractCall(storageSetter, "setStorage", ["0xbaddad"], await safe.nonce()), await chainId())
-            await expect(
-                executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1])
-            ).to.emit(safe, "ExecutionSuccess").withArgs(txHash, 0)
+            const txPromise = await executeContractCallWithSigners(safe, storageSetter, "setStorage", ["0xbaddad"], [user1])
+            await expect(txPromise).to.emit(safe, "ExecutionSuccess").withArgs(txHash, 0)
+            await txPromise.wait();
 
             await expect(
                 await hre.ethers.provider.getStorageAt(safe.address, "0x4242424242424242424242424242424242424242424242424242424242424242")
@@ -74,13 +85,24 @@ describe("GnosisSafe", async () => {
             ).to.emit(safe, "ExecutionFailure")
         })
 
-        it('should emit event for failed call execution if gasPrice > 0', async () => {
+        /**
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should emit event for failed call execution if gasPrice > 0', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe, reverter } = await setupTests()
             // Fund refund
-            await user1.sendTransaction({ to: safe.address, value: 10000000 })
-            await expect(
-                executeContractCallWithSigners(safe, reverter, "revert", [], [user1], false, { gasPrice: 1 })
-            ).to.emit(safe, "ExecutionFailure")
+            const sendTx = await user1.sendTransaction({ to: safe.address, value: 10000000 });
+            await sendTx.wait();
+            const txCall = buildContractCall(reverter, "revert", [], await safe.nonce(), false, { gasPrice: 1 })
+            const txPromise = await executeContractCallWithSigners(safe, reverter, "revert", [], [user1], false, { gasPrice: 1 })
+            await expect(txPromise).to.emit(safe, "ExecutionFailure")
         })
 
         it('should revert for failed call execution if gasPrice == 0 and safeTxGas == 0', async () => {
@@ -113,9 +135,21 @@ describe("GnosisSafe", async () => {
             ).to.emit(safe, "ExecutionFailure").withArgs(txHash, 0)
         })
 
-        it('should emit event for failed delegatecall execution if gasPrice > 0', async () => {
+        /**
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should emit event for failed delegatecall execution if gasPrice > 0', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
+            
             const { safe, reverter } = await setupTests()
-            await user1.sendTransaction({ to: safe.address, value: 10000000 })
+            const sendTx = await user1.sendTransaction({ to: safe.address, value: 10000000 })
+            await sendTx.wait();
             await expect(
                 executeContractCallWithSigners(safe, reverter, "revert", [], [user1], true, { gasPrice: 1 })
             ).to.emit(safe, "ExecutionFailure")
@@ -136,13 +170,24 @@ describe("GnosisSafe", async () => {
             ).to.be.reverted
         })
 
-        it('should emit payment in success event', async () => {
+        /**
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should emit payment in success event', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe } = await setupTests()
             const tx = buildSafeTransaction({
                 to: user1.address, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 100000, refundReceiver: user2.address
             })
 
-            await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            const sendTx = await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            await sendTx.wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
@@ -151,7 +196,9 @@ describe("GnosisSafe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
             ).to.emit(safe, "ExecutionSuccess")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
-            const logIndex = receipt.logs.length - 1
+            // There are additional ETH transfer events on zkSync related to transaction fees
+            const logIndex = receipt.logs.length - (hre.network.zksync ? 2 : 1)
+            const topics = receipt.logs[logIndex].topics
             const successEvent = safe.interface.decodeEventLog("ExecutionSuccess", receipt.logs[logIndex].data, receipt.logs[logIndex].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // Gas costs are around 3000, so even if we specified a safeTxGas from 100000 we should not use more
@@ -159,14 +206,25 @@ describe("GnosisSafe", async () => {
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
         })
 
-        it('should emit payment in failure event', async () => {
+        /**
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should emit payment in failure event', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe, storageSetter } = await setupTests()
             const data = storageSetter.interface.encodeFunctionData("setStorage", [0xbaddad])
             const tx = buildSafeTransaction({
                 to: storageSetter.address, data, nonce: await safe.nonce(), operation: 0, gasPrice: 1, safeTxGas: 3000, refundReceiver: user2.address
             })
 
-            await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            const sendTx = await user1.sendTransaction({ to: safe.address, value: parseEther("1") })
+            await sendTx.wait();
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(safe.address)).to.be.deep.eq(parseEther("1"))
 
@@ -175,7 +233,8 @@ describe("GnosisSafe", async () => {
                 executeTx(safe, tx, [await safeApproveHash(user1, safe, tx, true)]).then((tx) => { executedTx = tx; return tx })
             ).to.emit(safe, "ExecutionFailure")
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!!.hash)
-            const logIndex = receipt.logs.length - 1
+            // There are additional ETH transfer events on zkSync related to transaction fees
+            const logIndex = receipt.logs.length - (hre.network.zksync ? 2 : 1)
             const successEvent = safe.interface.decodeEventLog("ExecutionFailure", receipt.logs[logIndex].data, receipt.logs[logIndex].topics)
             expect(successEvent.txHash).to.be.eq(calculateSafeTransactionHash(safe, tx, await chainId()))
             // FIXME: When running out of gas the gas used is slightly higher than the safeTxGas and the user has to overpay
@@ -183,7 +242,17 @@ describe("GnosisSafe", async () => {
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(successEvent.payment))
         })
 
-        it('should be possible to manually increase gas', async () => {
+        /**
+         * ## Skip for zkSync, due to Expected to fail with official GnosisSafeL2.sol due to the use of the unsupported send() function in the HandlePayment()
+         * ## Expected to pass with GnosisSafeL2Zk.sol which uses call() instead of send()
+         * ## It should be possible to use send() in HandlePayment() after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should be possible to manually increase gas', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { safe } = await setupTests()
             const gasUserSource = `
             contract GasUser {

@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import { BigNumber } from "ethers";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
 import { parseEther } from "@ethersproject/units";
-import { deployContract, getMock, getSafeSingleton, getSafeTemplate } from "../utils/setup";
+import { deployContract, getMock, getSafeSingleton, getSafeTemplate, getWallets } from "../utils/setup";
 import { calculateSafeDomainSeparator } from "../../src/utils/execution";
 import { AddressOne } from "../../src/utils/constants";
 import { chainId, encodeTransfer } from "../utils/encoding";
@@ -12,7 +12,7 @@ import { chainId, encodeTransfer } from "../utils/encoding";
 
 describe("GnosisSafe", async () => {
 
-    const [user1, user2, user3] = waffle.provider.getWallets();
+    const [user1, user2, user3] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
@@ -55,7 +55,7 @@ describe("GnosisSafe", async () => {
 
         it('should revert if called twice', async () => {
             const { template } = await setupTests()
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).wait()
             await expect(
                 template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)
             ).to.be.revertedWith("GS200")
@@ -173,27 +173,51 @@ describe("GnosisSafe", async () => {
             ).to.be.revertedWith("GS011")
         })
 
-        it('should work with ether payment to deployer', async () => {
+        /**
+         * Skip for zkSync: This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should work with ether payment to deployer', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { template } = await setupTests()
             const payment = parseEther("10")
-            await user1.sendTransaction({ to: template.address, value: payment })
+            await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
             const userBalance = await hre.ethers.provider.getBalance(user1.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
-
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero)
+            
+            await (await template.setup(
+                [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, AddressZero, 
+                { gasLimit: hre.network.zksync ? 500000 : undefined}
+            )).wait()
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(userBalance.lt(await hre.ethers.provider.getBalance(user1.address))).to.be.true
         })
 
-        it('should work with ether payment to account', async () => {
+        /**
+         * Skip for zkSync: This test will fail due to the use of send() function in HandlePayment() in GnosisSafe.sol
+         * send() does not work currently on zkSync, though it should after a protocol upgrade (see link2) 
+         * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#using-call-over-send-or-transfer
+         * @see https://twitter.com/zksync/status/1644459406828924934
+         */
+        it('should work with ether payment to account', async function(this: Mocha.Context) {
+            if (hre.network.zksync) {
+                this.skip()
+            }
             const { template } = await setupTests()
             const payment = parseEther("10")
-            await user1.sendTransaction({ to: template.address, value: payment })
+            await (await user1.sendTransaction({ to: template.address, value: payment })).wait()
             const userBalance = await hre.ethers.provider.getBalance(user2.address)
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("10"))
 
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, user2.address)
+            await (await template.setup(
+                [user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, AddressZero, payment, user2.address,
+                { gasLimit: hre.network.zksync ? 500000 : undefined}
+            )).wait()
             
             await expect(await hre.ethers.provider.getBalance(template.address)).to.be.deep.eq(parseEther("0"))
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance.add(payment))
@@ -217,9 +241,9 @@ describe("GnosisSafe", async () => {
             const payment = 133742
 
             const transferData = encodeTransfer(user1.address, payment)
-            await mock.givenCalldataReturnBool(transferData, true)
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, AddressZero)
-            
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait()
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, AddressZero)).wait()
+
             expect(await mock.callStatic.invocationCountForCalldata(transferData)).to.be.deep.equals(BigNumber.from(1));
 
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address])
@@ -230,8 +254,8 @@ describe("GnosisSafe", async () => {
             const payment = 133742
 
             const transferData = encodeTransfer(user2.address, payment)
-            await mock.givenCalldataReturnBool(transferData, true)
-            await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, user2.address)
+            await (await mock.givenCalldataReturnBool(transferData, true)).wait()
+            await (await template.setup([user1.address, user2.address, user3.address], 2, AddressZero, "0x", AddressZero, mock.address, payment, user2.address)).wait()
             
             expect(await mock.callStatic.invocationCountForCalldata(transferData)).to.be.deep.equals(BigNumber.from(1));
 

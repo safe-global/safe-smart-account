@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import hre, { deployments, waffle, ethers } from "hardhat";
+import hre, { deployments, ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import { compatFallbackHandlerContract, getCompatFallbackHandler, getSafeWithOwners } from "../utils/setup";
+import { compatFallbackHandlerContract, getCompatFallbackHandler, getContractFactoryByName, getSafeWithOwners, getWallets } from "../utils/setup";
 import { buildSignatureBytes, executeContractCallWithSigners, calculateSafeMessageHash, EIP712_SAFE_MESSAGE_TYPE, signHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 import { BigNumber } from "ethers";
@@ -10,14 +10,21 @@ import { killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets();
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
-        const handler = await getCompatFallbackHandler()
-        const safe = await getSafeWithOwners([user1.address, user2.address], 2, handler.address)
-        const validator = (await compatFallbackHandlerContract()).attach(safe.address)
+
+        const signLib = await (await getContractFactoryByName("SignMessageLib")).deploy();
+        await signLib.deployed();
+
+        const handler = await getCompatFallbackHandler();
+        await handler.deployed();
+
+        const safe = await getSafeWithOwners([user1.address, user2.address], 2, handler.address);
+        const validator = (await compatFallbackHandlerContract()).attach(safe.address);
+        await validator.deployed();
+
         const killLib = await killLibContract(user1);
         return {
             safe,
@@ -64,7 +71,9 @@ describe("CompatibilityFallbackHandler", async () => {
 
         it('should revert if called directly', async () => {
             const { handler } = await setupTests()
-            await expect(handler.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.revertedWith("function call to a non-contract account")
+            await expect(
+                handler.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")
+            ).to.be.revertedWith(hre.network.zksync ? "call revert exception" : "function call to a non-contract account")
         })
 
         it('should revert if message was not signed', async () => {
@@ -79,7 +88,7 @@ describe("CompatibilityFallbackHandler", async () => {
 
         it('should return magic value if message was signed', async () => {
             const { safe, validator, signLib } = await setupTests()
-            await executeContractCallWithSigners(safe, signLib, "signMessage", ["0xbaddad"], [user1, user2], true)
+            await (await executeContractCallWithSigners(safe, signLib, "signMessage", ["0xbaddad"], [user1, user2], true)).wait()
             expect(await validator.callStatic['isValidSignature(bytes,bytes)']("0xbaddad", "0x")).to.be.eq("0x20c13b0b")
         })
 
@@ -99,7 +108,9 @@ describe("CompatibilityFallbackHandler", async () => {
         it('should revert if called directly', async () => {
             const { handler } = await setupTests()
             const dataHash = ethers.utils.keccak256("0xbaddad")
-            await expect(handler.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.revertedWith("function call to a non-contract account")
+            await expect(
+                handler.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")
+            ).to.be.revertedWith(hre.network.zksync ? "call revert exception" : "function call to a non-contract account")
         })
 
         it('should revert if message was not signed', async () => {
@@ -117,7 +128,7 @@ describe("CompatibilityFallbackHandler", async () => {
         it('should return magic value if message was signed', async () => {
             const { safe, validator, signLib } = await setupTests()
             const dataHash = ethers.utils.keccak256("0xbaddad")
-            await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true)
+            await (await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true)).wait();
             expect(await validator.callStatic['isValidSignature(bytes32,bytes)'](dataHash, "0x")).to.be.eq("0x1626ba7e")
         })
 
@@ -180,7 +191,13 @@ describe("CompatibilityFallbackHandler", async () => {
         it.skip('can be called for any Safe', async () => {
         })
 
-        it('should revert changes', async () => {
+        it('should revert changes', async function () {
+            /**
+             * ## Test not applicable for zkSync, therefore should skip.
+             * @see https://era.zksync.io/docs/dev/building-on-zksync/contracts/differences-with-ethereum.html#selfdestruct
+             */
+            if (hre.network.zksync) this.skip();
+
             const { validator, killLib } = await setupTests()
             const code = await ethers.provider.getCode(validator.address)
             expect(

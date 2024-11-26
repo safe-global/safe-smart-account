@@ -1,17 +1,17 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafeWithOwners, getSignMessageLib, getWallets } from "../utils/setup";
 import { executeContractCallWithSigners, calculateSafeMessageHash } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
 
 describe("SignMessageLib", async () => {
 
-    const [user1, user2] = waffle.provider.getWallets()
+    const [user1, user2] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
-        const lib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
+        const lib = await getSignMessageLib()
         return {
             safe: await getSafeWithOwners([user1.address, user2.address]),
             lib
@@ -44,12 +44,6 @@ describe("SignMessageLib", async () => {
             ).to.be.eq(1)
         })
 
-        it('can be used only via DELEGATECALL opcode', async () => {
-            const { lib } = await setupTests()
-
-            expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
-        })
-
         it("changes the expected storage slot without touching the most important ones", async () => {
           const { safe, lib } = await setupTests();
 
@@ -75,7 +69,7 @@ describe("SignMessageLib", async () => {
           expect(await safe.signedMessages(safeInternalMsgHash)).to.be.eq(0);
           expect(msgStorageSlotBeforeSigning).to.be.eq(`0x${"0".padStart(64, "0")}`);
           
-          await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true);
+          await (await executeContractCallWithSigners(safe, lib, "signMessage", [eip191MessageHash], [user1, user2], true)).wait();
           
           const masterCopyAddressAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 0);
           const thresholdAfterSigning = await hre.ethers.provider.getStorageAt(safe.address, 3);
@@ -90,5 +84,11 @@ describe("SignMessageLib", async () => {
           expect(nonceAfterSigning).to.be.eq(`0x${"1".padStart(64, "0")}`);
           expect(msgStorageSlotAfterSigning).to.be.eq(`0x${"1".padStart(64, "0")}`);
         });
+
+        it('can be used only via DELEGATECALL opcode', async () => {
+            const { lib } = await setupTests()
+
+            expect(lib.signMessage("0xbaddad")).to.revertedWith("function selector was not recognized and there's no fallback function");
+        })
     })
 })

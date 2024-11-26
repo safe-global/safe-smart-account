@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import hre, { deployments, waffle } from "hardhat";
+import hre, { deployments } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
-import { getSafeWithOwners } from "../utils/setup";
+import { getSafeWithOwners, getWallets } from "../utils/setup";
 import { AddressOne } from "../../src/utils/constants";
 
 describe("GnosisSafe", async () => {
 
-    const [user1] = waffle.provider.getWallets();
+    const [user1] = getWallets(hre);
 
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();

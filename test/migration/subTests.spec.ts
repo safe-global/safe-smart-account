@@ -2,10 +2,11 @@ import { BigNumber } from "ethers";
 import { Contract } from "@ethersproject/contracts"
 import { parseEther } from "@ethersproject/units"
 import { expect } from "chai";
-import hre, { ethers, waffle } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution"
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
+import { getWallets } from "../utils/setup";
 
 interface TestSetup {
     migratedSafe: Contract,
@@ -15,7 +16,16 @@ interface TestSetup {
 
 export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
-    const [user1, user2, user3] = waffle.provider.getWallets();
+    before(function () {
+        /**
+         * Migration tests are not relevant for zkSync: there are no older versions of safe-contracts on zkSync
+         */
+        if (hre.network.zksync) {
+            this.skip()
+        }
+    });
+
+    const [user1, user2, user3] = getWallets(hre);
 
     describe("execTransaction", async () => {
         it('should be able to transfer ETH', async () => {
