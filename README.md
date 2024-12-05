@@ -48,7 +48,7 @@ To add support for a new network follow the steps of the ``Deploy`` section and 
 
 > :warning: **Make sure to use the correct commit when deploying the contracts.** Any change (even comments) within the contract files will result in different addresses. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
 
-> **Current version:** The latest release is [v1.4.1-2](https://github.com/safe-global/safe-smart-account/tree/v1.4.1-2) on the commit [a7ee921](https://github.com/safe-global/safe-smart-account/commit/aa14911666deb13cdbbe37c37253a55918525437)
+> **Current version:** The latest release is [v1.4.1-3](https://github.com/safe-global/safe-smart-account/tree/v1.4.1-3) on the commit [21dc824](https://github.com/safe-global/safe-smart-account/commit/21dc82410445637820f600c7399a804ad55841d5)
 
 This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
