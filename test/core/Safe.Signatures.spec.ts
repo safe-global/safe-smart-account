@@ -639,7 +639,7 @@ describe("Safe", () => {
         });
     });
 
-    describe("checkNSignatures", async () => {
+    describe("checkNSignatures", () => {
         it("should fail if signature points into static part", async () => {
             const {
                 safe,

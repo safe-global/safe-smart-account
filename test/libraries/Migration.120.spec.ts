@@ -36,7 +36,7 @@ describe("Migration 1.2.0", () => {
             signers,
         };
     });
-    describe("constructor", async () => {
+    describe("constructor", () => {
         it("can not use 0 Address", async () => {
             const {
                 signers: [user1],

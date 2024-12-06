@@ -395,7 +395,7 @@ describe("OwnerManager", () => {
         });
     });
 
-    describe("changeThreshold", async () => {
+    describe("changeThreshold", () => {
         it("can only be called from Safe itself", async () => {
             const { safe } = await setupTests();
             await expect(safe.changeThreshold(1)).to.be.revertedWith("GS031");

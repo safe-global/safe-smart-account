@@ -32,7 +32,7 @@
         "lint": "npm run lint:sol && npm run lint:ts",
         "lint:fix": "npm run lint:sol:fix && npm run lint:ts:fix",
         "lint:sol": "solhint 'contracts/**/*.sol'",
-        "lint:sol:fix": "solhint --fix 'contracts/**/*.sol'",
+        "lint:sol:fix": "solhint --fix 'contracts/**/*.sol' --noPrompt",
         "lint:sol:prettier": "prettier 'contracts/**/*.sol' --list-different",
         "lint:ts": "eslint 'src/**/*.ts' 'test/**/*.ts'",
         "lint:ts:fix": "eslint 'src/**/*.ts' 'test/**/*.ts' --fix",
