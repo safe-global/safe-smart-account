@@ -124,9 +124,37 @@ describe("CompatibilityFallbackHandler", () => {
 
             const signerSafeSig = buildContractSignature(signerSafeAddress, signerSafeOwnerSignature.data);
 
-            expect(
-                await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes([typedDataSig, ethSignSig, signerSafeSig])),
-            ).to.be.eq("0x1626ba7e");
+            for (const signatures of [
+                [typedDataSig, ethSignSig],
+                [typedDataSig, signerSafeSig],
+                [ethSignSig, signerSafeSig],
+            ]) {
+                expect(await validator.isValidSignature.staticCall(dataHash, buildSignatureBytes(signatures))).to.be.eq("0x1626ba7e");
+            }
+        });
+
+        it("should not accept pre-approved signatures", async () => {
+            const {
+                validator,
+                signers: [user1, user2],
+            } = await setupTests();
+            const validatorAddress = await validator.getAddress();
+            const dataHash = ethers.keccak256("0xbaddad");
+            const user1Signature = {
+                signer: user1.address,
+                data: ethers.solidityPacked(["uint256", "uint256", "uint8"], [user1.address, 0, 1]),
+            };
+            const user2Signature = {
+                signer: user2.address,
+                data: await user2.signTypedData(
+                    { verifyingContract: validatorAddress, chainId: await chainId() },
+                    EIP712_SAFE_MESSAGE_TYPE,
+                    { message: dataHash },
+                ),
+            };
+
+            const signatures = buildSignatureBytes([user1Signature, user2Signature]);
+            await expect(validator.connect(user1).isValidSignature.staticCall(dataHash, signatures)).to.be.reverted;
         });
     });
 
