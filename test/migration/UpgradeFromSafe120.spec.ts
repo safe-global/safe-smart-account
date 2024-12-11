@@ -22,7 +22,8 @@ describe("Upgrade from Safe 1.2.0", () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
-        const [user1] = await hre.ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
         const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) throw new Error("Could not deploy Safe 1.2.0");
 
@@ -46,10 +47,9 @@ describe("Upgrade from Safe 1.2.0", () => {
             migratedSafe: safe,
             mock,
             multiSend: await getMultiSend(),
+            signers,
         };
     });
 
-    it("passes the Safe 1.2.0 tests", async () => {
-        await verificationTests(setupTests);
-    });
+    verificationTests(setupTests);
 });
