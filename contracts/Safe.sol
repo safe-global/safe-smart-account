@@ -335,7 +335,8 @@ contract Safe is
      * @notice Checks whether the signature provided is valid for the provided hash. Reverts otherwise.
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
-     *      Use `checkSignatures(bytes32,bytes)` instead.
+     *      Use `checkSignatures(address,bytes32,bytes)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash).
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
@@ -351,6 +352,7 @@ contract Safe is
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
      *      Use `checkNSignatures(address,bytes32,bytes,uint256)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
