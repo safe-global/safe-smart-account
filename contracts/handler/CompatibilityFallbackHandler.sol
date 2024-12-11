@@ -62,7 +62,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
-            safe.checkSignatures(messageHash, _signature);
+            safe.checkSignatures(_msgSender(), messageHash, _signature);
         }
         return EIP1271_MAGIC_VALUE;
     }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Safe, EIP712, ISafeSignatureVerifier} from "../handler/extensible/SignatureVerifierMuxer.sol";
+import {ISafe, EIP712, ISafeSignatureVerifier} from "../handler/extensible/SignatureVerifierMuxer.sol";
 
 /**
  * @title TestSafeSignatureVerifier - A simple test contract that implements the ISafeSignatureVerifier interface
@@ -16,7 +16,7 @@ contract TestSafeSignatureVerifier is ISafeSignatureVerifier {
      * @return magic The magic value that should be returned if the signature is valid (0x1626ba7e)
      */
     function isValidSafeSignature(
-        Safe,
+        ISafe,
         address,
         bytes32 _hash,
         bytes32 domainSeparator,

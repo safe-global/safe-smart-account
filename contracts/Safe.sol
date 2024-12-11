@@ -139,7 +139,7 @@ contract Safe is
                 // We use the post-increment here, so the current nonce value is used and incremented afterwards.
                 nonce++
             );
-            checkSignatures(txHash, signatures);
+            checkSignatures(msg.sender, txHash, signatures);
         }
         address guard = getGuard();
         {
@@ -267,12 +267,12 @@ contract Safe is
     /**
      * @inheritdoc ISafe
      */
-    function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
+    function checkSignatures(address executor, bytes32 dataHash, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         if (_threshold == 0) revertWithError("GS001");
-        checkNSignatures(msg.sender, dataHash, signatures, _threshold);
+        checkNSignatures(executor, dataHash, signatures, _threshold);
     }
 
     /**
@@ -343,7 +343,7 @@ contract Safe is
      */
     function checkSignatures(bytes32 dataHash, bytes calldata data, bytes memory signatures) external view {
         data;
-        checkSignatures(dataHash, signatures);
+        checkSignatures(msg.sender, dataHash, signatures);
     }
 
     /**
