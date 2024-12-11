@@ -19,7 +19,8 @@ describe("Upgrade from Safe 1.1.1", () => {
 
     // We migrate the Safe and run the verification tests
     const setupTests = deployments.createFixture(async ({ deployments }) => {
-        const [user1] = await hre.ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
@@ -45,10 +46,9 @@ describe("Upgrade from Safe 1.1.1", () => {
             migratedSafe: safe,
             mock,
             multiSend: await getMultiSend(),
+            signers,
         };
     });
 
-    it("passes the Safe 1.1.1 tests", async () => {
-        await verificationTests(setupTests);
-    });
+    verificationTests(setupTests);
 });

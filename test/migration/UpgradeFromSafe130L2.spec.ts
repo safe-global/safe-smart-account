@@ -20,7 +20,8 @@ describe("Upgrade from Safe 1.3.0 L2", () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
-        const [user1] = await hre.ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
         const singleton130L2 = (await (await user1.sendTransaction({ data: deploymentData.safe130l2.evm })).wait())?.contractAddress;
         if (!singleton130L2) throw new Error("Could not deploy Safe 1.3.0 L2");
 
@@ -45,10 +46,9 @@ describe("Upgrade from Safe 1.3.0 L2", () => {
             migratedSafe: safe,
             mock,
             multiSend: await getMultiSend(),
+            signers,
         };
     });
 
-    it("passes the Safe 1.3.0 tests", async () => {
-        await verificationTests(setupTests);
-    });
+    verificationTests(setupTests);
 });
