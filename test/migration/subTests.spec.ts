@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, { ethers } from "hardhat";
+import hre, { ethers, HardhatEthersSigner } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
@@ -9,14 +9,16 @@ interface TestSetup {
     migratedSafe: Safe;
     mock: MockContract;
     multiSend: MultiSend;
+    signers: HardhatEthersSigner[];
 }
 
-export const verificationTests = async (setupTests: () => Promise<TestSetup>) => {
-    const [user1, user2, user3] = await ethers.getSigners();
-
+export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
     describe("execTransaction", () => {
         it("should be able to transfer ETH", async () => {
-            const { migratedSafe } = await setupTests();
+            const {
+                migratedSafe,
+                signers: [user1, user2],
+            } = await setupTests();
             const migrateSafeAddress = await migratedSafe.getAddress();
             await user1.sendTransaction({ to: migrateSafeAddress, value: ethers.parseEther("1") });
             const nonce = await migratedSafe.nonce();
@@ -34,7 +36,10 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
 
     describe("addOwner", () => {
         it("should add owner and change threshold", async () => {
-            const { migratedSafe } = await setupTests();
+            const {
+                migratedSafe,
+                signers: [user1, user2, user3],
+            } = await setupTests();
 
             await expect(executeContractCallWithSigners(migratedSafe, migratedSafe, "addOwnerWithThreshold", [user2.address, 2], [user1]))
                 .to.emit(migratedSafe, "AddedOwner")
@@ -62,7 +67,11 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
 
     describe("enableModule", () => {
         it("should enabled module and be able to use it", async () => {
-            const { migratedSafe, mock } = await setupTests();
+            const {
+                migratedSafe,
+                mock,
+                signers: [user1, user2],
+            } = await setupTests();
             const mockAddress = await mock.getAddress();
 
             await expect(executeContractCallWithSigners(migratedSafe, migratedSafe, "enableModule", [user2.address], [user1]))
@@ -82,7 +91,12 @@ export const verificationTests = async (setupTests: () => Promise<TestSetup>) =>
 
     describe("multiSend", () => {
         it("execute multisend via delegatecall", async () => {
-            const { migratedSafe, mock, multiSend } = await setupTests();
+            const {
+                migratedSafe,
+                mock,
+                multiSend,
+                signers: [user1, user2],
+            } = await setupTests();
             const migratedSafeAddress = await migratedSafe.getAddress();
             const mockAddress = await mock.getAddress();
 
