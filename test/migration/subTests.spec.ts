@@ -1,5 +1,6 @@
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
-import hre, { ethers, HardhatEthersSigner } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { AddressOne } from "../../src/utils/constants";
 import { buildSafeTransaction, executeContractCallWithSigners, executeTxWithSigners, MetaTransaction } from "../../src/utils/execution";
 import { buildMultiSendSafeTx } from "../../src/utils/multisend";
