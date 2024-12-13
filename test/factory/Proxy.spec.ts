@@ -12,10 +12,6 @@ describe("Proxy", () => {
     });
 
     describe("masterCopy", () => {
-        before(function () {
-            if (hre.network.zksync) this.skip();
-        });
-
         const SINGLETON_SOURCE = `
         contract Test {
             uint256 _singletonSlot;
@@ -34,7 +30,7 @@ describe("Proxy", () => {
             const [deployer] = await hre.ethers.getSigners();
             const singleton = await deployContractFromSource(deployer, SINGLETON_SOURCE);
             const Proxy = await hre.ethers.getContractFactory("SafeProxy");
-            const proxyDeployment = await Proxy.deploy(singleton);
+            const proxyDeployment = await Proxy.deploy(singleton.target);
             const proxy = singleton.attach(proxyDeployment) as typeof singleton;
             return {
                 singleton,
