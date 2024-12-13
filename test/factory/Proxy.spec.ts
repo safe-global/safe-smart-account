@@ -12,14 +12,18 @@ describe("Proxy", () => {
     });
 
     describe("masterCopy", () => {
+        before(function () {
+            if (hre.network.zksync) this.skip();
+        });
+
         const SINGLETON_SOURCE = `
         contract Test {
             uint256 _singletonSlot;
-            function setMasterCopy(uint256 value) public {
-                _singletonSlot = value;
-            }
             function masterCopy() public pure returns (address) {
                 return address(0);
+            }
+            function overwriteSingletonSlot(uint256 value) public {
+                _singletonSlot = value;
             }
             function theAnswerToLifeTheUniverseAndEverything() public pure returns (uint256) {
                 return 42;
@@ -46,7 +50,7 @@ describe("Proxy", () => {
 
         it("should correctly mask the address value", async () => {
             const { proxy } = await setupTests();
-            await proxy.setMasterCopy(hre.ethers.MaxUint256);
+            await proxy.overwriteSingletonSlot(hre.ethers.MaxUint256);
             expect(await proxy.masterCopy()).to.equal(hre.ethers.getAddress(`0x${"ff".repeat(20)}`));
         });
 
@@ -56,7 +60,7 @@ describe("Proxy", () => {
             const mask = 0xffffffffffffffffffffffffn << 160n;
 
             expect(await proxy.theAnswerToLifeTheUniverseAndEverything()).to.equal(42);
-            await proxy.setMasterCopy(singletonAddressAsUint | mask);
+            await proxy.overwriteSingletonSlot(singletonAddressAsUint | mask);
             expect(await proxy.theAnswerToLifeTheUniverseAndEverything()).to.equal(42);
         });
     });
