@@ -2,6 +2,8 @@ methods {
     function getThreshold() external returns (uint256) envfree;
     function nonce() external returns (uint256) envfree;
     function isOwner(address) external returns (bool) envfree;
+    function checkSignatures(address, bytes32, bytes) external envfree;
+    function checkNSignatures(address, bytes32, bytes, uint256) external envfree;
 
     // harnessed
     function signatureSplitPublic(bytes,uint256) external returns (uint8,bytes32,bytes32) envfree;
@@ -27,8 +29,7 @@ methods {
     ) internal returns (bytes32) => CONSTANT;
 
     // optional
-    function checkSignatures(bytes32,bytes) external;
-    function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
+    function execTransaction(address, uint256, bytes, Enum.Operation, uint256, uint256, uint256, address, address, bytes) external returns (bool);
 }
 
 definition MAX_UINT256() returns uint256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
@@ -46,7 +47,6 @@ function signatureSplitGhost(bytes signatures, uint256 pos) returns (uint8,bytes
 rule checkSignatures() {
     bytes32 dataHash;
     address executor;
-    env e;
     bytes signaturesAB;
     bytes signaturesA;
     bytes signaturesB;
@@ -66,14 +66,13 @@ rule checkSignatures() {
     require !isOwner(currentContract);
     require getThreshold() == 2;
     require getCurrentOwner(dataHash, vA, rA, sA) < getCurrentOwner(dataHash, vB, rB, sB);
-    require executor == e.msg.sender;
 
-    checkNSignatures@withrevert(e, executor, dataHash, signaturesA, 1);
+    checkNSignatures@withrevert(executor, dataHash, signaturesA, 1);
     bool successA = !lastReverted;
-    checkNSignatures@withrevert(e, executor, dataHash, signaturesB, 1);
+    checkNSignatures@withrevert(executor, dataHash, signaturesB, 1);
     bool successB = !lastReverted;
 
-    checkSignatures@withrevert(e, dataHash, signaturesAB);
+    checkSignatures@withrevert(executor, dataHash, signaturesAB);
     bool successAB = !lastReverted;
 
     assert (successA && successB) <=> successAB, "checkNSignatures called twice separately must be equivalent to checkSignatures";
@@ -107,8 +106,8 @@ rule ownerSignaturesAreProvidedForExecTransaction(
     );
 
     env e;
-    require e.msg.value == 0;
-    checkSignatures@withrevert(e, transactionHash, signatures);
+
+    checkSignatures@withrevert(e.msg.sender, transactionHash, signatures);
     bool checkSignaturesOk = !lastReverted;
 
     execTransaction(e, to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, signatures);

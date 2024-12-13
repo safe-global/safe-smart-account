@@ -496,6 +496,27 @@ describe("ExtensibleFallbackHandler", () => {
                 );
             });
 
+            it("should not accept pre-approved signatures", async () => {
+                const { user1, user2, validator } = await setupTests();
+                const validatorAddress = await validator.getAddress();
+                const dataHash = ethers.keccak256("0xbaddad");
+                const user1Signature = {
+                    signer: user1.address,
+                    data: ethers.solidityPacked(["uint256", "uint256", "uint8"], [user1.address, 0, 1]),
+                };
+                const user2Signature = {
+                    signer: user2.address,
+                    data: await user2.signTypedData(
+                        { verifyingContract: validatorAddress, chainId: await chainId() },
+                        EIP712_SAFE_MESSAGE_TYPE,
+                        { message: dataHash },
+                    ),
+                };
+
+                const signatures = buildSignatureBytes([user1Signature, user2Signature]);
+                await expect(validator.connect(user1).isValidSignature.staticCall(dataHash, signatures)).to.be.reverted;
+            });
+
             it("should send EIP-712 context to custom verifier", async () => {
                 const { user1, user2, safe, validator, revertVerifier } = await setupTests();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
