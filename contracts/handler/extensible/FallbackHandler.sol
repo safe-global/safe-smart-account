@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Safe, IStaticFallbackMethod, IFallbackMethod, ExtensibleBase} from "./ExtensibleBase.sol";
+import {ISafe, IStaticFallbackMethod, IFallbackMethod, ExtensibleBase} from "./ExtensibleBase.sol";
 
 interface IFallbackHandler {
     function setSafeMethod(bytes4 selector, bytes32 newMethod) external;
@@ -22,7 +22,7 @@ abstract contract FallbackHandler is ExtensibleBase, IFallbackHandler {
      * @param newMethod A contract that implements the `IFallbackMethod` or `IStaticFallbackMethod` interface
      */
     function setSafeMethod(bytes4 selector, bytes32 newMethod) public override onlySelf {
-        _setSafeMethod(Safe(payable(_msgSender())), selector, newMethod);
+        _setSafeMethod(ISafe(payable(_msgSender())), selector, newMethod);
     }
 
     // --- fallback ---
@@ -30,7 +30,7 @@ abstract contract FallbackHandler is ExtensibleBase, IFallbackHandler {
     // solhint-disable-next-line
     fallback(bytes calldata) external returns (bytes memory result) {
         require(msg.data.length >= 24, "invalid method selector");
-        (Safe safe, address sender, bool isStatic, address handler) = _getContextAndHandler();
+        (ISafe safe, address sender, bool isStatic, address handler) = _getContextAndHandler();
         require(handler != address(0), "method handler not set");
 
         if (isStatic) {

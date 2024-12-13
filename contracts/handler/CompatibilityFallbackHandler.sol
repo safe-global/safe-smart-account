@@ -62,7 +62,9 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         if (_signature.length == 0) {
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
-            safe.checkSignatures(messageHash, _signature);
+            // We explicitly do not allow caller approved signatures for EIP-1271 to prevent unexpected behaviour. This
+            // is done by setting the executor address to `0` which can never be an owner of the Safe.
+            safe.checkSignatures(address(0), messageHash, _signature);
         }
         return EIP1271_MAGIC_VALUE;
     }

@@ -2,10 +2,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {IERC165} from "../../interfaces/IERC165.sol";
-import {Safe, MarshalLib, ExtensibleBase} from "./ExtensibleBase.sol";
+import {ISafe, MarshalLib, ExtensibleBase} from "./ExtensibleBase.sol";
 
 interface IERC165Handler {
-    function safeInterfaces(Safe safe, bytes4 interfaceId) external view returns (bool);
+    function safeInterfaces(ISafe safe, bytes4 interfaceId) external view returns (bool);
 
     function setSupportedInterface(bytes4 interfaceId, bool supported) external;
 
@@ -17,12 +17,12 @@ interface IERC165Handler {
 abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
     // --- events ---
 
-    event AddedInterface(Safe indexed safe, bytes4 interfaceId);
-    event RemovedInterface(Safe indexed safe, bytes4 interfaceId);
+    event AddedInterface(ISafe indexed safe, bytes4 interfaceId);
+    event RemovedInterface(ISafe indexed safe, bytes4 interfaceId);
 
     // --- storage ---
 
-    mapping(Safe => mapping(bytes4 => bool)) public override safeInterfaces;
+    mapping(ISafe => mapping(bytes4 => bool)) public override safeInterfaces;
 
     // --- setters ---
 
@@ -32,7 +32,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
      * @param supported True if the interface is supported, false otherwise
      */
     function setSupportedInterface(bytes4 interfaceId, bool supported) public override onlySelf {
-        Safe safe = Safe(payable(_manager()));
+        ISafe safe = ISafe(payable(_manager()));
         // invalid interface id per ERC165 spec
         require(interfaceId != 0xffffffff, "invalid interface id");
         bool current = safeInterfaces[safe][interfaceId];
@@ -51,7 +51,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
      * @param handlerWithSelectors The handlers encoded with the 4-byte selectors of the methods
      */
     function addSupportedInterfaceBatch(bytes4 _interfaceId, bytes32[] calldata handlerWithSelectors) external override onlySelf {
-        Safe safe = Safe(payable(_msgSender()));
+        ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
         for (uint256 i = 0; i < handlerWithSelectors.length; i++) {
             (bool isStatic, bytes4 selector, address handlerAddress) = MarshalLib.decodeWithSelector(handlerWithSelectors[i]);
@@ -73,7 +73,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
      * @param selectors The selectors of the methods to remove
      */
     function removeSupportedInterfaceBatch(bytes4 _interfaceId, bytes4[] calldata selectors) external override onlySelf {
-        Safe safe = Safe(payable(_msgSender()));
+        ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
         for (uint256 i = 0; i < selectors.length; i++) {
             _setSafeMethod(safe, selectors[i], bytes32(0));
@@ -99,7 +99,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
             interfaceId == type(IERC165).interfaceId ||
             interfaceId == type(IERC165Handler).interfaceId ||
             _supportsInterface(interfaceId) ||
-            safeInterfaces[Safe(payable(_manager()))][interfaceId];
+            safeInterfaces[ISafe(payable(_manager()))][interfaceId];
     }
 
     // --- internal ---

@@ -139,7 +139,7 @@ contract Safe is
                 // We use the post-increment here, so the current nonce value is used and incremented afterwards.
                 nonce++
             );
-            checkSignatures(txHash, signatures);
+            checkSignatures(msg.sender, txHash, signatures);
         }
         address guard = getGuard();
         {
@@ -267,12 +267,12 @@ contract Safe is
     /**
      * @inheritdoc ISafe
      */
-    function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
+    function checkSignatures(address executor, bytes32 dataHash, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         if (_threshold == 0) revertWithError("GS001");
-        checkNSignatures(msg.sender, dataHash, signatures, _threshold);
+        checkNSignatures(executor, dataHash, signatures, _threshold);
     }
 
     /**
@@ -335,7 +335,8 @@ contract Safe is
      * @notice Checks whether the signature provided is valid for the provided hash. Reverts otherwise.
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
-     *      Use `checkSignatures(bytes32,bytes)` instead.
+     *      Use `checkSignatures(address,bytes32,bytes)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash).
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
@@ -343,7 +344,7 @@ contract Safe is
      */
     function checkSignatures(bytes32 dataHash, bytes calldata data, bytes memory signatures) external view {
         data;
-        checkSignatures(dataHash, signatures);
+        checkSignatures(msg.sender, dataHash, signatures);
     }
 
     /**
@@ -351,6 +352,7 @@ contract Safe is
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
      *      Use `checkNSignatures(address,bytes32,bytes,uint256)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
