@@ -96,7 +96,7 @@ This command will use the deployment artifacts to compile the contracts and comp
 npx hardhat --network <network> local-verify
 ```
 
-This command will upload the contract source to Etherescan
+This command will upload the contract source to Etherscan
 ```bash
 npx hardhat --network <network> etherscan-verify
 ```
