@@ -40,7 +40,13 @@ contract SafeProxy {
             let _singleton := sload(0)
             // 0xa619486e == keccak("masterCopy()"). The value is right padded to 32-bytes with 0s
             if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
-                mstore(0, shr(12, shl(12, _singleton)))
+                // We mask the singleton address when handling the `masterCopy()` call to ensure that it is correctly
+                // ABI-encoded. We do this by shifting the address left by 96 bits (or 12 bytes) and then storing it in
+                // memory with a 12 byte offset from where the return data starts. Note that we **intentionally** only
+                // do this for the `masterCopy()` call, since the EVM `DELEGATECALL` opcode ignores the most-significant
+                // 12 bytes from the address, so we do not need to make sure the top bytes are cleared when proxying
+                // calls to the `singleton`. This saves us a tiny amount of gas per proxied call.
+                mstore(0x0c, shl(96, _singleton))
                 return(0, 0x20)
             }
             calldatacopy(0, 0, calldatasize())
