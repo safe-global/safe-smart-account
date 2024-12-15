@@ -479,7 +479,7 @@ File: [`contracts/libraries/SignMessage.sol`](https://github.com/safe-global/saf
 
 Expected behaviour:
 
-The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the `signedMessages` mapping.
+The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a message, the hash of that message should be marked as executed in the `signedMessages` mapping.
 
 #### GnosisSafeStorage
 
@@ -714,7 +714,7 @@ Expected behaviour:
 
 The `multiSend` is now payable therefore will enforce anymore that `msg.value` is 0. ETH that is not transferred out again will remain in `this` (the calling contract when used via a delegatecall or the contract when used via call, only possible with `MultiSendCallOnly`)
 
-#### Add MuliSend that disallows delegate operation
+#### Add MultiSend that disallows delegate operation
 
 File: [`contracts/libraries/MultiSendCallOnly.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/libraries/MultiSendCallOnly.sol)
 
@@ -741,7 +741,7 @@ Note: **This contract is meant as an example to demonstrate how to mark Safe mes
 
 Expected behaviour:
 
-The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a massage, the hash of that message should be marked as executed in the `signedMessages` mapping.
+The library is meant as a compatibility tool for the removed `signMessage` function from the pre-1.3.0 Safe contracts. It has the same signature and assumes the same storage layout as the previous Safe contract versions. After calling this function with a message, the hash of that message should be marked as executed in the `signedMessages` mapping.
 
 #### Add Migration example to downgrade from 1.3.0 to 1.2.0
 
