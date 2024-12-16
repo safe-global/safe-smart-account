@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 import "../munged/Safe.sol";
+import {SafeMath} from "../munged/external/SafeMath.sol";
 
 contract SafeHarness is Safe {
     constructor(
@@ -31,6 +32,10 @@ contract SafeHarness is Safe {
         }
     }
 
+    function numSigsSufficient(bytes memory signatures,uint256 requiredSignatures) public pure returns (bool) {
+        return (signatures.length >= SafeMath.mul(requiredSignatures,65));
+    }
+
     // harnessed getters
     function getModule(address module) public view returns (address) {
         return modules[module];
@@ -38,6 +43,10 @@ contract SafeHarness is Safe {
 
     function getSafeGuard() public view returns (address) {
         return getGuard();
+    }
+
+    function getModuleGuardExternal() public view returns (address) {
+        return getModuleGuard();
     }
 
     function getNativeTokenBalance() public view returns (uint256) {
