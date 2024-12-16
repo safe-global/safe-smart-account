@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2024-10-23 15:00:06
-+++ Safe.sol	2024-10-23 15:04:05
+--- Safe.sol	2024-12-11 12:09:10
++++ Safe.sol	2024-12-12 17:55:22
 @@ -75,22 +75,24 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -50,10 +50,21 @@ diff -druN Safe.sol Safe.sol
 +
          bytes32 domainHash = domainSeparator();
  
-         // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
+         // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+@@ -450,7 +451,8 @@
+             // Store the domain separator
+             mstore(add(ptr, 32), domainHash)
+             // Calculate the hash
+-            txHash := keccak256(add(ptr, 30), 66)
++            //txHash := keccak256(add(ptr, 30), 66) // old
++            txHash := keccak256(add(ptr, 0), 128) // new
+         }
+         /* solhint-enable no-inline-assembly */
+     }
+
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2024-10-18 15:20:48
-+++ base/Executor.sol	2024-10-23 15:03:22
+--- base/Executor.sol	2024-12-11 12:09:10
++++ base/Executor.sol	2024-12-12 17:55:22
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -70,8 +81,8 @@ diff -druN base/Executor.sol base/Executor.sol
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
 diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2024-10-18 15:20:48
-+++ interfaces/ISafe.sol	2024-10-23 15:03:22
+--- interfaces/ISafe.sol	2024-12-11 12:09:10
++++ interfaces/ISafe.sol	2024-12-12 17:55:22
 @@ -110,7 +110,7 @@
       */
      function domainSeparator() external view returns (bytes32);
