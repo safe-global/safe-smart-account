@@ -407,6 +407,11 @@ contract Safe is
 
         // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
         // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
+        //
+        // WARNING: We do not clean potential dirty bits in types that are less than 256 bits (addresses and Enum.Operation)
+        // The solidity assembly types that are smaller than 256 bit can have dirty high bits according to the spec (see the Warning in https://docs.soliditylang.org/en/latest/assembly.html#access-to-external-variables-functions-and-libraries).
+        // However, we read most of the data from calldata, where the variables are not packed, and the only variable we read from storage is uint256 nonce.
+        // This is not a problem, however, we must consider this for potential future changes.
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
