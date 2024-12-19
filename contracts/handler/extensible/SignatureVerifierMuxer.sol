@@ -121,10 +121,10 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
                 // 0x00 - 0x04: selector
                 // 0x04 - 0x36: domainSeparator
                 // 0x36 - 0x68: typeHash
-                // 0x68 - 0x6C: encodeData length
-                // 0x6C - 0x6C + encodeData length: encodeData
-                // 0x6C + encodeData length - 0x6C + encodeData length + 0x20: payload length
-                // 0x6C + encodeData length + 0x20 - end: payload
+                // 0x68 - 0x88: encodeData length
+                // 0x88 - 0x88 + encodeData length: encodeData
+                // 0x88 + encodeData length - 0x88 + encodeData length + 0x20: payload length
+                // 0x88 + encodeData length + 0x20 - end: payload
                 //
                 // Get the domainSeparator from the signature.
                 (bytes32 domainSeparator, bytes32 typeHash) = abi.decode(signature[4:68], (bytes32, bytes32));
