@@ -63,7 +63,7 @@ describe("ExtensibleFallbackHandler", () => {
         const revertVerifierSource = `
         contract RevertVerifier {
             function iToHex(bytes memory buffer) public pure returns (string memory) {
-                // Fixed buffer size for hexadecimal convertion
+                // Fixed buffer size for hexadecimal conversion
                 bytes memory converted = new bytes(buffer.length * 2);
                 bytes memory _base = "0123456789abcdef";
                 for (uint256 i = 0; i < buffer.length; i++) {

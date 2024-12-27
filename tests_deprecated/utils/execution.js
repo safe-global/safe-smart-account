@@ -68,7 +68,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     if (txGasEstimate > 0) {
         let estimateDataGasCosts = calcDataGasCosts(estimateData)
         let additionalGas = 10000
-        // To check if the transaction is successfull with the given safeTxGas we try to set a gasLimit so that only safeTxGas is available,
+        // To check if the transaction is successful with the given safeTxGas we try to set a gasLimit so that only safeTxGas is available,
         // when `execute` is triggered in `requiredTxGas`. If the response is `0x` then the inner transaction reverted and we need to increase the amount.
         for (let i = 0; i < 100; i++) {
             try {
