@@ -32,7 +32,7 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     let baseGasEstimate = calcDataGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
     baseGasEstimate += 1500 // 1500 -> hash generation costs
     baseGasEstimate += 1000 // 1000 -> Event emission
-    return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
+    return baseGasEstimate + 32000; // Add additional gas costs (e.g. base tx costs, transfer costs)
 }
 
 let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, opts) {
