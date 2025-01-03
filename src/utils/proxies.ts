@@ -26,7 +26,7 @@ export const getZkSyncBytecodeHashFromDeployerCallHeader = (proxyCreationCode: s
 export const calculateProxyAddress = async (
     factory: SafeProxyFactory,
     singleton: string,
-    inititalizer: string,
+    initializer: string,
     nonce: number | string,
     zkSync: boolean = false,
 ) => {
