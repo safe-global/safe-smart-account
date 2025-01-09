@@ -291,6 +291,10 @@ contract Safe is
         address currentOwner;
         uint256 v; // Implicit conversion from uint8 to uint256 will be done for v received from signatureSplit(...).
         bytes32 r;
+        // NOTE: We do not enforce the `s` to be from the lower half of the curve
+        // This essentially means that for every signature, there's another valid signature (known as ECDSA malleability)
+        // Since we have other mechanisms to prevent duplicated signatures (ordered owners array) and replay protection (nonce),
+        // we can safely ignore this malleability.
         bytes32 s;
         uint256 i;
         for (i = 0; i < requiredSignatures; i++) {
