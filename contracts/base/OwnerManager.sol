@@ -110,7 +110,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         // There has to be at least one Safe owner.
         if (_threshold == 0) revertWithError("GS202");
         threshold = _threshold;
-        emit ChangedThreshold(threshold);
+        emit ChangedThreshold(_threshold);
     }
 
     /**

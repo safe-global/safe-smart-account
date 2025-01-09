@@ -118,13 +118,13 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
             if (sigSelector == SAFE_SIGNATURE_MAGIC_VALUE && signature.length >= 68) {
                 // Signature is for an `ISafeSignatureVerifier` - decode the signature.
                 // Layout of the `signature`:
-                // 0x00 - 0x04: selector
-                // 0x04 - 0x36: domainSeparator
-                // 0x36 - 0x68: typeHash
-                // 0x68 - 0x6C: encodeData length
-                // 0x6C - 0x6C + encodeData length: encodeData
-                // 0x6C + encodeData length - 0x6C + encodeData length + 0x20: payload length
-                // 0x6C + encodeData length + 0x20 - end: payload
+                // 0x00 to 0x04: selector
+                // 0x04 to 0x36: domainSeparator
+                // 0x36 to 0x68: typeHash
+                // 0x68 to 0x88: encodeData length
+                // 0x88 to 0x88 + encodeData length: encodeData
+                // 0x88 + encodeData length to 0x88 + encodeData length + 0x20: payload length
+                // 0x88 + encodeData length + 0x20 to end: payload
                 //
                 // Get the domainSeparator from the signature.
                 (bytes32 domainSeparator, bytes32 typeHash) = abi.decode(signature[4:68], (bytes32, bytes32));
