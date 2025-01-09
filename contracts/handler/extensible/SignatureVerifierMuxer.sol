@@ -110,7 +110,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
             /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
-                sigSelector := and(calldataload(signature.offset), 0xFFFFFFFF)
+                sigSelector := and(calldataload(signature.offset), 0xFFFFFFFF00000000000000000000000000000000000000000000000000000000)
             }
             /* solhint-enable no-inline-assembly */
 
