@@ -22,7 +22,7 @@ contract CreateCall {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            newContract := create2(value, add(0x20, deploymentData), mload(deploymentData), salt)
+            newContract := create2(value, add(deploymentData, 0x20), mload(deploymentData), salt)
         }
         /* solhint-enable no-inline-assembly */
         require(newContract != address(0), "Could not deploy contract");
