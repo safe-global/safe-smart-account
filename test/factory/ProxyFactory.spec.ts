@@ -318,7 +318,7 @@ describe("ProxyFactory", () => {
             ).to.be.reverted;
 
             await mock.reset();
-            // Should be successfull now
+            // Should be successful now
             const proxyAddress = await calculateProxyAddressWithCallback(
                 factory,
                 singletonAddress,
@@ -405,7 +405,7 @@ describe("ProxyFactory", () => {
             ).to.be.reverted;
 
             await mock.reset();
-            // Should be successfull now
+            // Should be successful now
             const proxyAddress = await calculateProxyAddressWithCallback(
                 factory,
                 singletonAddress,

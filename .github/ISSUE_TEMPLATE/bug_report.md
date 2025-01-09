@@ -14,7 +14,7 @@ about: Bug report about the Safe smart contracts
 
 ## Description
 
-Please describe considely the bug you have found, and what you expect instead.
+Please describe concisely the bug you have found, and what you expect instead.
 
 ## Environment
 

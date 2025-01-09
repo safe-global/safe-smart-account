@@ -271,7 +271,7 @@ describe("Safe", () => {
             if (hre.network.zksync) {
                 // This test fails in zksync because of (allegedly) enormous gas cost differences
                 // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
-                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i cant confirm this:
+                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i can't confirm this:
                 // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
                 // From zkSync team:
                 // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
@@ -333,7 +333,7 @@ describe("Safe", () => {
             if (hre.network.zksync) {
                 // This test fails in zksync because of (allegedly) enormous gas cost differences
                 // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
-                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i cant confirm this:
+                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i can't confirm this:
                 // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
                 // From zkSync team:
                 // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,

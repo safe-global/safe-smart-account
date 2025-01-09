@@ -53,8 +53,8 @@ describe("SimulateTxAccessor", () => {
             const accessorAddress = await accessor.getAddress();
             const tx = await buildContractCall(safe, "getOwners", [], 0);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
-            const acccessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
-            const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData);
+            const accessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
+            const simulation = accessor.interface.decodeFunctionResult("simulate", accessibleData);
             expect(safe.interface.decodeFunctionResult("getOwners", simulation.returnData)[0]).to.be.deep.eq([user1.address]);
             expect(simulation.success).to.be.true;
             expect(simulation.estimate).to.be.lte(10000n);
@@ -69,8 +69,8 @@ describe("SimulateTxAccessor", () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             const tx = await buildContractCall(interactor, "sendAndReturnBalance", [user2.address, ethers.parseEther("1")], 0, true);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
-            const acccessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
-            const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData);
+            const accessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
+            const simulation = accessor.interface.decodeFunctionResult("simulate", accessibleData);
             expect(interactor.interface.decodeFunctionResult("sendAndReturnBalance", simulation.returnData)[0]).to.be.deep.eq(
                 userBalance + ethers.parseEther("1"),
             );
@@ -85,8 +85,8 @@ describe("SimulateTxAccessor", () => {
             const accessorAddress = await accessor.getAddress();
             const tx = await buildContractCall(interactor, "sendAndReturnBalance", [user2.address, ethers.parseEther("1")], 0, true);
             const simulationData = accessor.interface.encodeFunctionData("simulate", [tx.to, tx.value, tx.data, tx.operation]);
-            const acccessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
-            const simulation = accessor.interface.decodeFunctionResult("simulate", acccessibleData);
+            const accessibleData = await simulator.simulate.staticCall(accessorAddress, simulationData);
+            const simulation = accessor.interface.decodeFunctionResult("simulate", accessibleData);
             expect(simulation.returnData).to.be.deep.eq(
                 "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5472616e73666572206661696c65640000000000000000000000000000000000",
             );
