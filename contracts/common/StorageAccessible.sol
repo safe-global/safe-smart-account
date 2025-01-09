@@ -16,7 +16,7 @@ abstract contract StorageAccessible {
      */
     function getStorageAt(uint256 offset, uint256 length) public view returns (bytes memory) {
         bytes memory result = new bytes(length * 32);
-        for (uint256 index = 0; index < length; index++) {
+        for (uint256 index = 0; index < length; ++index) {
             /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {

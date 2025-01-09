@@ -53,7 +53,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
     function addSupportedInterfaceBatch(bytes4 _interfaceId, bytes32[] calldata handlerWithSelectors) external override onlySelf {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
-        for (uint256 i = 0; i < handlerWithSelectors.length; i++) {
+        for (uint256 i = 0; i < handlerWithSelectors.length; ++i) {
             (bool isStatic, bytes4 selector, address handlerAddress) = MarshalLib.decodeWithSelector(handlerWithSelectors[i]);
             _setSafeMethod(safe, selector, MarshalLib.encode(isStatic, handlerAddress));
             if (i > 0) {
@@ -75,7 +75,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
     function removeSupportedInterfaceBatch(bytes4 _interfaceId, bytes4[] calldata selectors) external override onlySelf {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
-        for (uint256 i = 0; i < selectors.length; i++) {
+        for (uint256 i = 0; i < selectors.length; ++i) {
             _setSafeMethod(safe, selectors[i], bytes32(0));
             if (i > 0) {
                 interfaceId ^= selectors[i];

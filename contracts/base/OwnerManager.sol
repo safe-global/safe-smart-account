@@ -35,7 +35,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         if (_threshold == 0) revertWithError("GS202");
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
-        for (uint256 i = 0; i < _owners.length; i++) {
+        for (uint256 i = 0; i < _owners.length; ++i) {
             // Owner address cannot be null.
             address owner = _owners[i];
             if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner)
@@ -60,7 +60,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         if (owners[owner] != address(0)) revertWithError("GS204");
         owners[owner] = owners[SENTINEL_OWNERS];
         owners[SENTINEL_OWNERS] = owner;
-        ownerCount++;
+        ++ownerCount;
         emit AddedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold) changeThreshold(_threshold);
@@ -77,7 +77,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         if (owners[prevOwner] != owner) revertWithError("GS205");
         owners[prevOwner] = owners[owner];
         owners[owner] = address(0);
-        ownerCount--;
+        --ownerCount;
         emit RemovedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold) changeThreshold(_threshold);
@@ -139,7 +139,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         while (currentOwner != SENTINEL_OWNERS) {
             array[index] = currentOwner;
             currentOwner = owners[currentOwner];
-            index++;
+            ++index;
         }
         return array;
     }
