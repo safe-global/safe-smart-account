@@ -38,7 +38,7 @@ library MarshalLib {
         assembly {
             // set isStatic to true if the left-most byte of the data is 0x00
             isStatic := iszero(shr(248, data))
-            handler := shr(96, shl(96, data))
+            handler := and(data, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
         }
         /* solhint-enable no-inline-assembly */
     }
@@ -56,7 +56,7 @@ library MarshalLib {
         assembly {
             // set isStatic to true if the left-most byte of the data is 0x00
             isStatic := iszero(shr(248, data))
-            handler := shr(96, shl(96, data))
+            handler := and(data, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
             selector := shl(168, shr(160, data))
         }
         /* solhint-enable no-inline-assembly */
