@@ -71,13 +71,13 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
      */
     function removeOwner(address prevOwner, address owner, uint256 _threshold) public override authorized {
         // Only allow to remove an owner, if threshold can still be reached.
-        if (ownerCount - 1 < _threshold) revertWithError("GS201");
+        // Here we do pre-decrement as it is cheaper and allows us to check if the threshold is still reachable.
+        if (--ownerCount < _threshold) revertWithError("GS201");
         // Validate owner address and check that it corresponds to owner index.
         if (owner == address(0) || owner == SENTINEL_OWNERS) revertWithError("GS203");
         if (owners[prevOwner] != owner) revertWithError("GS205");
         owners[prevOwner] = owners[owner];
         owners[owner] = address(0);
-        ownerCount--;
         emit RemovedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold) changeThreshold(_threshold);
