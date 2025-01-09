@@ -35,13 +35,15 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
         ISafe safe = ISafe(payable(_manager()));
         // invalid interface id per ERC165 spec
         require(interfaceId != 0xffffffff, "invalid interface id");
-        bool current = safeInterfaces[safe][interfaceId];
-        if (supported && !current) {
-            safeInterfaces[safe][interfaceId] = true;
-            emit AddedInterface(safe, interfaceId);
-        } else if (!supported && current) {
-            delete safeInterfaces[safe][interfaceId];
-            emit RemovedInterface(safe, interfaceId);
+        mapping(bytes4 => bool) storage safeInterface = safeInterfaces[safe];
+        bool current = safeInterface[interfaceId];
+        if (supported != current) {
+            safeInterface[interfaceId] = supported;
+            if (supported) {
+                emit AddedInterface(safe, interfaceId);
+            } else {
+                emit RemovedInterface(safe, interfaceId);
+            }
         }
     }
 
