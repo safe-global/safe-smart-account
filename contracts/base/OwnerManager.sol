@@ -35,7 +35,8 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         if (_threshold == 0) revertWithError("GS202");
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
-        for (uint256 i = 0; i < _owners.length; i++) {
+        uint256 ownersLength = _owners.length;
+        for (uint256 i = 0; i < ownersLength; i++) {
             // Owner address cannot be null.
             address owner = _owners[i];
             if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner)
@@ -46,7 +47,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
             currentOwner = owner;
         }
         owners[currentOwner] = SENTINEL_OWNERS;
-        ownerCount = _owners.length;
+        ownerCount = ownersLength;
         threshold = _threshold;
     }
 
