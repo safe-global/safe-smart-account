@@ -35,13 +35,15 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
         ISafe safe = ISafe(payable(_manager()));
         // invalid interface id per ERC165 spec
         require(interfaceId != 0xffffffff, "invalid interface id");
-        bool current = safeInterfaces[safe][interfaceId];
-        if (supported && !current) {
-            safeInterfaces[safe][interfaceId] = true;
-            emit AddedInterface(safe, interfaceId);
-        } else if (!supported && current) {
-            delete safeInterfaces[safe][interfaceId];
-            emit RemovedInterface(safe, interfaceId);
+        mapping(bytes4 => bool) storage safeInterface = safeInterfaces[safe];
+        bool current = safeInterface[interfaceId];
+        if (supported != current) {
+            safeInterface[interfaceId] = supported;
+            if (supported) {
+                emit AddedInterface(safe, interfaceId);
+            } else {
+                emit RemovedInterface(safe, interfaceId);
+            }
         }
     }
 
@@ -53,7 +55,8 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
     function addSupportedInterfaceBatch(bytes4 _interfaceId, bytes32[] calldata handlerWithSelectors) external override onlySelf {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
-        for (uint256 i = 0; i < handlerWithSelectors.length; ++i) {
+        uint256 len = handlerWithSelectors.length;
+        for (uint256 i = 0; i < len; ++i) {
             (bool isStatic, bytes4 selector, address handlerAddress) = MarshalLib.decodeWithSelector(handlerWithSelectors[i]);
             _setSafeMethod(safe, selector, MarshalLib.encode(isStatic, handlerAddress));
             if (i > 0) {
@@ -75,7 +78,8 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
     function removeSupportedInterfaceBatch(bytes4 _interfaceId, bytes4[] calldata selectors) external override onlySelf {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
-        for (uint256 i = 0; i < selectors.length; ++i) {
+        uint256 len = selectors.length;
+        for (uint256 i = 0; i < len; ++i) {
             _setSafeMethod(safe, selectors[i], bytes32(0));
             if (i > 0) {
                 interfaceId ^= selectors[i];

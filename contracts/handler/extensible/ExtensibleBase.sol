@@ -46,14 +46,15 @@ abstract contract ExtensibleBase is HandlerContext {
 
     function _setSafeMethod(ISafe safe, bytes4 selector, bytes32 newMethod) internal {
         (, address newHandler) = MarshalLib.decode(newMethod);
-        bytes32 oldMethod = safeMethods[safe][selector];
+        mapping(bytes4 => bytes32) storage safeMethod = safeMethods[safe];
+        bytes32 oldMethod = safeMethod[selector];
         (, address oldHandler) = MarshalLib.decode(oldMethod);
 
         if (address(newHandler) == address(0) && address(oldHandler) != address(0)) {
-            delete safeMethods[safe][selector];
+            delete safeMethod[selector];
             emit RemovedSafeMethod(safe, selector);
         } else {
-            safeMethods[safe][selector] = newMethod;
+            safeMethod[selector] = newMethod;
             if (address(oldHandler) == address(0)) {
                 emit AddedSafeMethod(safe, selector, newMethod);
             } else {
