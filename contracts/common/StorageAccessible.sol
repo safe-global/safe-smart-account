@@ -15,7 +15,8 @@ abstract contract StorageAccessible {
      * @return the bytes that were read.
      */
     function getStorageAt(uint256 offset, uint256 length) public view returns (bytes memory) {
-        bytes memory result = new bytes(length * 32);
+        // We use `<< 5` instead of `* 32` as SHR / SHL opcode only uses 3 gas, while DIV / MUL opcode uses 5 gas.
+        bytes memory result = new bytes(length << 5);
         for (uint256 index = 0; index < length; ++index) {
             /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
