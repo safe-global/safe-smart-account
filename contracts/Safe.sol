@@ -297,7 +297,7 @@ contract Safe is
         // we can safely ignore this malleability.
         bytes32 s;
         uint256 i;
-        for (i = 0; i < requiredSignatures; i++) {
+        for (i = 0; i < requiredSignatures; ++i) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
                 // If v is 0 then it is a contract signature

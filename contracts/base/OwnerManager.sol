@@ -36,7 +36,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         // Initializing Safe owners.
         address currentOwner = SENTINEL_OWNERS;
         uint256 ownersLength = _owners.length;
-        for (uint256 i = 0; i < ownersLength; i++) {
+        for (uint256 i = 0; i < ownersLength; ++i) {
             // Owner address cannot be null.
             address owner = _owners[i];
             if (owner == address(0) || owner == SENTINEL_OWNERS || owner == address(this) || currentOwner == owner)
@@ -61,7 +61,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         if (owners[owner] != address(0)) revertWithError("GS204");
         owners[owner] = owners[SENTINEL_OWNERS];
         owners[SENTINEL_OWNERS] = owner;
-        ownerCount++;
+        ++ownerCount;
         emit AddedOwner(owner);
         // Change threshold if threshold was changed.
         if (threshold != _threshold) changeThreshold(_threshold);
@@ -140,7 +140,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
         while (currentOwner != SENTINEL_OWNERS) {
             array[index] = currentOwner;
             currentOwner = owners[currentOwner];
-            index++;
+            ++index;
         }
         return array;
     }

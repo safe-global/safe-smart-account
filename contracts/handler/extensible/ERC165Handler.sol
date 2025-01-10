@@ -56,7 +56,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
         uint256 len = handlerWithSelectors.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ++i) {
             (bool isStatic, bytes4 selector, address handlerAddress) = MarshalLib.decodeWithSelector(handlerWithSelectors[i]);
             _setSafeMethod(safe, selector, MarshalLib.encode(isStatic, handlerAddress));
             if (i > 0) {
@@ -79,7 +79,7 @@ abstract contract ERC165Handler is ExtensibleBase, IERC165Handler {
         ISafe safe = ISafe(payable(_msgSender()));
         bytes4 interfaceId;
         uint256 len = selectors.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ++i) {
             _setSafeMethod(safe, selectors[i], bytes32(0));
             if (i > 0) {
                 interfaceId ^= selectors[i];
