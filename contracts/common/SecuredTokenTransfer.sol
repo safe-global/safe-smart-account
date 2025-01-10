@@ -16,7 +16,7 @@ abstract contract SecuredTokenTransfer {
      * @return transferred Returns true if the transfer was successful
      */
     function transferToken(address token, address receiver, uint256 amount) internal returns (bool transferred) {
-        // 0xa9059cbb - keccak("transfer(address,uint256)")
+        // 0xa9059cbb - bytes4(keccak256("transfer(address,uint256)"))
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly

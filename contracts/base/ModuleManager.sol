@@ -212,7 +212,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         while (next != address(0) && next != SENTINEL_MODULES && moduleCount < pageSize) {
             array[moduleCount] = next;
             next = modules[next];
-            moduleCount++;
+            ++moduleCount;
         }
 
         /**

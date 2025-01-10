@@ -28,7 +28,7 @@ import {Enum} from "./libraries/Enum.sol";
  *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
  *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
- *      - Fallback: Fallback handler is a contract that can provide additional read-only functionality for Safe. Managed in `FallbackManager`.
+ *      - Fallback: Fallback handler is a contract that can provide additional functionality for Safe. Managed in `FallbackManager`. Please read the security risks in the `IFallbackManager` interface.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
  *      For the events-based implementation see `SafeL2.sol`.
  * @author Stefan George - @Georgi87
@@ -292,9 +292,13 @@ contract Safe is
         address currentOwner;
         uint256 v; // Implicit conversion from uint8 to uint256 will be done for v received from signatureSplit(...).
         bytes32 r;
+        // NOTE: We do not enforce the `s` to be from the lower half of the curve
+        // This essentially means that for every signature, there's another valid signature (known as ECDSA malleability)
+        // Since we have other mechanisms to prevent duplicated signatures (ordered owners array) and replay protection (nonce),
+        // we can safely ignore this malleability.
         bytes32 s;
         uint256 i;
-        for (i = 0; i < requiredSignatures; i++) {
+        for (i = 0; i < requiredSignatures; ++i) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
                 // If v is 0 then it is a contract signature
