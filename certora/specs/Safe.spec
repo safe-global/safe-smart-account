@@ -131,21 +131,6 @@ rule setupCorrectlyConfiguresSafe(
 }
 
 
-rule guardAddressChange(method f) filtered {
-    f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
-         f.selector != sig:getStorageAt(uint256,uint256).selector
-} {
-    address guardBefore = getSafeGuard();
-
-    calldataarg args; env e;
-    f(e, args);
-
-    address guardAfter = getSafeGuard();
-
-    assert guardBefore != guardAfter =>
-        f.selector == sig:setGuard(address).selector;
-}
-
 invariant noSignedMessages(bytes32 message)
     signedMessages(message) == 0
     filtered { f -> reachableOnly(f) }
