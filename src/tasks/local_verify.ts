@@ -50,11 +50,11 @@ task("local-verify", "Verifies that the local deployment files correspond to the
             const onChainCode = await hre.ethers.provider.getCode(deployment.address);
             const onchainBytecodeHash = hre.ethers.keccak256(onChainCode);
             
-            // Компилируем контракт в реальном времени
+            // We compile the contract in real-time
             const meta = JSON.parse(deployment.metadata!);
             const solcjs = await loadSolc(meta.compiler.version);
             
-            // Подготавливаем метаданные для компиляции
+            // Preparing metadata for compilation
             const allowedSourceKey = ["keccak256", "content"];
             delete meta.compiler;
             delete meta.output;
