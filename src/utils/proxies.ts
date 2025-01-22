@@ -26,11 +26,11 @@ export const getZkSyncBytecodeHashFromDeployerCallHeader = (proxyCreationCode: s
 export const calculateProxyAddress = async (
     factory: SafeProxyFactory,
     singleton: string,
-    inititalizer: string,
+    initializer: string,
     nonce: number | string,
     zkSync: boolean = false,
 ) => {
-    const salt = ethers.solidityPackedKeccak256(["bytes32", "uint256"], [ethers.solidityPackedKeccak256(["bytes"], [inititalizer]), nonce]);
+    const salt = ethers.solidityPackedKeccak256(["bytes32", "uint256"], [ethers.solidityPackedKeccak256(["bytes"], [initializer]), nonce]);
     const factoryAddress = await factory.getAddress();
     const proxyCreationCode = await factory.proxyCreationCode();
 
@@ -47,26 +47,26 @@ export const calculateProxyAddress = async (
 export const calculateProxyAddressWithCallback = async (
     factory: SafeProxyFactory,
     singleton: string,
-    inititalizer: string,
+    initializer: string,
     nonce: number | string,
     callback: string,
     zkSync: boolean = false,
 ) => {
     const saltNonceWithCallback = ethers.solidityPackedKeccak256(["uint256", "address"], [nonce, callback]);
-    return calculateProxyAddress(factory, singleton, inititalizer, saltNonceWithCallback, zkSync);
+    return calculateProxyAddress(factory, singleton, initializer, saltNonceWithCallback, zkSync);
 };
 
 export const calculateChainSpecificProxyAddress = async (
     factory: SafeProxyFactory,
     singleton: string,
-    inititalizer: string,
+    initializer: string,
     nonce: number | string,
     chainId: BigNumberish,
     zkSync: boolean = false,
 ) => {
     const salt = ethers.solidityPackedKeccak256(
         ["bytes32", "uint256", "uint256"],
-        [ethers.solidityPackedKeccak256(["bytes"], [inititalizer]), nonce, chainId],
+        [ethers.solidityPackedKeccak256(["bytes"], [initializer]), nonce, chainId],
     );
     const factoryAddress = await factory.getAddress();
     const proxyCreationCode = await factory.proxyCreationCode();

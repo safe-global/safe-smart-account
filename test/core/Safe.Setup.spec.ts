@@ -211,7 +211,7 @@ describe("Safe", () => {
             await expect(template.setup([], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).to.be.revertedWith("GS202");
         });
 
-        it("should set fallback handler and call sub inititalizer", async () => {
+        it("should set fallback handler and call sub initializer", async () => {
             const {
                 template,
                 signers: [user1, user2, user3],
