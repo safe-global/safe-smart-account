@@ -1,7 +1,7 @@
 // This spec is a separate file because we summarize checkSignatures here
 
 methods {
-    function checkSignatures(bytes32, bytes memory) internal => NONDET;
+    function checkSignatures(address, bytes32, bytes memory) internal => NONDET;
 
     function getNativeTokenBalanceFor(address) external returns (uint256) envfree;
     function getSafeGuard() external returns (address) envfree;
@@ -41,7 +41,7 @@ rule nativeTokenRefundIsSentToRefundReceiver(
     // and adding pre-requirements is tricky
     // also, it shouldn't be the safe itself 
     require refundReceiver != 0 && refundReceiver != currentContract;
-    // // We're being optimistic about the delegatecall and in the munged contracts the actuall call was removed
+    // // We're being optimistic about the delegatecall and in the munged contracts the actual call was removed
     // // So it's possible the gas used to be 0 in the munged contracts, so no refund would be sent (a counterexample)
     // require operation == Enum.Operation.Call;
 

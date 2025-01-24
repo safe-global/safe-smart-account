@@ -29,7 +29,7 @@ describe("SafeL2", () => {
         };
     });
 
-    describe("execTransactions", async () => {
+    describe("execTransactions", () => {
         it("should emit SafeMultiSigTransaction event", async () => {
             const {
                 safe,

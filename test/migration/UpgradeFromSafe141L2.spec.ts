@@ -13,7 +13,8 @@ describe("Upgrade from Safe 1.4.1 L2", () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
-        const [user1] = await hre.ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
+        const [user1] = signers;
         const safeDeploymentData = hre.network.zksync ? deploymentData.safe141l2.zksync : deploymentData.safe141l2.evm;
         const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
         const singleton141L2 = await (await safeContractFactory.deploy()).getAddress();
@@ -40,10 +41,9 @@ describe("Upgrade from Safe 1.4.1 L2", () => {
             migratedSafe: safe,
             mock,
             multiSend: await getMultiSend(),
+            signers,
         };
     });
 
-    it("passes the Safe 1.4.1 tests", async () => {
-        await verificationTests(setupTests);
-    });
+    verificationTests(setupTests);
 });

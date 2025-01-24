@@ -28,7 +28,7 @@ import {Enum} from "./libraries/Enum.sol";
  *          1. Transaction Guard: managed in `GuardManager` for transactions executed with `execTransaction`.
  *          2. Module Guard: managed in `ModuleManager` for transactions executed with `execTransactionFromModule`
  *      - Modules: Modules are contracts that can be used to extend the write functionality of a Safe. Managed in `ModuleManager`.
- *      - Fallback: Fallback handler is a contract that can provide additional read-only functionality for Safe. Managed in `FallbackManager`.
+ *      - Fallback: Fallback handler is a contract that can provide additional functionality for Safe. Managed in `FallbackManager`. Please read the security risks in the `IFallbackManager` interface.
  *      Note: This version of the implementation contract doesn't emit events for the sake of gas efficiency and therefore requires a tracing node for indexing/
  *      For the events-based implementation see `SafeL2.sol`.
  * @author Stefan George - @Georgi87
@@ -139,7 +139,7 @@ contract Safe is
                 // We use the post-increment here, so the current nonce value is used and incremented afterwards.
                 nonce++
             );
-            checkSignatures(txHash, signatures);
+            checkSignatures(msg.sender, txHash, signatures);
         }
         address guard = getGuard();
         {
@@ -165,7 +165,8 @@ contract Safe is
 
         // We require some gas to emit the events (at least 2500) after the execution and some to perform code until the execution (500)
         // We also include the 1/64 in the check that is not sent along with a call to counteract potential shortings because of EIP-150
-        if (gasleft() < ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500) revertWithError("GS010");
+        // We use `<< 6` instead of `* 64` as SHR / SHL opcode only uses 3 gas, while DIV / MUL opcode uses 5 gas.
+        if (gasleft() < ((safeTxGas << 6) / 63).max(safeTxGas + 2500) + 500) revertWithError("GS010");
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
             uint256 gasUsed = gasleft();
@@ -179,9 +180,9 @@ contract Safe is
                 /* solhint-disable no-inline-assembly */
                 /// @solidity memory-safe-assembly
                 assembly {
-                    let p := mload(0x40)
-                    returndatacopy(p, 0, returndatasize())
-                    revert(p, returndatasize())
+                    let ptr := mload(0x40)
+                    returndatacopy(ptr, 0, returndatasize())
+                    revert(ptr, returndatasize())
                 }
                 /* solhint-enable no-inline-assembly */
             }
@@ -267,12 +268,12 @@ contract Safe is
     /**
      * @inheritdoc ISafe
      */
-    function checkSignatures(bytes32 dataHash, bytes memory signatures) public view override {
+    function checkSignatures(address executor, bytes32 dataHash, bytes memory signatures) public view override {
         // Load threshold to avoid multiple storage loads
         uint256 _threshold = threshold;
         // Check that a threshold is set
         if (_threshold == 0) revertWithError("GS001");
-        checkNSignatures(msg.sender, dataHash, signatures, _threshold);
+        checkNSignatures(executor, dataHash, signatures, _threshold);
     }
 
     /**
@@ -291,9 +292,13 @@ contract Safe is
         address currentOwner;
         uint256 v; // Implicit conversion from uint8 to uint256 will be done for v received from signatureSplit(...).
         bytes32 r;
+        // NOTE: We do not enforce the `s` to be from the lower half of the curve
+        // This essentially means that for every signature, there's another valid signature (known as ECDSA malleability)
+        // Since we have other mechanisms to prevent duplicated signatures (ordered owners array) and replay protection (nonce),
+        // we can safely ignore this malleability.
         bytes32 s;
         uint256 i;
-        for (i = 0; i < requiredSignatures; i++) {
+        for (i = 0; i < requiredSignatures; ++i) {
             (v, r, s) = signatureSplit(signatures, i);
             if (v == 0) {
                 // If v is 0 then it is a contract signature
@@ -335,7 +340,8 @@ contract Safe is
      * @notice Checks whether the signature provided is valid for the provided hash. Reverts otherwise.
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
-     *      Use `checkSignatures(bytes32,bytes)` instead.
+     *      Use `checkSignatures(address,bytes32,bytes)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash).
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
@@ -343,7 +349,7 @@ contract Safe is
      */
     function checkSignatures(bytes32 dataHash, bytes calldata data, bytes memory signatures) external view {
         data;
-        checkSignatures(dataHash, signatures);
+        checkSignatures(msg.sender, dataHash, signatures);
     }
 
     /**
@@ -351,6 +357,7 @@ contract Safe is
      *         The `data` parameter is completely ignored during signature verification.
      * @dev This function is provided for compatibility with previous versions.
      *      Use `checkNSignatures(address,bytes32,bytes,uint256)` instead.
+     *      ⚠️⚠️⚠️ If the caller is an owner of the Safe, it can trivially sign any hash with a pre-approve signature and may reduce the threshold of the signature by 1. ⚠️⚠️⚠️
      * @param dataHash Hash of the data (could be either a message hash or transaction hash)
      * @param data **IGNORED** The data pre-image.
      * @param signatures Signature data that should be verified.
@@ -403,9 +410,15 @@ contract Safe is
     ) public view override returns (bytes32 txHash) {
         bytes32 domainHash = domainSeparator();
 
-        // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
-        // allocates memory is inefficient. We only need to allocate memory for temporary variables to be used in the keccak256 call.
+        // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+        // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
+        //
+        // WARNING: We do not clean potential dirty bits in types that are less than 256 bits (addresses and Enum.Operation)
+        // The solidity assembly types that are smaller than 256 bit can have dirty high bits according to the spec (see the Warning in https://docs.soliditylang.org/en/latest/assembly.html#access-to-external-variables-functions-and-libraries).
+        // However, we read most of the data from calldata, where the variables are not packed, and the only variable we read from storage is uint256 nonce.
+        // This is not a problem, however, we must consider this for potential future changes.
         /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             // Get the free memory pointer
             let ptr := mload(0x40)

@@ -40,7 +40,7 @@ contract SafeProxyFactory {
             /* solhint-disable no-inline-assembly */
             /// @solidity memory-safe-assembly
             assembly {
-                if eq(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) {
+                if iszero(call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0)) {
                     revert(0, 0)
                 }
             }

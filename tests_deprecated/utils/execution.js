@@ -32,7 +32,7 @@ let estimateBaseGas = function(safe, to, value, data, operation, txGasEstimate, 
     let baseGasEstimate = calcDataGasCosts(payload) + signatureCost + (nonce > 0 ? 5000 : 20000)
     baseGasEstimate += 1500 // 1500 -> hash generation costs
     baseGasEstimate += 1000 // 1000 -> Event emission
-    return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
+    return baseGasEstimate + 32000; // Add additional gas costs (e.g. base tx costs, transfer costs)
 }
 
 let executeTransactionWithSigner = async function(signer, safe, subject, accounts, to, value, data, operation, executor, opts) {
@@ -68,7 +68,7 @@ let executeTransactionWithSigner = async function(signer, safe, subject, account
     if (txGasEstimate > 0) {
         let estimateDataGasCosts = calcDataGasCosts(estimateData)
         let additionalGas = 10000
-        // To check if the transaction is successfull with the given safeTxGas we try to set a gasLimit so that only safeTxGas is available,
+        // To check if the transaction is successful with the given safeTxGas we try to set a gasLimit so that only safeTxGas is available,
         // when `execute` is triggered in `requiredTxGas`. If the response is `0x` then the inner transaction reverted and we need to increase the amount.
         for (let i = 0; i < 100; i++) {
             try {

@@ -289,7 +289,7 @@ rule isOwnerDoesNotRevert {
     assert !lastReverted, "isOwner should not revert";
 }
 
-rule isOwnerNotSelfOrSentinal {
+rule isOwnerNotSelfOrSentinel {
     address addr;
     require addr == currentContract || addr == SENTINEL;
     requireInvariant self_not_owner();

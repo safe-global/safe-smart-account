@@ -7,11 +7,10 @@ import { chainId } from "../utils/encoding";
 import { encodeHandler, decodeHandler, encodeCustomVerifier, encodeHandlerFunction } from "../utils/extensible";
 import { killLibContract } from "../utils/contracts";
 
-describe("ExtensibleFallbackHandler", async () => {
-    const [user1, user2] = await hre.ethers.getSigners();
-
+describe("ExtensibleFallbackHandler", () => {
     const setupTests = deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
+        const [user1, user2] = await hre.ethers.getSigners();
         const signLib = await (await hre.ethers.getContractFactory("SignMessageLib")).deploy();
         const handler = await getExtensibleFallbackHandler();
         const handlerAddress = await handler.getAddress();
@@ -49,13 +48,13 @@ describe("ExtensibleFallbackHandler", async () => {
         const counterSource = `
         contract Counter {
             uint256 public count = 0;
-        
+
             function handle(address, address, uint256, bytes calldata) external returns (bytes memory result) {
                 bytes4 selector;
                 assembly {
                     selector := calldataload(164)
                 }
-        
+
                 require(selector == 0xdeadbeef, "Invalid data");
                 count = count + 1;
             }
@@ -64,7 +63,7 @@ describe("ExtensibleFallbackHandler", async () => {
         const revertVerifierSource = `
         contract RevertVerifier {
             function iToHex(bytes memory buffer) public pure returns (string memory) {
-                // Fixed buffer size for hexadecimal convertion
+                // Fixed buffer size for hexadecimal conversion
                 bytes memory converted = new bytes(buffer.length * 2);
                 bytes memory _base = "0123456789abcdef";
                 for (uint256 i = 0; i < buffer.length; i++) {
@@ -112,6 +111,8 @@ describe("ExtensibleFallbackHandler", async () => {
         );
 
         return {
+            user1,
+            user2,
             safe,
             validator,
             otherSafe,
@@ -128,8 +129,8 @@ describe("ExtensibleFallbackHandler", async () => {
         };
     });
 
-    describe("Token Callbacks", async () => {
-        describe("ERC1155", async () => {
+    describe("Token Callbacks", () => {
+        describe("ERC1155", () => {
             it("to handle onERC1155Received", async () => {
                 const { handler } = await setupTests();
                 expect(await handler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
@@ -146,7 +147,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
         });
 
-        describe("ERC721", async () => {
+        describe("ERC721", () => {
             it("to handle onERC721Received", async () => {
                 const { handler } = await setupTests();
                 expect(await handler.onERC721Received.staticCall(AddressZero, AddressZero, 0, "0x")).to.be.eq("0x150b7a02");
@@ -159,10 +160,10 @@ describe("ExtensibleFallbackHandler", async () => {
         });
     });
 
-    describe("Fallback Handler", async () => {
-        describe("fallback()", async () => {
+    describe("Fallback Handler", () => {
+        describe("fallback()", () => {
             it("should revert if call to safe is less than 4 bytes (method selector)", async () => {
-                const { validator } = await setupTests();
+                const { user1, validator } = await setupTests();
 
                 const tx = {
                     to: await validator.getAddress(),
@@ -175,8 +176,8 @@ describe("ExtensibleFallbackHandler", async () => {
         });
     });
 
-    describe("Custom methods", async () => {
-        describe("setSafeMethod(bytes4,bytes32)", async () => {
+    describe("Custom methods", () => {
+        describe("setSafeMethod(bytes4,bytes32)", () => {
             it("should revert if called by non-safe", async () => {
                 const { handler, mirror } = await setupTests();
                 await expect(handler.setSafeMethod("0xdeadbeef", encodeHandler(true, await mirror.getAddress()))).to.be.revertedWith(
@@ -185,7 +186,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when setting a new method", async () => {
-                const { safe, handler, validator, mirror } = await setupTests();
+                const { user1, user2, safe, handler, validator, mirror } = await setupTests();
                 const safeAddress = await safe.getAddress();
                 const newHandler = encodeHandler(true, await mirror.getAddress());
                 await expect(executeContractCallWithSigners(safe, validator, "setSafeMethod", ["0xdededede", newHandler], [user1, user2]))
@@ -197,7 +198,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when updating a method", async () => {
-                const { otherSafe, handler, preconfiguredValidator, mirror } = await setupTests();
+                const { user1, user2, otherSafe, handler, preconfiguredValidator, mirror } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
                 const oldHandler = encodeHandler(true, await mirror.getAddress());
                 const newHandler = encodeHandler(true, "0xdeAdDeADDEaDdeaDdEAddEADDEAdDeadDEADDEaD");
@@ -218,7 +219,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when removing a method", async () => {
-                const { otherSafe, handler, preconfiguredValidator } = await setupTests();
+                const { user1, user2, otherSafe, handler, preconfiguredValidator } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
                 await expect(
                     executeContractCallWithSigners(
@@ -237,7 +238,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("is correctly set", async () => {
-                const { safe, validator, mirror } = await setupTests();
+                const { user1, user2, safe, validator, mirror } = await setupTests();
                 const safeAddress = await safe.getAddress();
                 const tx = {
                     to: safeAddress,
@@ -275,7 +276,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should allow calling non-static methods", async () => {
-                const { safe, validator, counter } = await setupTests();
+                const { user1, user2, safe, validator, counter } = await setupTests();
 
                 const tx = {
                     to: await safe.getAddress(),
@@ -302,7 +303,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
         });
 
-        describe("MarshalLib", async () => {
+        describe("MarshalLib", () => {
             it("should correctly encode a handler and static flag", async () => {
                 const { testMarshalLib } = await setupTests();
                 const handler = "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
@@ -358,15 +359,15 @@ describe("ExtensibleFallbackHandler", async () => {
         });
     });
 
-    describe("Signature Verifier Muxer", async () => {
-        describe("supportsInterface(bytes4)", async () => {
+    describe("Signature Verifier Muxer", () => {
+        describe("supportsInterface(bytes4)", () => {
             it("should return true for supporting ERC1271", async () => {
                 const { handler } = await setupTests();
                 expect(await handler.supportsInterface.staticCall("0x1626ba7e")).to.be.eq(true);
             });
         });
 
-        describe("setDomainVerifier(bytes32,address)", async () => {
+        describe("setDomainVerifier(bytes32,address)", () => {
             it("should revert if called by non-safe", async () => {
                 const { handler, mirror } = await setupTests();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
@@ -376,7 +377,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when setting a new domain verifier", async () => {
-                const { safe, handler, validator, testVerifier } = await setupTests();
+                const { user1, user2, safe, handler, validator, testVerifier } = await setupTests();
                 const safeAddress = await safe.getAddress();
                 const testVerifierAddress = await testVerifier.getAddress();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
@@ -396,7 +397,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when updating a domain verifier", async () => {
-                const { otherSafe, handler, preconfiguredValidator, mirror } = await setupTests();
+                const { user1, user2, otherSafe, handler, preconfiguredValidator, mirror } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
                 const mirrorAddress = await mirror.getAddress();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
@@ -418,7 +419,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should emit event when removing a domain verifier", async () => {
-                const { otherSafe, handler, preconfiguredValidator } = await setupTests();
+                const { user1, user2, otherSafe, handler, preconfiguredValidator } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
                 await expect(
@@ -437,7 +438,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
         });
 
-        describe("isValidSignature(bytes32,bytes)", async () => {
+        describe("isValidSignature(bytes32,bytes)", () => {
             it("should revert if called directly", async () => {
                 const { handler } = await setupTests();
                 const dataHash = ethers.keccak256("0xbaddad");
@@ -463,14 +464,14 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should return magic value if message was signed", async () => {
-                const { safe, validator, signLib } = await setupTests();
+                const { user1, user2, safe, validator, signLib } = await setupTests();
                 const dataHash = ethers.keccak256("0xbaddad");
                 await executeContractCallWithSigners(safe, signLib, "signMessage", [dataHash], [user1, user2], true);
                 expect(await validator.isValidSignature.staticCall(dataHash, "0x")).to.be.eq("0x1626ba7e");
             });
 
             it("should return magic value if enough owners signed with typed signatures", async () => {
-                const { validator } = await setupTests();
+                const { user1, user2, validator } = await setupTests();
                 const validatorAddress = await validator.getAddress();
                 const dataHash = ethers.keccak256("0xbaddad");
                 const typedDataSig = {
@@ -495,8 +496,29 @@ describe("ExtensibleFallbackHandler", async () => {
                 );
             });
 
+            it("should not accept pre-approved signatures", async () => {
+                const { user1, user2, validator } = await setupTests();
+                const validatorAddress = await validator.getAddress();
+                const dataHash = ethers.keccak256("0xbaddad");
+                const user1Signature = {
+                    signer: user1.address,
+                    data: ethers.solidityPacked(["uint256", "uint256", "uint8"], [user1.address, 0, 1]),
+                };
+                const user2Signature = {
+                    signer: user2.address,
+                    data: await user2.signTypedData(
+                        { verifyingContract: validatorAddress, chainId: await chainId() },
+                        EIP712_SAFE_MESSAGE_TYPE,
+                        { message: dataHash },
+                    ),
+                };
+
+                const signatures = buildSignatureBytes([user1Signature, user2Signature]);
+                await expect(validator.connect(user1).isValidSignature.staticCall(dataHash, signatures)).to.be.reverted;
+            });
+
             it("should send EIP-712 context to custom verifier", async () => {
-                const { safe, validator, revertVerifier } = await setupTests();
+                const { user1, user2, safe, validator, revertVerifier } = await setupTests();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
                 const typeHash = ethers.keccak256("0xbaddad");
                 // abi encode the message
@@ -600,36 +622,36 @@ describe("ExtensibleFallbackHandler", async () => {
         });
     });
 
-    describe("IERC165", async () => {
-        describe("supportsInterface(bytes4)", async () => {
+    describe("IERC165", () => {
+        describe("supportsInterface(bytes4)", () => {
             it("should return true for ERC165", async () => {
                 const { validator } = await setupTests();
                 expect(await validator.supportsInterface.staticCall("0x01ffc9a7")).to.be.true;
             });
         });
 
-        describe("setSupportedInterface(bytes4,bool)", async () => {
+        describe("setSupportedInterface(bytes4,bool)", () => {
             it("should revert if called by non-safe", async () => {
                 const { handler } = await setupTests();
                 await expect(handler.setSupportedInterface("0xdeadbeef", true)).to.be.revertedWith("only safe can call this method");
             });
 
             it("should revert if trying to set an invalid interface", async () => {
-                const { validator, safe } = await setupTests();
+                const { user1, user2, validator, safe } = await setupTests();
                 await expect(
                     executeContractCallWithSigners(safe, validator, "setSupportedInterface", ["0xffffffff", true], [user1, user2]),
                 ).to.be.revertedWith("invalid interface id");
             });
 
             it("should emit event when adding a newly supported interface", async () => {
-                const { validator, safe, handler } = await setupTests();
+                const { user1, user2, validator, safe, handler } = await setupTests();
                 await expect(executeContractCallWithSigners(safe, validator, "setSupportedInterface", ["0xdeadbeef", true], [user1, user2]))
                     .to.emit(handler, "AddedInterface")
                     .withArgs(await safe.getAddress(), "0xdeadbeef");
             });
 
             it("should emit event when removing a supported interface", async () => {
-                const { handler, otherSafe, preconfiguredValidator } = await setupTests();
+                const { user1, user2, handler, otherSafe, preconfiguredValidator } = await setupTests();
 
                 await expect(
                     executeContractCallWithSigners(
@@ -645,7 +667,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should not emit event when removing an unsupported interface", async () => {
-                const { handler, otherSafe, preconfiguredValidator } = await setupTests();
+                const { user1, user2, handler, otherSafe, preconfiguredValidator } = await setupTests();
 
                 await expect(
                     executeContractCallWithSigners(
@@ -659,7 +681,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
         });
 
-        describe("addSupportedInterfaceBatch(bytes4, bytes32[]", async () => {
+        describe("addSupportedInterfaceBatch(bytes4, bytes32[]", () => {
             it("should revert if called by non-safe", async () => {
                 const { handler } = await setupTests();
                 await expect(handler.addSupportedInterfaceBatch("0xdeadbeef", [HashZero])).to.be.revertedWith(
@@ -668,7 +690,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should revert if batch contains an invalid interface", async () => {
-                const { validator, safe } = await setupTests();
+                const { user1, user2, validator, safe } = await setupTests();
                 await expect(
                     executeContractCallWithSigners(
                         safe,
@@ -681,7 +703,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should add all handlers in batch", async () => {
-                const { validator, safe, handler, mirror } = await setupTests();
+                const { user1, user2, validator, safe, handler, mirror } = await setupTests();
                 const safeAddress = await safe.getAddress();
 
                 // calculate the selector for each function
@@ -713,7 +735,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
         });
 
-        describe("removeSupportedInterfaceBatch(bytes4, bytes4[]", async () => {
+        describe("removeSupportedInterfaceBatch(bytes4, bytes4[]", () => {
             it("should revert if called by non-safe", async () => {
                 const { handler } = await setupTests();
                 await expect(handler.removeSupportedInterfaceBatch("0xdeadbeef", ["0xdeadbeef"])).to.be.revertedWith(
@@ -722,7 +744,7 @@ describe("ExtensibleFallbackHandler", async () => {
             });
 
             it("should remove all methods in a batch", async () => {
-                const { validator, safe, handler, mirror } = await setupTests();
+                const { user1, user2, validator, safe, handler, mirror } = await setupTests();
                 const safeAddress = await safe.getAddress();
 
                 // calculate the selector for each function

@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2024-10-23 15:00:06
-+++ Safe.sol	2024-10-23 15:04:05
+--- Safe.sol	2024-12-16 07:43:06
++++ Safe.sol	2025-01-13 11:58:17
 @@ -75,22 +75,24 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -30,7 +30,7 @@ diff -druN Safe.sol Safe.sol
          // setupOwners checks if the Threshold is already set, therefore preventing this method from being called more than once
          setupOwners(_owners, _threshold);
          if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
-@@ -386,9 +388,6 @@
+@@ -388,9 +390,6 @@
          return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
      }
  
@@ -40,7 +40,7 @@ diff -druN Safe.sol Safe.sol
      function getTransactionHash(
          address to,
          uint256 value,
-@@ -400,7 +399,9 @@
+@@ -402,7 +401,9 @@
          address gasToken,
          address refundReceiver,
          uint256 _nonce
@@ -50,10 +50,21 @@ diff -druN Safe.sol Safe.sol
 +
          bytes32 domainHash = domainSeparator();
  
-         // We opted out for using assembly code here, because the way Solidity compiler we use (0.7.6)
+         // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+@@ -452,7 +453,8 @@
+             // Store the domain separator
+             mstore(add(ptr, 32), domainHash)
+             // Calculate the hash
+-            txHash := keccak256(add(ptr, 30), 66)
++            //txHash := keccak256(add(ptr, 30), 66) // old
++            txHash := keccak256(add(ptr, 0), 128) // new
+         }
+         /* solhint-enable no-inline-assembly */
+     }
+
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2024-10-18 15:20:48
-+++ base/Executor.sol	2024-10-23 15:03:22
+--- base/Executor.sol	2024-12-16 07:43:06
++++ base/Executor.sol	2025-01-13 11:58:17
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -69,10 +80,23 @@ diff -druN base/Executor.sol base/Executor.sol
          } else {
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
+diff -druN base/FallbackManager.sol base/FallbackManager.sol
+--- base/FallbackManager.sol	2024-12-16 07:43:06
++++ base/FallbackManager.sol	2025-01-13 12:07:42
+@@ -63,7 +63,8 @@
+             // not going beyond the scratch space, etc)
+             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
+ 
+-            let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
++            // let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
++            let handler := and(0xffffffffffffffffffffffffffffffffffffffff, sload(FALLBACK_HANDLER_STORAGE_SLOT))
+ 
+             if iszero(handler) {
+                 return(0, 0)
 diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2024-10-18 15:20:48
-+++ interfaces/ISafe.sol	2024-10-23 15:03:22
-@@ -110,7 +110,7 @@
+--- interfaces/ISafe.sol	2024-12-16 07:43:06
++++ interfaces/ISafe.sol	2025-01-13 11:58:17
+@@ -113,7 +113,7 @@
       */
      function domainSeparator() external view returns (bytes32);
  
@@ -81,7 +105,7 @@ diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
       * @notice Returns transaction hash to be signed by owners.
       * @param to Destination address.
       * @param value Ether value.
-@@ -123,7 +123,6 @@
+@@ -126,7 +126,6 @@
       * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
       * @param _nonce Transaction nonce.
       * @return Transaction hash.
@@ -89,7 +113,7 @@ diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
      function getTransactionHash(
          address to,
          uint256 value,
-@@ -136,6 +135,8 @@
+@@ -139,6 +138,8 @@
          address refundReceiver,
          uint256 _nonce
      ) external view returns (bytes32);

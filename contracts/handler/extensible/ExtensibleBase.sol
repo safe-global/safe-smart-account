@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Safe} from "../../Safe.sol";
+import {ISafe} from "../../interfaces/ISafe.sol";
 import {HandlerContext} from "../HandlerContext.sol";
 import {MarshalLib} from "./MarshalLib.sol";
 
 interface IFallbackMethod {
-    function handle(Safe safe, address sender, uint256 value, bytes calldata data) external returns (bytes memory result);
+    function handle(ISafe safe, address sender, uint256 value, bytes calldata data) external returns (bytes memory result);
 }
 
 interface IStaticFallbackMethod {
-    function handle(Safe safe, address sender, uint256 value, bytes calldata data) external view returns (bytes memory result);
+    function handle(ISafe safe, address sender, uint256 value, bytes calldata data) external view returns (bytes memory result);
 }
 
 /**
@@ -20,9 +20,9 @@ interface IStaticFallbackMethod {
  */
 abstract contract ExtensibleBase is HandlerContext {
     // --- events ---
-    event AddedSafeMethod(Safe indexed safe, bytes4 selector, bytes32 method);
-    event ChangedSafeMethod(Safe indexed safe, bytes4 selector, bytes32 oldMethod, bytes32 newMethod);
-    event RemovedSafeMethod(Safe indexed safe, bytes4 selector);
+    event AddedSafeMethod(ISafe indexed safe, bytes4 selector, bytes32 method);
+    event ChangedSafeMethod(ISafe indexed safe, bytes4 selector, bytes32 oldMethod, bytes32 newMethod);
+    event RemovedSafeMethod(ISafe indexed safe, bytes4 selector);
 
     // --- storage ---
 
@@ -31,7 +31,7 @@ abstract contract ExtensibleBase is HandlerContext {
     // - The first byte is 0x00 if the method is static and 0x01 if the method is not static
     // - The last 20 bytes are the address of the handler contract
     // The method is encoded / decoded using the MarshalLib
-    mapping(Safe => mapping(bytes4 => bytes32)) public safeMethods;
+    mapping(ISafe => mapping(bytes4 => bytes32)) public safeMethods;
 
     // --- modifiers ---
     modifier onlySelf() {
@@ -44,16 +44,17 @@ abstract contract ExtensibleBase is HandlerContext {
 
     // --- internal ---
 
-    function _setSafeMethod(Safe safe, bytes4 selector, bytes32 newMethod) internal {
+    function _setSafeMethod(ISafe safe, bytes4 selector, bytes32 newMethod) internal {
         (, address newHandler) = MarshalLib.decode(newMethod);
-        bytes32 oldMethod = safeMethods[safe][selector];
+        mapping(bytes4 => bytes32) storage safeMethod = safeMethods[safe];
+        bytes32 oldMethod = safeMethod[selector];
         (, address oldHandler) = MarshalLib.decode(oldMethod);
 
         if (address(newHandler) == address(0) && address(oldHandler) != address(0)) {
-            delete safeMethods[safe][selector];
+            delete safeMethod[selector];
             emit RemovedSafeMethod(safe, selector);
         } else {
-            safeMethods[safe][selector] = newMethod;
+            safeMethod[selector] = newMethod;
             if (address(oldHandler) == address(0)) {
                 emit AddedSafeMethod(safe, selector, newMethod);
             } else {
@@ -67,8 +68,8 @@ abstract contract ExtensibleBase is HandlerContext {
      * @return safe The safe whose FallbackManager is making this call
      * @return sender The original `msg.sender` (as received by the FallbackManager)
      */
-    function _getContext() internal view returns (Safe safe, address sender) {
-        safe = Safe(payable(_manager()));
+    function _getContext() internal view returns (ISafe safe, address sender) {
+        safe = ISafe(payable(_manager()));
         sender = _msgSender();
     }
 
@@ -79,7 +80,7 @@ abstract contract ExtensibleBase is HandlerContext {
      * @return isStatic Whether the method is static (`view`) or not
      * @return handler the address of the handler contract
      */
-    function _getContextAndHandler() internal view returns (Safe safe, address sender, bool isStatic, address handler) {
+    function _getContextAndHandler() internal view returns (ISafe safe, address sender, bool isStatic, address handler) {
         (safe, sender) = _getContext();
         (isStatic, handler) = MarshalLib.decode(safeMethods[safe][msg.sig]);
     }

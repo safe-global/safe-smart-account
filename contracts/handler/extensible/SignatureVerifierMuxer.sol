@@ -2,7 +2,7 @@
 // solhint-disable one-contract-per-file
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Safe, ExtensibleBase} from "./ExtensibleBase.sol";
+import {ISafe, ExtensibleBase} from "./ExtensibleBase.sol";
 
 interface ERC1271 {
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4 magicValue);
@@ -28,7 +28,7 @@ interface ISafeSignatureVerifier {
      * @return magic The magic value that should be returned if the signature is valid (0x1626ba7e)
      */
     function isValidSafeSignature(
-        Safe safe,
+        ISafe safe,
         address sender,
         bytes32 _hash,
         bytes32 domainSeparator,
@@ -39,7 +39,7 @@ interface ISafeSignatureVerifier {
 }
 
 interface ISignatureVerifierMuxer {
-    function domainVerifiers(Safe safe, bytes32 domainSeparator) external view returns (ISafeSignatureVerifier);
+    function domainVerifiers(ISafe safe, bytes32 domainSeparator) external view returns (ISafeSignatureVerifier);
 
     function setDomainVerifier(bytes32 domainSeparator, ISafeSignatureVerifier verifier) external;
 }
@@ -61,17 +61,17 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     bytes4 private constant SAFE_SIGNATURE_MAGIC_VALUE = 0x5fd7e97d;
 
     // --- storage ---
-    mapping(Safe => mapping(bytes32 => ISafeSignatureVerifier)) public override domainVerifiers;
+    mapping(ISafe => mapping(bytes32 => ISafeSignatureVerifier)) public override domainVerifiers;
 
     // --- events ---
-    event AddedDomainVerifier(Safe indexed safe, bytes32 domainSeparator, ISafeSignatureVerifier verifier);
+    event AddedDomainVerifier(ISafe indexed safe, bytes32 domainSeparator, ISafeSignatureVerifier verifier);
     event ChangedDomainVerifier(
-        Safe indexed safe,
+        ISafe indexed safe,
         bytes32 domainSeparator,
         ISafeSignatureVerifier oldVerifier,
         ISafeSignatureVerifier newVerifier
     );
-    event RemovedDomainVerifier(Safe indexed safe, bytes32 domainSeparator);
+    event RemovedDomainVerifier(ISafe indexed safe, bytes32 domainSeparator);
 
     /**
      * Setter for the signature muxer
@@ -79,7 +79,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
      * @param newVerifier A contract that implements `ISafeSignatureVerifier`
      */
     function setDomainVerifier(bytes32 domainSeparator, ISafeSignatureVerifier newVerifier) public override onlySelf {
-        Safe safe = Safe(payable(_msgSender()));
+        ISafe safe = ISafe(payable(_msgSender()));
         ISafeSignatureVerifier oldVerifier = domainVerifiers[safe][domainSeparator];
         if (address(newVerifier) == address(0) && address(oldVerifier) != address(0)) {
             delete domainVerifiers[safe][domainSeparator];
@@ -102,27 +102,29 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
      * @return magic Standardised ERC1271 return value
      */
     function isValidSignature(bytes32 _hash, bytes calldata signature) external view override returns (bytes4 magic) {
-        (Safe safe, address sender) = _getContext();
+        (ISafe safe, address sender) = _getContext();
 
         // Check if the signature is for an `ISafeSignatureVerifier` and if it is valid for the domain.
         if (signature.length >= 4) {
             bytes4 sigSelector;
-            // solhint-disable-next-line no-inline-assembly
+            /* solhint-disable no-inline-assembly */
+            /// @solidity memory-safe-assembly
             assembly {
-                sigSelector := shl(224, shr(224, calldataload(signature.offset)))
+                sigSelector := calldataload(signature.offset)
             }
+            /* solhint-enable no-inline-assembly */
 
             // Guard against short signatures that would cause abi.decode to revert.
             if (sigSelector == SAFE_SIGNATURE_MAGIC_VALUE && signature.length >= 68) {
                 // Signature is for an `ISafeSignatureVerifier` - decode the signature.
                 // Layout of the `signature`:
-                // 0x00 - 0x04: selector
-                // 0x04 - 0x36: domainSeparator
-                // 0x36 - 0x68: typeHash
-                // 0x68 - 0x6C: encodeData length
-                // 0x6C - 0x6C + encodeData length: encodeData
-                // 0x6C + encodeData length - 0x6C + encodeData length + 0x20: payload length
-                // 0x6C + encodeData length + 0x20 - end: payload
+                // 0x00 to 0x04: selector
+                // 0x04 to 0x36: domainSeparator
+                // 0x36 to 0x68: typeHash
+                // 0x68 to 0x88: encodeData length
+                // 0x88 to 0x88 + encodeData length: encodeData
+                // 0x88 + encodeData length to 0x88 + encodeData length + 0x20: payload length
+                // 0x88 + encodeData length + 0x20 to end: payload
                 //
                 // Get the domainSeparator from the signature.
                 (bytes32 domainSeparator, bytes32 typeHash) = abi.decode(signature[4:68], (bytes32, bytes32));
@@ -151,7 +153,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
      * @param _hash Hash of the data that is signed
      * @param signature The signature to be verified
      */
-    function defaultIsValidSignature(Safe safe, bytes32 _hash, bytes memory signature) internal view returns (bytes4 magic) {
+    function defaultIsValidSignature(ISafe safe, bytes32 _hash, bytes memory signature) internal view returns (bytes4 magic) {
         bytes memory messageData = EIP712.encodeMessageData(
             safe.domainSeparator(),
             SAFE_MSG_TYPEHASH,
@@ -163,7 +165,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
             require(safe.signedMessages(messageHash) != 0, "Hash not approved");
         } else {
             // threshold signatures
-            safe.checkSignatures(messageHash, messageData, signature);
+            safe.checkSignatures(address(0), messageHash, signature);
         }
         magic = ERC1271.isValidSignature.selector;
     }

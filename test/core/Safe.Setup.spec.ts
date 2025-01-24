@@ -211,7 +211,7 @@ describe("Safe", () => {
             await expect(template.setup([], 0, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero)).to.be.revertedWith("GS202");
         });
 
-        it("should set fallback handler and call sub inititalizer", async () => {
+        it("should set fallback handler and call sub initializer", async () => {
             const {
                 template,
                 signers: [user1, user2, user3],
@@ -231,14 +231,14 @@ describe("Safe", () => {
                     /* solhint-enable no-inline-assembly */
                 }
             }`;
-            const testIntializer = await deployContractFromSource(user1, source);
-            const testIntializerAddress = await testIntializer.getAddress();
-            const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"]);
+            const testInitializer = await deployContractFromSource(user1, source);
+            const testInitializerAddress = await testInitializer.getAddress();
+            const initData = testInitializer.interface.encodeFunctionData("init", ["0x42baddad"]);
             await expect(
                 template.setup(
                     [user1.address, user2.address, user3.address],
                     2,
-                    testIntializerAddress,
+                    testInitializerAddress,
                     initData,
                     AddressOne,
                     AddressZero,
@@ -247,7 +247,7 @@ describe("Safe", () => {
                 ),
             )
                 .to.emit(template, "SafeSetup")
-                .withArgs(safeMsgSender, [user1.address, user2.address, user3.address], 2, testIntializerAddress, AddressOne);
+                .withArgs(safeMsgSender, [user1.address, user2.address, user3.address], 2, testInitializerAddress, AddressOne);
             await expect(await template.domainSeparator()).to.be.eq(calculateSafeDomainSeparator(templateAddress, await chainId()));
             await expect(await template.getOwners()).to.be.deep.eq([user1.address, user2.address, user3.address]);
             await expect(await template.getThreshold()).to.eq(2n);
@@ -272,14 +272,14 @@ describe("Safe", () => {
                     require(false, "Computer says nah");
                 }
             }`;
-            const testIntializer = await deployContractFromSource(user1, source);
-            const testIntializerAddress = await testIntializer.getAddress();
-            const initData = testIntializer.interface.encodeFunctionData("init", ["0x42baddad"]);
+            const testInitializer = await deployContractFromSource(user1, source);
+            const testInitializerAddress = await testInitializer.getAddress();
+            const initData = testInitializer.interface.encodeFunctionData("init", ["0x42baddad"]);
             await expect(
                 template.setup(
                     [user1.address, user2.address, user3.address],
                     2,
-                    testIntializerAddress,
+                    testInitializerAddress,
                     initData,
                     AddressZero,
                     AddressZero,

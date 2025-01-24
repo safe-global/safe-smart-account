@@ -18,7 +18,7 @@ methods {
     function execTransactionFromModule(address,uint256,bytes,Enum.Operation) external returns (bool);
     function execTransaction(address,uint256,bytes,Enum.Operation,uint256,uint256,uint256,address,address,bytes) external returns (bool);
 
-    function checkSignatures(bytes32, bytes memory) internal => NONDET;
+    function checkSignatures(address, bytes32, bytes memory) internal => NONDET;
 }
 
 definition reachableOnly(method f) returns bool =
@@ -130,21 +130,6 @@ rule setupCorrectlyConfiguresSafe(
     assert isOwner(owners[index]), "Owners not set correctly";
 }
 
-
-rule guardAddressChange(method f) filtered {
-    f -> f.selector != sig:simulateAndRevert(address,bytes).selector &&
-         f.selector != sig:getStorageAt(uint256,uint256).selector
-} {
-    address guardBefore = getSafeGuard();
-
-    calldataarg args; env e;
-    f(e, args);
-
-    address guardAfter = getSafeGuard();
-
-    assert guardBefore != guardAfter =>
-        f.selector == sig:setGuard(address).selector;
-}
 
 invariant noSignedMessages(bytes32 message)
     signedMessages(message) == 0

@@ -185,7 +185,7 @@ contract SafeToL2Migration is SafeStorage {
         while (currentOwner != sentinelOwners) {
             array[index] = currentOwner;
             currentOwner = owners[currentOwner];
-            index++;
+            ++index;
         }
         return array;
     }

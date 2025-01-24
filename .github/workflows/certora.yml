@@ -15,7 +15,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                rule: ["owner", "safe", "module", "nativeTokenRefund", "signatures", "safeMigration", "safeToL2Migration", "safeToL2Setup"]
+                rule: ["execute", "extensible", "fallback", "guards", "hash", "module", "nativeTokenRefund", "owner", "safe", "safeMigration", "safeToL2Migration", "safeToL2Setup", "setup", "signatures"]
 
         steps:
             - uses: actions/checkout@v4

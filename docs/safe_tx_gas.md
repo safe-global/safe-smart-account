@@ -30,7 +30,7 @@ If `gasPrice` is set to `0` then the Safe Smart Account will **not** issue a ref
 
 Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, based on this the Safe Smart Account will send along all available case when no refund is used.
 
-Before the execution the Safe Smart Account always check if enough gas is available to satisfy the `safeTxGas`. This can be seen in [`Safe.sol`](hhttps://github.com/safe-global/safe-smart-account/blob/main/contracts/Safe.sol#L168-L170):
+Before the execution the Safe Smart Account always check if enough gas is available to satisfy the `safeTxGas`. This can be seen in [`Safe.sol`](https://github.com/safe-global/safe-smart-account/blob/main/contracts/Safe.sol#L168-L170):
 
 ```js
 require(gasleft() >=
@@ -56,9 +56,9 @@ if (!success && safeTxGas == 0 && gasPrice == 0) {
     /* solhint-disable no-inline-assembly */
     /// @solidity memory-safe-assembly
     assembly {
-        let p := mload(0x40)
-        returndatacopy(p, 0, returndatasize())
-        revert(p, returndatasize())
+        let ptr := mload(0x40)
+        returndatacopy(ptr, 0, returndatasize())
+        revert(ptr, returndatasize())
     }
     /* solhint-enable no-inline-assembly */
 }

@@ -17,7 +17,7 @@ assignees: ''
 
 ## Description
 
-Please describe considely the bug you have found, and what you expect instead.
+Please describe concisely the bug you have found, and what you expect instead.
 
 ## Environment
 

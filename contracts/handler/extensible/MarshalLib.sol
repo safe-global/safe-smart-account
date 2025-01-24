@@ -33,12 +33,14 @@ library MarshalLib {
      * @return handler The address of the handler contract implementing the `IFallbackMethod` or `IStaticFallbackMethod` interface
      */
     function decode(bytes32 data) internal pure returns (bool isStatic, address handler) {
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             // set isStatic to true if the left-most byte of the data is 0x00
             isStatic := iszero(shr(248, data))
-            handler := shr(96, shl(96, data))
+            handler := and(data, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
         }
+        /* solhint-enable no-inline-assembly */
     }
 
     /**
@@ -49,12 +51,14 @@ library MarshalLib {
      * @return handler The address of the handler contract implementing the `IFallbackMethod` or `IStaticFallbackMethod` interface
      */
     function decodeWithSelector(bytes32 data) internal pure returns (bool isStatic, bytes4 selector, address handler) {
-        // solhint-disable-next-line no-inline-assembly
+        /* solhint-disable no-inline-assembly */
+        /// @solidity memory-safe-assembly
         assembly {
             // set isStatic to true if the left-most byte of the data is 0x00
             isStatic := iszero(shr(248, data))
-            handler := shr(96, shl(96, data))
+            handler := and(data, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
             selector := shl(168, shr(160, data))
         }
+        /* solhint-enable no-inline-assembly */
     }
 }
