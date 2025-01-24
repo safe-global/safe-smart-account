@@ -1,6 +1,9 @@
 ---
 name: Bug report
 about: Bug report about the Safe smart contracts
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
