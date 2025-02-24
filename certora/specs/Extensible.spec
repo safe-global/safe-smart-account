@@ -1,4 +1,4 @@
-/* A specification for the exstensible fallback handler */
+/* A specification for the extensible fallback handler */
 
 using ExtensibleFallbackHandlerHarness as fallbackHandler;
 using DummyHandler as dummyHandler;
