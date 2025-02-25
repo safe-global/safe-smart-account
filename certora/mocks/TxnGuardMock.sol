@@ -46,7 +46,7 @@ contract TxnGuardMock is ITransactionGuard {
         bytes memory signatures,
         address msgSender
     ) external override {
-        // updates transaction checked
+        // updates the transaction as checked
         preCheckedTransactions = true;
     }
 
@@ -57,7 +57,7 @@ contract TxnGuardMock is ITransactionGuard {
      * @param success The status of the transaction execution.
      */
     function checkAfterExecution(bytes32 hash, bool success) external override {
-        // updates transaction checked
+        // updates the transaction as checked
         postCheckedTransactions = true ;
     }
 

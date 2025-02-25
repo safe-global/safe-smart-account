@@ -38,7 +38,7 @@ contract ModuleGuardMockDuplicate is IModuleGuard {
         Enum.Operation operation,
         address module
     ) external override returns (bytes32 moduleTxHash) {
-        // updates transaction checked
+        // updates the transaction as checked
         preCheckedTransactions = true ;
         // if it passes, it returns a string of bytes
         return bytes32(0);
