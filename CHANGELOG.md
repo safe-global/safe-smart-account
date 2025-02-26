@@ -475,7 +475,7 @@ The following libraries have been marked as production ready.
 
 #### SignMessageLib
 
-File: [`contracts/libraries/SignMessage.sol`](https://github.com/safe-global/safe-smart-account/blob/e57df14ea96dc7dabf93f041c7531f2ab6755c76/contracts/libraries/SignMessage.sol)
+File: [`contracts/libraries/SignMessage.sol`](https://github.com/safe-global/safe-smart-account/blob/e57df14ea96dc7dabf93f041c7531f2ab6755c76/contracts/libraries/SignMessageLib.sol)
 
 Expected behaviour:
 
@@ -694,7 +694,7 @@ This transaction guard can be used to log more details about a transaction. This
 
 #### Add ReentrancyTransactionGuard
 
-File: [`contracts/examples/guards/ReentrancyTransactionGuard.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/ReentrancyTransactionGuard.sol)
+File: [`contracts/examples/guards/ReentrancyTransactionGuard.sol`](https://github.com/safe-global/safe-smart-account/blob/ad6c7355d5bdf4f7fa348fbfcb9f07431769a3c9/contracts/examples/guards/ReentrencyTransactionGuard.sol)
 
 Note: **This contract is meant as an example to demonstrate how to facilitate a guard. This should not be used in production without further checks.**
 
