@@ -12,7 +12,7 @@ Usage
 ### Install requirements with npm:
 
 ```bash
-npm i
+sudo npm i
 ```
 
 ### Testing
