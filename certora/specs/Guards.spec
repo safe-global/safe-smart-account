@@ -111,7 +111,7 @@ rule setGetCorrespondenceGuard(address guard) {
     assert guard == gotGuard;
 }
 
-/// @dev set-get correspodnence for module guard
+/// @dev set-get correspondence for module guard
 rule setGetCorrespondenceModuleGuard(address guard) {
     env e;
     setModuleGuard(e,guard);
