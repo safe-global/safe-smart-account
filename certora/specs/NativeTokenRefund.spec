@@ -37,7 +37,7 @@ rule nativeTokenRefundIsSentToRefundReceiver(
     // gas refund parameters must be set
     require baseGas > 0 && gasPrice > 0;
 
-    // the refund receiver must not be zero, because in such a case tx.origin will be used and it'll come up with countexamples related to overflow
+    // the refund receiver must not be zero, because in such a case tx.origin will be used and it'll come up with counterexamples related to overflow
     // and adding pre-requirements is tricky
     // also, it shouldn't be the safe itself 
     require refundReceiver != 0 && refundReceiver != currentContract;
