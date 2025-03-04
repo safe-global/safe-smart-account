@@ -234,7 +234,7 @@ rule moduleOnlyAddedThroughEnableModule(method f, address module) filtered {
 }
 
 
-rule onlyModuleCanExecuteModuleThransactions(
+rule onlyModuleCanExecuteModuleTransactions(
     address to,
     uint256 value,
     bytes data,
@@ -246,7 +246,7 @@ rule onlyModuleCanExecuteModuleThransactions(
     assert !lastReverted => getModule(e.msg.sender) != 0, "Only modules can execute module transactions";
 }
 
-rule onlyModuleCanExecuteModuleThransactionsWithReturnData(
+rule onlyModuleCanExecuteModuleTransactionsWithReturnData(
     address to,
     uint256 value,
     bytes data,
