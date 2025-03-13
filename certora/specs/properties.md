@@ -17,7 +17,7 @@ The categories are based on Certora's workshop [notes](https://github.com/Certor
    The most powerful type of properties covering the entire system. E.g., for any given operation, Safe threshold must remain lower or equal to the number of owners.
 
 5. Unit test
-   Such properties target specific function individually to verify their correctness. E.g., verify that a specific function can only be called by a specific address.
+   Such properties target specific functions individually to verify their correctness. E.g., verify that a specific function can only be called by a specific address.
 
 6. Risk assessment
    Such properties verify that worst cases that can happen to the system are handled correctly. E.g., verify that a transaction cannot be replayed.
