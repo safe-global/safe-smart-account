@@ -76,7 +76,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
             // Then the address without padding is stored right after the calldata
             mstore(add(ptr, calldatasize()), shl(96, caller()))
 
-            // Add 20 bytes for the address appended add the end
+            // Add 20 bytes for the address appended at the end
             let success := call(gas(), handler, 0, ptr, add(calldatasize(), 20), 0, 0)
 
             returndatacopy(ptr, 0, returndatasize())
