@@ -49,7 +49,7 @@ To make it easier to set the `safeTxGas` value a change has been made with the 1
 
 **When `safeTxGas` is set to `0`, the Safe contract will revert if the internal Safe transaction fails** (see [#274](https://github.com/safe-global/safe-smart-account/issues/274))
 
-That means if `safeTxGas` is set to `0` the Safe contract sends along all the available gas when performing the internal Safe transaction. If that transaction fails the Safe will revert and therefore also undo all State changes. This can be seen in [`Safe.sol`](https://github.com/safe-global/safe-smart-account/blob/c85741a6cda020cce3bc523c169909318717736f/contracts/Safe.sol#L179-L186):
+That means if `safeTxGas` is set to `0` the Safe contract sends along all the available gas when performing the internal Safe transaction. If that transaction fails the Safe will revert and therefore also undo all State changes. This can be seen in [`Safe.sol`](https://github.com/safe-global/safe-smart-account/blob/c85741a6cda020cce3bc523c169909318717736f/contracts/Safe.sol#L179-L188):
 
 ```js
 if (!success && safeTxGas == 0 && gasPrice == 0) {
