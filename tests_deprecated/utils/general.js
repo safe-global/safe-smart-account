@@ -14,7 +14,7 @@ function currentTimeNs() {
     return hrTime[0] * 1000000000 + hrTime[1]
 }
 
-function web3ContactFactory(web3Contract) {
+function web3ContractFactory(web3Contract) {
     return {
         at: async (address) => {
             assert.ok(address != null, "Address is required to create a contract instance")
@@ -167,7 +167,7 @@ Object.assign(exports, {
     Address0,
     formatAddress,
     formatAddresses,
-    web3ContactFactory,
+    web3ContractFactory,
     currentTimeNs,
     compile,
     deployContract,
