@@ -31,11 +31,11 @@ abstract contract StorageAccessible {
 
     /**
      * @dev Performs a delegatecall on a targetContract in the context of self.
-     * Internally reverts execution to avoid side effects (making it static).
+     * Internally reverts execution to avoid side effects (making it effectively static).
      *
-     * This method reverts with data equal to `abi.encode(bool(success), bytes(response))`.
+     * This method reverts with data equal to `abi.encodePacked(uint256(success), uint256(response.length), bytes(response))`.
      * Specifically, the `returndata` after a call to this method will be:
-     * `success:bool || response.length:uint256 || response:bytes`.
+     * `success:uint256 || response.length:uint256 || response:bytes`.
      *
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
