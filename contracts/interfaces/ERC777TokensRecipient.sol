@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /**
  * @title ERC777TokensRecipient
  * @dev Interface for contracts that will be called with the ERC777 token's `tokensReceived` method.
- * The contract receiving the tokens must implement this interface in order to receive the tokens.
+ * The contract receiving the tokens must implement this interface to receive the tokens.
  */
 interface ERC777TokensRecipient {
     /**
