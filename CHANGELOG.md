@@ -14,30 +14,30 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `Safe` - TBD
--   `SafeL2` - TBD
+- `Safe` - TBD
+- `SafeL2` - TBD
 
 ### Factory contracts
 
--   `SafeProxyFactory` - TBD
+- `SafeProxyFactory` - TBD
 
 ### Handler contracts
 
--   `TokenCallbackHandler` - TBD
--   `CompatibilityFallbackHandler` - TBD
+- `TokenCallbackHandler` - TBD
+- `CompatibilityFallbackHandler` - TBD
 
 ### Lib contracts
 
--   `MultiSend` - TBD
--   `MultiSendCallOnly` - TBD
--   `CreateCall` - TBD
--   `SignMessageLib` - TBD
--   `SafeToL2Migration` - TBD
--   `SafeMigration` - TBD (Target Safe version: TBD)
+- `MultiSend` - TBD
+- `MultiSendCallOnly` - TBD
+- `CreateCall` - TBD
+- `SignMessageLib` - TBD
+- `SafeToL2Migration` - TBD
+- `SafeMigration` - TBD (Target Safe version: TBD)
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` - TBD
+- `SimulateTxAccessor` - TBD
 
 # Version 1.5.0
 
@@ -55,8 +55,8 @@ ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-
 
 | Contract Name | EVM                                          | ZKSync                                       |
 | ------------- | -------------------------------------------- | -------------------------------------------- |
-| `Safe` | `0x85537a85f40c8B23e03bf95087f00b6bA1c11b3D` | `0xb55299340729B4F47ac2f00c955E7D7592fA76FC` |
-| `SafeL2` | `0x0859B89940E228513a8774079cB098c9ab40937D` | `0x1373d363aE75d6854e646cdFc475833010189f9a` |
+| `Safe`        | `0x85537a85f40c8B23e03bf95087f00b6bA1c11b3D` | `0xb55299340729B4F47ac2f00c955E7D7592fA76FC` |
+| `SafeL2`      | `0x0859B89940E228513a8774079cB098c9ab40937D` | `0x1373d363aE75d6854e646cdFc475833010189f9a` |
 
 ### Factory contracts
 
@@ -68,20 +68,20 @@ ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-
 
 | Contract Name                  | EVM                                          | ZKSync                                       |
 | ------------------------------ | -------------------------------------------- | -------------------------------------------- |
-| `TokenCallbackHandler` | `0x6Fe1aCEb024F6a914bFdca91637A87b5a614B2a0` | `0xAe40E8aE494AC3E5939f8462632927815d19Ad86` |
+| `TokenCallbackHandler`         | `0x6Fe1aCEb024F6a914bFdca91637A87b5a614B2a0` | `0xAe40E8aE494AC3E5939f8462632927815d19Ad86` |
 | `CompatibilityFallbackHandler` | `0x0c5c38DF451c7D467B1FeC87ba942115fc1195A6` | `0xC2f14b6a994D33de7CdaF8D0508408b9Ad2B7c37` |
-| `ExtensibleFallbackHandler` | `0x9f80A1Da6EDF0B078910519c2cF5bFb22a7A15DA` | `0xC6e7B4A23308ac2f4D408CFeFbF811a3a6dd8125` |
+| `ExtensibleFallbackHandler`    | `0x9f80A1Da6EDF0B078910519c2cF5bFb22a7A15DA` | `0xC6e7B4A23308ac2f4D408CFeFbF811a3a6dd8125` |
 
 ### Lib contracts
 
 | Contract Name                                   | EVM                                          | ZKSync                                       |
 | ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| `MultiSend` | `0x218543288004CD07832472D464648173c77D7eB7` | `0x2685Bd87C80329e32425Dc985E9a56796d67dC2E` |
-| `MultiSendCallOnly` | `0x3EbB62B65423a33a846416ff7Ce9BE6f9b86b3B4` | `0x88A98671029E01bBfdc569Faebff3b9806d43a55` |
-| `CreateCall` | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` | `0x73499857FFFA54F160B05f56E96ca7967C1dFB5c` |
-| `SignMessageLib` | `0x9AA451710fab48E673A413039C92A219fB016347` | `0x8344F105bA932c800B1ca3C298ca59791FE24790` |
-| `SafeToL2Setup` | `0x5941bAEf7a31933bF00B7f5Cc0Ae6abc6E41e3f0` | `0x4A56babDeD9C7bB8E7b88ac7e4E7d8BD20098167` |
-| `SafeToL2Migration` | `0xCB87AAF147299f68D60eF5C6d1c980680660C10C` | `0x6C84D95826E0C1Ec634eC8B0E2D83aa271a9944C` |
+| `MultiSend`                                     | `0x218543288004CD07832472D464648173c77D7eB7` | `0x2685Bd87C80329e32425Dc985E9a56796d67dC2E` |
+| `MultiSendCallOnly`                             | `0x3EbB62B65423a33a846416ff7Ce9BE6f9b86b3B4` | `0x88A98671029E01bBfdc569Faebff3b9806d43a55` |
+| `CreateCall`                                    | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` | `0x73499857FFFA54F160B05f56E96ca7967C1dFB5c` |
+| `SignMessageLib`                                | `0x9AA451710fab48E673A413039C92A219fB016347` | `0x8344F105bA932c800B1ca3C298ca59791FE24790` |
+| `SafeToL2Setup`                                 | `0x5941bAEf7a31933bF00B7f5Cc0Ae6abc6E41e3f0` | `0x4A56babDeD9C7bB8E7b88ac7e4E7d8BD20098167` |
+| `SafeToL2Migration`                             | `0xCB87AAF147299f68D60eF5C6d1c980680660C10C` | `0x6C84D95826E0C1Ec634eC8B0E2D83aa271a9944C` |
 | `SafeMigration` (Target Safe version: `v1.5.0`) | `0xb1a81E7ff1c67044897110207cd829E117F585Cf` | `0xd1A6304294915DBE9558A4D4623690440cD95fd3` |
 
 ### Storage reader contracts
@@ -178,8 +178,8 @@ ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-
 
 | Contract Name | EVM                                          | ZKSync                                       |
 | ------------- | -------------------------------------------- | -------------------------------------------- |
-| `Safe` | `0x41675C099F32341bf84BFc5382aF534df5C7461a` | `0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa` |
-| `SafeL2` | `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762` | `0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380` |
+| `Safe`        | `0x41675C099F32341bf84BFc5382aF534df5C7461a` | `0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa` |
+| `SafeL2`      | `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762` | `0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380` |
 
 ### Factory contracts
 
@@ -191,20 +191,20 @@ ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-
 
 | Contract Name                  | EVM                                          | ZKSync                                       |
 | ------------------------------ | -------------------------------------------- | -------------------------------------------- |
-| `TokenCallbackHandler` | `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562` | `0xd508168Db968De1EBc6f288322e6C820137eeF79` |
+| `TokenCallbackHandler`         | `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562` | `0xd508168Db968De1EBc6f288322e6C820137eeF79` |
 | `CompatibilityFallbackHandler` | `0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99` | `0x9301E98DD367135f21bdF66f342A249c9D5F9069` |
 
 ### Lib contracts
 
 | Contract Name                                   | EVM                                          | ZKSync                                       |
 | ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| `MultiSend` | `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526` | `0x309D0B190FeCCa8e1D5D8309a16F7e3CB133E885` |
-| `MultiSendCallOnly` | `0x9641d764fc13c8B624c04430C7356C1C7C8102e2` | `0x0408EF011960d02349d50286D20531229BCef773` |
-| `CreateCall` | `0x9b35Af71d77eaf8d7e40252370304687390A1A52` | `0xAAA566Fe7978bB0fb0B5362B7ba23038f4428D8f` |
-| `SignMessageLib` | `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9` | `0xAca1ec0a1A575CDCCF1DC3d5d296202Eb6061888` |
+| `MultiSend`                                     | `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526` | `0x309D0B190FeCCa8e1D5D8309a16F7e3CB133E885` |
+| `MultiSendCallOnly`                             | `0x9641d764fc13c8B624c04430C7356C1C7C8102e2` | `0x0408EF011960d02349d50286D20531229BCef773` |
+| `CreateCall`                                    | `0x9b35Af71d77eaf8d7e40252370304687390A1A52` | `0xAAA566Fe7978bB0fb0B5362B7ba23038f4428D8f` |
+| `SignMessageLib`                                | `0xd53cd0aB83D845Ac265BE939c57F53AD838012c9` | `0xAca1ec0a1A575CDCCF1DC3d5d296202Eb6061888` |
 | `SafeMigration` (Target Safe version: `v1.4.1`) | `0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6` | `0x817756C6c555A94BCEE39eB5a102AbC1678b09A7` |
-| `SafeToL2Migration` | `0xfF83F6335d8930cBad1c0D439A841f01888D9f69` | `0xa26620d1f8f1a2433F0D25027F141aaCAFB3E590` |
-| `SafeToL2Setup` | `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54` | `0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39` |
+| `SafeToL2Migration`                             | `0xfF83F6335d8930cBad1c0D439A841f01888D9f69` | `0xa26620d1f8f1a2433F0D25027F141aaCAFB3E590` |
+| `SafeToL2Setup`                                 | `0xBD89A1CE4DDe368FFAB0eC35506eEcE0b1fFdc54` | `0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39` |
 
 ### Storage reader contracts
 
@@ -250,28 +250,28 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `Safe` at `0xc962E67D9490E154D81181879ddf4CD3b65D2132`
--   `SafeL2` at `0x1eb4681c549d995AbdC4aB189cAbb9f00B508cAb`
+- `Safe` at `0xc962E67D9490E154D81181879ddf4CD3b65D2132`
+- `SafeL2` at `0x1eb4681c549d995AbdC4aB189cAbb9f00B508cAb`
 
 ### Factory contracts
 
--   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+- `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
 
 ### Handler contracts
 
--   `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
--   `CompatibilityFallbackHandler` at `0x2a15DE4410d4c8af0A7b6c12803120f43C42B820`
+- `TokenCallbackHandler` at `0xeDCF620325E82e3B9836eaaeFdc4283E99Dd7562`
+- `CompatibilityFallbackHandler` at `0x2a15DE4410d4c8af0A7b6c12803120f43C42B820`
 
 ### Lib contracts
 
--   `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
--   `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
--   `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
--   `SignMessageLib` at `0x58FCe385Ed16beB4BCE49c8DF34c7d6975807520`
+- `MultiSend` at `0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526`
+- `MultiSendCallOnly` at `0x9641d764fc13c8B624c04430C7356C1C7C8102e2`
+- `CreateCall` at `0x9b35Af71d77eaf8d7e40252370304687390A1A52`
+- `SignMessageLib` at `0x58FCe385Ed16beB4BCE49c8DF34c7d6975807520`
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
+- `SimulateTxAccessor` at `0x3d4BA2E0884aa488718476ca2FB8Efc291A46199`
 
 ## Changes
 
@@ -409,55 +409,55 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
--   `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
+- `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
 
 ### Factory contracts
 
--   `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+- `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
 
 ### Handler contracts
 
--   `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
--   `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+- `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
+- `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
 
 ### Lib contracts
 
--   `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
--   `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
--   `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
--   `SignMessageLib` at `0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2`
+- `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
+- `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
+- `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+- `SignMessageLib` at `0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2`
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
+- `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
 
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
 ### Core contracts
 
--   `GnosisSafe` at `0x69f4D1788e39c87893C980c06EdF4b7f686e2938`
--   `GnosisSafeL2` at `0xfb1bffC9d739B8D520DaF37dF666da4C687191EA`
+- `GnosisSafe` at `0x69f4D1788e39c87893C980c06EdF4b7f686e2938`
+- `GnosisSafeL2` at `0xfb1bffC9d739B8D520DaF37dF666da4C687191EA`
 
 ### Factory contracts
 
--   `GnosisSafeProxyFactory` at `0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC`
+- `GnosisSafeProxyFactory` at `0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC`
 
 ### Handler contracts
 
--   `DefaultCallbackHandler` at `0x3d8E605B02032A941Cfe26897Ca94d77a5BC24b3`
--   `CompatibilityFallbackHandler` at `0x017062a1dE2FE6b99BE3d9d37841FeD19F573804`
+- `DefaultCallbackHandler` at `0x3d8E605B02032A941Cfe26897Ca94d77a5BC24b3`
+- `CompatibilityFallbackHandler` at `0x017062a1dE2FE6b99BE3d9d37841FeD19F573804`
 
 ### Lib contracts
 
--   `MultiSend` at `0x998739BFdAAdde7C933B942a68053933098f9EDa`
--   `MultiSendCallOnly` at `0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`
--   `CreateCall` at `0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d`
--   `SignMessageLib` at `0x98FFBBF51bb33A056B08ddf711f289936AafF717`
+- `MultiSend` at `0x998739BFdAAdde7C933B942a68053933098f9EDa`
+- `MultiSendCallOnly` at `0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`
+- `CreateCall` at `0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d`
+- `SignMessageLib` at `0x98FFBBF51bb33A056B08ddf711f289936AafF717`
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x727a77a074D1E6c4530e814F89E618a3298FC044`
+- `SimulateTxAccessor` at `0x727a77a074D1E6c4530e814F89E618a3298FC044`
 
 ## Changes
 
@@ -497,27 +497,27 @@ Solidity optimizer: `disabled`
 
 ### Core contracts
 
--   `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
--   `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
+- `GnosisSafe` at `0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552`
+- `GnosisSafeL2` at `0x3E5c63644E683549055b9Be8653de26E0B4CD36E`
 
 ### Factory contracts
 
--   `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
+- `GnosisSafeProxyFactory` at `0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2`
 
 ### Handler contracts
 
--   `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
--   `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
+- `DefaultCallbackHandler` at `0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd`
+- `CompatibilityFallbackHandler` at `0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4`
 
 ### Lib contracts
 
--   `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
--   `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
--   `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
+- `MultiSend` at `0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761`
+- `MultiSendCallOnly` at `0x40A2aCCbd92BCA938b02010E17A5b8929b49130D`
+- `CreateCall` at `0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4`
 
 ### Storage reader contracts
 
--   `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
+- `SimulateTxAccessor` at `0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da`
 
 ## Changes
 
