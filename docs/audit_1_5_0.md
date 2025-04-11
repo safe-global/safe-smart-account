@@ -2,7 +2,7 @@
 
 ##### Auditor
 
--   Certora (https://www.certora.com/)
+- Certora (https://www.certora.com/)
 
 ##### Notes
 
@@ -12,4 +12,4 @@ There has been few bugfixes and gas optimization based changes.
 
 ##### Files
 
--   [Final Audit Report 1.5.0](Safe_Audit_Report_1_5_0.pdf)
+- [Final Audit Report 1.5.0](Safe_Audit_Report_1_5_0.pdf)

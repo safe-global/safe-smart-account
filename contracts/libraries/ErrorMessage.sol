@@ -11,7 +11,7 @@ abstract contract ErrorMessage {
     /**
      * @notice Function which uses assembly to revert with the passed error message.
      * @param error The error string to revert with.
-     * @dev Currently it is expected that the `error` string is at max 5 bytes of length. Ex: "GSXXX"
+     * @dev Currently, the `error` string is expected to be at max 5 bytes of length. Ex: "GSXXX"
      */
     function revertWithError(bytes5 error) internal pure {
         /* solhint-disable no-inline-assembly */

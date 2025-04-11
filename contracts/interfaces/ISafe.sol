@@ -8,7 +8,7 @@ import {IModuleManager} from "./IModuleManager.sol";
 import {IOwnerManager} from "./IOwnerManager.sol";
 
 /**
- * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
+ * @title ISafe - A multi signature wallet interface with support for confirmations using signed messages based on EIP-712.
  * @author @safe-global/safe-protocol
  */
 interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManager {

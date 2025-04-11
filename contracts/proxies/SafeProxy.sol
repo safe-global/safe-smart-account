@@ -11,7 +11,7 @@ interface IProxy {
 }
 
 /**
- * @title SafeProxy - Generic proxy contract allows to execute all transactions applying the code of a master contract.
+ * @title SafeProxy - A generic proxy contract allows the execution of all transactions by applying the code of a master contract.
  * @author Stefan George - <stefan@gnosis.io>
  * @author Richard Meissner - <richard@gnosis.io>
  */

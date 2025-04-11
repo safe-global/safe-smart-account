@@ -14,7 +14,7 @@ The logic for this can be seen in [`Safe.sol`](https://github.com/safe-global/sa
 
 ```js
 if (gasPrice > 0) {
-  payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
+    payment = handlePayment(gasUsed, baseGas, gasPrice, gasToken, refundReceiver);
 }
 ```
 
@@ -33,8 +33,7 @@ Therefore it is not necessary to be as strict on the gas being passed along with
 Before the execution the Safe Smart Account always check if enough gas is available to satisfy the `safeTxGas`. This can be seen in [`Safe.sol`](https://github.com/safe-global/safe-smart-account/blob/c85741a6cda020cce3bc523c169909318717736f/contracts/Safe.sol#L168-L169):
 
 ```js
-require(gasleft() >=
-  ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
+require(gasleft() >= ((safeTxGas * 64) / 63).max(safeTxGas + 2500) + 500, "GS010");
 ```
 
 **Therefore the `safeTxGas` behaves like a "minimum" gas value, that needs to be available, when it is set to a value > 0**

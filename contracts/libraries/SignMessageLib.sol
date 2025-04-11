@@ -17,7 +17,7 @@ contract SignMessageLib is SafeStorage {
     /**
      * @notice Marks a message (`_data`) as signed.
      * @dev Can be verified using EIP-1271 validation method by passing the pre-image of the message hash and empty bytes as the signature.
-     * @param _data Arbitrary length data that should be marked as signed on the behalf of address(this).
+     * @param _data Arbitrary length data that should be marked as signed on behalf of the address(this).
      */
     function signMessage(bytes calldata _data) external {
         bytes32 msgHash = getMessageHash(_data);
