@@ -74,12 +74,12 @@ jobs:
               uses: coverallsapp/github-action@v2
               with:
                   parallel: true
-                  flag-name: run-$
+                  flag-name: run-${{ matrix.contract-name }}
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
     finish:
         runs-on: ubuntu-latest
-        needs: tests
+        needs: coverage
         if: ${{ always() }}
         steps:
             - name: Coveralls Finished
