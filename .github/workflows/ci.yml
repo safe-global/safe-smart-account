@@ -1,7 +1,7 @@
 name: safe-smart-account
 on: [push, pull_request]
 env:
-    NODE_VERSION: 20.16.0
+    NODE_VERSION: 22.14.0
 
 jobs:
     lint-solidity:
@@ -40,6 +40,18 @@ jobs:
             - run: npm ci
             - run: npm run build
             - run: npm run test
+
+    tests-zk:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+            - run: npm ci
+            - run: npm run build
+            - run: npm run test:zk
 
     coverage:
         runs-on: ubuntu-latest
