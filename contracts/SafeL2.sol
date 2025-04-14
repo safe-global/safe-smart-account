@@ -7,12 +7,29 @@ import {ModuleManager} from "./base/ModuleManager.sol";
 import {Safe, Enum} from "./Safe.sol";
 
 /**
- * @title SafeL2 - An implementation of the Safe contract that emits additional events on transaction executions.
- * @notice For a more complete description of the Safe contract, please refer to the main Safe contract `Safe.sol`.
+ * @title SafeL2
+ * @notice An implementation of the Safe contract that emits additional events on transaction executions.
+ * @dev This contracts allow indexing of Safe accounts even on chains without good tracing support, at the cost of addition gas for emitting the events.
+ *      For a more complete description of the Safe account, please refer to the main {Safe} contract.
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
 contract SafeL2 is Safe {
+    /**
+     * @notice Safe multi-signature transaction data.
+     * @param to Destination address of Safe transaction.
+     * @param value Native token value of Safe transaction.
+     * @param data Data payload of Safe transaction.
+     * @param operation Operation type of Safe transaction.
+     * @param safeTxGas Gas that should be used for the Safe transaction.
+     * @param baseGas Base gas costs that are independent of the transaction execution.
+     * @param gasPrice Gas price that should be used for the payment calculation.
+     * @param gasToken Token address (or 0 for the native token) that is used for the payment.
+     * @param refundReceiver Address of receiver of gas payment (or 0 for `tx.origin`).
+     * @param signatures Signature data for the executed transaction.
+     * @param additionalInfo Additional transaction data encoded as: `abi.encode(nonce, msg.sender, threshold)`.
+     *                       This is used in order to work around "stack too deep" Solidity errors.
+     */
     event SafeMultiSigTransaction(
         address to,
         uint256 value,
@@ -24,11 +41,17 @@ contract SafeL2 is Safe {
         address gasToken,
         address payable refundReceiver,
         bytes signatures,
-        // We combine nonce, sender and threshold into one to avoid stack too deep
-        // Dev note: additionalInfo should not contain `bytes`, as this complicates decoding
         bytes additionalInfo
     );
 
+    /**
+     * @notice Safe module transaction data.
+     * @param module Module that executed the transaction.
+     * @param to Destination address of the module transaction.
+     * @param value Ether value of the module transaction.
+     * @param data Data payload of the module transaction.
+     * @param operation Operation type of the module transaction.
+     */
     event SafeModuleTransaction(address module, address to, uint256 value, bytes data, Enum.Operation operation);
 
     /**

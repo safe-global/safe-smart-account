@@ -19,7 +19,7 @@ interface IModuleGuard is IERC165 {
      * @param data The transaction data.
      * @param operation The type of operation of the module transaction.
      * @param module The module involved in the transaction.
-     * @return moduleTxHash The hash of the module transaction.
+     * @return moduleTxHash A guard-specific module transaction hash. This value is passed to the matching {checkAfterModuleExecution} call.
      */
     function checkModuleTransaction(
         address to,
@@ -32,13 +32,19 @@ interface IModuleGuard is IERC165 {
     /**
      * @notice Checks after execution of module transaction.
      * @dev The function needs to implement a check after the execution of the module transaction.
-     * @param txHash The hash of the module transaction.
+     * @param txHash The guard-specific module transaction hash returned from the matching {checkModuleTransaction} call.
      * @param success The status of the module transaction execution.
      */
     function checkAfterModuleExecution(bytes32 txHash, bool success) external;
 }
 
+/**
+ * @title Base Module Guard
+ */
 abstract contract BaseModuleGuard is IModuleGuard {
+    /**
+     * @inheritdoc IERC165
+     */
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
             interfaceId == type(IModuleGuard).interfaceId || // 0x58401ed8
@@ -49,21 +55,31 @@ abstract contract BaseModuleGuard is IModuleGuard {
 /**
  * @title Module Manager - A contract managing Safe modules
  * @notice Modules are extensions with unlimited access to a Safe that can be added to a Safe by its owners.
-           ⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions, 
+           ⚠️⚠️⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
            so only trusted and audited modules should be added to a Safe. A malicious module can
-           completely takeover a Safe.
+           completely take over a Safe. ⚠️⚠️⚠️
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
 abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
-    // SENTINEL_MODULES is used to traverse `modules`, so that:
-    //      1. `modules[SENTINEL_MODULES]` contains the first module
-    //      2. `modules[last_module]` points back to SENTINEL_MODULES
+    /**
+     * @notice The sentinel module value in the {modules} linked list.
+     * @dev `SENTINEL_MODULES` is used to traverse {modules}, so that:
+     *      1. `modules[SENTINEL_MODULES]` contains the first module
+     *      2. `modules[last_module]` points back to `SENTINEL_MODULES`
+     */
     address internal constant SENTINEL_MODULES = address(0x1);
 
-    // keccak256("module_manager.module_guard.address")
+    /**
+     * @notice The storage slot used for storing the currently configured module guard.
+     * @dev Precomputed value of: `keccak256("module_manager.module_guard.address")`.
+     */
     bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
+    /**
+     * @notice The linked list of modules.
+     * @dev This mapping defines a linked list where while allowing for `O(1)` inclusion checks.
+     */
     mapping(address => address) internal modules;
 
     /**
@@ -85,7 +101,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     /**
      * @notice Runs pre-execution checks for module transactions if a guard is enabled.
      * @param to Target address of module transaction.
-     * @param value Ether value of module transaction.
+     * @param value Native token value of module transaction.
      * @param data Data payload of module transaction.
      * @param operation Operation type of module transaction.
      * @return guard Guard to be used for checking.
@@ -100,7 +116,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         onBeforeExecTransactionFromModule(to, value, data, operation);
         guard = getModuleGuard();
 
-        // Only whitelisted modules are allowed.
+        // Only allow-listed modules are allowed.
         require(msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0), "GS104");
 
         if (guard != address(0)) {
@@ -110,10 +126,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
 
     /**
      * @notice Runs post-execution checks for module transactions if a guard is enabled.
+     * @dev Emits event based on module transaction success.
+     * @param guard Guard to be used for checking.
      * @param guardHash Hash returned from the guard during pre execution check.
      * @param success Boolean flag indicating if the call succeeded.
-     * @param guard Guard to be used for checking.
-     * @dev Emits event based on module transaction success.
      */
     function postModuleExecution(address guard, bytes32 guardHash, bool success) internal {
         if (guard != address(0)) {
@@ -140,7 +156,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @inheritdoc IModuleManager
      */
     function disableModule(address prevModule, address module) public override authorized {
-        // Validate module address and check that it corresponds to module index.
+        // Validate module address and check that it corresponds to a module index.
         if (module == address(0) || module == SENTINEL_MODULES) revertWithError("GS101");
         if (modules[prevModule] != module) revertWithError("GS103");
         modules[prevModule] = modules[module];
@@ -176,14 +192,15 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            // Load free memory location
+            // Load free memory location.
             returnData := mload(0x40)
             // We allocate memory for the return data by setting the free memory location to
-            // current free memory location + data size + 32 bytes for data size value
+            // current free memory location plus the return data size with an additional 32
+            // bytes for storing the length of the return data.
             mstore(0x40, add(returnData, add(returndatasize(), 0x20)))
-            // Store the size
+            // Store the size.
             mstore(returnData, returndatasize())
-            // Store the data
+            // Store the data.
             returndatacopy(add(returnData, 0x20), 0, returndatasize())
         }
         /* solhint-enable no-inline-assembly */
@@ -203,10 +220,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     function getModulesPaginated(address start, uint256 pageSize) external view override returns (address[] memory array, address next) {
         if (start != SENTINEL_MODULES && !isModuleEnabled(start)) revertWithError("GS105");
         if (pageSize == 0) revertWithError("GS106");
-        // Init array with max page size
+        // Init array with max page size.
         array = new address[](pageSize);
 
-        // Populate return array
+        // Populate return array.
         uint256 moduleCount = 0;
         next = modules[start];
         while (next != address(0) && next != SENTINEL_MODULES && moduleCount < pageSize) {
@@ -215,18 +232,16 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
             ++moduleCount;
         }
 
-        /**
-          Because of the argument validation, we can assume that the loop will always iterate over the valid module list values
-          and the `next` variable will either be an enabled module or a sentinel address (signalling the end). 
-          
-          If we haven't reached the end inside the loop, we need to set the next pointer to the last element of the modules array
-          because the `next` variable (which is a module by itself) acting as a pointer to the start of the next page is neither 
-          included to the current page, nor will it be included in the next one if you pass it as a start.
-        */
+        // Because of the argument validation, we can assume that the loop will always iterate over the valid module list values
+        // and the `next` variable will either be an enabled module or a sentinel address (signalling the end).
+        //
+        // If we haven't reached the end inside the loop, we need to set the next pointer to the last element of the modules array
+        // because the `next` variable (which is a module by itself) acting as a pointer to the start of the next page is neither
+        // included to the current page, nor will it be included in the next one if you pass it as a start.
         if (next != SENTINEL_MODULES) {
             next = array[moduleCount - 1];
         }
-        // Set the correct size of the returned array
+        // Set the correct size of the returned array.
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -236,10 +251,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     }
 
     /**
-     * @notice Returns true if `account` is a contract.
+     * @notice Returns true if `account` appears to be a contract.
      * @dev This function will return false if invoked during the constructor of a contract,
      *      as the code is not created until after the constructor finishes.
-     * @param account The address being queried
+     * @param account The address being queried.
      */
     function isContract(address account) internal view returns (bool) {
         uint256 size;
@@ -270,8 +285,8 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     }
 
     /**
-     * @dev Internal method to retrieve the current module guard
-     * @return moduleGuard The address of the guard
+     * @dev Internal method to retrieve the current module guard.
+     * @return moduleGuard The address of the guard.
      */
     function getModuleGuard() internal view returns (address moduleGuard) {
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
@@ -286,7 +301,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     /**
      * @notice A hook that gets called before execution of {execTransactionFromModule*} methods.
      * @param to Destination address of module transaction.
-     * @param value Ether value of module transaction.
+     * @param value Native token value of module transaction.
      * @param data Data payload of module transaction.
      * @param operation Operation type of module transaction.
      */
