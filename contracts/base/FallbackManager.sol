@@ -65,7 +65,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         assembly {
             // When compiled with the optimizer, the compiler relies on certain assumptions on how the
             // memory is used, therefore we need to guarantee memory safety (keeping the free memory pointer
-            // at memory offset 0x40 intact, not going beyond the scratch space, etc)
+            // at memory offset 0x40 intact, not going beyond the scratch space, etc).
             // See: <https://docs.soliditylang.org/en/latest/assembly.html#memory-safety>
 
             let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)

@@ -438,7 +438,7 @@ contract Safe is
         //
         // WARNING: We do not clean potential dirty bits in types that are less than 256 bits (addresses and `Enum.Operation`)
         // Solidity types that are smaller than 256 bit can have dirty high bits when accessed in assembly according to the spec
-        // (see the warning in <https://docs.soliditylang.org/en/latest/assembly.html#access-to-external-variables-functions-and-libraries>).
+        // (see the warning in <https://docs.soliditylang.org/en/v0.7.6/assembly.html#access-to-external-variables-functions-and-libraries>).
         // However, we read most of the data from calldata, where the variables are not packed, and the only variable we read from storage is `uint256 nonce`.
         // This is not a problem, however, we must consider this for potential future changes.
         /* solhint-disable no-inline-assembly */

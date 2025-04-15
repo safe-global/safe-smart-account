@@ -52,13 +52,13 @@ We are manually reviewing the NatSpec documentation to make sure there aren't an
 - [x] base/GuardManager.sol
 - [x] base/ModuleManager.sol
 - [x] base/OwnerManager.sol
-- [ ] common/NativeCurrencyPaymentFallback.sol
-- [ ] common/SecuredTokenTransfer.sol
-- [ ] common/SelfAuthorized.sol
-- [ ] common/SignatureDecoder.sol
-- [ ] common/Singleton.sol
-- [ ] common/StorageAccessible.sol
-- [ ] external/SafeMath.sol
+- [x] common/NativeCurrencyPaymentFallback.sol
+- [x] common/SecuredTokenTransfer.sol
+- [x] common/SelfAuthorized.sol
+- [x] common/SignatureDecoder.sol
+- [x] common/Singleton.sol
+- [x] common/StorageAccessible.sol
+- [x] external/SafeMath.sol
 - [ ] handler/CompatibilityFallbackHandler.sol
 - [ ] handler/ExtensibleFallbackHandler.sol
 - [ ] handler/HandlerContext.sol
