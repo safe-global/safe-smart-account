@@ -68,6 +68,26 @@ export const killLibContract = async (deployer: Signer, zkSync?: boolean) => {
     return deployContractFromSource(deployer, killLibSource);
 };
 
+export const badSimulatorSource = `
+interface ICompatibilityFallbackHandler {
+    function simulate(address, bytes calldata) external returns (bytes memory);
+}
+
+contract Test {
+    function simulateFallbackHandler(address fallbackHandler) external {
+        ICompatibilityFallbackHandler(fallbackHandler).simulate(address(0), "");
+    }
+
+    function simulateAndRevert(address, bytes memory) external returns (bool, bytes memory) {
+        // Oops! We don't revert.
+        return (true, "");
+    }
+}`;
+
+export const badSimulatorContract = async (deployer: Signer) => {
+    return deployContractFromSource(deployer, badSimulatorSource);
+};
+
 /**
  * Retrieves the sender address from the contract runner.
  * It is useful when using methods like `hre.ethers.getContractAt` which automatically attach

@@ -201,7 +201,16 @@ export const compile = async (source: string) => {
         throw Error("Could not compile contract");
     }
     const fileOutput = output["contracts"]["tmp.sol"];
-    const contractOutput = fileOutput[Object.keys(fileOutput)[0]];
+    // Find the first contract with bytecode in the output, this allows the
+    // compiled code to include interfaces.
+    const contractOutput = Object.values(fileOutput).find((output) => {
+        const bytecode = (output["evm"]["bytecode"] ?? {})["object"] ?? "";
+        return bytecode.length > 0;
+    });
+    if (!contractOutput) {
+        console.log(output);
+        throw Error("No contract with bytecode");
+    }
     const abi = contractOutput["abi"];
     const data = "0x" + contractOutput["evm"]["bytecode"]["object"];
     return {
