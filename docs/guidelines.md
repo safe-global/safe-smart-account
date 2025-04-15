@@ -59,7 +59,7 @@ We are manually reviewing the NatSpec documentation to make sure there aren't an
 - [x] common/Singleton.sol
 - [x] common/StorageAccessible.sol
 - [x] external/SafeMath.sol
-- [ ] handler/CompatibilityFallbackHandler.sol
+- [x] handler/CompatibilityFallbackHandler.sol
 - [ ] handler/ExtensibleFallbackHandler.sol
 - [ ] handler/HandlerContext.sol
 - [ ] handler/TokenCallbackHandler.sol
