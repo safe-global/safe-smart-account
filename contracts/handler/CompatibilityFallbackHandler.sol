@@ -95,6 +95,8 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @dev Internally reverts execution to avoid side effects (making it effectively static).
      *      Catches the internal revert and returns encoded result as bytes.
      *      Inspired by <https://github.com/gnosis/util-contracts/blob/bb5fe5fb5df6d8400998094fb1b32a178a47c3a1/contracts/StorageAccessible.sol>.
+     *      ⚠️⚠️⚠️ This function assumes the caller is a Safe contract is only intended for being used as a fallback handler for a {Safe}.
+     *      Using it in other ways may cause undefined behavior. ⚠️⚠️⚠️
      * @param targetContract Address of the contract containing the code to execute.
      * @param calldataPayload Calldata that should be sent to the target contract (encoded method name and arguments).
      */
@@ -129,34 +131,42 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 ptr,
                 calldatasize(),
                 // The `simulateAndRevert` call should always reverts, and
-                // instead encodes whether or not it was successful in the return
-                // data. The first 32-byte word of the return data contains the
-                // `success` value, so write it to memory address 0x00 (which is
-                // the Solidity scratch space and OK to use).
+                // instead encodes whether or not it was successful in the
+                // return data. The first 32-byte word of the return data
+                // contains the `success` value, and the second 32-byte word
+                // contains the response bytes length, so write them to memory
+                // address 0x00 (Solidity scratch which is OK to use).
                 0x00,
-                0x20
+                0x40
             )
 
-            // Double check that the call reverted as expected. It will always
-            // revert if the caller is a Safe, but check anyway to make sure this
-            // function does not make unexpected state changes when called by
-            // other contracts.
-            if success {
+            // Double check that the call reverted as expected, and that the
+            // `returndata` is long enough to hold the encoded success boolean
+            // and response bytes length (64 bytes total). This will always be
+            // the case if the caller is a Safe, but check anyway to make sure
+            // this function does not make unexpected state changes when
+            // called by other contracts.
+            if or(success, lt(returndatasize(), 0x40)) {
                 revert(0, 0)
             }
 
             // Allocate and copy the response bytes, making sure to increment
             // the free memory pointer accordingly (in case this method is
             // called as an internal function). The remaining `returndata[0x20:]`
-            // contains the ABI encoded response bytes, so we can just write it
-            // as is to memory.
-            let responseSize := sub(returndatasize(), 0x20)
+            // contains the ABI encoded response bytes, so we can just copy it
+            // as is to memory. Note that `returndatacopy` will revert if we
+            // try to copy past the `returndatasize` bounds, so we don't need an
+            // additional check here. However, do note that this will consume
+            // all remaining gas. This is fine (since we don't aim to support
+            // other callers that aren't Safes with the compatibility fallback
+            // handler).
+            let responseEncodedSize := add(mload(0x20), 0x20)
             response := mload(0x40)
-            mstore(0x40, add(response, responseSize))
-            returndatacopy(response, 0x20, responseSize)
+            mstore(0x40, add(response, responseEncodedSize))
+            returndatacopy(response, 0x20, responseEncodedSize)
 
             if iszero(mload(0x00)) {
-                revert(add(response, 0x20), mload(response))
+                revert(add(response, 0x20), responseEncodedSize)
             }
         }
         /* solhint-enable no-inline-assembly */

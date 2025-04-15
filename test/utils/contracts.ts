@@ -74,13 +74,39 @@ interface ICompatibilityFallbackHandler {
 }
 
 contract Test {
-    function simulateFallbackHandler(address fallbackHandler) external {
-        ICompatibilityFallbackHandler(fallbackHandler).simulate(address(0), "");
+    function simulateFallbackHandler(address fallbackHandler, uint256 mode) external {
+        ICompatibilityFallbackHandler(fallbackHandler).simulate(address(0), abi.encode(mode));
     }
 
-    function simulateAndRevert(address, bytes memory) external returns (bool, bytes memory) {
-        // Oops! We don't revert.
-        return (true, "");
+    function simulateAndRevert(address, bytes memory data) external {
+        uint256 mode = abi.decode(data, (uint256));
+
+        if (mode == 0) {
+            // Return instead of revert.
+            assembly {
+                mstore(0, 1)
+                mstore(32, 0)
+                return(0, 64)
+            }
+        } else if (mode == 1) {
+            // Revert with only success bool without appended data bytes.
+            assembly {
+                mstore(0, 1)
+                revert(0, 32)
+            }
+        } else if (mode == 2) {
+            // Revert with incomplete result data.
+            assembly {
+                mstore(0, 1)
+                mstore(32, 100)
+                revert(0, add(64, 50))
+            }
+        } else {
+            // Revert with nothing!
+            assembly {
+                revert(0, 0)
+            }
+        }
     }
 }`;
 

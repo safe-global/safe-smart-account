@@ -257,7 +257,9 @@ describe("CompatibilityFallbackHandler", () => {
         it("should revert for unsupported callers", async () => {
             const { handler, badSimulator } = await setupTests();
             const handlerAddress = await handler.getAddress();
-            await expect(badSimulator.simulateFallbackHandler(handlerAddress)).to.be.reverted;
+            for (let mode = 0; mode < 4; mode++) {
+                await expect(badSimulator.simulateFallbackHandler(handlerAddress, mode)).to.be.reverted;
+            }
         });
     });
 });
