@@ -10,7 +10,7 @@ import {Executor, Enum} from "../base/Executor.sol";
  */
 contract SimulateTxAccessor is Executor {
     /**
-     * @notice The address of the {SimulateTxAccessor} contract.
+     * @dev The address of the {SimulateTxAccessor} contract.
      */
     address private immutable ACCESSOR_SINGLETON;
 

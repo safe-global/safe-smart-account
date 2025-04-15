@@ -70,8 +70,8 @@ abstract contract BaseTransactionGuard is ITransactionGuard {
  */
 abstract contract GuardManager is SelfAuthorized, IGuardManager {
     /**
-     * @notice The storage slot used for storing the currently configured transaction guard.
-     * @dev Precomputed value of: `keccak256("guard_manager.guard.address")`.
+     * @dev The storage slot used for storing the currently configured transaction guard.
+     *      Precomputed value of: `keccak256("guard_manager.guard.address")`.
      */
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 

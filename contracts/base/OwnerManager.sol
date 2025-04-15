@@ -13,26 +13,26 @@ import {IOwnerManager} from "../interfaces/IOwnerManager.sol";
  */
 abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
     /**
-     * @notice The sentinel owner value in the {owners} linked list.
-     * @dev `SENTINEL_OWNERS` is used to traverse {owners}, so that:
+     * @dev The sentinel owner value in the {owners} linked list.
+     *      `SENTINEL_OWNERS` is used to traverse {owners}, such that:
      *      1. `owners[SENTINEL_OWNERS]` contains the first owner
      *      2. `owners[last_owner]` points back to `SENTINEL_OWNERS`
      */
     address internal constant SENTINEL_OWNERS = address(0x1);
 
     /**
-     * @notice The linked list of owners.
-     * @dev This mapping defines a linked list where while allowing for `O(1)` inclusion checks.
+     * @dev The linked list of owners, where `owners[owner]` points to the next in the list.
+     *      A mapping is used to allow for `O(1)` inclusion checks.
      */
     mapping(address => address) internal owners;
 
     /**
-     * @notice The number of owners.
+     * @dev The number of owners.
      */
     uint256 internal ownerCount;
 
     /**
-     * @notice The threshold of owners required to sign a transaction.
+     * @dev The threshold of owners required to sign a transaction.
      */
     uint256 internal threshold;
 

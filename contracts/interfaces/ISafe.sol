@@ -176,6 +176,7 @@ interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManage
      * @notice Returns a descriptive version of the Safe contract.
      * @return The version string.
      */
+    // solhint-disable-next-line func-name-mixedcase
     function VERSION() external view returns (string memory);
 
     /**

@@ -10,8 +10,8 @@ import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
  */
 abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
     /**
-     * @notice The storage slot used for storing the currently configured fallback handler address.
-     * @dev Precomputed value of: `keccak256("fallback_manager.handler.address")`.
+     * @dev The storage slot used for storing the currently configured fallback handler address.
+     *      Precomputed value of: `keccak256("fallback_manager.handler.address")`.
      */
     bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
 

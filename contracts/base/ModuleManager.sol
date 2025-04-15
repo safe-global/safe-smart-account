@@ -63,22 +63,22 @@ abstract contract BaseModuleGuard is IModuleGuard {
  */
 abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     /**
-     * @notice The sentinel module value in the {modules} linked list.
-     * @dev `SENTINEL_MODULES` is used to traverse {modules}, so that:
+     * @dev The sentinel module value in the {modules} linked list.
+     *      `SENTINEL_MODULES` is used to traverse {modules}, such that:
      *      1. `modules[SENTINEL_MODULES]` contains the first module
      *      2. `modules[last_module]` points back to `SENTINEL_MODULES`
      */
     address internal constant SENTINEL_MODULES = address(0x1);
 
     /**
-     * @notice The storage slot used for storing the currently configured module guard.
-     * @dev Precomputed value of: `keccak256("module_manager.module_guard.address")`.
+     * @dev The storage slot used for storing the currently configured module guard.
+     *      Precomputed value of: `keccak256("module_manager.module_guard.address")`.
      */
     bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
     /**
-     * @notice The linked list of modules.
-     * @dev This mapping defines a linked list where while allowing for `O(1)` inclusion checks.
+     * @dev The linked list of modules, where `modules[module]` points to the next in the list.
+     *      A mapping is used to allow for `O(1)` inclusion checks.
      */
     mapping(address => address) internal modules;
 
