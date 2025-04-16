@@ -2,25 +2,26 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title Multi Send Call Only - Allows to batch multiple transactions into one, but only calls
- * @notice The guard logic is not required here as this contract doesn't support nested delegate calls
+ * @title Multi Send Call Only
+ * @notice Batch multiple transactions into one, but only `CALL`s.
+ * @dev The guard logic is not required here as this contract doesn't support nested `DELEGATECALL`s.
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
 contract MultiSendCallOnly {
     /**
-     * @dev Sends multiple transactions and reverts all if one fails.
-     * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of
-     *                     operation has to be uint8(0) in this version (=> 1 byte),
-     *                     to as a address (=> 20 bytes),
-     *                     value as a uint256 (=> 32 bytes),
-     *                     data length as a uint256 (=> 32 bytes),
-     *                     data as bytes.
-     *                     see abi.encodePacked for more information on packed encoding
-     * @notice The code is for the most part the same as the normal MultiSend (to keep compatibility),
-     *         but reverts if a transaction tries to use a delegatecall.
-     * @notice This method is payable as delegatecalls keep the msg.value from the previous call
-     *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
+     * @notice Sends multiple transactions and reverts all if one fails.
+     * @dev The code is for the most part the same as the normal {MultiSend} in order to keep compatibility,
+     *      but reverts if a transaction tries to perform a `DELEGATECALL` operation.
+     *      This method is payable as `DELEGATECALL`s keep the `msg.value` from the previous call.
+     *      Otherwise, calling this method from {execTransaction} that receives native token would revert.
+     * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of:
+     *                     1. _operation_ as a `uint8(0)` for `CALL` (=> 1 byte),
+     *                     2. _to_ as a {address} (=> 20 bytes),
+     *                     3. _value_ as a {uint256} (=> 32 bytes),
+     *                     4. _data_ length as a {uint256} (=> 32 bytes),
+     *                     5. _data_ as {bytes}.
+     *                     see {abi.encodePacked} for more information on packed encoding
      */
     function multiSend(bytes memory transactions) public payable {
         /* solhint-disable no-inline-assembly */

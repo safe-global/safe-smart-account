@@ -11,7 +11,7 @@ pragma solidity >=0.7.0 <0.9.0;
 abstract contract Singleton {
     /**
      * @dev `singleton` must be the first declared variable to ensure it has the same storage location as in the {SafeProxy} contract.
-     * The address must be stored alone: it must use a full 32-byte word and cannot be packed with other storage variables.
+     *      The address must be stored alone: it must use a full 32-byte word and cannot be packed with other storage variables.
      */
     address private singleton;
 }

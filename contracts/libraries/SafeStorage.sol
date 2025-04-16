@@ -2,23 +2,54 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title SafeStorage - Storage layout of the Safe Smart Account contracts to be used in libraries.
+ * @title Safe Storage
+ * @notice Storage layout of the Safe smart account contracts to be used in libraries.
  * @dev Should be always the first base contract of a library that is used with a Safe.
  * @author Richard Meissner - @rmeissner
  */
 contract SafeStorage {
-    // From /common/Singleton.sol
+    /**
+     * @dev See <../common/Singleton.sol>.
+     */
     address internal singleton;
-    // From /common/ModuleManager.sol
+
+    /**
+     * @dev See <../common/ModuleManager.sol>.
+     */
     mapping(address => address) internal modules;
-    // From /common/OwnerManager.sol
+
+    /**
+     * @dev See <../common/OwnerManager.sol>.
+     */
     mapping(address => address) internal owners;
+
+    /**
+     * @dev See <../common/OwnerManager.sol>.
+     */
     uint256 internal ownerCount;
+
+    /**
+     * @dev See <../common/OwnerManager.sol>.
+     */
     uint256 internal threshold;
 
-    // From /Safe.sol
+    /**
+     * @dev See <../Safe.sol>.
+     */
     uint256 internal nonce;
+
+    /**
+     * @dev See <../Safe.sol>.
+     */
     bytes32 internal _deprecatedDomainSeparator;
+
+    /**
+     * @dev See <../Safe.sol>.
+     */
     mapping(bytes32 => uint256) internal signedMessages;
+
+    /**
+     * @dev See <../Safe.sol>.
+     */
     mapping(address => mapping(bytes32 => uint256)) internal approvedHashes;
 }
