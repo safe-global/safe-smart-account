@@ -24,7 +24,7 @@ interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManage
      */
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
     /**
-     * @notice An hashed was approved by an owner.
+     * @notice A transaction hash was approved by an owner.
      * @param approvedHash The hash that was approved.
      * @param owner The owner that approved it.
      */

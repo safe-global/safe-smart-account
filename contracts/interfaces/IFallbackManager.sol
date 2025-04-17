@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 /**
  * @title Fallback Manager Interface
- * @notice Interface for managing how fallback calls made to this contract.
+ * @notice Interface for managing fallback calls made to this contract.
  * @author @safe-global/safe-protocol
  */
 interface IFallbackManager {

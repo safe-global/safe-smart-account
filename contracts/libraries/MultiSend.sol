@@ -25,11 +25,11 @@ contract MultiSend {
      *      Otherwise, calling this method from {execTransaction} that receives native token would revert.
      * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of:
      *                     1. _operation_ as a {uint8}, 0 for a `CALL` or 1 for a `DELEGATECALL` (=> 1 byte),
-     *                     2. _to_ as a {address} (=> 20 bytes),
+     *                     2. _to_ as an {address} (=> 20 bytes),
      *                     3. _value_ as a {uint256} (=> 32 bytes),
      *                     4. _data_ length as a {uint256} (=> 32 bytes),
      *                     5. _data_ as {bytes}.
-     *                     see {abi.encodePacked} for more information on packed encoding
+     *                     See {abi.encodePacked} for more information on packed encoding.
      */
     function multiSend(bytes memory transactions) public payable {
         require(address(this) != MULTISEND_SINGLETON, "MultiSend should only be called via delegatecall");

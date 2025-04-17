@@ -286,7 +286,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
 
     /**
      * @dev Internal method to retrieve the current module guard.
-     * @return moduleGuard The address of the guard.
+     * @return moduleGuard The address of the module guard.
      */
     function getModuleGuard() internal view returns (address moduleGuard) {
         bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
