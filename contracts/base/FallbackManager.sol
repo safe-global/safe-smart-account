@@ -5,7 +5,8 @@ import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
 
 /**
- * @title Fallback Manager - A contract managing fallback calls made to this contract
+ * @title Fallback Manager
+ * @notice A contract managing fallback calls made to this contract
  * @author Richard Meissner - @rmeissner
  */
 abstract contract FallbackManager is SelfAuthorized, IFallbackManager {

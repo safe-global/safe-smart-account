@@ -17,7 +17,7 @@ interface IModuleGuard is IERC165 {
      * @param to The address to which the transaction is intended.
      * @param value The value of the transaction in Wei.
      * @param data The transaction data.
-     * @param operation The type of operation of the module transaction.
+     * @param operation Operation type (0 for `CALL`, 1 for `DELEGATECALL`) of the module transaction.
      * @param module The module involved in the transaction.
      * @return moduleTxHash A guard-specific module transaction hash. This value is passed to the matching {checkAfterModuleExecution} call.
      */
@@ -103,7 +103,7 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @param to Target address of module transaction.
      * @param value Native token value of module transaction.
      * @param data Data payload of module transaction.
-     * @param operation Operation type of module transaction.
+     * @param operation Operation type (0 for `CALL`, 1 for `DELEGATECALL`) of the module transaction.
      * @return guard Guard to be used for checking.
      * @return guardHash Hash returned from the guard tx check.
      */

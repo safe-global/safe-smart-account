@@ -17,7 +17,7 @@ interface ITransactionGuard is IERC165 {
      * @param to The address to which the transaction is intended.
      * @param value The native token value of the transaction in Wei.
      * @param data The transaction data.
-     * @param operation The type of operation of the transaction.
+     * @param operation Operation type (0 for `CALL`, 1 for `DELEGATECALL`).
      * @param safeTxGas Gas used for the transaction.
      * @param baseGas The base gas for the transaction.
      * @param gasPrice The price of gas in Wei for the transaction.
