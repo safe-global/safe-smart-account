@@ -1,5 +1,4 @@
-Safe Smart Account
-==============
+# Safe Smart Account
 
 [![npm version](https://badge.fury.io/js/%40safe-global%2Fsafe-smart-account.svg)](https://badge.fury.io/js/%40safe-global%2Fsafe-smart-account)
 [![Build Status](https://github.com/safe-global/safe-smart-account/workflows/safe-smart-account/badge.svg?branch=main)](https://github.com/safe-global/safe-smart-account/actions)
@@ -7,8 +6,8 @@ Safe Smart Account
 
 > :warning: **This branch contains changes that are under development** To use the latest audited version make sure to use the correct commit. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
 
-Usage
------
+## Usage
+
 ### Install requirements with npm:
 
 ```bash
@@ -42,7 +41,7 @@ MNEMONIC=
 
 A collection of the different Safe contract deployments and their addresses can be found in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository.
 
-To add support for a new network follow the steps of the ``Deploy`` section and create a PR in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository. 
+To add support for a new network follow the steps of the `Deploy` section and create a PR in the [Safe deployments](https://github.com/safe-global/safe-deployments) repository.
 
 ### Deploy
 
@@ -53,6 +52,7 @@ To add support for a new network follow the steps of the ``Deploy`` section and 
 This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
 Preparation:
+
 - Set `MNEMONIC` in `.env`
 - Set `INFURA_KEY` in `.env`
 - For zkSync, set `ZKSYNC_DEPLOYER_PK` in `.env`
@@ -75,7 +75,7 @@ npx hardhat --network <network> local-verify
 
 It is possible to use the `NODE_URL` env var to connect to any EVM based network via an RPC endpoint. This connection then can be used with the `custom` network.
 
-E.g. to deploy the Safe contract suite on that network you would run `npm run deploy-all custom`. 
+E.g. to deploy the Safe contract suite on that network you would run `npm run deploy-all custom`.
 
 The resulting addresses should be on all networks the same.
 
@@ -83,32 +83,35 @@ Note: Address will vary if contract code is changed or a different Solidity vers
 
 #### Replay protection ([EIP-155](https://eips.ethereum.org/EIPS/eip-155))
 
-Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy). 
+Some networks require replay protection, making it incompatible with the default deployment process as it relies on a presigned transaction without replay protection (see https://github.com/Arachnid/deterministic-deployment-proxy).
 
-Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, run `npm i --save-dev @safe-global/safe-singleton-factory` before deployment. For more information, including deploying the factory to a new network, please refer to the factory repo.  
+Safe Smart Account contracts use a different deterministic deployment proxy (https://github.com/safe-global/safe-singleton-factory). To make sure that the latest version of this package is installed, run `npm i --save-dev @safe-global/safe-singleton-factory` before deployment. For more information, including deploying the factory to a new network, please refer to the factory repo.
 
 Note: This will result in different addresses compared to hardhat's default deterministic deployment process.
 
 ### Verify contract
 
 This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
+
 ```bash
 npx hardhat --network <network> local-verify
 ```
 
 This command will upload the contract source to Etherscan
+
 ```bash
 npx hardhat --network <network> etherscan-verify
 ```
 
-Documentation
--------------
+## Documentation
+
 - [Safe developer portal](http://docs.safe.global)
 - [Error codes](docs/error_codes.md)
 - [Coding guidelines](docs/guidelines.md)
 
-Audits/ Formal Verification
----------
+## Audits / Formal Verification
+
+- [for Version 1.5.0 by Certora](docs/audit_1_5_0.md)
 - [for Version 1.4.0/1.4.1 by Ackee Blockchain](docs/audit_1_4_0.md)
 - [for Version 1.3.0 by G0 Group](docs/audit_1_3_0.md)
 - [for Version 1.2.0 by G0 Group](docs/audit_1_2_0.md)
@@ -116,10 +119,10 @@ Audits/ Formal Verification
 - [for Version 1.0.0 by Runtime Verification](docs/rv_1_0_0.md)
 - [for Version 0.0.1 by Alexey Akhunov](docs/alexey_audit.md)
 
-Security and Liability
-----------------------
+## Security and Liability
+
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-License
--------
+## License
+
 All smart contracts are released under LGPL-3.0

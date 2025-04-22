@@ -50,7 +50,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
 
     /**
      * @notice Implementation of updated EIP-1271 signature validation method.
-     * @param _dataHash Hash of the data signed on the behalf of address(msg.sender)
+     * @param _dataHash Hash of the data signed on behalf of the address(msg.sender)
      * @param _signature Signature byte array associated with _dataHash
      * @return Updated EIP1271 magic value if signature is valid, otherwise 0x0
      */
