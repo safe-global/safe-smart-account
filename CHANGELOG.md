@@ -299,7 +299,7 @@ We removed the `GAS` opcode usage in module transactions to forward all the avai
 
 Issue: [#483](https://github.com/safe-global/safe-smart-account/issues/483)
 
-The `setupModules` method was changed to require the `to` address to be a contract. The transaction will revert with a `GS002` error code if the' to' address is not a contract.
+The `setupModules` method was changed to require the `to` address to be a contract. The transaction will revert with a `GS002` error code if the `to` address is not a contract.
 
 #### Enforce the `dataHash` is equal to `data` in the signature verification process for contract signatures
 
@@ -708,7 +708,7 @@ File: [`contracts/libraries/MultiSend.sol`](https://github.com/safe-global/safe-
 
 Expected behaviour:
 
-The `multiSend` is now payable therefore it will enforce anymore that the `msg.value` is 0. ETH that is not transferred out again will remain in `this` (the calling contract when used via a delegatecall or the contract when used via call, only possible with `MultiSendCallOnly`)
+The `multiSend` is now payable; therefore, it will no longer enforce that the `msg.value` is 0. ETH that is not transferred out again will remain in `this` (the calling contract when used via a delegatecall or the contract when used via call, only possible with `MultiSendCallOnly`)
 
 #### Add MultiSend that disallows delegate operation
 
