@@ -71,7 +71,7 @@ abstract contract OwnerManager is SelfAuthorized, IOwnerManager {
      * @inheritdoc IOwnerManager
      */
     function removeOwner(address prevOwner, address owner, uint256 _threshold) public override authorized {
-        // Only allow to remove an owner, if threshold can still be reached.
+        // Only allow the removal of an owner if the threshold can still be reached.
         // Here we do pre-decrement as it is cheaper and allows us to check if the threshold is still reachable.
         if (--ownerCount < _threshold) revertWithError("GS201");
         // Validate owner address and check that it corresponds to owner index.
