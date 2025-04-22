@@ -61,7 +61,7 @@ abstract contract ExtensibleBase is HandlerContext {
 
     /**
      * Dry code to get the Safe and the original `msg.sender` from the FallbackManager
-     * @return safe The safe whose FallbackManager is making this call
+     * @return safe The Safe whose FallbackManager is making this call
      * @return sender The original `msg.sender` (as received by the FallbackManager)
      */
     function _getContext() internal view returns (ISafe safe, address sender) {
@@ -71,7 +71,7 @@ abstract contract ExtensibleBase is HandlerContext {
 
     /**
      * Get the context and the method handler applicable to the current call
-     * @return safe The safe whose FallbackManager is making this call
+     * @return safe The Safe whose FallbackManager is making this call
      * @return sender The original `msg.sender` (as received by the FallbackManager)
      * @return isStatic Whether the method is static (`view`) or not
      * @return handler the address of the handler contract

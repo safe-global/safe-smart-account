@@ -37,8 +37,8 @@ abstract contract HandlerContext {
 
     /**
      * @notice Allows fetching the original caller address.
-     * @dev This is only reliable in combination with a FallbackManager that supports this (e.g. Safe contract >=1.3.0).
-     *      When using this functionality make sure that the linked _manager (aka msg.sender) supports this.
+     * @dev This is only reliable with a FallbackManager supporting this (e.g. Safe contract >=1.3.0).
+     *      When using this functionality, ensure that the linked _manager (aka msg.sender) supports this.
      *      This function does not rely on a trusted forwarder. Use the returned value only to
      *      check information against the calling manager.
      * @return sender Original caller address.

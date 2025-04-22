@@ -12,7 +12,7 @@ contract SafeProxyFactory {
     event ProxyCreationL2(SafeProxy indexed proxy, address singleton, bytes initializer, uint256 saltNonce);
     event ChainSpecificProxyCreationL2(SafeProxy indexed proxy, address singleton, bytes initializer, uint256 saltNonce, uint256 chainId);
 
-    /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
+    /// @dev Allows the creation code used for the Proxy deployment to be retrieved. With this, it is easily possible to calculate the predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
         return type(SafeProxy).creationCode;
     }
@@ -57,7 +57,7 @@ contract SafeProxyFactory {
      * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
      */
     function createProxyWithNonce(address _singleton, bytes memory initializer, uint256 saltNonce) public returns (SafeProxy proxy) {
-        // If the initializer changes the proxy address should change too. Hashing the initializer data is cheaper than just concatenating it
+        // If the initializer changes, the proxy address should change too. Hashing the initializer data is cheaper than just concatenating it
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce));
         proxy = deployProxy(_singleton, initializer, salt);
         emit ProxyCreation(proxy, _singleton);
