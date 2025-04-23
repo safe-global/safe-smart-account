@@ -34,7 +34,7 @@ Note: Make sure to use a unique identifier else unexpected behaviour will occur
 
 ### Code comments
 
-Use only `//` for comments and do not use block comments `/* ... */`. The exception to this rule is to use block comments comments for Solhint enable/disable directives: `/* solhint-{enable,disable} ... */`. Comments should be sentences: they should start with a capital letter and end with a dot.
+Use only `//` for comments and do not use block comments `/* ... */`. The exception to this rule is to use block comments for Solhint enable/disable directives: `/* solhint-{enable,disable} ... */`. Comments should be sentences: they should start with a capital letter and end with a dot.
 
 ### NatSepc
 
