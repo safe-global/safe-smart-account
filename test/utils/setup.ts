@@ -201,13 +201,25 @@ export const compile = async (source: string) => {
         throw Error("Could not compile contract");
     }
     const fileOutput = output["contracts"]["tmp.sol"];
-    const contractOutput = fileOutput[Object.keys(fileOutput)[0]];
-    const abi = contractOutput["abi"];
-    const data = "0x" + contractOutput["evm"]["bytecode"]["object"];
-    return {
-        data: data,
-        interface: abi,
-    };
+
+    // Find the first contract with bytecode in the output, this allows the
+    // compiled code to include interfaces.
+    for (const contract in fileOutput) {
+        const contractOutput = fileOutput[contract];
+        if (!contractOutput["evm"]["bytecode"] || !contractOutput["evm"]["bytecode"]["object"]) {
+            continue;
+        }
+
+        const abi = contractOutput["abi"];
+        const data = "0x" + contractOutput["evm"]["bytecode"]["object"];
+        return {
+            data,
+            interface: abi,
+        };
+    }
+
+    console.log(output);
+    throw Error("No contract with bytecode");
 };
 
 export const deployContractFromSource = async (deployer: Signer, source: string): Promise<ethers.Contract> => {

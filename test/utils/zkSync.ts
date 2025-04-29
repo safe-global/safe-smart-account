@@ -73,9 +73,20 @@ export async function zkCompile(
     }
 
     const fileOutput = output["contracts"]["tmp.sol"];
-    const contractOutput = fileOutput[Object.keys(fileOutput)[0]];
-    const abi = contractOutput["abi"];
-    const bytecode = "0x" + contractOutput["evm"]["bytecode"]["object"];
 
-    return { bytecode, abi };
+    // Find the first contract with bytecode in the output, this allows the
+    // compiled code to include interfaces.
+    for (const contract in fileOutput) {
+        const contractOutput = fileOutput[contract];
+        if (!contractOutput["evm"]["bytecode"] || !contractOutput["evm"]["bytecode"]["object"]) {
+            continue;
+        }
+
+        const abi = contractOutput["abi"];
+        const bytecode = "0x" + contractOutput["evm"]["bytecode"]["object"];
+        return { abi, bytecode };
+    }
+
+    console.log(output);
+    throw Error("No contract with bytecode");
 }

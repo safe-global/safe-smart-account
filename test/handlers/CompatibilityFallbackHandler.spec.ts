@@ -11,7 +11,7 @@ import {
     signHash,
 } from "../../src/utils/execution";
 import { chainId } from "../utils/encoding";
-import { killLibContract } from "../utils/contracts";
+import { badSimulatorContract, killLibContract } from "../utils/contracts";
 
 describe("CompatibilityFallbackHandler", () => {
     const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
@@ -31,11 +31,13 @@ describe("CompatibilityFallbackHandler", () => {
         const safeAddress = await safe.getAddress();
         const validator = await getCompatFallbackHandler(safeAddress);
         const killLib = await killLibContract(user1, hre.network.zksync);
+        const badSimulator = await badSimulatorContract(user1);
         return {
             safe,
             validator,
             handler,
             killLib,
+            badSimulator,
             signLib,
             signerSafe,
             signers,
@@ -200,8 +202,6 @@ describe("CompatibilityFallbackHandler", () => {
     });
 
     describe("simulate", () => {
-        it.skip("can be called for any Safe", async () => {});
-
         it("should revert changes", async function () {
             /**
              * ## Test not applicable for zkSync, therefore should skip.
@@ -252,6 +252,14 @@ describe("CompatibilityFallbackHandler", () => {
             const value = await validator.simulate.staticCall(killLibAddress, killLib.interface.encodeFunctionData("updateAndGet", []));
             expect(value).to.be.eq(1n);
             expect(await killLib.value()).to.be.eq(0n);
+        });
+
+        it("should revert for unsupported callers", async () => {
+            const { handler, badSimulator } = await setupTests();
+            const handlerAddress = await handler.getAddress();
+            for (let mode = 0; mode < 4; mode++) {
+                await expect(badSimulator.simulateFallbackHandler(handlerAddress, mode)).to.be.reverted;
+            }
         });
     });
 });
