@@ -32,6 +32,23 @@ contract MultiSendCallOnly {
      *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
      */
     function multiSend(bytes memory transactions) public payable {
+        // Keep track of the unused balance that was included in the call. This may seem counter-
+        // inuitive compared to tracking the total used balance, but it prevents an edge case with
+        // multiple transactions where:
+        // - caller sends value `x`
+        // - `n` times, a meta transaction is executed to a contract that:
+        //   - receives the value `x`
+        //   - sends back the value `x` through non-calling mechanisms (`SELFDESTRUCT` or a
+        //     potential future `PAY`)
+        // If we were to track the total used balance, it  would be possible this way (however
+        // implausible) for `n * x` to overflow a `uint256`.
+        //
+        // Additionally, just checking `address(this).balance` isn't sound, as it would allow
+        // malicious actors to front-run transactions to the `MultiSendCallOnly` and increase the
+        // multiSend contract balance through non-calling mechanisms and cause unrelated
+        // transactions to revert.
+        uint256 unusedValue = msg.value;
+
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -53,6 +70,14 @@ contract MultiSendCallOnly {
                 to := or(to, mul(iszero(to), address()))
                 // We offset the load address by 21 byte (operation byte + 20 address bytes)
                 let value := mload(add(transactions, add(i, 0x15)))
+                // Record the used value; we use saturating subtraction to allow for native tokens
+                // that are stuck in the contract to be transferred out. We use some cheeky
+                // branchless math for maximum gas efficiency:
+                // - if `unusedValue > value`, then this will compute the difference that we want:
+                //   `1 * (unusedValue - value) = unusedValue - value`
+                // - if `unusedValue <= value, then this will saturate to `0` as we want:
+                //   `0 * unchecked { unusedValue - value } = 0`
+                unusedValue := mul(gt(unusedValue, value), sub(unusedValue, value))
                 // We offset the load address by 53 byte (operation byte + 20 address bytes + 32 value bytes)
                 let dataLength := mload(add(transactions, add(i, 0x35)))
                 // We offset the load address by 85 byte (operation byte + 20 address bytes + 32 value bytes + 32 data length bytes)
@@ -77,6 +102,6 @@ contract MultiSendCallOnly {
         }
         /* solhint-enable no-inline-assembly */
 
-        require(address(this) != MULTISEND_SINGLETON || address(this).balance == 0, "MultiSend has leftover balance");
+        require(address(this) != MULTISEND_SINGLETON || unusedValue == 0, "MultiSend has leftover balance");
     }
 }
