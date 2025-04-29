@@ -1,3 +1,4 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 import { deployContractFromSource, getMock, getMultiSendCallOnly, getSafe, getDelegateCaller } from "../utils/setup";
@@ -9,7 +10,7 @@ import {
     MetaTransaction,
     safeApproveHash,
 } from "../../src/utils/execution";
-import { buildMultiSendSafeTx } from "../../src/utils/multisend";
+import { buildMultiSendSafeTx, encodeMultiSend } from "../../src/utils/multisend";
 
 describe("MultiSendCallOnly", () => {
     const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
@@ -128,22 +129,24 @@ describe("MultiSendCallOnly", () => {
             const {
                 safe,
                 multiSend,
-                storageSetter,
                 signers: [user1],
             } = await setupTests();
 
-            const txs: MetaTransaction[] = [await buildContractCall(storageSetter, "setStorage", ["0xbaddad"], 0)];
+            const target = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+            const txs: MetaTransaction[] = [{ to: target, value: ethers.parseEther("1"), data: "0x", operation: 0 }];
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await safe.nonce());
 
+            await expect(await hre.ethers.provider.getBalance(target)).to.eq(ethers.parseEther("0"));
             await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("0"));
 
             await expect(
                 executeTx(safe.connect(user1), safeTx, [await safeApproveHash(user1, safe, safeTx, true)], {
-                    value: ethers.parseEther("1"),
+                    value: ethers.parseEther("3"),
                 }),
             ).to.emit(safe, "ExecutionSuccess");
 
-            await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("1"));
+            await expect(await hre.ethers.provider.getBalance(target)).to.eq(ethers.parseEther("1"));
+            await expect(await hre.ethers.provider.getBalance(await safe.getAddress())).to.eq(ethers.parseEther("2"));
         });
 
         it("can execute contract calls", async () => {
@@ -270,6 +273,61 @@ describe("MultiSendCallOnly", () => {
 
             await expect(await safe.isOwner(randomAddress1)).to.be.true;
             await expect(await safe.isOwner(randomAddress2)).to.be.true;
+        });
+
+        it("allows transferring ETH with multiSend calls", async () => {
+            const {
+                multiSend,
+                signers: [user1],
+            } = await setupTests();
+
+            const txs: MetaTransaction[] = [
+                { to: await user1.getAddress(), value: ethers.parseEther("1"), data: "0x", operation: 0 },
+                { to: await user1.getAddress(), value: ethers.parseEther("2"), data: "0x", operation: 0 },
+            ];
+
+            await expect(
+                multiSend.connect(user1).multiSend(encodeMultiSend(txs), {
+                    value: ethers.parseEther("3"),
+                }),
+            ).to.not.be.reverted;
+
+            expect(await hre.ethers.provider.getBalance(multiSend)).to.eq(0);
+        });
+
+        it("allows transferring out pre-existing ETH balance", async () => {
+            const {
+                multiSend,
+                signers: [user1],
+            } = await setupTests();
+
+            // Spoof a balance on the `MultiSendCallOnly` contract, this may happen if a contract
+            // `SELFDESTRUCT`s with a target address of the `MultiSendCallOnly` contract, or
+            // potentially with a future `PAY` opcode.
+            await setBalance(await multiSend.getAddress(), ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(multiSend)).to.eq(ethers.parseEther("1"));
+
+            const txs: MetaTransaction[] = [{ to: await user1.getAddress(), value: ethers.parseEther("1"), data: "0x", operation: 0 }];
+
+            await multiSend.connect(user1).multiSend(encodeMultiSend(txs));
+
+            expect(await hre.ethers.provider.getBalance(multiSend)).to.eq(0);
+        });
+
+        it("reverts on calls with leftover balance", async () => {
+            const {
+                multiSend,
+                signers: [user1],
+            } = await setupTests();
+
+            const target = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+            const txs: MetaTransaction[] = [{ to: target, value: ethers.parseEther("1"), data: "0x", operation: 0 }];
+
+            await expect(
+                multiSend.connect(user1).multiSend(encodeMultiSend(txs), {
+                    value: ethers.parseEther("3"),
+                }),
+            ).to.be.revertedWith("MultiSend has leftover balance");
         });
     });
 });
