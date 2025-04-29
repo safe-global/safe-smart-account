@@ -9,6 +9,15 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 contract MultiSendCallOnly {
     /**
+     * @dev The address of the {MultiSendCallOnly} contract.
+     */
+    address private immutable MULTISEND_SINGLETON;
+
+    constructor() {
+        MULTISEND_SINGLETON = address(this);
+    }
+
+    /**
      * @dev Sends multiple transactions and reverts all if one fails.
      * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of
      *                     operation has to be uint8(0) in this version (=> 1 byte),
@@ -67,5 +76,7 @@ contract MultiSendCallOnly {
             }
         }
         /* solhint-enable no-inline-assembly */
+
+        require(address(this) != MULTISEND_SINGLETON || address(this).balance == 0, "MultiSend has leftover balance");
     }
 }
