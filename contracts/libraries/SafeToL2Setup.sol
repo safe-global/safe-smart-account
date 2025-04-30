@@ -5,11 +5,11 @@ import {SafeStorage} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Safe to L2 Setup Contract
- * @dev This contract expects the singleton to be the {Safe} by default. Even if there are more
- * {SafeL2} proxies deployed, the average gas cost on L2s is significantly lower, making the
- * current design more economically efficient overall.
  * @notice This contract facilitates the deployment of a Safe to the same address on all networks by
  *         automatically changing the singleton to the L2 version when not on chain ID 1.
+ * @dev This contract expects the singleton to be the {Safe} by default. Even if there are more
+ *      {SafeL2} proxies deployed, the average gas cost on L2s is significantly lower, making the
+ *      current design more economically efficient overall.
  */
 contract SafeToL2Setup is SafeStorage {
     /**

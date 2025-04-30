@@ -5,19 +5,27 @@ import {ISafe} from "./../interfaces/ISafe.sol";
 import {SafeStorage} from "./SafeStorage.sol";
 
 /**
- * @title SignMessageLib - Allows to sign messages on-chain by writing the signed message hashes on-chain.
+ * @title Sign Message Library
+ * @notice Sign messages on-chain.
  * @author Richard Meissner - @rmeissner
  */
 contract SignMessageLib is SafeStorage {
-    // keccak256("SafeMessage(bytes message)");
+    /**
+     * @dev The precomputed EIP-712 type hash for the Safe message type.
+     *      Precomputed value of: `keccak256("SafeMessage(bytes message)")`.
+     */
     bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
 
+    /**
+     * @notice A Safe message was signed on-chain.
+     * @param msgHash The hash of the message.
+     */
     event SignMsg(bytes32 indexed msgHash);
 
     /**
      * @notice Marks a message (`_data`) as signed.
      * @dev Can be verified using EIP-1271 validation method by passing the pre-image of the message hash and empty bytes as the signature.
-     * @param _data Arbitrary length data that should be marked as signed on behalf of the address(this).
+     * @param _data Arbitrary length data that should be marked as signed on behalf of the `address(this)`.
      */
     function signMessage(bytes calldata _data) external {
         bytes32 msgHash = getMessageHash(_data);

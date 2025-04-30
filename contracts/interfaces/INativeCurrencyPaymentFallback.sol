@@ -7,6 +7,11 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author @safe-global/safe-protocol
  */
 interface INativeCurrencyPaymentFallback {
+    /**
+     * @notice Native tokens were received.
+     * @param sender The address that sent the tokens.
+     * @param value The native token value that was received.
+     */
     event SafeReceived(address indexed sender, uint256 value);
 
     /**

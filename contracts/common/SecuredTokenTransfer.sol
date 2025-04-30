@@ -2,27 +2,28 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title SecuredTokenTransfer - Secure token transfer.
+ * @title Secured Token Transfer
+ * @notice Securely transfer tokens, handling non-standard ERC-20 tokens.
  * @author Richard Meissner - @rmeissner
  */
 abstract contract SecuredTokenTransfer {
     /**
-     * @notice Transfers a token and returns a boolean if it was a success
+     * @notice Transfers a token and returns `true` if it was successful, `false` otherwise.
      * @dev It checks the return data of the transfer call and returns true if the transfer was successful.
      *      It doesn't check if the `token` address is a contract or not.
-     * @param token Token that should be transferred
-     * @param receiver Receiver to whom the token should be transferred
-     * @param amount The amount of tokens that should be transferred
-     * @return transferred Returns true if the transfer was successful
+     * @param token Token that should be transferred.
+     * @param receiver Receiver to whom the token should be transferred.
+     * @param amount The amount of tokens that should be transferred.
+     * @return transferred Boolean indicating whether or not the transfer was successful.
      */
     function transferToken(address token, address receiver, uint256 amount) internal returns (bool transferred) {
-        // 0xa9059cbb - bytes4(keccak256("transfer(address,uint256)"))
+        // The transfer function selector `0xa9059cbb`, precomputed value of `bytes4(keccak256("transfer(address,uint256)"))`.
         bytes memory data = abi.encodeWithSelector(0xa9059cbb, receiver, amount);
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
             // We write the return value to scratch space.
-            // See https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory
+            // See <https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html#layout-in-memory>
             let success := call(sub(gas(), 10000), token, 0, add(data, 0x20), mload(data), 0, 0x20)
             switch returndatasize()
             case 0 {
