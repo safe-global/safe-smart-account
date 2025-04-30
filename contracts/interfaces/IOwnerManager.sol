@@ -2,12 +2,27 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title IOwnerManager - Interface for contract which manages Safe owners and a threshold to authorize transactions.
+ * @title Owner Manager Interface
+ * @notice Interface for managing Safe owners and a threshold to authorize transactions.
  * @author @safe-global/safe-protocol
  */
 interface IOwnerManager {
+    /**
+     * @notice An owner was added.
+     * @param owner The address of the new owner.
+     */
     event AddedOwner(address indexed owner);
+
+    /**
+     * @notice An owner was removed.
+     * @param owner The address of the old owner.
+     */
     event RemovedOwner(address indexed owner);
+
+    /**
+     * @notice The signature threshold changed.
+     * @param threshold The new threshold for authorizing Safe transactions.
+     */
     event ChangedThreshold(uint256 threshold);
 
     /**
@@ -21,7 +36,7 @@ interface IOwnerManager {
     /**
      * @notice Removes the owner `owner` from the Safe and updates the threshold to `_threshold`.
      * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be removed in the linked list
+     * @param prevOwner Owner that pointed to the owner to be removed in the linked list.
      * @param owner Owner address to be removed.
      * @param _threshold New threshold.
      */
@@ -30,7 +45,7 @@ interface IOwnerManager {
     /**
      * @notice Replaces the owner `oldOwner` in the Safe with `newOwner`.
      * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be replaced in the linked list
+     * @param prevOwner Owner that pointed to the owner to be replaced in the linked list.
      * @param oldOwner Owner address to be replaced.
      * @param newOwner New owner address.
      */

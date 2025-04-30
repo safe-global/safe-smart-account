@@ -15,9 +15,9 @@ interface ITransactionGuard is IERC165 {
      * @notice Checks the transaction details.
      * @dev The function needs to implement transaction validation logic.
      * @param to The address to which the transaction is intended.
-     * @param value The value of the transaction in Wei.
+     * @param value The native token value of the transaction in Wei.
      * @param data The transaction data.
-     * @param operation The type of operation of the transaction.
+     * @param operation Operation type (0 for `CALL`, 1 for `DELEGATECALL`).
      * @param safeTxGas Gas used for the transaction.
      * @param baseGas The base gas for the transaction.
      * @param gasPrice The price of gas in Wei for the transaction.
@@ -43,13 +43,19 @@ interface ITransactionGuard is IERC165 {
     /**
      * @notice Checks after execution of the transaction.
      * @dev The function needs to implement a check after the execution of the transaction.
-     * @param hash The hash of the transaction.
+     * @param hash The hash of the executed transaction.
      * @param success The status of the transaction execution.
      */
     function checkAfterExecution(bytes32 hash, bool success) external;
 }
 
+/**
+ * @title Base Transaction Guard
+ */
 abstract contract BaseTransactionGuard is ITransactionGuard {
+    /**
+     * @inheritdoc IERC165
+     */
     function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return
             interfaceId == type(ITransactionGuard).interfaceId || // 0xe6d7a83a
@@ -58,11 +64,15 @@ abstract contract BaseTransactionGuard is ITransactionGuard {
 }
 
 /**
- * @title Guard Manager - A contract managing transaction guards which perform pre and post-checks on Safe transactions.
+ * @title Guard Manager
+ * @notice A contract managing transaction guards which perform pre and post-checks on Safe transactions.
  * @author Richard Meissner - @rmeissner
  */
 abstract contract GuardManager is SelfAuthorized, IGuardManager {
-    // keccak256("guard_manager.guard.address")
+    /**
+     * @dev The storage slot used for storing the currently configured transaction guard.
+     *      Precomputed value of: `keccak256("guard_manager.guard.address")`.
+     */
     bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     /**
@@ -81,11 +91,11 @@ abstract contract GuardManager is SelfAuthorized, IGuardManager {
     }
 
     /**
-     * @dev Internal method to retrieve the current guard
-     *      We do not have a public method because we're short on bytecode size limit,
-     *      to retrieve the guard address, one can use `getStorageAt` from `StorageAccessible` contract
-     *      with the slot `GUARD_STORAGE_SLOT`
-     * @return guard The address of the guard
+     * @notice Internal method to retrieve the current guard.
+     * @dev We do not have a public method because we're short on bytecode size limit,
+     *      to retrieve the guard address, one can use {getStorageAt} from {StorageAccessible} contract
+     *      with the slot {GUARD_STORAGE_SLOT}.
+     * @return guard The address of the guard.
      */
     function getGuard() internal view returns (address guard) {
         /* solhint-disable no-inline-assembly */

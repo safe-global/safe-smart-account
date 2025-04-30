@@ -3,7 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title IProxy - Helper interface to access the singleton address of the Proxy on-chain.
+ * @title Proxy Interface
+ * @notice Helper interface to access the singleton address of the Proxy on-chain.
  * @author Richard Meissner - @rmeissner
  */
 interface IProxy {
@@ -11,17 +12,22 @@ interface IProxy {
 }
 
 /**
- * @title SafeProxy - A generic proxy contract allows the execution of all transactions by applying the code of a master contract.
+ * @title SafeProxy
+ * @notice A generic proxy contract that allows the execution of all transactions by applying the code of a singleton contract.
  * @author Stefan George - <stefan@gnosis.io>
  * @author Richard Meissner - <richard@gnosis.io>
  */
 contract SafeProxy {
-    // Singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
-    // To reduce deployment costs this variable is internal and needs to be retrieved via `getStorageAt`
+    /**
+     * @dev The singleton address to delegate all calls to.
+     *      The singleton always needs to be first declared variable, in order to ensure that it is at the same location in the contracts to which calls are delegated.
+     *      Its value can be retrieved via the {masterCopy} function.
+     */
     address internal singleton;
 
     /**
-     * @notice Constructor function sets address of singleton contract.
+     * @notice Safe proxy constructor.
+     * @dev Sets the address of the singleton contract.
      * @param _singleton Singleton address.
      */
     constructor(address _singleton) {
@@ -29,7 +35,9 @@ contract SafeProxy {
         singleton = _singleton;
     }
 
-    /// @dev Fallback function forwards all transactions and returns all received return data.
+    /**
+     * @notice Delegate all calls to the `singleton` implementation, and forward all return data to the caller.
+     */
     fallback() external payable {
         // Note that this assembly block is **intentionally** not marked as memory-safe. First of all, it isn't memory
         // safe to begin with, and turning this into memory-safe assembly would just make it less gas efficient.
