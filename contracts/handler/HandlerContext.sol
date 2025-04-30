@@ -5,10 +5,11 @@ import {ISafe} from "../interfaces/ISafe.sol";
 import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
- * @title Handler Context - Allows the fallback handler to extract additional context from the calldata
+ * @title Handler Context
+ * @notice Allows the fallback handler to extract additional context from the calldata.
  * @dev The fallback manager appends the following context to the calldata:
  *      1. Fallback manager caller address (non-padded)
- * based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8cc8b844a9f92f63dc55aa581f7d643a1bc5ac1/contracts/metatx/ERC2771Context.sol
+ *      Based on <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8cc8b844a9f92f63dc55aa581f7d643a1bc5ac1/contracts/metatx/ERC2771Context.sol>
  * @author Richard Meissner - @rmeissner
  */
 abstract contract HandlerContext {
@@ -37,7 +38,7 @@ abstract contract HandlerContext {
 
     /**
      * @notice Allows fetching the original caller address.
-     * @dev This is only reliable with a FallbackManager supporting this (e.g. Safe contract >=1.3.0).
+     * @dev This is only reliable with a {FallbackManager} supporting this (e.g. Safe contract >=1.3.0).
      *      When using this functionality, ensure that the linked _manager (aka msg.sender) supports this.
      *      This function does not rely on a trusted forwarder. Use the returned value only to
      *      check information against the calling manager.
@@ -55,8 +56,8 @@ abstract contract HandlerContext {
     }
 
     /**
-     * @notice Returns the FallbackManager address
-     * @return Fallback manager address
+     * @notice Returns the FallbackManager address.
+     * @return Fallback manager address.
      */
     function _manager() internal view returns (address) {
         return msg.sender;

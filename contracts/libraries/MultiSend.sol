@@ -2,13 +2,17 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title Multi Send - Allows to batch multiple transactions into one.
+ * @title Multi Send
+ * @notice Batch multiple transactions into one.
  * @author Nick Dodson - <nick.dodson@consensys.net>
  * @author Gonçalo Sá - <goncalo.sa@consensys.net>
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
 contract MultiSend {
+    /**
+     * @dev The address of the {MultiSend} contract.
+     */
     address private immutable MULTISEND_SINGLETON;
 
     constructor() {
@@ -16,16 +20,16 @@ contract MultiSend {
     }
 
     /**
-     * @dev Sends multiple transactions and reverts all if one fails.
-     * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of
-     *                     operation as a uint8 with 0 for a call or 1 for a delegatecall (=> 1 byte),
-     *                     to as a address (=> 20 bytes),
-     *                     value as a uint256 (=> 32 bytes),
-     *                     data length as a uint256 (=> 32 bytes),
-     *                     data as bytes.
-     *                     see abi.encodePacked for more information on packed encoding
-     * @notice This method is payable as delegatecalls keep the msg.value from the previous call
-     *         If the calling method (e.g. execTransaction) received ETH this would revert otherwise
+     * @notice Sends multiple transactions and reverts all if one fails.
+     * @dev This method is payable as `DELEGATECALL`s keep the `msg.value` from the previous call.
+     *      Otherwise, calling this method from {execTransaction} that receives native token would revert.
+     * @param transactions Encoded transactions. Each transaction is encoded as a packed bytes of:
+     *                     1. _operation_ as a {uint8}, 0 for a `CALL` or 1 for a `DELEGATECALL` (=> 1 byte),
+     *                     2. _to_ as an {address} (=> 20 bytes),
+     *                     3. _value_ as a {uint256} (=> 32 bytes),
+     *                     4. _data_ length as a {uint256} (=> 32 bytes),
+     *                     5. _data_ as {bytes}.
+     *                     See {abi.encodePacked} for more information on packed encoding.
      */
     function multiSend(bytes memory transactions) public payable {
         require(address(this) != MULTISEND_SINGLETON, "MultiSend should only be called via delegatecall");

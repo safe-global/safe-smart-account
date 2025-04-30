@@ -4,7 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 import {INativeCurrencyPaymentFallback} from "./../interfaces/INativeCurrencyPaymentFallback.sol";
 
 /**
- * @title NativeCurrencyPaymentFallback - A contract that has a fallback to accept native currency payments.
+ * @title Native Currency Payment Fallback
+ * @notice A contract that has a fallback to accept native token payments.
  * @author Richard Meissner - @rmeissner
  */
 abstract contract NativeCurrencyPaymentFallback is INativeCurrencyPaymentFallback {
