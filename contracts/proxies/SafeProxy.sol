@@ -45,9 +45,11 @@ contract SafeProxy {
                 // memory with a 12 byte offset from where the return data starts. Note that we **intentionally** only
                 // do this for the `masterCopy()` call, since the EVM `DELEGATECALL` opcode ignores the most-significant
                 // 12 bytes from the address, so we do not need to make sure the top bytes are cleared when proxying
-                // calls to the `singleton`. This saves us a tiny amount of gas per proxied call.
-                mstore(0x0c, shl(96, _singleton))
-                return(0, 0x20)
+                // calls to the `singleton`. This saves us a tiny amount of gas per proxied call. Additionally, we write
+                // to the "zero-memory" slot, this guarantees that there are no dirty bits in the first 12 bytes in the
+                // return data, which can lead to problems for contracts compiled with Solidity v0.8+.
+                mstore(0x6c, shl(96, _singleton))
+                return(0x60, 0x20)
             }
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)
