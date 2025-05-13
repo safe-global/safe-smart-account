@@ -56,6 +56,6 @@ contract Test4337ModuleAndHandler {
     }
 
     function enableMyself() public {
-        ISafe(address(this)).enableModule(MY_ADDRESS);
+        ISafe(payable(address(this))).enableModule(MY_ADDRESS);
     }
 }
