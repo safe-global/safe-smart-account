@@ -147,17 +147,17 @@ interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManage
 
     /**
      * @notice Returns transaction hash to be signed by owners.
-     * @param to Destination address.
-     * @param value Ether value.
-     * @param data Data payload.
-     * @param operation Operation type.
-     * @param safeTxGas Gas that should be used for the safe transaction.
-     * @param baseGas Gas costs for data used to trigger the safe transaction.
-     * @param gasPrice Maximum gas price that should be used for this transaction.
-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param _nonce Transaction nonce.
-     * @return Transaction hash.
+     * @param to Destination address of Safe transaction.
+     * @param value Native token value of the Safe transaction.
+     * @param data Data payload of the Safe transaction.
+     * @param operation Operation type of the Safe transaction: 0 for `CALL` and 1 for `DELEGATECALL`.
+     * @param safeTxGas Gas that should be used for the Safe transaction.
+     * @param baseGas Base gas costs that are independent of the transaction execution (e.g. base transaction fee, signature check, payment of the refund).
+     * @param gasPrice Gas price that should be used for the payment calculation.
+     * @param gasToken Token address (or 0 for the native token) that is used for the payment.
+     * @param refundReceiver Address of receiver of the gas payment (or 0 for `tx.origin`).
+     * @param _nonce Safe transaction nonce.
+     * @return Safe transaction hash.
      */
     function getTransactionHash(
         address to,
