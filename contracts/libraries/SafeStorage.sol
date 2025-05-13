@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Should be always the first base contract of a library that is used with a Safe.
  * @author Richard Meissner - @rmeissner
  */
-contract SafeStorage {
+abstract contract SafeStorage {
     // From /common/Singleton.sol
     address internal singleton;
     // From /common/ModuleManager.sol

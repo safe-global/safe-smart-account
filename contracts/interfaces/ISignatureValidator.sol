@@ -2,7 +2,7 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity >=0.7.0 <0.9.0;
 
-contract ISignatureValidatorConstants {
+abstract contract ISignatureValidatorConstants {
     // bytes4(keccak256("isValidSignature(bytes32,bytes)")
     bytes4 internal constant EIP1271_MAGIC_VALUE = 0x1626ba7e;
 }
