@@ -22,6 +22,10 @@ describe("ProxyFactory", () => {
             isInitialized = true;
         }
 
+        function revertingInitializer() public {
+            revert("initilalization reverted");
+        }
+
         function masterCopy() public pure returns (address) {
             return address(0);
         }
@@ -107,6 +111,15 @@ describe("ProxyFactory", () => {
                 .withArgs(proxyAddress, singletonAddress);
             await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith("Create2 call failed");
         });
+
+        it("should propagate initializer reverts", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("revertingInitializer", []);
+            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith(
+                "initilalization reverted",
+            );
+        });
     });
 
     describe("createProxyWithNonceL2", () => {
@@ -177,6 +190,15 @@ describe("ProxyFactory", () => {
                 .to.emit(factory, "ProxyCreationL2")
                 .withArgs(proxyAddress, singletonAddress, initCode, saltNonce);
             await expect(factory.createProxyWithNonceL2(singletonAddress, initCode, saltNonce)).to.be.revertedWith("Create2 call failed");
+        });
+
+        it("should propagate initializer reverts", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("revertingInitializer", []);
+            await expect(factory.createProxyWithNonceL2(singletonAddress, initCode, saltNonce)).to.be.revertedWith(
+                "initilalization reverted",
+            );
         });
     });
 
