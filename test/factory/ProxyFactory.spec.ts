@@ -223,22 +223,33 @@ describe("ProxyFactory", () => {
 
         it("should revert if singleton address is not a contract", async () => {
             const { factory } = await setupTests();
-            await expect(factory.createProxyWithNonce(AddressZero, "0x", saltNonce)).to.be.revertedWith("Singleton contract not deployed");
+            await expect(factory.createChainSpecificProxyWithNonce(AddressZero, "0x", saltNonce)).to.be.revertedWith(
+                "Singleton contract not deployed",
+            );
         });
 
         it("should revert with invalid initializer", async () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
 
-            await expect(factory.createProxyWithNonce(singletonAddress, "0x42baddad", saltNonce)).to.be.revertedWithoutReason();
+            await expect(
+                factory.createChainSpecificProxyWithNonce(singletonAddress, "0x42baddad", saltNonce),
+            ).to.be.revertedWithoutReason();
         });
 
         it("should emit event without initializing", async () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = "0x";
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
-            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
             const proxy = singleton.attach(proxyAddress) as Contract;
@@ -254,8 +265,15 @@ describe("ProxyFactory", () => {
             const singletonAddress = await singleton.getAddress();
             const factoryAddress = await factory.getAddress();
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
-            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
             const proxy = singleton.attach(proxyAddress) as Contract;
@@ -290,11 +308,160 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = singleton.interface.encodeFunctionData("init", []);
-            const proxyAddress = await calculateProxyAddress(factory, singletonAddress, initCode, saltNonce, hre.network.zksync);
-            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce))
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce))
                 .to.emit(factory, "ProxyCreation")
                 .withArgs(proxyAddress, singletonAddress);
-            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith("Create2 call failed");
+            await expect(factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith(
+                "Create2 call failed",
+            );
+        });
+    });
+
+    describe("createChainSpecificProxyWithNonceL2", () => {
+        const saltNonce = 42;
+
+        it("should revert if singleton address is not a contract", async () => {
+            const { factory } = await setupTests();
+            await expect(factory.createChainSpecificProxyWithNonceL2(AddressZero, "0x", saltNonce)).to.be.revertedWith(
+                "Singleton contract not deployed",
+            );
+        });
+
+        it("should revert with invalid initializer", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+
+            await expect(
+                factory.createChainSpecificProxyWithNonceL2(singletonAddress, "0x42baddad", saltNonce),
+            ).to.be.revertedWithoutReason();
+        });
+
+        it("should emit event without initializing", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const initCode = "0x";
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce))
+                .to.emit(factory, "ProxyCreation")
+                .withArgs(proxyAddress, singletonAddress)
+                .to.emit(factory, "ChainSpecificProxyCreationL2")
+                .withArgs(proxyAddress, singletonAddress, initCode, saltNonce, await chainId());
+            const proxy = singleton.attach(proxyAddress) as Contract;
+            expect(await proxy.creator()).to.be.eq(AddressZero);
+            expect(await proxy.isInitialized()).to.be.eq(false);
+            expect(await proxy.masterCopy()).to.be.eq(singletonAddress);
+            expect(await singleton.masterCopy()).to.be.eq(AddressZero);
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
+        });
+
+        it("should emit event with initializing", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const factoryAddress = await factory.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce))
+                .to.emit(factory, "ProxyCreation")
+                .withArgs(proxyAddress, singletonAddress)
+                .to.emit(factory, "ChainSpecificProxyCreationL2")
+                .withArgs(proxyAddress, singletonAddress, initCode, saltNonce, await chainId());
+            const proxy = singleton.attach(proxyAddress) as Contract;
+            expect(await proxy.creator()).to.be.eq(factoryAddress);
+            expect(await proxy.isInitialized()).to.be.eq(true);
+            expect(await proxy.masterCopy()).to.be.eq(singletonAddress);
+            expect(await singleton.masterCopy()).to.be.eq(AddressZero);
+            expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
+        });
+
+        it("should deploy proxy to create2 address with chainid included in salt", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const provider = hre.ethers.provider;
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            expect(await provider.getCode(proxyAddress)).to.eq("0x");
+
+            await factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce);
+
+            expect(await provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
+        });
+
+        it("should not be able to deploy same proxy twice", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            await expect(factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce))
+                .to.emit(factory, "ProxyCreation")
+                .withArgs(proxyAddress, singletonAddress)
+                .to.emit(factory, "ChainSpecificProxyCreationL2")
+                .withArgs(proxyAddress, singletonAddress, initCode, saltNonce, await chainId());
+            await expect(factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce)).to.be.revertedWith(
+                "Create2 call failed",
+            );
+        });
+    });
+
+    describe("createChainSpecificProxyWithNonce & createChainSpecificProxyWithNonceL2", () => {
+        const saltNonce = 42;
+
+        it("should result in same proxy", async () => {
+            const { factory, singleton } = await setupTests();
+            const singletonAddress = await singleton.getAddress();
+
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const proxyAddress = await calculateChainSpecificProxyAddress(
+                factory,
+                singletonAddress,
+                initCode,
+                saltNonce,
+                await chainId(),
+                hre.network.zksync,
+            );
+            const proxyAddressOnchain = await factory.createChainSpecificProxyWithNonce.staticCall(singletonAddress, initCode, saltNonce);
+            const proxyAddressOnchainL2 = await factory.createChainSpecificProxyWithNonceL2.staticCall(
+                singletonAddress,
+                initCode,
+                saltNonce,
+            );
+            expect(proxyAddress).to.be.eq(proxyAddressOnchain);
+            expect(proxyAddress).to.be.eq(proxyAddressOnchainL2);
         });
     });
 });
