@@ -38,7 +38,7 @@ contract OnlyOwnersGuard is BaseTransactionGuard {
         bytes memory,
         address msgSender
     ) external view override {
-        require(ISafe(msg.sender).isOwner(msgSender), "msg sender is not allowed to exec");
+        require(ISafe(payable(msg.sender)).isOwner(msgSender), "msg sender is not allowed to exec");
     }
 
     /**
