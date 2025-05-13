@@ -3,7 +3,7 @@ import hre, { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { deployContractFromSource, getFactory, getMock, getSafe, getSafeProxyRuntimeCode } from "../utils/setup";
 import { AddressZero } from "@ethersproject/constants";
-import { calculateChainSpecificProxyAddress, calculateProxyAddress, calculateProxyAddressWithCallback } from "../../src/utils/proxies";
+import { calculateChainSpecificProxyAddress, calculateProxyAddress } from "../../src/utils/proxies";
 import { chainId } from "./../utils/encoding";
 
 describe("ProxyFactory", () => {
