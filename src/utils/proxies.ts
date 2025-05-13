@@ -44,18 +44,6 @@ export const calculateProxyAddress = async (
     return ethers.getCreate2Address(factoryAddress, salt, ethers.keccak256(deploymentCode));
 };
 
-export const calculateProxyAddressWithCallback = async (
-    factory: SafeProxyFactory,
-    singleton: string,
-    initializer: string,
-    nonce: number | string,
-    callback: string,
-    zkSync: boolean = false,
-) => {
-    const saltNonceWithCallback = ethers.solidityPackedKeccak256(["uint256", "address"], [nonce, callback]);
-    return calculateProxyAddress(factory, singleton, initializer, saltNonceWithCallback, zkSync);
-};
-
 export const calculateChainSpecificProxyAddress = async (
     factory: SafeProxyFactory,
     singleton: string,
