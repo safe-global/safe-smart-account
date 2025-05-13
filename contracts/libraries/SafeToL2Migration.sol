@@ -70,17 +70,22 @@ contract SafeToL2Migration is SafeStorage {
     /**
      * @dev Internal function with common migration steps, changes the singleton and emits SafeMultiSigTransaction event
      */
-    function migrate(address l2Singleton, bytes memory functionData) private {
+    function migrate(address l2Singleton) private {
         singleton = l2Singleton;
 
         // Encode nonce, sender, threshold
         bytes memory additionalInfo = abi.encode(0, msg.sender, threshold);
 
-        // Simulate a L2 transaction so Safe Tx Service indexer picks up the Safe
+        // Simulate a L2 transaction so Safe Tx Service indexer picks up the Safe. This is intended as a
+        // **best-effort** estimate to the actual transaction that was executed, and may be inaccurate under
+        // the following conditions (non-exhaustive):
+        // - The `migrate*` function was called from an intermediary contract (such as `MultiSend`).
+        // - The `migrate*` function as called by a module after a transaction with nonce 0 already executed.
+        // - etc.
         emit SafeMultiSigTransaction(
             MIGRATION_SINGLETON,
             0,
-            functionData,
+            msg.data,
             Enum.Operation.DelegateCall,
             0,
             0,
@@ -112,9 +117,7 @@ contract SafeToL2Migration is SafeStorage {
             "Provided singleton version is not supported"
         );
 
-        // 0xef2624ae - bytes4(keccak256("migrateToL2(address)"))
-        bytes memory functionData = abi.encodeWithSelector(0xef2624ae, l2Singleton);
-        migrate(l2Singleton, functionData);
+        migrate(l2Singleton);
     }
 
     /**
@@ -142,9 +145,7 @@ contract SafeToL2Migration is SafeStorage {
         // Safes < 1.3.0 did not emit SafeSetup, so Safe Tx Service backend needs the event to index the Safe
         emit SafeSetup(MIGRATION_SINGLETON, getOwners(), threshold, address(0), fallbackHandler);
 
-        // 0xd9a20812 - bytes4(keccak256("migrateFromV111(address,address)"))
-        bytes memory functionData = abi.encodeWithSelector(0xd9a20812, l2Singleton, fallbackHandler);
-        migrate(l2Singleton, functionData);
+        migrate(l2Singleton);
     }
 
     /**
