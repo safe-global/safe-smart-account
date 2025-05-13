@@ -26,7 +26,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
 
             If the fallback method is triggered, the fallback handler appends the msg.sender address to the calldata and calls the fallback handler.
             A potential attacker could call a Safe with the 3 bytes signature of a withdraw function. Since 3 bytes do not create a valid signature,
-            the call would end in a fallback handler. Since it appends the msg.sender address to the calldata, the attacker could craft an address 
+            the call would end in a fallback handler. Since it appends the msg.sender address to the calldata, the attacker could craft an address
             where the first 3 bytes of the previous calldata + the first byte of the address make up a valid function signature. The subsequent call would result in unsanctioned access to Safe's internal protected methods.
             For some reason, solidity matches the first 4 bytes of the calldata to a function signature, regardless if more data follow these 4 bytes.
         */
@@ -48,13 +48,11 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         emit ChangedFallbackHandler(handler);
     }
 
-    // @notice Forwards all calls to the fallback handler if set. Returns 0 if no handler is set.
-    // @dev Appends the non-padded caller address to the calldata to be optionally used in the handler
-    //      The handler can make use of `HandlerContext.sol` to extract the address.
-    //      This is done because in the next call frame the `msg.sender` will be FallbackManager's address
-    //      and having the original caller address may enable additional verification scenarios.
+    /**
+     * @inheritdoc IFallbackManager
+     */
     // solhint-disable-next-line payable-fallback,no-complex-fallback
-    fallback() external {
+    fallback() external override {
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
