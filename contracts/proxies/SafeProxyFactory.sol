@@ -93,45 +93,6 @@ contract SafeProxyFactory {
     }
 
     /**
-     * @notice Deploy a new proxy with `_singleton` singleton and `saltNonce` salt.
-     *         Optionally executes an initializer call to a new proxy and calls a specified callback address `callback`.
-     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-     * @param initializer Payload for a message call to be sent to a new proxy contract.
-     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-     * @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
-     */
-    function createProxyWithCallback(
-        address _singleton,
-        bytes memory initializer,
-        uint256 saltNonce,
-        IProxyCreationCallback callback
-    ) public returns (SafeProxy proxy) {
-        uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
-        proxy = createProxyWithNonce(_singleton, initializer, saltNonceWithCallback);
-        if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);
-    }
-
-    /**
-     * @notice Deploy a new proxy with `_singleton` singleton and `saltNonce` salt.
-     *         Optionally executes an initializer call to a new proxy and calls a specified callback address `callback`.
-     * @dev Emits an extra event to allow tracking of `initializer` and `saltNonce`.
-     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
-     * @param initializer Payload for a message call to be sent to a new proxy contract.
-     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-     * @param callback Callback that will be invoked after the new proxy contract has been successfully deployed and initialized.
-     */
-    function createProxyWithCallbackL2(
-        address _singleton,
-        bytes memory initializer,
-        uint256 saltNonce,
-        IProxyCreationCallback callback
-    ) public returns (SafeProxy proxy) {
-        uint256 saltNonceWithCallback = uint256(keccak256(abi.encodePacked(saltNonce, callback)));
-        proxy = createProxyWithNonceL2(_singleton, initializer, saltNonceWithCallback);
-        if (address(callback) != address(0)) callback.proxyCreated(proxy, _singleton, initializer, saltNonce);
-    }
-
-    /**
      * @notice Returns true if `account` is a contract.
      * @dev This function will return false if invoked during the constructor of a contract,
      *      as the code is not created until after the constructor finishes.
