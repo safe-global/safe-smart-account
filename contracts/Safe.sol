@@ -102,6 +102,10 @@ contract Safe is
             // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
             handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
         }
+
+        // Note that we use the setup function parameters instead of reading from storage here. This may mean that the
+        // event parameters are inaccurate if the `to.delegatecall(data)` modified any of them (such as adding or
+        // removing owners, changing the threshold or resetting the fallback handler).
         emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
     }
 
