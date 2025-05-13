@@ -56,9 +56,9 @@ abstract contract BaseModuleGuard is IModuleGuard {
  * @title Module Manager
  * @notice A contract managing Safe modules.
  * @dev Modules are extensions with unlimited access to a Safe that can be added to a Safe by its owners.
-        ⚠️⚠️⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
-        so only trusted and audited modules should be added to a Safe. A malicious module can
-        completely take over a Safe. ⚠️⚠️⚠️
+ *      ⚠️⚠️⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
+ *      so only trusted and audited modules should be added to a Safe. A malicious module can
+ *      completely take over a Safe. ⚠️⚠️⚠️
  * @author Stefan George - @Georgi87
  * @author Richard Meissner - @rmeissner
  */
