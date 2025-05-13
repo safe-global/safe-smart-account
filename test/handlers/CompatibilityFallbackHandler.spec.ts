@@ -266,7 +266,7 @@ describe("CompatibilityFallbackHandler", () => {
     describe("encodeTransactionData", () => {
         it("should return the pre-image of a transaction hash", async () => {
             const { safe, validator } = await setupTests();
-            const tx = [`0x${"11".repeat(20)}`, 1, "0x01020304", 0, 4, 5, 6, `0x${"77".repeat(20)}`, `0x${"88".repeat(20)}`, 9];
+            const tx = [`0x${"11".repeat(20)}`, 1, "0x01020304", 0, 4, 5, 6, `0x${"77".repeat(20)}`, `0x${"88".repeat(20)}`, 9] as const;
             expect(ethers.keccak256(await validator.encodeTransactionData(...tx))).to.be.eq(await safe.getTransactionHash(...tx));
         });
     });
