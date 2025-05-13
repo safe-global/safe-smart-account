@@ -38,8 +38,9 @@ contract SafeProxy {
         /* solhint-disable no-inline-assembly */
         assembly {
             let _singleton := sload(0)
-            // 0xa619486e == bytes4(keccak256("masterCopy()")). The value is right padded to 32-bytes with 0s
-            if eq(calldataload(0), 0xa619486e00000000000000000000000000000000000000000000000000000000) {
+            // 0xa619486e == uint32(bytes4(keccak256("masterCopy()"))). Only the 4 first bytes of calldata are
+            // considered to make it 100% Solidity ABI conformant.
+            if eq(shr(224, calldataload(0)), 0xa619486e) {
                 // We mask the singleton address when handling the `masterCopy()` call to ensure that it is correctly
                 // ABI-encoded. We do this by shifting the address left by 96 bits (or 12 bytes) and then storing it in
                 // memory with a 12 byte offset from where the return data starts. Note that we **intentionally** only
