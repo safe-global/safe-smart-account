@@ -79,7 +79,7 @@ contract SafeMigration is SafeStorage {
      */
     function migrateWithFallbackHandler() external onlyDelegateCall {
         migrateSingleton();
-        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
@@ -96,7 +96,7 @@ contract SafeMigration is SafeStorage {
      */
     function migrateL2WithFallbackHandler() external onlyDelegateCall {
         migrateL2Singleton();
-        ISafe(address(this)).setFallbackHandler(SAFE_FALLBACK_HANDLER);
+        ISafe(payable(address(this))).setFallbackHandler(SAFE_FALLBACK_HANDLER);
     }
 
     /**
