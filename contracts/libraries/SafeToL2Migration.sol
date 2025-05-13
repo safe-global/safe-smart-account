@@ -59,7 +59,10 @@ contract SafeToL2Migration is SafeStorage {
 
     /**
      * @notice Modifier to prevent using initialized Safes.
-     * If Safe has a nonce higher than 0, it will revert
+     *         If the Safe is executing a transaction with a nonce higher than 0, it will revert.
+     * @dev Note that this modifier is **best-effort** and can be bypassed if a Safe:
+     *      1. executes an initial transaction with nonce 0
+     *      2. executes the migration as a module transaction
      */
     modifier onlyNonceZero() {
         // Nonce is increased before executing a tx, so first executed tx will have nonce=1
