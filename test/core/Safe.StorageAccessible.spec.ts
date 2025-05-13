@@ -38,7 +38,7 @@ describe("StorageAccessible", () => {
             /**
              * ## Test not applicable for zkSync, therefore should skip.
              * The `SELFDESTRUCT` instruction is not supported
-             * @see https://era.zksync.io/docs/reference/architecture/differences-with-ethereum.html#selfdestruct
+             * @see https://docs.zksync.io/zksync-protocol/differences/evm-instructions#selfdestruct
              */
             if (hre.network.zksync) this.skip();
 
