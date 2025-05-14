@@ -6,9 +6,9 @@ import {Enum} from "../libraries/Enum.sol";
  * @title Module Manager Interface
  * @notice Interface for managing Safe modules.
  * @dev Modules are extensions with unlimited access to a Safe that can be added to a Safe by its owners.
-        ⚠️⚠️⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
-        so only trusted and audited modules should be added to a Safe. A malicious module can
-        completely takeover a Safe. ⚠️⚠️⚠️
+ *      ⚠️⚠️⚠️ WARNING: Modules are a security risk since they can execute arbitrary transactions,
+ *      so only trusted and audited modules should be added to a Safe. A malicious module can
+ *      completely takeover a Safe. ⚠️⚠️⚠️
  * @author @safe-global/safe-protocol
  */
 interface IModuleManager {
