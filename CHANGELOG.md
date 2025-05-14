@@ -104,7 +104,9 @@ The repository was renamed from `safe-contracts` to `safe-smart-account` to bett
 
 PR: [#851](https://github.com/safe-global/safe-smart-account/pull/851)
 
-`ExtensibleFallbackHandler` originally created by the CoWSwap Team is used for bringing new features and capabilities to Safe Smart Account including, but not limited to swaps, TWAP orders, etc. More details can be found [here](https://cow.fi/learn/all-you-need-to-know-about-cow-swap-new-safe-fallback-handler).
+`ExtensibleFallbackHandler` originally created by the CoW Swap team is used for bringing new features and capabilities to Safe Smart Account including, but not limited to swaps, TWAP orders, etc. More details can be found [here](https://cow.fi/learn/all-you-need-to-know-about-cow-swap-new-safe-fallback-handler).
+
+**NOTE**: The events for adding and removing Safe methods and domain verifiers were simplified such that contracts only emit a "changed" event. This is a breaking change from the original implementation from the CoW Swap team.
 
 #### Event emitted with `initializer` and `saltNonce` for proxy creation
 
