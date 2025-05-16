@@ -90,7 +90,6 @@
         "rimraf": "^6.0.1",
         "solc": "=0.7.6",
         "solhint": "^5.1.0",
-        "ts-node": "^10.9.2",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.32.1",
         "yargs": "^17.7.2",
