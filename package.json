@@ -81,6 +81,7 @@
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-no-only-tests": "^3.3.0",
         "eslint-plugin-prettier": "^5.4.0",
+        "ethers": "6.13.0",
         "hardhat": "^2.24.0",
         "hardhat-deploy": "^1.0.2",
         "husky": "^9.1.7",
