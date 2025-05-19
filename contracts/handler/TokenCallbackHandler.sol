@@ -12,6 +12,9 @@ import {HandlerContext} from "./HandlerContext.sol";
 /**
  * @title Token Callback Handler
  * @notice Handles supported tokens' callbacks, allowing Safes to receive these tokens.
+ * @dev ⚠️ WARNING: This contract implements various token callback functions, which makes it
+ *      possible for itself to receive these tokens despite not being designed to do so,
+ *      PERMANENTLY LOCKING THOSE TOKENS. Do not send tokens to this contract.
  * @author Richard Meissner - @rmeissner
  */
 contract TokenCallbackHandler is HandlerContext, ERC1155TokenReceiver, ERC777TokensRecipient, ERC721TokenReceiver, IERC165 {
