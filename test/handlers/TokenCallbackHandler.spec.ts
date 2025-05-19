@@ -77,6 +77,19 @@ describe("TokenCallbackHandler", () => {
                     .safeBatchTransferFrom(await user.getAddress(), await handler.getAddress(), [2, 3], [100, 100], context),
             ).to.be.revertedWith("TokenCallbackHandler cannot receive tokens");
         });
+
+        it("can be tricked into sending tokens to the fallback handler", async () => {
+            // demonstrate that the `onERC*Received` methods are best effort, and that they can be
+            // tricked to send tokens to the fallback handler.
+            const { handler, user, erc1155 } = await setupTests();
+
+            await erc1155.mint(await user.getAddress(), 1, 100, "0x");
+            const otherErc1155 = await ethers.deployContract("ERC1155Token");
+            const context = ethers.toBeHex(await otherErc1155.getAddress(), 32);
+
+            await expect(erc1155.connect(user).safeTransferFrom(await user.getAddress(), await handler.getAddress(), 1, 100, context)).to
+                .not.be.reverted;
+        });
     });
 
     describe("ERC721", () => {
@@ -123,6 +136,23 @@ describe("TokenCallbackHandler", () => {
                     .connect(user)
                     ["safeTransferFrom(address,address,uint256,bytes)"](await user.getAddress(), await handler.getAddress(), 1, context),
             ).to.be.revertedWith("TokenCallbackHandler cannot receive tokens");
+        });
+
+        it("can be tricked into sending tokens to the fallback handler", async () => {
+            // demonstrate that the `onERC*Received` methods are best effort, and that they can be
+            // tricked to send tokens to the fallback handler.
+            const { handler, user, erc721 } = await setupTests();
+
+            await erc721.mint(await user.getAddress(), 1);
+            const otherErc721 = await ethers.deployContract("ERC721Token");
+            await otherErc721.mint(await user.getAddress(), 1);
+            const context = ethers.toBeHex(await otherErc721.getAddress(), 32);
+
+            await expect(
+                erc721
+                    .connect(user)
+                    ["safeTransferFrom(address,address,uint256,bytes)"](await user.getAddress(), await handler.getAddress(), 1, context),
+            ).to.not.be.reverted;
         });
     });
 
