@@ -3,7 +3,6 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "./../interfaces/ISafe.sol";
 import {ISignatureValidator} from "./../interfaces/ISignatureValidator.sol";
-import {HandlerContext} from "./HandlerContext.sol";
 import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
 
 /**
@@ -13,7 +12,7 @@ import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
  *      Using it in other ways may cause undefined behavior. ⚠️⚠️⚠️
  * @author Richard Meissner - @rmeissner
  */
-contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator, HandlerContext {
+contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator {
     /**
      * @dev The precomputed EIP-712 type hash for the Safe message type.
      *      Precomputed value of: `keccak256("SafeMessage(bytes message)")`.
