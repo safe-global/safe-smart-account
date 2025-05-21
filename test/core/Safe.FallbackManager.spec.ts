@@ -107,13 +107,13 @@ describe("FallbackManager", () => {
 
             // Check unset callbacks
             // Ethers v6 throws an internal error when trying to call a non-existent function
-            await expect(safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.rejected;
+            await expect(safeHandler.supportsInterface.staticCall("0x01ffc9a7")).to.be.rejected;
 
             // Setup Safe
             await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero);
 
             // Check callbacks
-            expect(await safeHandler.onERC1155Received.staticCall(AddressZero, AddressZero, 0, 0, "0x")).to.be.eq("0xf23a6e61");
+            expect(await safeHandler.supportsInterface.staticCall("0x01ffc9a7")).to.be.true;
         });
 
         it("sends along msg.sender on simple call", async () => {
