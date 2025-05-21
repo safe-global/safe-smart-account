@@ -91,6 +91,11 @@ contract Safe is
         uint256 payment,
         address payable paymentReceiver
     ) external override {
+        // Emit the setup event optimistically. This ensures that changes such as `addOwner` and `changeThreshold` that are part
+        // of the  `to.delegatecall(data)` that happen in the `setupModules` call emit events in order relative to the setup
+        // event, making it easier for off-chain indexers to reliably reconstruct the Safe configuration.
+        emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
+
         // setupOwners checks if the Threshold is already set, therefore preventing this method from being called more than once
         setupOwners(_owners, _threshold);
         if (fallbackHandler != address(0)) internalSetFallbackHandler(fallbackHandler);
@@ -102,7 +107,6 @@ contract Safe is
             // baseGas = 0, gasPrice = 1 and gas = payment => amount = (payment + 0) * 1 = payment
             handlePayment(payment, 0, 1, paymentToken, paymentReceiver);
         }
-        emit SafeSetup(msg.sender, _owners, _threshold, to, fallbackHandler);
     }
 
     /**
