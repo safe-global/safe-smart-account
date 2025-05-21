@@ -143,24 +143,18 @@ describe("ExtensibleFallbackHandler", () => {
             });
 
             it("to handle onERC1155Received", async () => {
-                const { handler, erc1155 } = await setupTests();
-                const callback = handler.interface.encodeFunctionData("onERC1155Received", [AddressZero, AddressZero, 0, 0, "0x"]);
-                const callbackWithContext = ethers.concat([callback, await erc1155.getAddress()]);
-                const [result] = handler.interface.decodeFunctionResult(
-                    "onERC1155Received",
-                    await ethers.provider.call({ to: await handler.getAddress(), data: callbackWithContext }),
-                );
+                const { handler, safe } = await setupTests();
+                const result = await handler
+                    .connect(ethers.provider)
+                    .onERC1155Received(AddressZero, AddressZero, 0, 0, "0x", { from: await safe.getAddress() });
                 await expect(result).to.be.eq("0xf23a6e61");
             });
 
             it("to handle onERC1155BatchReceived", async () => {
-                const { handler, erc1155 } = await setupTests();
-                const callback = handler.interface.encodeFunctionData("onERC1155BatchReceived", [AddressZero, AddressZero, [], [], "0x"]);
-                const callbackWithContext = ethers.concat([callback, await erc1155.getAddress()]);
-                const [result] = handler.interface.decodeFunctionResult(
-                    "onERC1155BatchReceived",
-                    await ethers.provider.call({ to: await handler.getAddress(), data: callbackWithContext }),
-                );
+                const { handler, safe } = await setupTests();
+                const result = await handler
+                    .connect(ethers.provider)
+                    .onERC1155BatchReceived(AddressZero, AddressZero, [], [], "0x", { from: await safe.getAddress() });
                 await expect(result).to.be.eq("0xbc197c81");
             });
 
@@ -187,18 +181,7 @@ describe("ExtensibleFallbackHandler", () => {
                     erc1155
                         .connect(user1)
                         .safeBatchTransferFrom(await user1.getAddress(), await handler.getAddress(), [2, 3], [100, 100], "0x"),
-                ).to.be.reverted;
-
-                // This tricks the `HandlerContext` implementation to call our ERC-1155 implementation.
-                const context = ethers.toBeHex(await erc1155.getAddress(), 32);
-                await expect(
-                    erc1155.connect(user1).safeTransferFrom(await user1.getAddress(), await handler.getAddress(), 1, 100, context),
-                ).to.be.revertedWith("cannot receive tokens");
-                await expect(
-                    erc1155
-                        .connect(user1)
-                        .safeBatchTransferFrom(await user1.getAddress(), await handler.getAddress(), [2, 3], [100, 100], context),
-                ).to.be.revertedWith("cannot receive tokens");
+                ).to.be.revertedWith("not a fallback call");
             });
         });
 
@@ -209,16 +192,11 @@ describe("ExtensibleFallbackHandler", () => {
             });
 
             it("to handle onERC721Received", async () => {
-                const { handler, user1, erc721 } = await setupTests();
+                const { handler, safe } = await setupTests();
 
-                await erc721.mint(await user1.getAddress(), 0);
-
-                const callback = handler.interface.encodeFunctionData("onERC721Received", [AddressZero, AddressZero, 0, "0x"]);
-                const callbackWithContext = ethers.concat([callback, await erc721.getAddress()]);
-                const [result] = handler.interface.decodeFunctionResult(
-                    "onERC721Received",
-                    await ethers.provider.call({ to: await handler.getAddress(), data: callbackWithContext }),
-                );
+                const result = await handler
+                    .connect(ethers.provider)
+                    .onERC721Received(AddressZero, AddressZero, 0, "0x", { from: await safe.getAddress() });
                 await expect(result).to.be.eq("0x150b7a02");
             });
 
@@ -241,17 +219,7 @@ describe("ExtensibleFallbackHandler", () => {
                     erc721
                         .connect(user1)
                         ["safeTransferFrom(address,address,uint256)"](await user1.getAddress(), await handler.getAddress(), 1),
-                ).to.be.reverted;
-
-                // This tricks the `HandlerContext` implementation to call our ERC-721 implementation.
-                const context = ethers.toBeHex(await erc721.getAddress(), 32);
-                await expect(
-                    erc721
-                        .connect(user1)
-                        [
-                            "safeTransferFrom(address,address,uint256,bytes)"
-                        ](await user1.getAddress(), await handler.getAddress(), 1, context),
-                ).to.be.revertedWith("cannot receive tokens");
+                ).to.be.revertedWith("not a fallback call");
             });
         });
     });

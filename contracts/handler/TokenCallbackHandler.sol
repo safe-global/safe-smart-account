@@ -4,9 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import {ERC1155TokenReceiver} from "../interfaces/ERC1155TokenReceiver.sol";
 import {ERC721TokenReceiver} from "../interfaces/ERC721TokenReceiver.sol";
 import {ERC777TokensRecipient} from "../interfaces/ERC777TokensRecipient.sol";
-import {IERC1155} from "../interfaces/IERC1155.sol";
 import {IERC165} from "../interfaces/IERC165.sol";
-import {IERC721} from "../interfaces/IERC721.sol";
 import {HandlerContext} from "./HandlerContext.sol";
 
 /**
@@ -22,16 +20,7 @@ contract TokenCallbackHandler is HandlerContext, ERC1155TokenReceiver, ERC777Tok
      * @notice Handles ERC-1155 Token callback.
      * @return Standardized onERC1155Received return value.
      */
-    function onERC1155Received(address, address, uint256 id, uint256, bytes calldata) external view override returns (bytes4) {
-        // The ERC-1155 standard implies that the callback happens **after** the transfer completes,
-        // so we can read the balance of the transferred token in order to ensure the transfer was
-        // not to the token handler itself, and instead received by a Safe that has this contract
-        // configured as a fallback handler. Note that this is best-effort to try and reduce the
-        // number of lost tokens sent to the token fallback handler contract and not intended to
-        // prevent all unintentional token transfers.
-        uint256 balance = IERC1155(_msgSender()).balanceOf(address(this), id);
-        require(balance == 0, "TokenCallbackHandler cannot receive tokens");
-
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external view override onlyFallback returns (bytes4) {
         return 0xf23a6e61;
     }
 
@@ -42,20 +31,10 @@ contract TokenCallbackHandler is HandlerContext, ERC1155TokenReceiver, ERC777Tok
     function onERC1155BatchReceived(
         address,
         address,
-        uint256[] calldata ids,
+        uint256[] calldata,
         uint256[] calldata,
         bytes calldata
-    ) external view override returns (bytes4) {
-        // Batched version of `onERC1155Received`, see comment there for more details.
-        address[] memory owners = new address[](ids.length);
-        for (uint256 i = 0; i < owners.length; i++) {
-            owners[i] = address(this);
-        }
-        uint256[] memory balances = IERC1155(_msgSender()).balanceOfBatch(owners, ids);
-        for (uint256 i = 0; i < balances.length; i++) {
-            require(balances[i] == 0, "TokenCallbackHandler cannot receive tokens");
-        }
-
+    ) external view override onlyFallback returns (bytes4) {
         return 0xbc197c81;
     }
 
@@ -63,16 +42,7 @@ contract TokenCallbackHandler is HandlerContext, ERC1155TokenReceiver, ERC777Tok
      * @notice Handles ERC-721 Token callback.
      * @return Standardized onERC721Received return value.
      */
-    function onERC721Received(address, address, uint256 tokenId, bytes calldata) external view override returns (bytes4) {
-        // The ERC-721 standard implies that the callback happens **after** the transfer completes,
-        // so we can read the owner of the transferred token in order to ensure that it wasn't
-        // transferred to the token handler itself, and instead received by a Safe that has this
-        // contract configured as a fallback handler. Note that this is best-effort to try and
-        // reduce the number of lost tokens sent to the token fallback handler contract and not
-        // intended to prevent all unintentional token transfers.
-        address to = IERC721(_msgSender()).ownerOf(tokenId);
-        require(to != address(this), "TokenCallbackHandler cannot receive tokens");
-
+    function onERC721Received(address, address, uint256, bytes calldata) external view override onlyFallback returns (bytes4) {
         return 0x150b7a02;
     }
 
