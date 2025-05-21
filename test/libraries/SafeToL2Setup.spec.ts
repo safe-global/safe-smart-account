@@ -178,22 +178,18 @@ describe("SafeToL2Setup", () => {
                         sameHexString(log.stack[log.stack.length - 2], ethers.zeroPadValue(safeToL2SetupLibAddress, 32).slice(2)),
                 );
                 const preDelegateCallStorage = trace.structLogs[delegateCallIntoTheLib].storage;
+                const preDelegateCallDepth = trace.structLogs[delegateCallIntoTheLib].depth;
 
-                // The SafeSetup event is emitted after the Safe is set up
-                // To get the storage snapshot after the Safe is set up, we need to find the LOG2 opcode with the topic input on the stack equal the SafeSetup event signature
-                const SAFE_SETUP_EVENT_SIGNATURE = safeSingleton.interface.getEvent("SafeSetup").topicHash;
-                const postSafeSetup = trace.structLogs.find(
-                    (log, index) =>
-                        log.op === "LOG2" &&
-                        log.stack[log.stack.length - 3] === SAFE_SETUP_EVENT_SIGNATURE.slice(2) &&
-                        index > delegateCallIntoTheLib,
-                );
-                if (!postSafeSetup) {
-                    throw new Error("No SafeSetup event");
+                // Find the end of the delegatecall, to see how the storage changed.
+                const postDelegateCall = trace.structLogs
+                    .slice(delegateCallIntoTheLib + 1)
+                    .find((log) => log.depth === preDelegateCallDepth);
+                if (!postDelegateCall) {
+                    throw new Error("No end of delegate call");
                 }
-                const postSafeSetupStorage = postSafeSetup.storage;
+                const postDelegateCallStorage = postDelegateCall.storage;
 
-                for (const [key, value] of Object.entries(postSafeSetupStorage)) {
+                for (const [key, value] of Object.entries(postDelegateCallStorage)) {
                     // The slot key 0 is the singleton storage slot, it must equal the L2 singleton address
                     if (sameHexString(key, ethers.zeroPadValue("0x00", 32))) {
                         expect(sameHexString(ethers.zeroPadValue(safeL2SingletonAddress, 32), value)).to.be.true;
