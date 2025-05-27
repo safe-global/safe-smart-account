@@ -64,14 +64,12 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     mapping(ISafe => mapping(bytes32 => ISafeSignatureVerifier)) public override domainVerifiers;
 
     // --- events ---
-    event AddedDomainVerifier(ISafe indexed safe, bytes32 domainSeparator, ISafeSignatureVerifier verifier);
     event ChangedDomainVerifier(
         ISafe indexed safe,
         bytes32 domainSeparator,
         ISafeSignatureVerifier oldVerifier,
         ISafeSignatureVerifier newVerifier
     );
-    event RemovedDomainVerifier(ISafe indexed safe, bytes32 domainSeparator);
 
     /**
      * Setter for the signature muxer
@@ -81,17 +79,8 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     function setDomainVerifier(bytes32 domainSeparator, ISafeSignatureVerifier newVerifier) public override onlySelf {
         ISafe safe = ISafe(payable(_msgSender()));
         ISafeSignatureVerifier oldVerifier = domainVerifiers[safe][domainSeparator];
-        if (address(newVerifier) == address(0) && address(oldVerifier) != address(0)) {
-            delete domainVerifiers[safe][domainSeparator];
-            emit RemovedDomainVerifier(safe, domainSeparator);
-        } else {
-            domainVerifiers[safe][domainSeparator] = newVerifier;
-            if (address(oldVerifier) == address(0)) {
-                emit AddedDomainVerifier(safe, domainSeparator, newVerifier);
-            } else {
-                emit ChangedDomainVerifier(safe, domainSeparator, oldVerifier, newVerifier);
-            }
-        }
+        domainVerifiers[safe][domainSeparator] = newVerifier;
+        emit ChangedDomainVerifier(safe, domainSeparator, oldVerifier, newVerifier);
     }
 
     /**

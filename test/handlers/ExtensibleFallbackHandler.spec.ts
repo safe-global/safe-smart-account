@@ -209,8 +209,8 @@ describe("ExtensibleFallbackHandler", () => {
                 const safeAddress = await safe.getAddress();
                 const newHandler = encodeHandler(true, await mirror.getAddress());
                 await expect(executeContractCallWithSigners(safe, validator, "setSafeMethod", ["0xdededede", newHandler], [user1, user2]))
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xdededede", newHandler.toLowerCase());
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xdededede", HashZero, newHandler.toLowerCase());
 
                 // Check that the method is actually set
                 expect(await handler.safeMethods.staticCall(safeAddress, "0xdededede")).to.be.eq(newHandler);
@@ -238,8 +238,9 @@ describe("ExtensibleFallbackHandler", () => {
             });
 
             it("should emit event when removing a method", async () => {
-                const { user1, user2, otherSafe, handler, preconfiguredValidator } = await setupTests();
+                const { user1, user2, otherSafe, handler, preconfiguredValidator, mirror } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
+                const oldHandler = encodeHandler(true, await mirror.getAddress());
                 await expect(
                     executeContractCallWithSigners(
                         otherSafe,
@@ -249,8 +250,8 @@ describe("ExtensibleFallbackHandler", () => {
                         [user1, user2],
                     ),
                 )
-                    .to.emit(handler, "RemovedSafeMethod")
-                    .withArgs(otherSafeAddress, "0x7f8dc53c");
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(otherSafeAddress, "0x7f8dc53c", oldHandler, HashZero);
 
                 // Check that the method is actually removed
                 expect(await handler.safeMethods.staticCall(otherSafeAddress, "0x7f8dc53c")).to.be.eq(HashZero);
@@ -409,8 +410,8 @@ describe("ExtensibleFallbackHandler", () => {
                         [user1, user2],
                     ),
                 )
-                    .to.emit(handler, "AddedDomainVerifier")
-                    .withArgs(safeAddress, domainSeparator, testVerifierAddress);
+                    .to.emit(handler, "ChangedDomainVerifier")
+                    .withArgs(safeAddress, domainSeparator, ethers.ZeroAddress, testVerifierAddress);
 
                 expect(await handler.domainVerifiers(safeAddress, domainSeparator)).to.be.eq(testVerifierAddress);
             });
@@ -441,6 +442,8 @@ describe("ExtensibleFallbackHandler", () => {
                 const { user1, user2, otherSafe, handler, preconfiguredValidator } = await setupTests();
                 const otherSafeAddress = await otherSafe.getAddress();
                 const domainSeparator = ethers.keccak256("0xdeadbeef");
+                const oldVerifier = await handler.domainVerifiers(otherSafeAddress, domainSeparator);
+
                 await expect(
                     executeContractCallWithSigners(
                         otherSafe,
@@ -450,8 +453,8 @@ describe("ExtensibleFallbackHandler", () => {
                         [user1, user2],
                     ),
                 )
-                    .to.emit(handler, "RemovedDomainVerifier")
-                    .withArgs(otherSafeAddress, domainSeparator);
+                    .to.emit(handler, "ChangedDomainVerifier")
+                    .withArgs(otherSafeAddress, domainSeparator, oldVerifier, ethers.ZeroAddress);
 
                 expect(await handler.domainVerifiers(otherSafeAddress, domainSeparator)).to.be.eq(AddressZero);
             });
@@ -755,12 +758,12 @@ describe("ExtensibleFallbackHandler", () => {
                 await expect(
                     executeContractCallWithSigners(safe, validator, "addSupportedInterfaceBatch", [interfaceId, batch], [user1, user2]),
                 )
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xabababab", encodeHandler(true, mirrorAddress))
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xcdcdcdcd", encodeHandler(true, mirrorAddress))
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xefefefef", encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xabababab", HashZero, encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xcdcdcdcd", HashZero, encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xefefefef", HashZero, encodeHandler(true, mirrorAddress))
                     .to.emit(handler, "AddedInterface")
                     .withArgs(safeAddress, interfaceId);
 
@@ -796,12 +799,12 @@ describe("ExtensibleFallbackHandler", () => {
                 await expect(
                     executeContractCallWithSigners(safe, validator, "addSupportedInterfaceBatch", [interfaceId, batch], [user1, user2]),
                 )
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xabababab", encodeHandler(true, mirrorAddress))
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xcdcdcdcd", encodeHandler(true, mirrorAddress))
-                    .to.emit(handler, "AddedSafeMethod")
-                    .withArgs(safeAddress, "0xefefefef", encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xabababab", HashZero, encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xcdcdcdcd", HashZero, encodeHandler(true, mirrorAddress))
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xefefefef", HashZero, encodeHandler(true, mirrorAddress))
                     .to.emit(handler, "AddedInterface")
                     .withArgs(safeAddress, interfaceId);
 
@@ -829,12 +832,12 @@ describe("ExtensibleFallbackHandler", () => {
                         [user1, user2],
                     ),
                 )
-                    .to.emit(handler, "RemovedSafeMethod")
-                    .withArgs(safeAddress, "0xabababab")
-                    .to.emit(handler, "RemovedSafeMethod")
-                    .withArgs(safeAddress, "0xcdcdcdcd")
-                    .to.emit(handler, "RemovedSafeMethod")
-                    .withArgs(safeAddress, "0xefefefef")
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xabababab", encodeHandler(true, mirrorAddress), HashZero)
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xcdcdcdcd", encodeHandler(true, mirrorAddress), HashZero)
+                    .to.emit(handler, "ChangedSafeMethod")
+                    .withArgs(safeAddress, "0xefefefef", encodeHandler(true, mirrorAddress), HashZero)
                     .to.emit(handler, "RemovedInterface")
                     .withArgs(safeAddress, interfaceId);
 
