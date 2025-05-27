@@ -151,13 +151,13 @@ Issues:
 -   [#557](https://github.com/safe-global/safe-smart-account/pull/557)
 -   [#589](https://github.com/safe-global/safe-smart-account/pull/589)
 
-Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was moved from the core contract to the `CompatibilityFallbackHandler`.
+Previously pre-approved signatures relying on the `msg.sender` variable couldn't be used in guards or modules without duplicating the logic within the module itself. This is now improved by adding an overloaded `checkNSignatures` method that accepts a `msg.sender` parameter. This allows the module to pass the `msg.sender` variable to the `checkNSignatures` method and use the pre-approved signatures. The old method was kept for backwards compatibility.
 
 #### Remove `encodeTransactionData` and add inline-assembly-based encoding in `getTransactionHash`
 
 PR: [#603](https://github.com/safe-global/safe-smart-account/pull/603)
 
-The `encodeTransactionData` function has been refactored in two stages since the last release. Initially, due to bytecode size constraints, it was modified in PR [#603](https://github.com/safe-global/safe-smart-account/pull/603) to a `private` function. Subsequently, in PR [#847](https://github.com/safe-global/safe-smart-account/pull/847), `encodeTransactionData` was entirely removed and replaced with an optimized, inline-assembly implementation within the `getTransactionHash` function.
+The `encodeTransactionData` function has been refactored in two stages since the last release. Initially, due to bytecode size constraints, it was modified in PR [#603](https://github.com/safe-global/safe-smart-account/pull/603) to a `private` function. Subsequently, in PR [#847](https://github.com/safe-global/safe-smart-account/pull/847), `encodeTransactionData` was entirely removed and replaced with an optimized, inline-assembly implementation within the `getTransactionHash` function. Note that `encodeTransactionData` was added to the `CompatibilityFallbackHandler` for backwards compatibility.
 
 #### Deprecate `createProxyWithCallback`
 
