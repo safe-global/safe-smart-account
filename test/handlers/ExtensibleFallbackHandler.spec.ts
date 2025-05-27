@@ -77,9 +77,27 @@ describe("ExtensibleFallbackHandler", () => {
             }
         }`;
 
+        const erc165BencherSource = `
+        interface IERC165 {
+            function supportsInterface(bytes4 interfaceId) external view returns (bool);
+        }
+
+        contract ERC165Bencher {
+            function supportsInterfaceGas(address implementation, bytes4 interfaceId) external view returns (uint256 cold, uint256 warm) {
+                cold = gasleft();
+                IERC165(implementation).supportsInterface(interfaceId);
+                cold = cold - gasleft();
+
+                warm = gasleft();
+                IERC165(implementation).supportsInterface(interfaceId);
+                warm = warm - gasleft();
+            }
+        }`;
+
         const mirror = await deployContractFromSource(user1, mirrorSource);
         const revertVerifier = await deployContractFromSource(user1, revertVerifierSource);
         const counter = await deployContractFromSource(user1, counterSource);
+        const erc165Bencher = await deployContractFromSource(user1, erc165BencherSource);
 
         // Set up the mirror on the preconfigured validator
         // Check the event when changing
@@ -125,6 +143,7 @@ describe("ExtensibleFallbackHandler", () => {
             counter,
             testVerifier,
             revertVerifier,
+            erc165Bencher,
             testMarshalLib,
         };
     });
@@ -630,6 +649,21 @@ describe("ExtensibleFallbackHandler", () => {
             it("should return true for ERC165", async () => {
                 const { validator } = await setupTests();
                 expect(await validator.supportsInterface.staticCall("0x01ffc9a7")).to.be.true;
+            });
+
+            it("should use less than 30.000 gas", async function () {
+                /**
+                 * ## zkSync has a different gas schedule, and therefore this test is not applicable.
+                 */
+                if (hre.network.zksync) this.skip();
+
+                const { validator, erc165Bencher } = await setupTests();
+
+                for (const interfaceId of ["0x01ffc9a7", "0xdeadbeef"]) {
+                    const [cold, warm] = await erc165Bencher.supportsInterfaceGas(await validator.getAddress(), interfaceId);
+                    expect(cold).to.be.lessThan(30000);
+                    expect(warm).to.be.lessThan(30000);
+                }
             });
         });
 
