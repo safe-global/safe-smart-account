@@ -34,7 +34,9 @@ contract SafeProxy {
         // Note that this assembly block is **intentionally** not marked as memory-safe. First of all, it isn't memory
         // safe to begin with, and turning this into memory-safe assembly would just make it less gas efficient.
         // Additionally, we noticed that converting this to memory-safe assembly had no affect on optimizations of other
-        // contracts (as it always gets compiled alone in its own compilation unit anyway).
+        // contracts (as it always gets compiled alone in its own compilation unit anyway). Because the assembly block
+        // always halts and never returns control back to Solidity, disrespecting Solidity's memory safety invariants
+        // is not an issue.
         /* solhint-disable no-inline-assembly */
         assembly {
             let _singleton := sload(0)
@@ -46,9 +48,16 @@ contract SafeProxy {
                 // memory with a 12 byte offset from where the return data starts. Note that we **intentionally** only
                 // do this for the `masterCopy()` call, since the EVM `DELEGATECALL` opcode ignores the most-significant
                 // 12 bytes from the address, so we do not need to make sure the top bytes are cleared when proxying
-                // calls to the `singleton`. This saves us a tiny amount of gas per proxied call.
-                mstore(0x0c, shl(96, _singleton))
-                return(0, 0x20)
+                // calls to the `singleton`. This saves us a tiny amount of gas per proxied call. Additionally, we write
+                // to the "zero-memory" slot instead of the scratch space, which guarantees that 12 bytes of memory
+                // preceding the singleton address are zero (which would not be guaranteed for the scratch space) [1].
+                // This ensures that the data we return has the leading 12 bytes set to zero and conforms to the
+                // Solidity ABI [2].
+                //
+                // [1]: https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html
+                // [2]: https://docs.soliditylang.org/en/v0.7.6/abi-spec.html#formal-specification-of-the-encoding
+                mstore(0x6c, shl(96, _singleton))
+                return(0x60, 0x20)
             }
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)
