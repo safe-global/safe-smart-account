@@ -159,6 +159,12 @@ PR: [#603](https://github.com/safe-global/safe-smart-account/pull/603)
 
 The `encodeTransactionData` function has been refactored in two stages since the last release. Initially, due to bytecode size constraints, it was modified in PR [#603](https://github.com/safe-global/safe-smart-account/pull/603) to a `private` function. Subsequently, in PR [#847](https://github.com/safe-global/safe-smart-account/pull/847), `encodeTransactionData` was entirely removed and replaced with an optimized, inline-assembly implementation within the `getTransactionHash` function.
 
+#### Deprecate `createProxyWithCallback`
+
+PR: [#955](https://github.com/safe-global/safe-smart-account/pull/955)
+
+The `createProxyWithCallback` function on the `SafeProxyFactory` was removed, as it was unused and the current implementation did not guarantee that the `callback` would get called.
+
 # Version 1.4.1
 
 ## Release iterations
