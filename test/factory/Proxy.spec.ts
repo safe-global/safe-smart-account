@@ -44,6 +44,17 @@ describe("Proxy", () => {
             expect(await proxy.masterCopy()).to.equal(await singleton.getAddress());
         });
 
+        it("should ignore extra calldata bytes", async () => {
+            const { singleton, proxy } = await setupTests();
+            const callData = hre.ethers.concat([proxy.interface.encodeFunctionData("masterCopy", []), "0xbaddad"]);
+            const returnData = await hre.ethers.provider.call({
+                to: await proxy.getAddress(),
+                data: callData,
+            });
+            const [masterCopy] = hre.ethers.AbiCoder.defaultAbiCoder().decode(["address"], returnData);
+            expect(masterCopy).to.equal(await singleton.getAddress());
+        });
+
         it("should correctly mask the address value", async () => {
             const { proxy } = await setupTests();
             await proxy.overwriteSingletonSlot(hre.ethers.MaxUint256);
