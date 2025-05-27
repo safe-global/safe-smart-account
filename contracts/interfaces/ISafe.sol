@@ -22,6 +22,8 @@ interface ISafe is IModuleManager, IGuardManager, IOwnerManager, IFallbackManage
      * @notice Sets an initial storage of the Safe contract.
      * @dev This method can only be called once.
      *      If a proxy was created without setting up, anyone can call setup and claim the proxy.
+     *      This method emits a {SafeSetup} event with the setup parameters instead of reading from storage,
+     *      which may be inaccurate if the delegate call to `to` modifies the owners, threshold or fallback handler.
      * @param _owners List of Safe owners.
      * @param _threshold Number of required confirmations for a Safe transaction.
      * @param to Contract address for optional delegate call.
