@@ -19,4 +19,14 @@ interface IFallbackManager {
      * @param handler contract to handle fallback calls.
      */
     function setFallbackHandler(address handler) external;
+
+    /**
+     * @notice Forwards all calls to the fallback handler if set.
+     *         Returns empty data if no handler is set.
+     * @dev Appends the non-padded caller address to the calldata to be optionally used in the handler
+     *      The handler can make use of {HandlerContext} to extract the address.
+     *      This is done because in the next call frame the `msg.sender` will be {FallbackManager}'s address
+     *      and having the original caller address may enable additional verification scenarios.
+     */
+    fallback() external;
 }
