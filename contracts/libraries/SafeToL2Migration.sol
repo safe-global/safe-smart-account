@@ -110,8 +110,8 @@ contract SafeToL2Migration is SafeStorage {
     function migrateToL2(address l2Singleton) external onlyDelegateCall onlyNonceZero {
         address _singleton = singleton;
         require(_singleton != l2Singleton, "Safe is already using the singleton");
-        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(_singleton).VERSION()));
-        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
+        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(payable(_singleton)).VERSION()));
+        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(payable(l2Singleton)).VERSION()));
 
         require(oldSingletonVersion == newSingletonVersion, "L2 singleton must match current version singleton");
         // There's no way to make sure if address is a valid singleton, unless we configure the contract for every chain
@@ -133,16 +133,16 @@ contract SafeToL2Migration is SafeStorage {
     function migrateFromV111(address l2Singleton, address fallbackHandler) external onlyDelegateCall onlyNonceZero {
         require(isContract(fallbackHandler), "fallbackHandler is not a contract");
 
-        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(singleton).VERSION()));
+        bytes32 oldSingletonVersion = keccak256(abi.encodePacked(ISafe(payable(singleton)).VERSION()));
         require(oldSingletonVersion == keccak256(abi.encodePacked("1.1.1")), "Provided singleton version is not supported");
 
-        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(l2Singleton).VERSION()));
+        bytes32 newSingletonVersion = keccak256(abi.encodePacked(ISafe(payable(l2Singleton)).VERSION()));
         require(
             newSingletonVersion == keccak256(abi.encodePacked("1.3.0")) || newSingletonVersion == keccak256(abi.encodePacked("1.4.1")),
             "Provided singleton version is not supported"
         );
 
-        ISafe safe = ISafe(address(this));
+        ISafe safe = ISafe(payable(address(this)));
         safe.setFallbackHandler(fallbackHandler);
 
         // Safes < 1.3.0 did not emit SafeSetup, so Safe Tx Service backend needs the event to index the Safe
