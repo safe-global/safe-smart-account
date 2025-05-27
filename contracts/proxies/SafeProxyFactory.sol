@@ -10,6 +10,7 @@ import {SafeProxy} from "./SafeProxy.sol";
 contract SafeProxyFactory {
     event ProxyCreation(SafeProxy indexed proxy, address singleton);
     event ProxyCreationL2(SafeProxy indexed proxy, address singleton, bytes initializer, uint256 saltNonce);
+    event ChainSpecificProxyCreationL2(SafeProxy indexed proxy, address singleton, bytes initializer, uint256 saltNonce, uint256 chainId);
 
     /// @dev Allows to retrieve the creation code used for the Proxy deployment. With this it is easily possible to calculate predicted address.
     function proxyCreationCode() public pure returns (bytes memory) {
@@ -91,6 +92,24 @@ contract SafeProxyFactory {
         bytes32 salt = keccak256(abi.encodePacked(keccak256(initializer), saltNonce, getChainId()));
         proxy = deployProxy(_singleton, initializer, salt);
         emit ProxyCreation(proxy, _singleton);
+    }
+
+    /**
+     * @notice Deploys a new chain-specific proxy with `_singleton` singleton and `saltNonce` salt. Optionally executes an initializer call to a new proxy.
+     * @dev Allows to create a new proxy contract that should exist only on 1 network (e.g. specific governance or admin accounts)
+     *      by including the chain id in the create2 salt. Such proxies cannot be created on other networks by replaying the transaction.
+     *      Emits an extra event to allow tracking of `initializer` and `saltNonce`.
+     * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
+     * @param initializer Payload for a message call to be sent to a new proxy contract.
+     * @param saltNonce Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
+     */
+    function createChainSpecificProxyWithNonceL2(
+        address _singleton,
+        bytes memory initializer,
+        uint256 saltNonce
+    ) public returns (SafeProxy proxy) {
+        proxy = createChainSpecificProxyWithNonce(_singleton, initializer, saltNonce);
+        emit ChainSpecificProxyCreationL2(proxy, _singleton, initializer, saltNonce, getChainId());
     }
 
     /**
