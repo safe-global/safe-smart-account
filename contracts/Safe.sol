@@ -13,6 +13,7 @@ import {StorageAccessible} from "./common/StorageAccessible.sol";
 import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
 import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
+import {EIP712Constants} from "./libraries/EIP712Constants.sol";
 import {Enum} from "./libraries/Enum.sol";
 
 /**
@@ -50,16 +51,6 @@ contract Safe is
     using SafeMath for uint256;
 
     string public constant override VERSION = "1.5.0";
-
-    // keccak256(
-    //     "EIP712Domain(uint256 chainId,address verifyingContract)"
-    // );
-    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218;
-
-    // keccak256(
-    //     "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
-    // );
-    bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
 
     uint256 public override nonce;
     bytes32 private _deprecatedDomainSeparator;
@@ -395,7 +386,7 @@ contract Safe is
         }
         /* solhint-enable no-inline-assembly */
 
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
+        return keccak256(abi.encode(EIP712Constants.DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }
 
     /**
@@ -414,6 +405,7 @@ contract Safe is
         uint256 _nonce
     ) public view override returns (bytes32 txHash) {
         bytes32 domainHash = domainSeparator();
+        bytes32 safeTxTypehash = EIP712Constants.SAFE_TX_TYPEHASH;
 
         // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
         // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
@@ -446,7 +438,7 @@ contract Safe is
             // ptr + 256: gasToken
             // ptr + 288: refundReceiver
             // ptr + 320: nonce
-            mstore(ptr, SAFE_TX_TYPEHASH)
+            mstore(ptr, safeTxTypehash)
             mstore(add(ptr, 32), to)
             mstore(add(ptr, 64), value)
             mstore(add(ptr, 96), calldataHash)

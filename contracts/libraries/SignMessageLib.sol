@@ -2,6 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "./../interfaces/ISafe.sol";
+import {EIP712Constants} from "./EIP712Constants.sol";
 import {SafeStorage} from "./SafeStorage.sol";
 
 /**
@@ -9,9 +10,6 @@ import {SafeStorage} from "./SafeStorage.sol";
  * @author Richard Meissner - @rmeissner
  */
 contract SignMessageLib is SafeStorage {
-    // keccak256("SafeMessage(bytes message)");
-    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
-
     event SignMsg(bytes32 indexed msgHash);
 
     /**
@@ -31,7 +29,7 @@ contract SignMessageLib is SafeStorage {
      * @return Message hash.
      */
     function getMessageHash(bytes memory message) public view returns (bytes32) {
-        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        bytes32 safeMessageHash = keccak256(abi.encode(EIP712Constants.SAFE_MSG_TYPEHASH, keccak256(message)));
         return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), ISafe(payable(address(this))).domainSeparator(), safeMessageHash));
     }
 }
