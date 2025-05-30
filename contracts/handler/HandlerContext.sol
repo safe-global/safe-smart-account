@@ -2,6 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "../interfaces/ISafe.sol";
+import {StorageSlots} from "../libraries/StorageSlots.sol";
 
 /**
  * @title Handler Context - Allows the fallback handler to extract additional context from the calldata
@@ -11,12 +12,6 @@ import {ISafe} from "../interfaces/ISafe.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract HandlerContext {
-    /**
-     * @dev The storage slot used for storing the currently configured fallback handler address.
-     *      Precomputed value of: `keccak256("fallback_manager.handler.address")`.
-     */
-    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
-
     /**
      * @notice A modifier that reverts if not called by a Safe as a fallback handler.
      * @dev Note that this modifier does a **best effort** attempt at not allowing calls that are
@@ -35,7 +30,7 @@ abstract contract HandlerContext {
      *      effort** check and may generate false positives under certain conditions.
      */
     function _requireFallback() internal view {
-        bytes memory storageData = ISafe(payable(msg.sender)).getStorageAt(uint256(FALLBACK_HANDLER_STORAGE_SLOT), 1);
+        bytes memory storageData = ISafe(payable(msg.sender)).getStorageAt(uint256(StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT), 1);
         address fallbackHandler = abi.decode(storageData, (address));
         require(fallbackHandler == address(this), "not a fallback call");
     }

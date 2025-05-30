@@ -3,15 +3,13 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
+import {StorageSlots} from "../libraries/StorageSlots.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
  * @author Richard Meissner - @rmeissner
  */
 abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
-    // keccak256("fallback_manager.handler.address")
-    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
-
     /**
      *  @notice Internal function to set the fallback handler.
      *  @param handler contract to handle fallback calls.
@@ -32,10 +30,11 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         */
         if (handler == address(this)) revertWithError("GS400");
 
+        bytes32 slot = StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(FALLBACK_HANDLER_STORAGE_SLOT, handler)
+            sstore(slot, handler)
         }
         /* solhint-enable no-inline-assembly */
     }
@@ -53,6 +52,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
      */
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external override {
+        bytes32 slot = StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -61,7 +61,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
             // not going beyond the scratch space, etc)
             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
 
-            let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
+            let handler := sload(slot)
 
             if iszero(handler) {
                 return(0, 0)
