@@ -1,0 +1,8 @@
+$ git clone https://github.com/safe-global/safe-smart-account.git
+Cloning into 'safe-smart-account'...
+remote: Enumerating objects: 9533, done.
+remote: Counting objects: 100% (2004/2004), done.
+remote: Compressing objects: 100% (577/577), done.
+remote: Total 9533 (delta 1713), reused 1421 (delta 1421), pack-reused 7529 (from 2)
+Receiving objects: 100% (9533/9533), 9.63 MiB | 1.43 MiB/s, done.
+Resolving deltas: 100% (6339/6339), done
