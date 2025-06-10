@@ -47,7 +47,7 @@ Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.
 
 Solidity optimizer: `disabled`
 
-ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-solidity/releases/tag/1.5.3)
+ZK Settings: zksolc version [1.5.9](https://github.com/matter-labs/era-compiler-solidity/releases/tag/1.5.9)
 
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
