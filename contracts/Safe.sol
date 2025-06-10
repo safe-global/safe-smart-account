@@ -128,7 +128,8 @@ contract Safe is
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            txHash = getTransactionHash( // Transaction info
+            txHash = getTransactionHash(
+                // Transaction info
                 to,
                 value,
                 data,

@@ -4,7 +4,7 @@
         {
             "files": "*.sol",
             "options": {
-                "parser": "solidity-parse",
+                "parser": "slang",
                 "printWidth": 140,
                 "tabWidth": 4,
                 "useTabs": false,
