@@ -21,14 +21,14 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
                 signers: [user1, user2],
             } = await setupTests();
             const migrateSafeAddress = await migratedSafe.getAddress();
-            await user1.sendTransaction({ to: migrateSafeAddress, value: ethers.parseEther("1") }).then((tx) => tx.wait(1));
+            await user1.sendTransaction({ to: migrateSafeAddress, value: ethers.parseEther("1") });
             const nonce = await migratedSafe.nonce();
             const tx = buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce });
 
             const userBalance = await ethers.provider.getBalance(user2.address);
             expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
-            await executeTxWithSigners(migratedSafe, tx, [user1]);
+            await executeTxWithSigners(migratedSafe, tx, [user1]).then((tx) => tx.wait(1));
 
             expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
             expect(await ethers.provider.getBalance(migrateSafeAddress)).to.eq(0n);

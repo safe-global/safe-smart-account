@@ -284,12 +284,7 @@ describe("ProxyFactory", () => {
             expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
 
-        it("should deploy proxy to create2 address with chainid included in salt", async function () {
-            if (hre.network.zksync) {
-                // zksync has a different way with create2
-                // https://docs.zksync.io/zksync-protocol/differences/evm-instructions#create-create2
-                this.skip();
-            }
+        it("should deploy proxy to create2 address with chainid included in salt", async () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const provider = hre.ethers.provider;
@@ -304,7 +299,7 @@ describe("ProxyFactory", () => {
             );
             expect(await provider.getCode(proxyAddress)).to.eq("0x");
 
-            await factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce);
+            await factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce).then((tx) => tx.wait(1));
 
             expect(await provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
@@ -400,12 +395,7 @@ describe("ProxyFactory", () => {
             expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
 
-        it("should deploy proxy to create2 address with chainid included in salt", async function () {
-            if (hre.network.zksync) {
-                // zksync has a different way with create2
-                // https://docs.zksync.io/zksync-protocol/differences/evm-instructions#create-create2
-                this.skip();
-            }
+        it("should deploy proxy to create2 address with chainid included in salt", async () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const provider = hre.ethers.provider;
@@ -420,7 +410,7 @@ describe("ProxyFactory", () => {
             );
             expect(await provider.getCode(proxyAddress)).to.eq("0x");
 
-            await factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce);
+            await factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce).then((tx) => tx.wait(1));
 
             expect(await provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
