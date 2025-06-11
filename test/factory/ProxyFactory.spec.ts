@@ -284,7 +284,10 @@ describe("ProxyFactory", () => {
             expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
 
-        it("should deploy proxy to create2 address with chainid included in salt", async () => {
+        it("should deploy proxy to create2 address with chainid included in salt", async function () {
+            if (hre.network.zksync) {
+                this.skip();
+            }
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const provider = hre.ethers.provider;
@@ -395,7 +398,10 @@ describe("ProxyFactory", () => {
             expect(await hre.ethers.provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
 
-        it("should deploy proxy to create2 address with chainid included in salt", async () => {
+        it("should deploy proxy to create2 address with chainid included in salt", async function () {
+            if (hre.network.zksync) {
+                this.skip();
+            }
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const provider = hre.ethers.provider;

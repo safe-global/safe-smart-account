@@ -30,6 +30,7 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
             await executeTxWithSigners(migratedSafe, tx, [user1]);
 
+            console.log("Migrated Safe address balance after: ", await ethers.provider.getBalance(migrateSafeAddress));
             await expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
             await expect(await ethers.provider.getBalance(migrateSafeAddress)).to.eq(0n);
         });
