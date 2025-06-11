@@ -299,7 +299,7 @@ describe("ProxyFactory", () => {
             );
             expect(await provider.getCode(proxyAddress)).to.eq("0x");
 
-            await factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce);
+            await factory.createChainSpecificProxyWithNonce(singletonAddress, initCode, saltNonce).then((tx) => tx.wait(1));
 
             expect(await provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
@@ -410,7 +410,7 @@ describe("ProxyFactory", () => {
             );
             expect(await provider.getCode(proxyAddress)).to.eq("0x");
 
-            await factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce);
+            await factory.createChainSpecificProxyWithNonceL2(singletonAddress, initCode, saltNonce).then((tx) => tx.wait(1));
 
             expect(await provider.getCode(proxyAddress)).to.be.eq(await getSafeProxyRuntimeCode());
         });
