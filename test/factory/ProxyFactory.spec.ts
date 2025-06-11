@@ -286,6 +286,8 @@ describe("ProxyFactory", () => {
 
         it("should deploy proxy to create2 address with chainid included in salt", async function () {
             if (hre.network.zksync) {
+                // zksync has a different way with create2
+                // https://docs.zksync.io/zksync-protocol/differences/evm-instructions#create-create2
                 this.skip();
             }
             const { factory, singleton } = await setupTests();
@@ -400,6 +402,8 @@ describe("ProxyFactory", () => {
 
         it("should deploy proxy to create2 address with chainid included in salt", async function () {
             if (hre.network.zksync) {
+                // zksync has a different way with create2
+                // https://docs.zksync.io/zksync-protocol/differences/evm-instructions#create-create2
                 this.skip();
             }
             const { factory, singleton } = await setupTests();
