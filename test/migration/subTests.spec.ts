@@ -28,7 +28,7 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
             const userBalance = await ethers.provider.getBalance(user2.address);
             expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
-            await executeTxWithSigners(migratedSafe, tx, [user1]);
+            await executeTxWithSigners(migratedSafe, tx, [user1]).then((tx) => tx.wait(1));
 
             expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
             expect(await ethers.provider.getBalance(migrateSafeAddress)).to.eq(0n);
