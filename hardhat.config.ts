@@ -8,9 +8,10 @@ import "@matterlabs/hardhat-zksync-node";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 import { getSingletonFactoryInfo } from "@safe-global/safe-singleton-factory";
 
-const argv = yargs
+const argv = yargs(hideBin(process.argv))
     .option("network", {
         type: "string",
         default: "hardhat",
@@ -89,9 +90,10 @@ const userConfig: HardhatUserConfig = {
         compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: defaultSolidityVersion }],
     },
     zksolc: {
-        version: "1.5.9",
+        version: "1.5.15",
         settings: {
-            suppressedErrors: ["assemblycreate"],
+            codegen: "yul",
+            suppressedWarnings: ["assemblycreate", "txorigin"],
         },
     },
     networks: {
