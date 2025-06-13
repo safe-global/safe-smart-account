@@ -55,40 +55,40 @@ ZK Settings: zksolc version [1.5.15](https://github.com/matter-labs/era-compiler
 
 | Contract Name | EVM                                          | ZKSync                                       |
 | ------------- | -------------------------------------------- | -------------------------------------------- |
-| `Safe`        | `0x96Fd1f00cA36927A41276cc5772a6DE5A52701B5` | `0x5BeA400cbeF16fdE0000a65764280e244b7950a3` |
-| `SafeL2`      | `0xF0783FE3dfBE309Bd5a61f610819345a2b1d20df` | `0xCE7a7e0672cACA79071CEbF7d1aA3A4d7f2b429E` |
+| `Safe`        | `0x96Fd1f00cA36927A41276cc5772a6DE5A52701B5` | `0x836C7AC1ea9a608C19E116D00de085cd10885D52` |
+| `SafeL2`      | `0xF0783FE3dfBE309Bd5a61f610819345a2b1d20df` | `0xFaDC68800ffbE48688dfD35167CceaCAda73925E` |
 
 ### Factory contracts
 
 | Contract Name      | EVM                                          | ZKSync                                       |
 | ------------------ | -------------------------------------------- | -------------------------------------------- |
-| `SafeProxyFactory` | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | `0x6075cdB6408353A8B5B83d59230b9a0D10D36d1a` |
+| `SafeProxyFactory` | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | `0x36324C1DB5011Ba909B169382e945B7132048839` |
 
 ### Handler contracts
 
 | Contract Name                  | EVM                                          | ZKSync                                       |
 | ------------------------------ | -------------------------------------------- | -------------------------------------------- |
-| `TokenCallbackHandler`         | `0x54e86d004d71a8D2112ec75FaCE57D730b0433F3` | `0x477570Cb7702Cb29A11Ec2CfD8e6b6E3Ac08A95C` |
-| `CompatibilityFallbackHandler` | `0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4` | `0x05B39322dd0d6c9b2caDF7Ed9f4ACeD8cFbC97c3` |
-| `ExtensibleFallbackHandler`    | `0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3` | `0x250915eBE47DAC5e2B51dF5b865af24F40783E35` |
+| `TokenCallbackHandler`         | `0x54e86d004d71a8D2112ec75FaCE57D730b0433F3` | `0x93D96D012AB04AeC9d8d4e1d44FE053F20C42d65` |
+| `CompatibilityFallbackHandler` | `0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4` | `0x8075357E701bE0c69BA91200beF5DA559355ed44` |
+| `ExtensibleFallbackHandler`    | `0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3` | `0xC3Bb7DeCc1817Afe5f5E43aab7Ac27A73D3c7323` |
 
 ### Lib contracts
 
 | Contract Name                                   | EVM                                          | ZKSync                                       |
 | ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| `MultiSend`                                     | `0x218543288004CD07832472D464648173c77D7eB7` | `0x2685Bd87C80329e32425Dc985E9a56796d67dC2E` |
-| `MultiSendCallOnly`                             | `0xA83c336B20401Af773B6219BA5027174338D1836` | `0x3C2a323339005AaaA576B8748cc23817A4A63D85` |
-| `CreateCall`                                    | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` | `0x73499857FFFA54F160B05f56E96ca7967C1dFB5c` |
-| `SignMessageLib`                                | `0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa` | `0xC2d0CB2ADa4f5B357c04382564d01184BE31A355` |
-| `SafeToL2Setup`                                 | `0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a` | `0x0F6326A013C03b16b26232fe6A32A4bb8966247C` |
-| `SafeToL2Migration`                             | `0x5D9c4239fF1b89982AA9dd98F73e560cAcC19653` | `0x318bE6a446dCce2595475d4e58C97BA3Ab808a73` |
-| `SafeMigration` (Target Safe version: `v1.5.0`) | `0x36104384D371B2987902706Bd96E98339297DDa2` | `0x214371bb872F56b4542dE6C0291C1ADc0cE33142` |
+| `MultiSend`                                     | `0x218543288004CD07832472D464648173c77D7eB7` | `0x01c034313144eAd284470AF2298322C3a21A508A` |
+| `MultiSendCallOnly`                             | `0xA83c336B20401Af773B6219BA5027174338D1836` | `0xC72e528C2A32322135779D637F5Fc78fb7215E6B` |
+| `CreateCall`                                    | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` | `0x731E389eaeb8Bf94E566eA25838d8102Ff366c22` |
+| `SignMessageLib`                                | `0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa` | `0x215DBE9e1433409361AE672AA559d39bEB39E268` |
+| `SafeToL2Setup`                                 | `0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a` | `0x89cd9D389D18cB0886C7ee40459f4446F8E7f3AB` |
+| `SafeToL2Migration`                             | `0x5D9c4239fF1b89982AA9dd98F73e560cAcC19653` | `0xf111419Dc4a0E83DC5925C1CB5a61f183a05f94d` |
+| `SafeMigration` (Target Safe version: `v1.5.0`) | `0x36104384D371B2987902706Bd96E98339297DDa2` | `0xca3ab43DCF6aC652c41538F37FF8aD3726343F40` |
 
 ### Storage reader contracts
 
 | Contract Name        | EVM                                          | ZKSync                                       |
 | -------------------- | -------------------------------------------- | -------------------------------------------- |
-| `SimulateTxAccessor` | `0x07EfA797c55B5DdE3698d876b277aBb6B893654C` | `0x46dc52c6e956617F5A0a0Ede99233B7c35106105` |
+| `SimulateTxAccessor` | `0x07EfA797c55B5DdE3698d876b277aBb6B893654C` | `0xDa379CFB8D9F5Fc2873dfAC5Df06C74b6C214Cd5` |
 
 ## Changes
 
