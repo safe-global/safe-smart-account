@@ -26,12 +26,12 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
             const tx = buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce });
 
             const userBalance = await ethers.provider.getBalance(user2.address);
-            await expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(ethers.parseEther("1"));
+            expect(await ethers.provider.getBalance(migrateSafeAddress)).to.be.deep.eq(ethers.parseEther("1"));
 
-            await executeTxWithSigners(migratedSafe, tx, [user1]);
+            await executeTxWithSigners(migratedSafe, tx, [user1]).then((tx) => tx.wait(1));
 
-            await expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
-            await expect(await ethers.provider.getBalance(migrateSafeAddress)).to.eq(0n);
+            expect(await ethers.provider.getBalance(user2.address)).to.be.deep.eq(userBalance + ethers.parseEther("1"));
+            expect(await ethers.provider.getBalance(migrateSafeAddress)).to.eq(0n);
         });
     });
 
@@ -47,8 +47,8 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
                 .withArgs(user2.address)
                 .and.to.emit(migratedSafe, "ChangedThreshold");
 
-            await expect(await migratedSafe.getThreshold()).to.eq(2n);
-            await expect(await migratedSafe.getOwners()).to.be.deep.equal([user2.address, user1.address]);
+            expect(await migratedSafe.getThreshold()).to.eq(2n);
+            expect(await migratedSafe.getOwners()).to.be.deep.equal([user2.address, user1.address]);
 
             await expect(
                 executeContractCallWithSigners(migratedSafe, migratedSafe, "addOwnerWithThreshold", [user3.address, 1], [user1, user2]),
@@ -57,12 +57,12 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
                 .withArgs(user3.address)
                 .and.to.emit(migratedSafe, "ChangedThreshold");
 
-            await expect(await migratedSafe.getThreshold()).to.be.deep.eq(1n);
-            await expect(await migratedSafe.getOwners()).to.be.deep.equal([user3.address, user2.address, user1.address]);
+            expect(await migratedSafe.getThreshold()).to.be.deep.eq(1n);
+            expect(await migratedSafe.getOwners()).to.be.deep.equal([user3.address, user2.address, user1.address]);
 
-            await expect(await migratedSafe.isOwner(user1.address)).to.be.true;
-            await expect(await migratedSafe.isOwner(user2.address)).to.be.true;
-            await expect(await migratedSafe.isOwner(user3.address)).to.be.true;
+            expect(await migratedSafe.isOwner(user1.address)).to.be.true;
+            expect(await migratedSafe.isOwner(user2.address)).to.be.true;
+            expect(await migratedSafe.isOwner(user3.address)).to.be.true;
         });
     });
 
@@ -79,8 +79,8 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
                 .to.emit(migratedSafe, "EnabledModule")
                 .withArgs(user2.address);
 
-            await expect(await migratedSafe.isModuleEnabled(user2.address)).to.be.true;
-            await expect(await migratedSafe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address], AddressOne]);
+            expect(await migratedSafe.isModuleEnabled(user2.address)).to.be.true;
+            expect(await migratedSafe.getModulesPaginated(AddressOne, 10)).to.be.deep.equal([[user2.address], AddressOne]);
 
             const user2Safe = migratedSafe.connect(user2);
             await expect(user2Safe.execTransactionFromModule(mockAddress, 0, "0xbaddad", 0))
@@ -103,7 +103,7 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
 
             await user1.sendTransaction({ to: migratedSafeAddress, value: ethers.parseEther("1") });
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
-            await expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.eq(ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.eq(ethers.parseEther("1"));
 
             const txs: MetaTransaction[] = [
                 buildSafeTransaction({ to: user2.address, value: ethers.parseEther("1"), nonce: 0 }),
@@ -112,8 +112,8 @@ export const verificationTests = (setupTests: () => Promise<TestSetup>) => {
             const safeTx = await buildMultiSendSafeTx(multiSend, txs, await migratedSafe.nonce());
             await expect(executeTxWithSigners(migratedSafe, safeTx, [user1])).to.emit(migratedSafe, "ExecutionSuccess");
 
-            await expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.eq(ethers.parseEther("0"));
-            await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + ethers.parseEther("1"));
+            expect(await hre.ethers.provider.getBalance(migratedSafeAddress)).to.eq(ethers.parseEther("0"));
+            expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + ethers.parseEther("1"));
             expect(await mock.invocationCountForCalldata("0xbaddad")).to.eq(1n);
         });
     });

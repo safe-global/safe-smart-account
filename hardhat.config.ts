@@ -94,6 +94,11 @@ const userConfig: HardhatUserConfig = {
             suppressedErrors: ["assemblycreate"],
         },
     },
+    zksyncAnvil: {
+        // the zksync tests fail with version 0.6.4
+        // in general, it's good to pin zksync version because semver doesn't apply to 0.x releases
+        version: "0.6.3",
+    },
     networks: {
         hardhat: {
             allowUnlimitedContractSize: true,

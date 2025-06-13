@@ -313,7 +313,11 @@ describe("Safe", () => {
             ).to.be.revertedWith("GS011");
         });
 
-        it("should work with ether payment to deployer", async () => {
+        it("should work with ether payment to deployer", async function () {
+            if (hre.network.zksync) {
+                // zksync does not support tx.origin
+                this.skip();
+            }
             const {
                 template,
                 signers: [user1, user2, user3],
@@ -353,16 +357,18 @@ describe("Safe", () => {
             const userBalance = await hre.ethers.provider.getBalance(user2.address);
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("10"));
 
-            await template.setup(
-                [user1.address, user2.address, user3.address],
-                2,
-                AddressZero,
-                "0x",
-                AddressZero,
-                AddressZero,
-                payment,
-                user2.address,
-            );
+            await template
+                .setup(
+                    [user1.address, user2.address, user3.address],
+                    2,
+                    AddressZero,
+                    "0x",
+                    AddressZero,
+                    AddressZero,
+                    payment,
+                    user2.address,
+                )
+                .then((tx) => tx.wait(1));
 
             await expect(await hre.ethers.provider.getBalance(templateAddress)).to.eq(ethers.parseEther("0"));
             await expect(await hre.ethers.provider.getBalance(user2.address)).to.eq(userBalance + payment);
