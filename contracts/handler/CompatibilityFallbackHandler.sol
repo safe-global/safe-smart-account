@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import {ISafe} from "./../interfaces/ISafe.sol";
 import {ISignatureValidator} from "./../interfaces/ISignatureValidator.sol";
 import {Enum} from "./../libraries/Enum.sol";
+import {EIP712Constants} from "./../libraries/EIP712Constants.sol";
 import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
 
 /**
@@ -14,18 +15,6 @@ import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
  * @author Richard Meissner - @rmeissner
  */
 contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidator {
-    /**
-     * @dev The precomputed EIP-712 type hash for the Safe message type.
-     *      Precomputed value of: `keccak256("SafeMessage(bytes message)")`.
-     */
-    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
-
-    /**
-     * @dev The precomputed EIP-712 type hash for the Safe transaction type.
-     *      Precomputed value of: `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)")`.
-     */
-    bytes32 private constant SAFE_TX_TYPEHASH = 0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;
-
     /**
      * @dev The sentinel module value in the {ModuleManager.modules} linked list.
      *      See {ModuleManager.SENTINEL_MODULES} for more information.
@@ -49,7 +38,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
      * @return Encoded message.
      */
     function encodeMessageDataForSafe(ISafe safe, bytes memory message) public view returns (bytes memory) {
-        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        bytes32 safeMessageHash = keccak256(abi.encode(EIP712Constants.SAFE_MSG_TYPEHASH, keccak256(message)));
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash);
     }
 
@@ -211,7 +200,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         bytes32 domainSeparator = safe.domainSeparator();
         bytes32 safeTxHash = keccak256(
             abi.encode(
-                SAFE_TX_TYPEHASH,
+                EIP712Constants.SAFE_TX_TYPEHASH,
                 to,
                 value,
                 keccak256(data),

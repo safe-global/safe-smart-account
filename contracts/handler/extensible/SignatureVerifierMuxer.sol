@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe, ExtensibleBase} from "./ExtensibleBase.sol";
+import {EIP712Constants} from "./../../libraries/EIP712Constants.sol";
 
 interface ERC1271 {
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4 magicValue);
@@ -55,8 +56,6 @@ interface ISignatureVerifierMuxer {
  */
 abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureVerifierMuxer {
     // --- constants ---
-    // keccak256("SafeMessage(bytes message)");
-    bytes32 private constant SAFE_MSG_TYPEHASH = 0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca;
     // keccak256("safeSignature(bytes32,bytes32,bytes,bytes)");
     bytes4 private constant SAFE_SIGNATURE_MAGIC_VALUE = 0x5fd7e97d;
 
@@ -147,7 +146,7 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     function defaultIsValidSignature(ISafe safe, bytes32 _hash, bytes memory signature) internal view returns (bytes4 magic) {
         bytes memory messageData = EIP712.encodeMessageData(
             safe.domainSeparator(),
-            SAFE_MSG_TYPEHASH,
+            EIP712Constants.SAFE_MSG_TYPEHASH,
             abi.encode(keccak256(abi.encode(_hash)))
         );
         bytes32 messageHash = keccak256(messageData);
