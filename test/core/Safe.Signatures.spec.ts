@@ -503,9 +503,9 @@ describe("Safe", () => {
 
             const selfSignature = {
                 signer: safeAddress,
-                data: buildSignatureBytes([await safeApproveHash(safe, safe, tx, true)]),
+                data: buildSignatureBytes([await safeApproveHash(await hre.ethers.getSigner(safeAddress), safe, tx, true)]),
                 dynamic: true,
-            };
+            } as const;
             const signatures = buildSignatureBytes([selfSignature]);
 
             await expect(safe["checkSignatures(address,bytes32,bytes)"](user1.address, txHash, signatures)).to.be.revertedWith("GS025");
