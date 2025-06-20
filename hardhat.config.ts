@@ -97,9 +97,9 @@ const userConfig: HardhatUserConfig = {
         },
     },
     zksyncAnvil: {
-        // the zksync tests fail with version 0.6.4
-        // in general, it's good to pin zksync version because semver doesn't apply to 0.x releases
-        version: "0.6.3",
+        // We pin zksync node versions because they're fairly unstable and it's hard to predict whether
+        // a new version will change something, since 0.x versions are not following semver.
+        version: "0.6.5",
     },
     networks: {
         hardhat: {
