@@ -27,7 +27,10 @@ interface IModuleManager {
     /**
      * @notice Disables the module `module` for the Safe.
      * @dev This can only be done via a Safe transaction.
-     * @param prevModule Previous module in the modules linked list.
+     * @param prevModule Previous module in the modules linked list. If the module to be
+     *        disabled is the first (or only) element of the list, `prevModule` MUST be
+     *        set to the sentinel address `0x1` (referred to as `SENTINEL_MODULES` in the
+     *        implementation).
      * @param module Module to be removed.
      */
     function disableModule(address prevModule, address module) external;
