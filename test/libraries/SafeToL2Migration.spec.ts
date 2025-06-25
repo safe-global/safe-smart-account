@@ -320,10 +320,6 @@ describe("SafeToL2Migration library", () => {
         });
 
         it("doesn't touch important storage slots", async function () {
-            const addHexEncodedNumbers = (a: string, b: string) => {
-                return "0x" + (BigInt(a) + BigInt(b)).toString(16).padStart(64, "0");
-            };
-
             const {
                 safe130,
                 migration,
@@ -342,7 +338,9 @@ describe("SafeToL2Migration library", () => {
 
             expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
             expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-            expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(addHexEncodedNumbers(nonceBeforeMigration, "0x1"));
+            expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(
+                hre.ethers.toBeHex(BigInt(nonceBeforeMigration) + 1n, 32),
+            );
             expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
             expect(await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).to.be.eq(
                 fallbackHandlerBeforeMigration,
