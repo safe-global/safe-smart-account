@@ -319,7 +319,7 @@ describe("SafeToL2Migration library", () => {
             );
         });
 
-        it("doesn't touch important storage slots", async function () {
+        it("doesn't touch important storage slots", async () => {
             const {
                 safe130,
                 migration,
