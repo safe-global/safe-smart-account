@@ -34,7 +34,8 @@ export const defaultTokenCallbackHandlerDeployment = async () => {
 
 export const getSafeSingleton = async () => {
     const safeContractName = safeContractUnderTest();
-    const safe = await hre.ethers.getContractAt(safeContractUnderTest(), (await deployments.get(safeContractName)).address);
+    const { address } = await deployments.get(safeContractName);
+    const safe = await hre.ethers.getContractAt(safeContractName, address);
     return safe as unknown as Safe | SafeL2;
 };
 
