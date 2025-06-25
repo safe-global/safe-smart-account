@@ -22,7 +22,7 @@ describe("Migration 1.2.0", () => {
         await deployments.fixture();
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
+        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120.evm })).wait())?.contractAddress;
         if (!singleton120) {
             throw new Error("Could not deploy SafeSingleton120");
         }

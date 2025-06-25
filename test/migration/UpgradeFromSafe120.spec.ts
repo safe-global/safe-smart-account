@@ -24,7 +24,7 @@ describe("Upgrade from Safe 1.2.0", () => {
         const mockAddress = await mock.getAddress();
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
+        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120.evm })).wait())?.contractAddress;
         if (!singleton120) throw new Error("Could not deploy Safe 1.2.0");
 
         const singleton150 = await (await getSafeSingleton()).getAddress();
