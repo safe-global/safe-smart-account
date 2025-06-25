@@ -30,8 +30,9 @@ const {
     PK,
     SOLIDITY_VERSION,
     SOLIDITY_SETTINGS,
-    HARDHAT_ENABLE_ZKSYNC = "0",
     HARDHAT_CHAIN_ID = 31337,
+    HARDHAT_ENABLE_ZKSYNC,
+    HARDHAT_ENABLE_GAS_REPORTER,
 } = process.env;
 
 const DEFAULT_MNEMONIC = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -169,6 +170,9 @@ const userConfig: HardhatUserConfig = {
     },
     etherscan: {
         apiKey: ETHERSCAN_API_KEY,
+    },
+    gasReporter: {
+        enabled: HARDHAT_ENABLE_GAS_REPORTER === "1",
     },
 };
 if (NODE_URL) {

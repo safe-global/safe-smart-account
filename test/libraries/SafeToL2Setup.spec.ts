@@ -130,11 +130,11 @@ describe("SafeToL2Setup", () => {
                 ).to.be.rejectedWith("Safe must have not executed any tx");
             });
 
-            it("changes the expected storage slot without touching the most important ones", async () => {
+            it("changes the expected storage slot without touching the most important ones", async function () {
                 if (hre.network.zksync) {
                     // zksync doesn't support hardhat style traces
                     // and their traces only include calls without the storage changes
-                    return;
+                    this.skip();
                 }
 
                 const {
