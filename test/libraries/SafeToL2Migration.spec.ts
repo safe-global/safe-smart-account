@@ -320,11 +320,9 @@ describe("SafeToL2Migration library", () => {
         });
 
         it("doesn't touch important storage slots", async function () {
-            if (hre.config.gasReporter.enabled) {
-                // For some reason, this test does not play well with the gas reporter,
-                // so skip it in case it is enabled.
-                this.skip();
-            }
+            const addHexEncodedNumbers = (a: string, b: string) => {
+                return "0x" + (BigInt(a) + BigInt(b)).toString(16).padStart(64, "0");
+            };
 
             const {
                 safe130,
@@ -340,13 +338,11 @@ describe("SafeToL2Migration library", () => {
             const guardBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT);
             const fallbackHandlerBeforeMigration = await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT);
 
-            await expect(
-                executeContractCallWithSigners(safe130, migration, "migrateToL2", [await singleton130l2.getAddress()], [user1], true),
-            );
+            await executeContractCallWithSigners(safe130, migration, "migrateToL2", [await singleton130l2.getAddress()], [user1], true);
 
             expect(await hre.ethers.provider.getStorage(safeAddress, 3)).to.be.eq(ownerCountBeforeMigration);
             expect(await hre.ethers.provider.getStorage(safeAddress, 4)).to.be.eq(thresholdBeforeMigration);
-            expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(nonceBeforeMigration);
+            expect(await hre.ethers.provider.getStorage(safeAddress, 5)).to.be.eq(addHexEncodedNumbers(nonceBeforeMigration, "0x1"));
             expect(await hre.ethers.provider.getStorage(safeAddress, GUARD_STORAGE_SLOT)).to.be.eq(guardBeforeMigration);
             expect(await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).to.be.eq(
                 fallbackHandlerBeforeMigration,
