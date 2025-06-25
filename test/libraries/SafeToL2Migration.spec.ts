@@ -319,7 +319,13 @@ describe("SafeToL2Migration library", () => {
             );
         });
 
-        it("doesn't touch important storage slots", async () => {
+        it("doesn't touch important storage slots", async function() {
+            if (hre.config.gasReporter.enabled) {
+                // For some reason, this test does not play well with the gas reporter,
+                // so skip it in case it is enabled.
+                this.skip();
+            }
+
             const {
                 safe130,
                 migration,
