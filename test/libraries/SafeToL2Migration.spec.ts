@@ -306,7 +306,7 @@ describe("SafeToL2Migration library", () => {
             if (hre.config.gasReporter.enabled) {
                 // For some reason, this test does not play nice with the gas reporter, so skip it
                 // when gas reporting is enabled.
-                this.skip();
+                // this.skip();
             }
 
             const {
