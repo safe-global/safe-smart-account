@@ -3,7 +3,6 @@ import hre, { ethers, deployments } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { getSafe, getSafeSingletonAt, getSafeSingleton, getCompatFallbackHandler } from "../utils/setup";
 import deploymentData from "../json/safeDeployment.json";
-import { Safe, SafeL2 } from "../../typechain-types";
 import {
     buildSafeTransaction,
     executeContractCallWithSigners,
@@ -26,7 +25,7 @@ describe("SafeToL2Migration library", () => {
         const [user1] = signers;
 
         const singletonDeployment = async (key: keyof typeof deploymentData) => {
-            const code = deploymentData[key]
+            const code = deploymentData[key];
             const factory = new hre.ethers.ContractFactory(["constructor()"], code, user1);
             const contract = await factory.deploy();
             return getSafeSingletonAt(await contract.getAddress());

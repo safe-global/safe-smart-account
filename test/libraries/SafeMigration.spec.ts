@@ -24,7 +24,7 @@ const migrationPaths = [
         testSuiteName: "1.3.0 to latest (1.5.0)",
         from: {
             safeDeploymentData: deploymentData.safe130,
-            safeL2DeploymentData: deploymentData.safe130l2
+            safeL2DeploymentData: deploymentData.safe130l2,
         },
         latest: true,
     },

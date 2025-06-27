@@ -63,7 +63,7 @@ Solidity optimizer: `disabled`
 
 #### Deprecate zkSync EraVM Support
 
-PR: [#0](https://github.com/safe-global/safe-smart-account/pull/0)
+PR: [#1004](https://github.com/safe-global/safe-smart-account/pull/1004)
 
 ZkSync and zkSync based chains now have a full EVM compatibility layer. Starting from Safe v1.5.0, all deployments will be EVM only and will no longer support EraVM versions of Safe. Note that EraVM contracts cannot `DELEGATECALL` EVM contracts, which means that Safes created with EraVM cannot upgrade to Safe v1.5.0+ and instead need to be migrated.
 
