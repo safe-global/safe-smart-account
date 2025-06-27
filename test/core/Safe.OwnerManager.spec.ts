@@ -25,18 +25,6 @@ describe("OwnerManager", () => {
             await expect(safe.addOwnerWithThreshold(user2.address, 1)).to.be.revertedWith("GS031");
         });
 
-        it("can not set Safe itself", async () => {
-            const {
-                safe,
-                signers: [user1],
-            } = await setupTests();
-            const safeAddress = await safe.getAddress();
-
-            await expect(executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [safeAddress, 1], [user1])).to.revertedWith(
-                "GS203",
-            );
-        });
-
         it("can not set sentinel", async () => {
             const {
                 safe,

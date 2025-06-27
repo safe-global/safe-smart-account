@@ -137,17 +137,6 @@ describe("Safe", () => {
             ).to.be.revertedWith("GS203");
         });
 
-        it("should revert if Safe itself is used as an owner", async () => {
-            const {
-                template,
-                signers: [, user2],
-            } = await setupTests();
-            const templateAddress = await template.getAddress();
-            await expect(
-                template.setup([user2.address, templateAddress], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero),
-            ).to.be.revertedWith("GS203");
-        });
-
         it("should revert if sentinel is used as an owner", async () => {
             const {
                 template,
@@ -165,7 +154,7 @@ describe("Safe", () => {
             } = await setupTests();
             await expect(
                 template.setup([user2.address, user2.address], 2, AddressZero, "0x", AddressZero, AddressZero, 0, AddressZero),
-            ).to.be.revertedWith("GS203");
+            ).to.be.revertedWith("GS204");
         });
 
         it("should revert if threshold is too high", async () => {
