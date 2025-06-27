@@ -2,10 +2,8 @@ import hre, { deployments } from "hardhat";
 import { Contract, Signer, ethers } from "ethers";
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc";
-import * as zk from "zksync-ethers";
 import { logGas } from "../../src/utils/execution";
 import { safeContractUnderTest } from "./config";
-import { zkCompile } from "./zkSync";
 import { getRandomIntAsString } from "./numbers";
 import { MockContract, Safe, SafeL2 } from "../../typechain-types";
 
@@ -224,24 +222,15 @@ export const compile = async (source: string) => {
 };
 
 export const deployContractFromSource = async (deployer: Signer, source: string): Promise<ethers.Contract> => {
-    if (!hre.network.zksync) {
-        const output = await compile(source);
-        const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
-        const receipt = await transaction.wait();
+    const output = await compile(source);
+    const transaction = await deployer.sendTransaction({ data: output.data, gasLimit: 6000000 });
+    const receipt = await transaction.wait();
 
-        if (!receipt?.contractAddress) {
-            throw Error("Could not deploy contract");
-        }
-
-        return new Contract(receipt.contractAddress, output.interface, deployer);
-    } else {
-        const output = await zkCompile(hre, source);
-        const signers = await hre.ethers.getSigners();
-        const factory = new zk.ContractFactory(output.abi, output.bytecode, signers[0], "create");
-        const contract = await factory.deploy();
-
-        return contract as ethers.Contract;
+    if (!receipt?.contractAddress) {
+        throw Error("Could not deploy contract");
     }
+
+    return new Contract(receipt.contractAddress, output.interface, deployer);
 };
 
 export const getSignMessageLib = async () => {

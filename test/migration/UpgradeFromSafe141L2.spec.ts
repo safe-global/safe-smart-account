@@ -15,14 +15,13 @@ describe("Upgrade from Safe 1.4.1 L2", () => {
         const mockAddress = await mock.getAddress();
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const safeDeploymentData = hre.network.zksync ? deploymentData.safe141l2.zksync : deploymentData.safe141l2.evm;
-        const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
+        const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), deploymentData.safe141l2, user1);
         const singleton141L2 = await (await safeContractFactory.deploy()).getAddress();
         if (!singleton141L2) throw new Error("Could not deploy Safe 1.4.1 L2");
 
         const factory = await getFactory();
         const saltNonce = 42;
-        const proxyAddress = await calculateProxyAddress(factory, singleton141L2, "0x", saltNonce, hre.network.zksync);
+        const proxyAddress = await calculateProxyAddress(factory, singleton141L2, "0x", saltNonce);
         await factory.createProxyWithNonce(singleton141L2, "0x", saltNonce).then((tx) => tx.wait());
 
         const safe = await hre.ethers.getContractAt("Safe", proxyAddress);

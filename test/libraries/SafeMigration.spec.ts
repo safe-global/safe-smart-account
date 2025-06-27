@@ -23,33 +23,30 @@ const migrationPaths = [
     {
         testSuiteName: "1.3.0 to latest (1.5.0)",
         from: {
-            safeDeploymentData: { evm: deploymentData.safe130.evm, zksync: deploymentData.safe130.zksync },
-            safeL2DeploymentData: { evm: deploymentData.safe130l2.evm, zksync: deploymentData.safe130l2.zksync },
+            safeDeploymentData: deploymentData.safe130,
+            safeL2DeploymentData: deploymentData.safe130l2,
         },
         latest: true,
     },
     {
         testSuiteName: "1.3.0 to 1.4.1",
         from: {
-            safeDeploymentData: { evm: deploymentData.safe130.evm, zksync: deploymentData.safe130.zksync },
-            safeL2DeploymentData: { evm: deploymentData.safe130l2.evm, zksync: deploymentData.safe130l2.zksync },
+            safeDeploymentData: deploymentData.safe130,
+            safeL2DeploymentData: deploymentData.safe130l2,
         },
         // `to` is used when the target contracts are not latest. So, we need to provide the bytecode
         // of the old version of the contracts
         to: {
-            safeDeploymentData: { evm: deploymentData.safe141.evm, zksync: deploymentData.safe141.zksync },
-            safeL2DeploymentData: { evm: deploymentData.safe141l2.evm, zksync: deploymentData.safe141l2.zksync },
-            safeCompatFallbackHandler: {
-                evm: fallbackHandlerDeploymentData.compatibilityFallbackHandler141.evm,
-                zksync: fallbackHandlerDeploymentData.compatibilityFallbackHandler141.zksync,
-            },
+            safeDeploymentData: deploymentData.safe141,
+            safeL2DeploymentData: deploymentData.safe141l2,
+            safeCompatFallbackHandler: fallbackHandlerDeploymentData.compatibilityFallbackHandler141,
         },
     },
     {
         testSuiteName: "1.4.1 to latest (1.5.0)",
         from: {
-            safeDeploymentData: { evm: deploymentData.safe141.evm, zksync: deploymentData.safe141.zksync },
-            safeL2DeploymentData: { evm: deploymentData.safe141l2.evm, zksync: deploymentData.safe141l2.zksync },
+            safeDeploymentData: deploymentData.safe141,
+            safeL2DeploymentData: deploymentData.safe141l2,
         },
         latest: true,
     },
@@ -97,7 +94,7 @@ describe("SafeMigration Library", () => {
         let COMPATIBILITY_FALLBACK_HANDLER_ADDRESS: string | undefined;
 
         describe(testSuiteName, () => {
-            const setupTests = deployments.createFixture(async ({ deployments, network: { zksync } }) => {
+            const setupTests = deployments.createFixture(async ({ deployments }) => {
                 await deployments.fixture();
                 const signers = await ethers.getSigners();
                 const [user1] = signers;
@@ -109,9 +106,9 @@ describe("SafeMigration Library", () => {
                     SAFE_SINGLETON_L2_ADDRESS = await (await getSafeL2Singleton()).getAddress();
                     COMPATIBILITY_FALLBACK_HANDLER_ADDRESS = await (await getCompatFallbackHandler()).getAddress();
                 } else if (to) {
-                    const safeDeploymentData = zksync ? to?.safeDeploymentData.zksync : to?.safeDeploymentData.evm;
-                    const safeL2DeploymentData = zksync ? to?.safeL2DeploymentData.zksync : to?.safeL2DeploymentData.evm;
-                    const safeCompatFallbackHandler = zksync ? to?.safeCompatFallbackHandler.zksync : to?.safeCompatFallbackHandler.evm;
+                    const safeDeploymentData = to.safeDeploymentData;
+                    const safeL2DeploymentData = to.safeL2DeploymentData;
+                    const safeCompatFallbackHandler = to.safeCompatFallbackHandler;
 
                     const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
                     SAFE_SINGLETON_ADDRESS = await (await safeContractFactory.deploy()).getAddress();
@@ -135,8 +132,8 @@ describe("SafeMigration Library", () => {
                     throw new Error("Invalid migration path");
                 }
 
-                const safeDeploymentData = zksync ? from.safeDeploymentData.zksync : from.safeDeploymentData.evm;
-                const safeL2DeploymentData = zksync ? from.safeL2DeploymentData.zksync : from.safeL2DeploymentData.evm;
+                const safeDeploymentData = from.safeDeploymentData;
+                const safeL2DeploymentData = from.safeL2DeploymentData;
                 const safeContractFactory = new hre.ethers.ContractFactory(await getAbi("Safe"), safeDeploymentData, user1);
                 const singletonAddress = await (await safeContractFactory.deploy()).getAddress();
                 const safeL2ContractFactory = new hre.ethers.ContractFactory(await getAbi("SafeL2"), safeL2DeploymentData, user1);

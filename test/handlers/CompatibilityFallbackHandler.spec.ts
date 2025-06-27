@@ -30,7 +30,7 @@ describe("CompatibilityFallbackHandler", () => {
         });
         const safeAddress = await safe.getAddress();
         const validator = await getCompatFallbackHandler(safeAddress);
-        const killLib = await killLibContract(user1, hre.network.zksync);
+        const killLib = await killLibContract(user1);
         const badSimulator = await badSimulatorContract(user1);
         const erc721 = await ethers.deployContract("ERC721Token");
         const erc1155 = await ethers.deployContract("ERC1155Token");
@@ -272,14 +272,7 @@ describe("CompatibilityFallbackHandler", () => {
     });
 
     describe("simulate", () => {
-        it("should revert changes", async function () {
-            /**
-             * ## Test not applicable for zkSync, therefore should skip.
-             * The `SELFDESTRUCT` instruction is not supported
-             * @see https://docs.zksync.io/zksync-protocol/differences/evm-instructions#selfdestruct
-             */
-            if (hre.network.zksync) this.skip();
-
+        it("should revert changes", async () => {
             const { validator, killLib } = await setupTests();
             const validatorAddress = await validator.getAddress();
             const killLibAddress = await killLib.getAddress();

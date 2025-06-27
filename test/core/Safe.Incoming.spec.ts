@@ -25,7 +25,7 @@ describe("Safe", () => {
         const [user1] = signers;
         return {
             safe: await getSafe({ owners: [user1.address] }),
-            gasCappedTransferContract: hre.network.zksync ? null : await deployContractFromSource(user1, gasCappedTransferSource),
+            gasCappedTransferContract: await deployContractFromSource(user1, gasCappedTransferSource),
             callContract: await deployContractFromSource(user1, callSource),
             signers,
         };
@@ -33,11 +33,6 @@ describe("Safe", () => {
 
     describe("fallback", () => {
         it("should be able to receive ETH via transfer", async () => {
-            if (hre.network.zksync) {
-                // zksync doesn't support .transfer
-                return;
-            }
-
             const { safe, gasCappedTransferContract } = await setupTests();
             const safeAddress = await safe.getAddress();
 
@@ -46,11 +41,6 @@ describe("Safe", () => {
         });
 
         it("should be able to receive ETH via send", async () => {
-            if (hre.network.zksync) {
-                // zksync doesn't support .transfer
-                return;
-            }
-
             const { safe, gasCappedTransferContract } = await setupTests();
             const safeAddress = await safe.getAddress();
 

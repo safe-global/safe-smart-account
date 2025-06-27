@@ -16,15 +16,6 @@ contract Test {
 }`;
 
 describe("CreateCall", () => {
-    before(function () {
-        /**
-         * performCreate and performCreate2 functions of CreateCall.sol will not work on zkSync because the compiler
-         * needs to be aware of the code at compile time.
-         * @see https://docs.zksync.io/build/developer-reference/ethereum-differences/evm-instructions#create-create2
-         */
-        if (hre.network.zksync) this.skip();
-    });
-
     const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const testContract = await compile(CONTRACT_SOURCE);

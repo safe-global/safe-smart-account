@@ -7,7 +7,7 @@ describe("StorageAccessible", () => {
     const setupTests = hre.deployments.createFixture(async ({ deployments }) => {
         await deployments.fixture();
         const [user1, user2] = await hre.ethers.getSigners();
-        const killLib = await killLibContract(user1, hre.network.zksync);
+        const killLib = await killLibContract(user1);
         return {
             safe: await getSafe({ owners: [user1.address, user2.address], threshold: 1 }),
             killLib,
@@ -34,14 +34,7 @@ describe("StorageAccessible", () => {
     });
 
     describe("simulateAndRevert", () => {
-        it("should revert changes", async function () {
-            /**
-             * ## Test not applicable for zkSync, therefore should skip.
-             * The `SELFDESTRUCT` instruction is not supported
-             * @see https://docs.zksync.io/zksync-protocol/differences/evm-instructions#selfdestruct
-             */
-            if (hre.network.zksync) this.skip();
-
+        it("should revert changes", async () => {
             const { safe, killLib } = await setupTests();
             const killLibAddress = await killLib.getAddress();
 

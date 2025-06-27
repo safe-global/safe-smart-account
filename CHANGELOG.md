@@ -4,40 +4,9 @@ This changelog only contains changes starting from version 1.3.0
 
 # Current version
 
-## Compiler settings
+## Changes
 
-Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) (for more info see issue [#251](https://github.com/safe-global/safe-smart-account/issues/251))
-
-Solidity optimizer: `disabled`
-
-## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
-
-### Core contracts
-
--   `Safe` - TBD
--   `SafeL2` - TBD
-
-### Factory contracts
-
--   `SafeProxyFactory` - TBD
-
-### Handler contracts
-
--   `TokenCallbackHandler` - TBD
--   `CompatibilityFallbackHandler` - TBD
-
-### Lib contracts
-
--   `MultiSend` - TBD
--   `MultiSendCallOnly` - TBD
--   `CreateCall` - TBD
--   `SignMessageLib` - TBD
--   `SafeToL2Migration` - TBD
--   `SafeMigration` - TBD (Target Safe version: v1.5.0)
-
-### Storage reader contracts
-
--   `SimulateTxAccessor` - TBD
+None.
 
 # Version 1.5.0
 
@@ -47,52 +16,56 @@ Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.
 
 Solidity optimizer: `disabled`
 
-ZK Settings: zksolc version [1.5.15](https://github.com/matter-labs/era-compiler-solidity/releases/tag/1.5.15)
-
 ## Expected addresses with [Safe Singleton Factory](https://github.com/safe-global/safe-singleton-factory)
 
 ### Core contracts
 
-| Contract Name | EVM                                          | ZKSync                                       |
-| ------------- | -------------------------------------------- | -------------------------------------------- |
-| `Safe`        | `0x96Fd1f00cA36927A41276cc5772a6DE5A52701B5` | `0x836C7AC1ea9a608C19E116D00de085cd10885D52` |
-| `SafeL2`      | `0xF0783FE3dfBE309Bd5a61f610819345a2b1d20df` | `0xFaDC68800ffbE48688dfD35167CceaCAda73925E` |
+| Contract Name | Address                                      |
+| ------------- | -------------------------------------------- |
+| `Safe`        | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` |
+| `SafeL2`      | `0xEdd160fEBBD92E350D4D398fb636302fccd67C7e` |
 
 ### Factory contracts
 
-| Contract Name      | EVM                                          | ZKSync                                       |
-| ------------------ | -------------------------------------------- | -------------------------------------------- |
-| `SafeProxyFactory` | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | `0x36324C1DB5011Ba909B169382e945B7132048839` |
+| Contract Name      | Address                                      |
+| ------------------ | -------------------------------------------- |
+| `SafeProxyFactory` | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` |
 
 ### Handler contracts
 
-| Contract Name                  | EVM                                          | ZKSync                                       |
-| ------------------------------ | -------------------------------------------- | -------------------------------------------- |
-| `TokenCallbackHandler`         | `0x54e86d004d71a8D2112ec75FaCE57D730b0433F3` | `0x93D96D012AB04AeC9d8d4e1d44FE053F20C42d65` |
-| `CompatibilityFallbackHandler` | `0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4` | `0x8075357E701bE0c69BA91200beF5DA559355ed44` |
-| `ExtensibleFallbackHandler`    | `0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3` | `0xC3Bb7DeCc1817Afe5f5E43aab7Ac27A73D3c7323` |
+| Contract Name                  | Address                                      |
+| ------------------------------ | -------------------------------------------- |
+| `TokenCallbackHandler`         | `0x54e86d004d71a8D2112ec75FaCE57D730b0433F3` |
+| `CompatibilityFallbackHandler` | `0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4` |
+| `ExtensibleFallbackHandler`    | `0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3` |
 
 ### Lib contracts
 
-| Contract Name                                   | EVM                                          | ZKSync                                       |
-| ----------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| `MultiSend`                                     | `0x218543288004CD07832472D464648173c77D7eB7` | `0x01c034313144eAd284470AF2298322C3a21A508A` |
-| `MultiSendCallOnly`                             | `0xA83c336B20401Af773B6219BA5027174338D1836` | `0xC72e528C2A32322135779D637F5Fc78fb7215E6B` |
-| `CreateCall`                                    | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` | `0x731E389eaeb8Bf94E566eA25838d8102Ff366c22` |
-| `SignMessageLib`                                | `0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa` | `0x215DBE9e1433409361AE672AA559d39bEB39E268` |
-| `SafeToL2Setup`                                 | `0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a` | `0x89cd9D389D18cB0886C7ee40459f4446F8E7f3AB` |
-| `SafeToL2Migration`                             | `0x5D9c4239fF1b89982AA9dd98F73e560cAcC19653` | `0xf111419Dc4a0E83DC5925C1CB5a61f183a05f94d` |
-| `SafeMigration` (Target Safe version: `v1.5.0`) | `0x36104384D371B2987902706Bd96E98339297DDa2` | `0xca3ab43DCF6aC652c41538F37FF8aD3726343F40` |
+| Contract Name                                   | Address                                      |
+| ----------------------------------------------- | -------------------------------------------- |
+| `CreateCall`                                    | `0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4` |
+| `MultiSend`                                     | `0x218543288004CD07832472D464648173c77D7eB7` |
+| `MultiSendCallOnly`                             | `0xA83c336B20401Af773B6219BA5027174338D1836` |
+| `SignMessageLib`                                | `0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa` |
+| `SafeToL2Setup`                                 | `0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a` |
+| `SafeToL2Migration`                             | `0x5D9c4239fF1b89982AA9dd98F73e560cAcC19653` |
+| `SafeMigration` (target Safe version: `v1.5.0`) | `0x6439e7ABD8Bb915A5263094784C5CF561c4172AC` |
 
 ### Storage reader contracts
 
-| Contract Name        | EVM                                          | ZKSync                                       |
-| -------------------- | -------------------------------------------- | -------------------------------------------- |
-| `SimulateTxAccessor` | `0x07EfA797c55B5DdE3698d876b277aBb6B893654C` | `0xDa379CFB8D9F5Fc2873dfAC5Df06C74b6C214Cd5` |
+| Contract Name        | Address                                      |
+| -------------------- | -------------------------------------------- |
+| `SimulateTxAccessor` | `0x07EfA797c55B5DdE3698d876b277aBb6B893654C` |
 
 ## Changes
 
 ### General
+
+#### Deprecate zkSync EraVM Support
+
+PR: [#1004](https://github.com/safe-global/safe-smart-account/pull/1004)
+
+ZkSync and zkSync based chains now have a full EVM compatibility layer. Starting from Safe v1.5.0, all deployments will be EVM only and will no longer support EraVM versions of Safe. Note that EraVM contracts cannot `DELEGATECALL` EVM contracts, which means that Safes created with EraVM cannot upgrade to Safe v1.5.0+ and instead need to be migrated.
 
 #### Rename repository
 
@@ -194,10 +167,6 @@ ZK Settings: zksolc version [1.5.3](https://github.com/matter-labs/era-compiler-
 | Contract Name      | EVM                                          | ZKSync                                       |
 | ------------------ | -------------------------------------------- | -------------------------------------------- |
 | `SafeProxyFactory` | `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67` | `0xc329D02fd8CB2fc13aa919005aF46320794a8629` |
-
-### Factory contracts
-
--   `SafeProxyFactory` at `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67` (EVM), `0xc329D02fd8CB2fc13aa919005aF46320794a8629` (zkSync)
 
 ### Handler contracts
 
