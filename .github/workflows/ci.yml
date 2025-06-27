@@ -39,7 +39,7 @@ jobs:
                   cache: "npm"
             - run: npm ci
             - run: npm run build
-            - run: npm run test
+            - run: HARDHAT_ENABLE_GAS_REPORTER=1 npm run test
 
     coverage:
         runs-on: ubuntu-latest
