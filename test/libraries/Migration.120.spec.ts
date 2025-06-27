@@ -6,13 +6,6 @@ import deploymentData from "../json/safeDeployment.json";
 import { executeContractCallWithSigners } from "../../src/utils/execution";
 
 describe("Migration 1.2.0", () => {
-    before(function () {
-        /**
-         * ## Migration test is not relevant for zkSync: there is no 1.2.0 of safe-contracts on zkSync
-         */
-        if (hre.network.zksync) this.skip();
-    });
-
     const MigratedInterface = new ethers.Interface([
         "function domainSeparator() view returns(bytes32)",
         "function masterCopy() view returns(address)",
@@ -22,7 +15,7 @@ describe("Migration 1.2.0", () => {
         await deployments.fixture();
         const signers = await hre.ethers.getSigners();
         const [user1] = signers;
-        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120.evm })).wait())?.contractAddress;
+        const singleton120 = (await (await user1.sendTransaction({ data: deploymentData.safe120 })).wait())?.contractAddress;
         if (!singleton120) {
             throw new Error("Could not deploy SafeSingleton120");
         }

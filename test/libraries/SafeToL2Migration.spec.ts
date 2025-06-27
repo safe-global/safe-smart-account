@@ -25,24 +25,14 @@ describe("SafeToL2Migration library", () => {
         const signers = await ethers.getSigners();
         const [user1] = signers;
 
-        const networkKey = hre.network.zksync ? "zksync" : "evm";
         const singletonDeployment = async (key: keyof typeof deploymentData) => {
-            const code = (deploymentData[key] as { evm: string; zksync?: string })[networkKey];
-            if (code === undefined) {
-                throw new Error(`bytecode not avilable for ${key} on ${networkKey}`);
-            }
+            const code = deploymentData[key]
             const factory = new hre.ethers.ContractFactory(["constructor()"], code, user1);
             const contract = await factory.deploy();
             return getSafeSingletonAt(await contract.getAddress());
         };
 
-        let singleton111: Safe | SafeL2 | undefined;
-        let safe111: Safe | SafeL2 | undefined;
-        if (!hre.network.zksync) {
-            singleton111 = await singletonDeployment("safe111");
-            safe111 = await getSafe({ singleton: singleton111, owners: [user1.address] });
-        }
-
+        const singleton111 = await singletonDeployment("safe111");
         const singleton130 = await singletonDeployment("safe130");
         const singleton130l2 = await singletonDeployment("safe130l2");
         const singleton141 = await singletonDeployment("safe141");
@@ -76,7 +66,7 @@ describe("SafeToL2Migration library", () => {
         const migration = await safeToL2MigrationContract.deploy();
 
         return {
-            safe111,
+            safe111: await getSafe({ singleton: singleton111, owners: [user1.address] }),
             safe130: await getSafe({ singleton: singleton130, owners: [user1.address] }),
             safe141: await getSafe({ singleton: singleton141, owners: [user1.address] }),
             safeWith1967Proxy,
@@ -259,12 +249,6 @@ describe("SafeToL2Migration library", () => {
                 singleton141l2,
                 signers: [user1],
             } = await setupTests();
-            if (typeof safe111 === "undefined") {
-                if (!hre.network.zksync) throw new Error("Safe 1.1.1 was undefined");
-                // Safe 1.1.1 was never deployed to zksync
-                return;
-            }
-
             const safeAddress = await safe111.getAddress();
             expect(await safe111.VERSION()).eq("1.1.1");
             expect("0x" + (await hre.ethers.provider.getStorage(safeAddress, FALLBACK_HANDLER_STORAGE_SLOT)).slice(26)).to.be.eq(
@@ -319,7 +303,13 @@ describe("SafeToL2Migration library", () => {
             );
         });
 
-        it("doesn't touch important storage slots", async () => {
+        it("doesn't touch important storage slots", async function () {
+            if (hre.config.gasReporter.enabled) {
+                // For some reason, this test does not play nice with the gas reporter, so skip it
+                // when gas reporting is enabled.
+                this.skip();
+            }
+
             const {
                 safe130,
                 migration,

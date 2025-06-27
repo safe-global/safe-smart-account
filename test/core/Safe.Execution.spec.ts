@@ -72,13 +72,7 @@ describe("Safe", () => {
                 { gasLimit: 1000000 },
             );
 
-            // ZkSync node will not even let you execute the transaction with too little gas and just throw, so we can't test the revert reason
-            // .to.be.reverted works as a catch statement
-            if (hre.network.zksync) {
-                await expect(txPromise).to.be.reverted;
-            } else {
-                await expect(txPromise).to.be.revertedWith("GS010");
-            }
+            await expect(txPromise).to.be.revertedWith("GS010");
         });
 
         it("should emit event for successful call execution", async () => {
@@ -217,8 +211,7 @@ describe("Safe", () => {
 
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const receiptLogs = receipt?.logs ?? [];
-            // There are additional ETH transfer events on zkSync related to transaction fees
-            const logIndex = receiptLogs.length - (hre.network.zksync ? 2 : 1);
+            const logIndex = receiptLogs.length - 1;
             const successEvent = safe.interface.decodeEventLog(
                 "ExecutionSuccess",
                 receiptLogs[logIndex].data,
@@ -254,8 +247,7 @@ describe("Safe", () => {
             await expect(executedTx).to.emit(safe, "ExecutionFailure");
             const receipt = await hre.ethers.provider.getTransactionReceipt(executedTx!.hash);
             const receiptLogs = receipt?.logs ?? [];
-            // There are additional ETH transfer events on zkSync related to transaction fees
-            const logIndex = receiptLogs.length - (hre.network.zksync ? 2 : 1);
+            const logIndex = receiptLogs.length - 1;
             const successEvent = safe.interface.decodeEventLog(
                 "ExecutionFailure",
                 receiptLogs[logIndex].data,
@@ -268,28 +260,16 @@ describe("Safe", () => {
         });
 
         it("should be possible to manually increase gas", async () => {
-            if (hre.network.zksync) {
-                // This test fails in zksync because of (allegedly) enormous gas cost differences
-                // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
-                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i can't confirm this:
-                // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
-                // From zkSync team:
-                // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
-                // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
-                // TODO: update the node plugin when a new version is released
-                return;
-            }
-
             const { safe, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
             const gasUserSource = `
             contract GasUser {
-        
+
                 uint256[] public data;
-        
+
                 constructor() payable {}
-        
+
                 function nested(uint256 level, uint256 count) external {
                     if (level == 0) {
                         for (uint256 i = 0; i < count; i++) {
@@ -299,7 +279,7 @@ describe("Safe", () => {
                     }
                     this.nested(level - 1, count);
                 }
-        
+
                 function useGas(uint256 count) public {
                     this.nested(6, count);
                     this.nested(8, count);
@@ -330,18 +310,6 @@ describe("Safe", () => {
         });
 
         it("should forward all the gas to the native token refund receiver", async () => {
-            if (hre.network.zksync) {
-                // This test fails in zksync because of (allegedly) enormous gas cost differences
-                // a call to useGas(8) costs ~400k gas in evm but ~28m gas in zksync.
-                // I suspect the gas cost difference to play a role but the zksync docs do not mention any numbers so i can't confirm this:
-                // https://docs.zksync.io/zk-stack/concepts/fee-mechanism
-                // From zkSync team:
-                // Update: in-memory node when in standalone mode assumes very high l1 gas price resulting in a very high gas consumption,
-                // We will update the default values and it should result in a similar gas usage as in other networks then. I’ll let you know once it is done.
-                // TODO: update the node plugin when a new version is released
-                return;
-            }
-
             const { safe, nativeTokenReceiver, signers } = await setupTests();
             const [user1] = signers;
             const safeAddress = await safe.getAddress();
@@ -377,7 +345,7 @@ describe("Safe", () => {
                 }
             }
 
-            expect(parsedLogs[0].forwardedGas).to.be.gte(hre.network.zksync ? 340000n : 400000n);
+            expect(parsedLogs[0].forwardedGas).to.be.gte(400000n);
         });
     });
 });

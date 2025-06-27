@@ -30,7 +30,7 @@ describe("ExtensibleFallbackHandler", () => {
         const preconfiguredValidator = await getExtensibleFallbackHandler(await otherSafe.getAddress());
         const testVerifier = await (await hre.ethers.getContractFactory("TestSafeSignatureVerifier")).deploy();
         const testMarshalLib = await (await hre.ethers.getContractFactory("TestMarshalLib")).deploy();
-        const killLib = await killLibContract(user1, hre.network.zksync);
+        const killLib = await killLibContract(user1);
 
         const mirrorSource = `
         contract Mirror {
@@ -715,12 +715,7 @@ describe("ExtensibleFallbackHandler", () => {
                 expect(await validator.supportsInterface.staticCall("0x01ffc9a7")).to.be.true;
             });
 
-            it("should use less than 30.000 gas", async function () {
-                /**
-                 * ## zkSync has a different gas schedule, and therefore this test is not applicable.
-                 */
-                if (hre.network.zksync) this.skip();
-
+            it("should use less than 30.000 gas", async () => {
                 const { validator, erc165Bencher } = await setupTests();
 
                 for (const interfaceId of ["0x01ffc9a7", "0xdeadbeef"]) {

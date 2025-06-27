@@ -8,13 +8,6 @@ import deploymentData from "../json/safeDeployment.json";
 import { calculateProxyAddress } from "../../src/utils/proxies";
 
 describe("Upgrade from Safe 1.1.1", () => {
-    before(function () {
-        /**
-         * ## There's no safe 1.1.1 on zkSync, so we skip this test
-         */
-        if (hre.network.zksync) this.skip();
-    });
-
     const ChangeMasterCopyInterface = new ethers.Interface(["function changeMasterCopy(address target)"]);
 
     // We migrate the Safe and run the verification tests
@@ -24,7 +17,7 @@ describe("Upgrade from Safe 1.1.1", () => {
         await deployments.fixture();
         const mock = await getMock();
         const mockAddress = await mock.getAddress();
-        const singleton111 = (await (await user1.sendTransaction({ data: deploymentData.safe111.evm })).wait())?.contractAddress;
+        const singleton111 = (await (await user1.sendTransaction({ data: deploymentData.safe111 })).wait())?.contractAddress;
         if (!singleton111) throw new Error("Could not deploy Safe 1.1.1");
         const singleton150 = await (await getSafeSingleton()).getAddress();
         const factory = await getFactory();

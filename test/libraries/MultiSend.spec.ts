@@ -40,14 +40,7 @@ describe("MultiSend", () => {
     });
 
     describe("multiSend", () => {
-        it("should enforce delegatecall to MultiSend", async function () {
-            /**
-             * ## Test not applicable for zkSync, therefore should skip.
-             * The `SELFDESTRUCT` instruction is not supported
-             * @see https://docs.zksync.io/zksync-protocol/differences/evm-instructions#selfdestruct
-             */
-            if (hre.network.zksync) this.skip();
-
+        it("should enforce delegatecall to MultiSend", async () => {
             const {
                 multiSend,
                 signers: [user1],

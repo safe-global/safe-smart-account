@@ -21,7 +21,3 @@ typechain-types
 .certora_internal
 .certora_recent_jobs.json
 .zip-output-url.txt
-
-# zksync era node log
-era_test_node.log
-anvil-zksync.log

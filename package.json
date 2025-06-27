@@ -15,15 +15,12 @@
     ],
     "scripts": {
         "build": "hardhat compile",
-        "build:zk": "HARDHAT_ENABLE_ZKSYNC=1 hardhat compile",
         "build:ts": "rimraf dist && tsc -p tsconfig.prod.json",
         "build:ts:dev": "rimraf dist && tsc -p tsconfig.json",
         "test": "npm run test:hardhat && npm run test:L1 && npm run test:L2",
-        "test:all": "npm run test && npm run test:zk",
         "test:hardhat": "hardhat test --network hardhat",
         "test:L1": "HARDHAT_CHAIN_ID=1 hardhat test --grep '@L1'",
         "test:L2": "SAFE_CONTRACT_UNDER_TEST=SafeL2 hardhat test --network hardhat",
-        "test:zk": "HARDHAT_ENABLE_ZKSYNC=1 hardhat test",
         "coverage": "hardhat coverage",
         "codesize": "hardhat codesize",
         "benchmark": "hardhat test benchmark/*.ts",
@@ -43,7 +40,7 @@
         "fmt:ts": "prettier 'src/**/*.ts' 'test/**/*.ts' -w",
         "prepack": "npm run build",
         "prepare": "husky",
-        "prepublish": "rimraf build && npm run build && npm run build:zk && npm run build:ts"
+        "prepublish": "rimraf build && npm run build && npm run build:ts"
     },
     "repository": {
         "type": "git",
@@ -60,12 +57,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.29.0",
-        "@matterlabs/hardhat-zksync-deploy": "^1.7.0",
-        "@matterlabs/hardhat-zksync-ethers": "^1.3.0",
-        "@matterlabs/hardhat-zksync-node": "^1.5.1",
-        "@matterlabs/hardhat-zksync-solc": "^1.4.0",
-        "@matterlabs/hardhat-zksync-verify": "^1.8.1",
-        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "@nomicfoundation/hardhat-toolbox": "^6.0.0",
         "@openzeppelin/contracts": "^3.4.2",
         "@safe-global/mock-contract": "^4.1.0",
         "@safe-global/safe-singleton-factory": "^1.0.44",
@@ -92,7 +84,6 @@
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.35.0",
-        "yargs": "^18.0.0",
-        "zksync-ethers": "6.18.0"
+        "yargs": "^18.0.0"
     }
 }

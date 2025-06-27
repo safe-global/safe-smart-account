@@ -1,27 +1,24 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getDeployerAccount } from "../utils/deploy";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments } = hre;
-    const deployerAccount = await getDeployerAccount(hre);
-    const { deploy } = deployments;
+    const { deployer: deployerAccount } = await hre.getNamedAccounts();
 
-    await deploy("TokenCallbackHandler", {
+    await hre.deployments.deploy("TokenCallbackHandler", {
         from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
-    await deploy("CompatibilityFallbackHandler", {
+    await hre.deployments.deploy("CompatibilityFallbackHandler", {
         from: deployerAccount,
         args: [],
         log: true,
         deterministicDeployment: true,
     });
 
-    await deploy("ExtensibleFallbackHandler", {
+    await hre.deployments.deploy("ExtensibleFallbackHandler", {
         from: deployerAccount,
         args: [],
         log: true,

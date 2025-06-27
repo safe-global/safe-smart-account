@@ -313,11 +313,7 @@ describe("Safe", () => {
             ).to.be.revertedWith("GS011");
         });
 
-        it("should work with ether payment to deployer", async function () {
-            if (hre.network.zksync) {
-                // zksync does not support tx.origin
-                this.skip();
-            }
+        it("should work with ether payment to deployer", async () => {
             const {
                 template,
                 signers: [user1, user2, user3],
