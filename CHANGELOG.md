@@ -68,9 +68,9 @@ ZkSync and zkSync based chains now have a full EVM compatibility layer. Starting
 
 #### Deprecate `SafeToL2Migration`
 
-PR: [#1005](https://github.com/safe-global/safe-smart-account/pull/1005)
+PR: [#1008](https://github.com/safe-global/safe-smart-account/pull/1008)
 
-`SafeToL2Migration` was used as a solution to help make Safes that were deployed with an L1 singleton compatible with the transaction service and wallet interface on networks where only the L2 singleton is supported. It _only_ allowed migrations from a Safe singleton to another with the same version. Since the wallet interface now deploys all Safes with the `SafeToL2Setup` contract, all 1.5.0 Safes are expected to be deployed in a cross-chain compatible way, and this contract is no longer necessary. A new contract that supports migrating Safes with L1 singletons to the latest L2 singleton may be introduced in the future.
+`SafeToL2Migration` was used as a solution to help make Safes that were deployed with an L1 singleton compatible with the transaction service and wallet interface on networks where only the L2 singleton is supported. It _only_ allowed migrations from a Safe singleton to another with the same version. Since the wallet interface now deploys all Safes with the `SafeToL2Setup` contract, all 1.5.0 Safes are expected to be deployed in a cross-chain compatible way, and this contract is no longer necessary. A new contract that supports migrating Safes with older L1 singletons to the latest L2 singleton may be introduced in the future.
 
 #### Rename repository
 
