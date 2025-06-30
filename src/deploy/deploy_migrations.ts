@@ -8,13 +8,6 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const SafeL2 = await hre.deployments.get("SafeL2");
     const CompatibilityFallbackHandler = await hre.deployments.get("CompatibilityFallbackHandler");
 
-    await hre.deployments.deploy("SafeToL2Migration", {
-        from: deployerAccount,
-        args: [],
-        log: true,
-        deterministicDeployment: true,
-    });
-
     await hre.deployments.deploy("SafeMigration", {
         from: deployerAccount,
         args: [Safe.address, SafeL2.address, CompatibilityFallbackHandler.address],
