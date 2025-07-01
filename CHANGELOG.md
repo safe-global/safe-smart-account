@@ -48,7 +48,6 @@ Solidity optimizer: `disabled`
 | `MultiSendCallOnly`                             | `0xA83c336B20401Af773B6219BA5027174338D1836` |
 | `SignMessageLib`                                | `0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa` |
 | `SafeToL2Setup`                                 | `0x900C7589200010D6C6eCaaE5B06EBe653bc2D82a` |
-| `SafeToL2Migration`                             | `0x5D9c4239fF1b89982AA9dd98F73e560cAcC19653` |
 | `SafeMigration` (target Safe version: `v1.5.0`) | `0x6439e7ABD8Bb915A5263094784C5CF561c4172AC` |
 
 ### Storage reader contracts
@@ -66,6 +65,12 @@ Solidity optimizer: `disabled`
 PR: [#1004](https://github.com/safe-global/safe-smart-account/pull/1004)
 
 ZkSync and zkSync based chains now have a full EVM compatibility layer. Starting from Safe v1.5.0, all deployments will be EVM only and will no longer support EraVM versions of Safe. Note that EraVM contracts cannot `DELEGATECALL` EVM contracts, which means that Safes created with EraVM cannot upgrade to Safe v1.5.0+ and instead need to be migrated.
+
+#### Deprecate `SafeToL2Migration`
+
+PR: [#1008](https://github.com/safe-global/safe-smart-account/pull/1008)
+
+`SafeToL2Migration` was used as a solution to help make Safes that were deployed with an L1 singleton compatible with the transaction service and wallet interface on networks where only the L2 singleton is supported. It _only_ allowed migrations from a Safe singleton to another with the same version. Since the wallet interface now deploys all Safes with the `SafeToL2Setup` contract, all 1.5.0 Safes are expected to be deployed in a cross-chain compatible way, and this contract is no longer necessary. A new contract that supports migrating Safes with older L1 singletons to the latest L2 singleton may be introduced in the future.
 
 #### Rename repository
 
