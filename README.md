@@ -4,9 +4,6 @@
 [![Build Status](https://github.com/safe-global/safe-smart-account/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/safe-global/safe-smart-account/actions)
 [![Coverage Status](https://coveralls.io/repos/github/safe-global/safe-smart-account/badge.svg?branch=main)](https://coveralls.io/github/safe-global/safe-smart-account)
 
-> [!WARNING]
-> **This branch contains changes that are under development** To use the latest audited version make sure to use the correct commit. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
-
 ## Usage
 
 ### Install requirements with npm:
@@ -48,8 +45,6 @@ To add support for a new network follow the steps of the `Deploy` section and cr
 
 > [!WARNING]
 > **Make sure to use the correct commit when deploying the contracts.** Any change (even comments) within the contract files will result in different addresses. The tagged versions that are used by the Safe team can be found in the [releases](https://github.com/safe-global/safe-smart-account/releases).
-
-> **Current version:** The latest release is [v1.4.1-3](https://github.com/safe-global/safe-smart-account/tree/v1.4.1-3) on the commit [21dc824](https://github.com/safe-global/safe-smart-account/commit/21dc82410445637820f600c7399a804ad55841d5)
 
 This will deploy the contracts deterministically and verify the contracts on etherscan using [Solidity 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6) by default.
 
