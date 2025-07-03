@@ -8,6 +8,7 @@ import { getSafeTemplate, getSafe } from "../utils/setup";
 import {
     safeSignTypedData,
     executeTx,
+    executeContractCallWithSigners,
     safeSignMessage,
     calculateSafeTransactionHash,
     safeApproveHash,
@@ -480,6 +481,34 @@ describe("Safe", () => {
             ]);
 
             await safe["checkSignatures(address,bytes32,bytes)"](user1.address, txHash, signatures);
+        });
+
+        it("should not allow trivial signatures when the Safe owns itself", async () => {
+            const {
+                signers: [user1],
+            } = await setupTests();
+            const compatFallbackHandler = await getCompatFallbackHandler();
+            const compatFallbackHandlerAddress = await compatFallbackHandler.getAddress();
+            const safe = await getSafe({
+                owners: [user1.address],
+                threshold: 1,
+                fallbackHandler: compatFallbackHandlerAddress,
+            });
+            const safeAddress = await safe.getAddress();
+
+            await executeContractCallWithSigners(safe, safe, "addOwnerWithThreshold", [safeAddress, 1], [user1]);
+
+            const tx = buildSafeTransaction({ to: safeAddress, nonce: await safe.nonce() });
+            const txHash = calculateSafeTransactionHash(safeAddress, tx, await chainId());
+
+            const selfSignature = {
+                signer: safeAddress,
+                data: buildSignatureBytes([await safeApproveHash(await hre.ethers.getSigner(safeAddress), safe, tx, true)]),
+                dynamic: true,
+            } as const;
+            const signatures = buildSignatureBytes([selfSignature]);
+
+            await expect(safe["checkSignatures(address,bytes32,bytes)"](user1.address, txHash, signatures)).to.be.revertedWith("GS025");
         });
     });
 
