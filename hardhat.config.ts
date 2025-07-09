@@ -7,6 +7,10 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { getSingletonFactoryInfo } from "@safe-global/safe-singleton-factory";
 
+import "./src/tasks/local_verify";
+import "./src/tasks/deploy_contracts";
+import "./src/tasks/show_codesize";
+
 const argv = yargs(hideBin(process.argv))
     .option("network", {
         type: "string",
@@ -45,10 +49,6 @@ if (PK) {
     };
 }
 const soliditySettings = SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
-
-import "./src/tasks/local_verify";
-import "./src/tasks/deploy_contracts";
-import "./src/tasks/show_codesize";
 
 const deterministicDeployment = (network: string): DeterministicDeploymentInfo => {
     const info = getSingletonFactoryInfo(parseInt(network));
