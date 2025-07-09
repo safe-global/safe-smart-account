@@ -21,7 +21,10 @@ interface IOwnerManager {
     /**
      * @notice Removes the owner `owner` from the Safe and updates the threshold to `_threshold`.
      * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be removed in the linked list
+     * @param prevOwner Owner that pointed to the `owner` to be removed in the linked list.
+     *        If the owner to be removed is the first (or only) element of the list,
+     *        `prevOwner` MUST be set to the sentinel address `0x1` (referred to as
+     *        `SENTINEL_OWNERS` in the implementation).
      * @param owner Owner address to be removed.
      * @param _threshold New threshold.
      */
@@ -30,7 +33,10 @@ interface IOwnerManager {
     /**
      * @notice Replaces the owner `oldOwner` in the Safe with `newOwner`.
      * @dev This can only be done via a Safe transaction.
-     * @param prevOwner Owner that pointed to the owner to be replaced in the linked list
+     * @param prevOwner Owner that pointed to the `oldOwner` to be replaced in the linked list.
+     *        If the owner to be replaced is the first (or only) element of the list,
+     *        `prevOwner` MUST be set to the sentinel address `0x1` (referred to as
+     *        `SENTINEL_OWNERS` in the implementation).
      * @param oldOwner Owner address to be replaced.
      * @param newOwner New owner address.
      */
