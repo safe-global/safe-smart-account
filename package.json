@@ -60,7 +60,7 @@
         "@nomicfoundation/hardhat-toolbox": "^6.0.0",
         "@openzeppelin/contracts": "^3.4.2",
         "@safe-global/mock-contract": "^4.1.0",
-        "@safe-global/safe-singleton-factory": "^1.0.44",
+        "@safe-global/safe-singleton-factory": "^2.0.0",
         "@types/chai": "^4.3.20",
         "@types/mocha": "^10.0.10",
         "@types/node": "^24.0.3",
