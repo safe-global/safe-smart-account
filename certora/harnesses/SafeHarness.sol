@@ -3,7 +3,7 @@ import "../munged/Safe.sol";
 import {SafeMath} from "../munged/external/SafeMath.sol";
 import {ISafe, IStaticFallbackMethod, IFallbackMethod, ExtensibleBase} from "../munged/handler/extensible/ExtensibleBase.sol";
 import {IFallbackHandler, FallbackHandler} from "../munged/handler/extensible/FallbackHandler.sol";
-
+import {FALLBACK_HANDLER_STORAGE_SLOT} from "../munged/libraries/SafeStorage.sol";
 
 contract SafeHarness is Safe {
     constructor(
@@ -35,8 +35,8 @@ contract SafeHarness is Safe {
         }
     }
 
-    function numSigsSufficient(bytes memory signatures,uint256 requiredSignatures) public pure returns (bool) {
-        return (signatures.length >= SafeMath.mul(requiredSignatures,65));
+    function numSigsSufficient(bytes memory signatures, uint256 requiredSignatures) public pure returns (bool) {
+        return (signatures.length >= SafeMath.mul(requiredSignatures, 65));
     }
 
     // harnessed getters
@@ -74,14 +74,14 @@ contract SafeHarness is Safe {
 
     function getFallbackHandler() public view returns (address) {
         address handler;
-        assembly{
+        assembly {
             handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
         }
-        return handler ;
+        return handler;
     }
 
     function callSetSafeMethod(bytes4 selector, bytes32 newMethod) public {
-        IFallbackHandler(address(this)).setSafeMethod(selector,newMethod);
+        IFallbackHandler(address(this)).setSafeMethod(selector, newMethod);
     }
 
     function callDummyHandler(bytes4 selector) public {

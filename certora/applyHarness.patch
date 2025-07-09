@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2025-05-27 10:10:59
-+++ Safe.sol	2025-05-27 10:10:59
+--- Safe.sol	2025-07-09 12:21:55.831312348 +0000
++++ Safe.sol	2025-07-09 12:45:47.086078483 +0000
 @@ -75,22 +75,25 @@
           * so we create a Safe with 0 owners and threshold 1.
           * This is an unusable Safe, perfect for the singleton
@@ -31,7 +31,7 @@ diff -druN Safe.sol Safe.sol
          // Emit the setup event optimistically. This ensures that changes such as `addOwner` and `changeThreshold` that are part
          // of the  `to.delegatecall(data)` that happen in the `setupModules` call emit events in order relative to the setup
          // event, making it easier for off-chain indexers to reliably reconstruct the Safe configuration.
-@@ -397,9 +400,6 @@
+@@ -398,9 +401,6 @@
          return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
      }
  
@@ -41,7 +41,7 @@ diff -druN Safe.sol Safe.sol
      function getTransactionHash(
          address to,
          uint256 value,
-@@ -411,7 +411,9 @@
+@@ -412,7 +412,9 @@
          address gasToken,
          address refundReceiver,
          uint256 _nonce
@@ -52,7 +52,7 @@ diff -druN Safe.sol Safe.sol
          bytes32 domainHash = domainSeparator();
  
          // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
-@@ -466,7 +468,8 @@
+@@ -467,7 +469,8 @@
              // Store the domain separator
              mstore(add(ptr, 32), domainHash)
              // Calculate the hash
@@ -63,8 +63,8 @@ diff -druN Safe.sol Safe.sol
          /* solhint-enable no-inline-assembly */
      }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2025-05-27 10:10:59
-+++ base/Executor.sol	2025-05-27 10:10:59
+--- base/Executor.sol	2025-07-03 08:51:19.308739177 +0000
++++ base/Executor.sol	2025-07-09 12:45:47.086392895 +0000
 @@ -26,12 +26,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -81,9 +81,9 @@ diff -druN base/Executor.sol base/Executor.sol
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
 diff -druN base/FallbackManager.sol base/FallbackManager.sol
---- base/FallbackManager.sol	2025-05-27 10:10:59
-+++ base/FallbackManager.sol	2025-05-27 10:10:59
-@@ -61,7 +61,8 @@
+--- base/FallbackManager.sol	2025-07-09 12:42:34.885183896 +0000
++++ base/FallbackManager.sol	2025-07-09 12:45:47.086663906 +0000
+@@ -60,7 +60,8 @@
              // not going beyond the scratch space, etc)
              // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
  
@@ -94,8 +94,8 @@ diff -druN base/FallbackManager.sol base/FallbackManager.sol
              if iszero(handler) {
                  return(0, 0)
 diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2025-05-27 10:10:59
-+++ interfaces/ISafe.sol	2025-05-27 10:10:59
+--- interfaces/ISafe.sol	2025-07-03 08:51:19.312340984 +0000
++++ interfaces/ISafe.sol	2025-07-09 12:45:47.087200687 +0000
 @@ -117,7 +117,7 @@
       */
      function domainSeparator() external view returns (bytes32);
