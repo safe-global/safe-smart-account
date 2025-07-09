@@ -3,15 +3,14 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
+// solhint-disable-next-line no-unused-import
+import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
  * @author Richard Meissner - @rmeissner
  */
 abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
-    // keccak256("fallback_manager.handler.address")
-    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
-
     /**
      *  @notice Internal function to set the fallback handler.
      *  @param handler contract to handle fallback calls.

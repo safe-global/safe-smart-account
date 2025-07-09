@@ -2,6 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "../interfaces/ISafe.sol";
+import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Handler Context - Allows the fallback handler to extract additional context from the calldata
@@ -11,12 +12,6 @@ import {ISafe} from "../interfaces/ISafe.sol";
  * @author Richard Meissner - @rmeissner
  */
 abstract contract HandlerContext {
-    /**
-     * @dev The storage slot used for storing the currently configured fallback handler address.
-     *      Precomputed value of: `keccak256("fallback_manager.handler.address")`.
-     */
-    bytes32 internal constant FALLBACK_HANDLER_STORAGE_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
-
     /**
      * @notice A modifier that reverts if not called by a Safe as a fallback handler.
      * @dev Note that this modifier does a **best effort** attempt at not allowing calls that are

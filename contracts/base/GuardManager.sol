@@ -6,6 +6,8 @@ import {SelfAuthorized} from "./../common/SelfAuthorized.sol";
 import {IERC165} from "./../interfaces/IERC165.sol";
 import {IGuardManager} from "./../interfaces/IGuardManager.sol";
 import {Enum} from "./../libraries/Enum.sol";
+// solhint-disable-next-line no-unused-import
+import {GUARD_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title ITransactionGuard Interface
@@ -62,15 +64,13 @@ abstract contract BaseTransactionGuard is ITransactionGuard {
  * @author Richard Meissner - @rmeissner
  */
 abstract contract GuardManager is SelfAuthorized, IGuardManager {
-    // keccak256("guard_manager.guard.address")
-    bytes32 internal constant GUARD_STORAGE_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
-
     /**
      * @inheritdoc IGuardManager
      */
     function setGuard(address guard) external override authorized {
         if (guard != address(0) && !ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId))
             revertWithError("GS300");
+
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {

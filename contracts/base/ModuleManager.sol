@@ -5,6 +5,8 @@ import {SelfAuthorized} from "./../common/SelfAuthorized.sol";
 import {IERC165} from "./../interfaces/IERC165.sol";
 import {IModuleManager} from "./../interfaces/IModuleManager.sol";
 import {Enum} from "./../libraries/Enum.sol";
+// solhint-disable-next-line no-unused-import
+import {MODULE_GUARD_STORAGE_SLOT} from "./../libraries/SafeStorage.sol";
 import {Executor} from "./Executor.sol";
 
 /**
@@ -60,9 +62,6 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
     //      1. `modules[SENTINEL_MODULES]` contains the first module
     //      2. `modules[last_module]` points back to SENTINEL_MODULES
     address internal constant SENTINEL_MODULES = address(0x1);
-
-    // keccak256("module_manager.module_guard.address")
-    bytes32 internal constant MODULE_GUARD_STORAGE_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
     mapping(address => address) internal modules;
 
@@ -217,10 +216,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
 
         /**
           Because of the argument validation, we can assume that the loop will always iterate over the valid module list values
-          and the `next` variable will either be an enabled module or a sentinel address (signalling the end). 
-          
+          and the `next` variable will either be an enabled module or a sentinel address (signalling the end).
+
           If we haven't reached the end inside the loop, we need to set the next pointer to the last element of the modules array
-          because the `next` variable (which is a module by itself) acting as a pointer to the start of the next page is neither 
+          because the `next` variable (which is a module by itself) acting as a pointer to the start of the next page is neither
           included to the current page, nor will it be included in the next one if you pass it as a start.
         */
         if (next != SENTINEL_MODULES) {
@@ -259,11 +258,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
         if (moduleGuard != address(0) && !IModuleGuard(moduleGuard).supportsInterface(type(IModuleGuard).interfaceId))
             revertWithError("GS301");
 
-        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, moduleGuard)
+            sstore(MODULE_GUARD_STORAGE_SLOT, moduleGuard)
         }
         /* solhint-enable no-inline-assembly */
         emit ChangedModuleGuard(moduleGuard);
@@ -274,11 +272,10 @@ abstract contract ModuleManager is SelfAuthorized, Executor, IModuleManager {
      * @return moduleGuard The address of the guard
      */
     function getModuleGuard() internal view returns (address moduleGuard) {
-        bytes32 slot = MODULE_GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            moduleGuard := sload(slot)
+            moduleGuard := sload(MODULE_GUARD_STORAGE_SLOT)
         }
         /* solhint-enable no-inline-assembly */
     }
