@@ -5,6 +5,7 @@ import {SelfAuthorized} from "./../common/SelfAuthorized.sol";
 import {IERC165} from "./../interfaces/IERC165.sol";
 import {IModuleManager} from "./../interfaces/IModuleManager.sol";
 import {Enum} from "./../libraries/Enum.sol";
+// solhint-disable-next-line no-unused-import
 import {MODULE_GUARD_STORAGE_SLOT} from "./../libraries/SafeStorage.sol";
 import {Executor} from "./Executor.sol";
 

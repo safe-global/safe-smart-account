@@ -3,6 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
+// solhint-disable-next-line no-unused-import
 import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
