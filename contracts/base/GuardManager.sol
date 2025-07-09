@@ -6,7 +6,7 @@ import {SelfAuthorized} from "./../common/SelfAuthorized.sol";
 import {IERC165} from "./../interfaces/IERC165.sol";
 import {IGuardManager} from "./../interfaces/IGuardManager.sol";
 import {Enum} from "./../libraries/Enum.sol";
-import {StorageSlots} from "../libraries/StorageSlots.sol";
+import {GUARD_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title ITransactionGuard Interface
@@ -70,11 +70,10 @@ abstract contract GuardManager is SelfAuthorized, IGuardManager {
         if (guard != address(0) && !ITransactionGuard(guard).supportsInterface(type(ITransactionGuard).interfaceId))
             revertWithError("GS300");
 
-        bytes32 slot = StorageSlots.GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, guard)
+            sstore(GUARD_STORAGE_SLOT, guard)
         }
         /* solhint-enable no-inline-assembly */
         emit ChangedGuard(guard);
@@ -88,11 +87,10 @@ abstract contract GuardManager is SelfAuthorized, IGuardManager {
      * @return guard The address of the guard
      */
     function getGuard() internal view returns (address guard) {
-        bytes32 slot = StorageSlots.GUARD_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            guard := sload(slot)
+            guard := sload(GUARD_STORAGE_SLOT)
         }
         /* solhint-enable no-inline-assembly */
     }

@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "../interfaces/ISafe.sol";
-import {StorageSlots} from "../libraries/StorageSlots.sol";
+import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Handler Context - Allows the fallback handler to extract additional context from the calldata
@@ -30,7 +30,7 @@ abstract contract HandlerContext {
      *      effort** check and may generate false positives under certain conditions.
      */
     function _requireFallback() internal view {
-        bytes memory storageData = ISafe(payable(msg.sender)).getStorageAt(uint256(StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT), 1);
+        bytes memory storageData = ISafe(payable(msg.sender)).getStorageAt(uint256(FALLBACK_HANDLER_STORAGE_SLOT), 1);
         address fallbackHandler = abi.decode(storageData, (address));
         require(fallbackHandler == address(this), "not a fallback call");
     }

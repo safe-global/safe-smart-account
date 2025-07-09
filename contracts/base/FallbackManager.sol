@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {SelfAuthorized} from "../common/SelfAuthorized.sol";
 import {IFallbackManager} from "../interfaces/IFallbackManager.sol";
-import {StorageSlots} from "../libraries/StorageSlots.sol";
+import {FALLBACK_HANDLER_STORAGE_SLOT} from "../libraries/SafeStorage.sol";
 
 /**
  * @title Fallback Manager - A contract managing fallback calls made to this contract
@@ -30,11 +30,10 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         */
         if (handler == address(this)) revertWithError("GS400");
 
-        bytes32 slot = StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, handler)
+            sstore(FALLBACK_HANDLER_STORAGE_SLOT, handler)
         }
         /* solhint-enable no-inline-assembly */
     }
@@ -52,7 +51,6 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
      */
     // solhint-disable-next-line payable-fallback,no-complex-fallback
     fallback() external override {
-        bytes32 slot = StorageSlots.FALLBACK_HANDLER_STORAGE_SLOT;
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
@@ -61,7 +59,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
             // not going beyond the scratch space, etc)
             // Solidity docs: https://docs.soliditylang.org/en/latest/assembly.html#memory-safety
 
-            let handler := sload(slot)
+            let handler := sload(FALLBACK_HANDLER_STORAGE_SLOT)
 
             if iszero(handler) {
                 return(0, 0)
