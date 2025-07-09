@@ -1,10 +1,15 @@
 import "@nomicfoundation/hardhat-toolbox";
 import type { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "hardhat-deploy";
+import type { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { getSingletonFactoryInfo } from "@safe-global/safe-singleton-factory";
+
+import "./src/tasks/local_verify";
+import "./src/tasks/deploy_contracts";
+import "./src/tasks/show_codesize";
 
 const argv = yargs(hideBin(process.argv))
     .option("network", {
@@ -15,7 +20,6 @@ const argv = yargs(hideBin(process.argv))
     .version(false)
     .parseSync();
 
-// Load environment variables.
 dotenv.config();
 const {
     NODE_URL,
@@ -25,47 +29,38 @@ const {
     PK,
     SOLIDITY_VERSION,
     SOLIDITY_SETTINGS,
-    HARDHAT_CHAIN_ID = 31337,
+    HARDHAT_CHAIN_ID,
     HARDHAT_ENABLE_GAS_REPORTER,
 } = process.env;
 
+if (["mainnet", "sepolia"].includes(argv.network) && INFURA_KEY === undefined) {
+    throw new Error(`Could not find Infura key in env, unable to connect to network ${argv.network}`);
+}
+
 const DEFAULT_MNEMONIC = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
+const DEFAULT_SOLIDITY_VERSION = "0.7.6";
 
 const sharedNetworkConfig: HttpNetworkUserConfig = {};
 if (PK) {
     sharedNetworkConfig.accounts = [PK];
 } else {
     sharedNetworkConfig.accounts = {
-        mnemonic: MNEMONIC || DEFAULT_MNEMONIC,
+        mnemonic: MNEMONIC ?? DEFAULT_MNEMONIC,
     };
 }
-
-if (["mainnet", "rinkeby", "kovan", "goerli", "ropsten", "mumbai", "polygon"].includes(argv.network) && INFURA_KEY === undefined) {
-    throw new Error(`Could not find Infura key in env, unable to connect to network ${argv.network}`);
-}
-
-import "./src/tasks/local_verify";
-import "./src/tasks/deploy_contracts";
-import "./src/tasks/show_codesize";
-import { BigNumber } from "@ethersproject/bignumber";
-import { DeterministicDeploymentInfo } from "hardhat-deploy/dist/types";
-
-const defaultSolidityVersion = "0.7.6";
-const primarySolidityVersion = SOLIDITY_VERSION || defaultSolidityVersion;
 const soliditySettings = SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined;
 
 const deterministicDeployment = (network: string): DeterministicDeploymentInfo => {
     const info = getSingletonFactoryInfo(parseInt(network));
     if (!info) {
-        throw new Error(`
-        Safe factory not found for network ${network}. You can request a new deployment at https://github.com/safe-global/safe-singleton-factory.
-        For more information, see https://github.com/safe-global/safe-smart-account#replay-protection-eip-155
-      `);
+        throw new Error(
+            `Safe factory not found for network ${network}. You can request a new deployment at https://github.com/safe-global/safe-singleton-factory.`,
+        );
     }
     return {
         factory: info.address,
         deployer: info.signerAddress,
-        funding: BigNumber.from(info.gasLimit).mul(BigNumber.from(info.gasPrice)).toString(),
+        funding: `${BigInt(info.gasLimit) * BigInt(info.gasPrice)}`,
         signedTx: info.transaction,
     };
 };
@@ -82,59 +77,42 @@ const userConfig: HardhatUserConfig = {
         target: "ethers-v6",
     },
     solidity: {
-        compilers: [{ version: primarySolidityVersion, settings: soliditySettings }, { version: defaultSolidityVersion }],
+        compilers: [
+            { version: SOLIDITY_VERSION ?? DEFAULT_SOLIDITY_VERSION, settings: soliditySettings },
+            { version: DEFAULT_SOLIDITY_VERSION },
+        ],
     },
     networks: {
         hardhat: {
             allowUnlimitedContractSize: true,
             blockGasLimit: 100000000,
             gas: 100000000,
-            chainId: typeof HARDHAT_CHAIN_ID === "string" && !Number.isNaN(parseInt(HARDHAT_CHAIN_ID)) ? parseInt(HARDHAT_CHAIN_ID) : 31337,
+            chainId: Number(HARDHAT_CHAIN_ID ?? 31337),
         },
         mainnet: {
             ...sharedNetworkConfig,
             url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
         },
+        sepolia: {
+            ...sharedNetworkConfig,
+            url: `https://sepolia.infura.io/v3/${INFURA_KEY}`,
+        },
         gnosis: {
             ...sharedNetworkConfig,
-            url: "https://rpc.gnosischain.com",
+            url: `https://rpc.gnosischain.com`,
         },
-        goerli: {
-            ...sharedNetworkConfig,
-            url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
-        },
-        mumbai: {
-            ...sharedNetworkConfig,
-            url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
-        },
-        polygon: {
-            ...sharedNetworkConfig,
-            url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
-        },
-        bsc: {
-            ...sharedNetworkConfig,
-            url: `https://bsc-dataseed.binance.org/`,
-        },
-        arbitrum: {
-            ...sharedNetworkConfig,
-            url: `https://arb1.arbitrum.io/rpc`,
-        },
-        fantomTestnet: {
-            ...sharedNetworkConfig,
-            url: `https://rpc.testnet.fantom.network/`,
-        },
-        avalanche: {
-            ...sharedNetworkConfig,
-            url: `https://api.avax.network/ext/bc/C/rpc`,
-        },
-        zkSyncMainnet: {
+        zksync: {
             ...sharedNetworkConfig,
             url: "https://mainnet.era.zksync.io",
         },
-        zkSyncSepolia: {
-            ...sharedNetworkConfig,
-            url: "https://sepolia.era.zksync.dev",
-        },
+        ...(NODE_URL
+            ? {
+                  custom: {
+                      ...sharedNetworkConfig,
+                      url: NODE_URL,
+                  },
+              }
+            : {}),
     },
     deterministicDeployment,
     namedAccounts: {
@@ -150,10 +128,5 @@ const userConfig: HardhatUserConfig = {
         enabled: HARDHAT_ENABLE_GAS_REPORTER === "1",
     },
 };
-if (NODE_URL) {
-    userConfig.networks!.custom = {
-        ...sharedNetworkConfig,
-        url: NODE_URL,
-    };
-}
+
 export default userConfig;
