@@ -10,30 +10,68 @@ import {IOwnerManager} from "./IOwnerManager.sol";
 import {IStorageAccessible} from "./IStorageAccessible.sol";
 
 /**
- * @title ISafe - A multisignature wallet interface with support for confirmations using signed messages based on EIP-712.
+ * @title Safe Interface
+ * @notice A multi-signature wallet with support for confirmations using signed messages based on EIP-712.
+ * @dev This is a Solidity interface definition to the Safe account.
  * @author @safe-global/safe-protocol
  */
 interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager, IOwnerManager, IFallbackManager, IStorageAccessible {
+    /**
+     * @notice Safe setup event.
+     * @param initiator Caller of the {setup} function.
+     * @param owners The initial owners that the safe was set up with.
+     * @param threshold The initial signature threshold.
+     * @param initializer The address of the setup initializer contract.
+     * @param fallbackHandler The address of the initial fallback handler configured for the Safe.
+     */
     event SafeSetup(address indexed initiator, address[] owners, uint256 threshold, address initializer, address fallbackHandler);
+    /**
+     * @notice A transaction hash was approved by an owner.
+     * @param approvedHash The hash that was approved.
+     * @param owner The owner that approved it.
+     */
     event ApproveHash(bytes32 indexed approvedHash, address indexed owner);
+    /**
+     * @notice A Safe message was signed.
+     * @param msgHash The hash the message that was signed.
+     */
     event SignMsg(bytes32 indexed msgHash);
+    /**
+     * @notice A Safe transaction reverted.
+     * @dev This event is emitted when {execTransaction} is configured to not revert on failed execution.
+     *      The Safe's nonce will increment and payment for the transaction will be processed.
+     * @param txHash The Safe transaction hash.
+     * @param payment The payment amount.
+     */
     event ExecutionFailure(bytes32 indexed txHash, uint256 payment);
+    /**
+     * @notice A Safe transaction executed.
+     * @param txHash The Safe transaction hash.
+     * @param payment The payment amount.
+     */
     event ExecutionSuccess(bytes32 indexed txHash, uint256 payment);
 
     /**
-     * @notice Sets an initial storage of the Safe contract.
+     * @notice Sets an initial storage of the Safe account.
      * @dev This method can only be called once.
-     *      If a proxy was created without setting up, anyone can call setup and claim the proxy.
+     *      ⚠️⚠️⚠️ If a proxy was created without setting up, anyone can call setup and claim the proxy. ⚠️⚠️⚠️
+     *      ⚠️⚠️⚠️ A Safe can set itself as an owner which is a valid setup for EIP-7702 delegations.
+     *      However, if address of the accounts is not an EOA and cannot sign for itself, you can
+     *      potentially block access to the account completely. For example, if you have a `n/n`
+     *      Safe (so `threshold == ownerCount`) and one of the owners is the Safe itself and not
+     *      an EIP-7702 delegated account, then it will not be possible to produce a valid
+     *      signature for the Safe. ⚠️⚠️⚠️
      *      This method emits a {SafeSetup} event with the setup parameters instead of reading from storage,
      *      which may be inaccurate if the delegate call to `to` modifies the owners, threshold or fallback handler.
-     * @param _owners List of Safe owners.
+     * @param _owners Array of initial Safe owners.
      * @param _threshold Number of required confirmations for a Safe transaction.
-     * @param to Contract address for optional delegate call.
-     * @param data Data payload for optional delegate call.
-     * @param fallbackHandler Handler for fallback calls to this contract
-     * @param paymentToken Token that should be used for the payment (0 is ETH)
-     * @param payment Value that should be paid
-     * @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
+     * @param to Optional initializer contract address. It will be `DELEGATECALL`-ed with `data`.
+     *           Use the 0 address to not perform any additional initialization.
+     * @param data Data payload for the `to` initializer contract.
+     * @param fallbackHandler Handler for fallback calls to this contract.
+     * @param paymentToken Token that should be used for the payment (0 for native token).
+     * @param payment Value that should be paid.
+     * @param paymentReceiver Address that should receive the payment (or 0 if `tx.origin`).
      */
     function setup(
         address[] calldata _owners,
@@ -46,24 +84,24 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
         address payable paymentReceiver
     ) external;
 
-    /** @notice Executes a `operation` {0: Call, 1: DelegateCall} transaction to `to` with `value` (Native Currency)
-     *          and pays `gasPrice` * `gasLimit` in `gasToken` token to `refundReceiver`.
+    /** @notice Executes a transaction with `operation` to the `to` address with a native token `value` with a `data` payload.
+     *          Pays `gasPrice * gasLimit` in `gasToken` token to the `refundReceiver`.
      * @dev The fees are always transferred, even if the user transaction fails.
      *      This method doesn't perform any sanity check of the transaction, such as:
      *      - if the contract at `to` address has code or not
      *      - if the `gasToken` is a contract or not
      *      It is the responsibility of the caller to perform such checks.
      * @param to Destination address of Safe transaction.
-     * @param value Ether value of Safe transaction.
-     * @param data Data payload of Safe transaction.
-     * @param operation Operation type of Safe transaction.
+     * @param value Native token value of the Safe transaction.
+     * @param data Data payload of the Safe transaction.
+     * @param operation Operation type of the Safe transaction: 0 for `CALL` and 1 for `DELEGATECALL`.
      * @param safeTxGas Gas that should be used for the Safe transaction.
-     * @param baseGas Gas costs that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+     * @param baseGas Base gas costs that are independent of the transaction execution (e.g. base transaction fee, signature check, payment of the refund).
      * @param gasPrice Gas price that should be used for the payment calculation.
-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param signatures Signature data that should be verified.
-     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param gasToken Token address (or 0 for the native token) that is used for the payment.
+     * @param refundReceiver Address of receiver of the gas payment (or 0 for `tx.origin`).
+     * @param signatures Packed signature data that should be verified.
+     *                   Can be packed ECDSA signature `r:bytes32 || s:bytes32 || v:uint8`, contract signature (EIP-1271), or approved hash.
      * @return success Boolean indicating transaction's success.
      */
     function execTransaction(
@@ -84,9 +122,9 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      * @param executor Address that executes the transaction.
      *        ⚠️⚠️⚠️ Make sure that the executor address is a legitimate executor.
      *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
-     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param signatures Signature data that should be verified.
-     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash).
+     * @param signatures Packed signature data that should be verified.
+     *                   Can be packed ECDSA signature `r:bytes32 || s:bytes32 || v:uint8`, contract signature (EIP-1271), or approved hash.
      */
     function checkSignatures(address executor, bytes32 dataHash, bytes memory signatures) external view;
 
@@ -96,40 +134,40 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      * @param executor Address that executes the transaction.
      *        ⚠️⚠️⚠️ Make sure that the executor address is a legitimate executor.
      *        Incorrectly passed the executor might reduce the threshold by 1 signature. ⚠️⚠️⚠️
-     * @param dataHash Hash of the data (could be either a message hash or transaction hash)
-     * @param signatures Signature data that should be verified.
-     *                   Can be packed ECDSA signature ({bytes32 r}{bytes32 s}{uint8 v}), contract signature (EIP-1271) or approved hash.
+     * @param dataHash Hash of the data (could be either a message hash or transaction hash).
+     * @param signatures Packed signature data that should be verified.
+     *                   Can be packed ECDSA signature `r:bytes32 || s:bytes32 || v:uint8`, contract signature (EIP-1271), or approved hash.
      * @param requiredSignatures Amount of required valid signatures.
      */
     function checkNSignatures(address executor, bytes32 dataHash, bytes memory signatures, uint256 requiredSignatures) external view;
 
     /**
-     * @notice Marks hash `hashToApprove` as approved.
+     * @notice Marks hash `hashToApprove` as approved for `msg.sender`.
      * @dev This can be used with a pre-approved hash transaction signature.
-     *      IMPORTANT: The approved hash stays approved forever. There's no revocation mechanism, so it behaves similarly to ECDSA signatures
+     *      IMPORTANT: The approved hash stays approved forever. There's no revocation mechanism, so it behaves similarly to ECDSA signatures.
      * @param hashToApprove The hash to mark as approved for signatures that are verified by this contract.
      */
     function approveHash(bytes32 hashToApprove) external;
 
     /**
      * @dev Returns the domain separator for this contract, as defined in the EIP-712 standard.
-     * @return bytes32 The domain separator hash.
+     * @return The domain separator hash.
      */
     function domainSeparator() external view returns (bytes32);
 
     /**
      * @notice Returns transaction hash to be signed by owners.
-     * @param to Destination address.
-     * @param value Ether value.
-     * @param data Data payload.
-     * @param operation Operation type.
-     * @param safeTxGas Gas that should be used for the safe transaction.
-     * @param baseGas Gas costs for data used to trigger the safe transaction.
-     * @param gasPrice Maximum gas price that should be used for this transaction.
-     * @param gasToken Token address (or 0 if ETH) that is used for the payment.
-     * @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin).
-     * @param _nonce Transaction nonce.
-     * @return Transaction hash.
+     * @param to Destination address of Safe transaction.
+     * @param value Native token value of the Safe transaction.
+     * @param data Data payload of the Safe transaction.
+     * @param operation Operation type of the Safe transaction: 0 for `CALL` and 1 for `DELEGATECALL`.
+     * @param safeTxGas Gas that should be used for the Safe transaction.
+     * @param baseGas Base gas costs that are independent of the transaction execution (e.g. base transaction fee, signature check, payment of the refund).
+     * @param gasPrice Gas price that should be used for the payment calculation.
+     * @param gasToken Token address (or 0 for the native token) that is used for the payment.
+     * @param refundReceiver Address of receiver of the gas payment (or 0 for `tx.origin`).
+     * @param _nonce Safe transaction nonce.
+     * @return Safe transaction hash.
      */
     function getTransactionHash(
         address to,
@@ -145,34 +183,32 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
     ) external view returns (bytes32);
 
     /**
-     * External getter function for state variables.
+     * @notice Returns a descriptive version of the Safe contract.
+     * @return The version string.
      */
-
-    /**
-     * @notice Returns the version of the Safe contract.
-     * @return Version string.
-     */
-    // solhint-disable-next-line
+    // solhint-disable-next-line func-name-mixedcase
     function VERSION() external view returns (string memory);
 
     /**
      * @notice Returns the nonce of the Safe contract.
-     * @return Nonce.
+     * @return The current nonce.
      */
     function nonce() external view returns (uint256);
 
     /**
-     * @notice Returns a uint if the messageHash is signed by the owner.
-     * @param messageHash Hash of message that should be checked.
-     * @return Number denoting if an owner signed the hash.
+     * @notice Returns a non-zero value if the `messageHash` is signed for the Safe.
+     * @param messageHash The hash of message that should be checked.
+     * @return An integer denoting whether or not the hash is signed for the Safe.
+     *         A non-zero value indicates that the hash is signed.
      */
     function signedMessages(bytes32 messageHash) external view returns (uint256);
 
     /**
-     * @notice Returns a uint if the messageHash is approved by the owner.
-     * @param owner Owner address that should be checked.
-     * @param messageHash Hash of message that should be checked.
-     * @return Number denoting if an owner approved the hash.
+     * @notice Returns a non-zero value if the `messageHash` is approved by the `owner`.
+     * @param owner The owner address that may have approved a hash.
+     * @param messageHash The hash of message to check.
+     * @return An integer denoting whether or not the hash is approved by the owner.
+     *         A non-zero value indicates that the hash is approved.
      */
     function approvedHashes(address owner, bytes32 messageHash) external view returns (uint256);
 }

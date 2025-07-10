@@ -2,8 +2,8 @@
 
 ##### Auditor
 
--   Certora (https://www.certora.com/)
--   Ackee (https://ackee.xyz/)
+- Certora (https://www.certora.com/)
+- Ackee (https://ackee.xyz/)
 
 ##### Notes
 
@@ -21,5 +21,5 @@ There has been few bugfixes and gas optimization based changes.
 
 ##### Files
 
--   [Final Audit Report 1.5.0 - Certora](Safe_Audit_Report_1_5_0_Certora.pdf)
--   [Final Audit Report 1.5.0 - Ackee](Safe_Audit_Report_1_5_0_Ackee.pdf)
+- [Final Audit Report 1.5.0 - Certora](Safe_Audit_Report_1_5_0_Certora.pdf)
+- [Final Audit Report 1.5.0 - Ackee](Safe_Audit_Report_1_5_0_Ackee.pdf)

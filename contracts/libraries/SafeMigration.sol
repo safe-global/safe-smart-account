@@ -9,38 +9,38 @@ import {SafeStorage} from "./../libraries/SafeStorage.sol";
  * @notice This is a generic contract that facilitates Safe and SafeL2 proxy contracts to migrate their singleton address.
  *         The supported target Safe version is immutable and set in the constructor during the deployment of the contract.
  *         This contract also supports migration with fallback handler update.
- * @author @safe-global/safe-protocol
  * @dev IMPORTANT: The library is intended to be used with the Safe standard proxy that stores the singleton address
  *      at the storage slot 0. Use at your own risk with custom proxy implementations. The contract will allow invocations
  *      to the migration functions only via delegatecall.
+ * @author @safe-global/safe-protocol
  */
 contract SafeMigration is SafeStorage {
     /**
-     * @notice Address of this contract
+     * @notice Address of this contract.
      */
     address public immutable MIGRATION_SINGLETON;
     /**
-     * @notice Address of the Safe Singleton implementation
+     * @notice Address of the Safe singleton implementation.
      */
     address public immutable SAFE_SINGLETON;
     /**
-     * @notice Address of the Safe Singleton (L2) implementation
+     * @notice Address of the Safe singleton (L2) implementation.
      */
     address public immutable SAFE_L2_SINGLETON;
     /**
-     * @notice Address of the Fallback Handler
+     * @notice Address of the fallback handler.
      */
     address public immutable SAFE_FALLBACK_HANDLER;
 
     /**
-     * @notice Event indicating a change of a singleton address. Named master copy here for legacy reasons.
-     * @param singleton New master copy address
+     * @notice Event indicating a change of a singleton address. Named "master copy" here for legacy reasons.
+     * @param singleton New master copy address.
      */
     event ChangedMasterCopy(address singleton);
 
     /**
-     * @notice Modifier to make a function callable via delegatecall only.
-     * If the function is called via a regular call, it will revert.
+     * @notice Modifier to make a function callable via `DELEGATECALL` only.
+     * If the function is called via a regular `CALL`, it will revert.
      */
     modifier onlyDelegateCall() {
         require(address(this) != MIGRATION_SINGLETON, "Migration should only be called via delegatecall");
@@ -48,10 +48,10 @@ contract SafeMigration is SafeStorage {
     }
 
     /**
-     * @notice Constructor
-     * @param safeSingleton Address of the Safe Singleton implementation
-     * @param safeL2Singleton Address of the SafeL2 Singleton implementation
-     * @param fallbackHandler Address of the fallback handler implementation
+     * @notice Safe migration constructor.
+     * @param safeSingleton Address of the Safe singleton implementation.
+     * @param safeL2Singleton Address of the SafeL2 singleton implementation.
+     * @param fallbackHandler Address of the fallback handler implementation.
      */
     constructor(address safeSingleton, address safeL2Singleton, address fallbackHandler) {
         MIGRATION_SINGLETON = address(this);
@@ -101,10 +101,10 @@ contract SafeMigration is SafeStorage {
 
     /**
      * @notice Checks whether an account has code.
+     * @dev This function relies on the `EXTCODESIZE` assembly opcode to determine whether an address has code.
+     *      It does not reliably determine whether or not an address is a smart contract or an EOA.
      * @param account The address of the account to be checked.
      * @return A boolean value indicating whether the address has code (true) or not (false).
-     * @dev This function relies on the `extcodesize` assembly opcode to determine whether an address has code.
-     * It does not reliably determine whether or not an address is a smart contract or an EOA.
      */
     function hasCode(address account) internal view returns (bool) {
         uint256 size;
