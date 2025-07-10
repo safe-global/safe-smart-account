@@ -386,16 +386,24 @@ contract Safe is
     /**
      * @inheritdoc ISafe
      */
-    function domainSeparator() public view override returns (bytes32) {
-        uint256 chainId;
+    function domainSeparator() public view override returns (bytes32 domainHash) {
+        // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+        // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            chainId := chainid()
+            // Get the free memory pointer
+            let ptr := mload(0x40)
+
+            // Prepare the domain data for hashing in memory.
+            mstore(ptr, DOMAIN_SEPARATOR_TYPEHASH)
+            mstore(add(ptr, 32), chainid())
+            mstore(add(ptr, 64), address())
+
+            // Compute the domain separator.
+            domainHash := keccak256(ptr, 96)
         }
         /* solhint-enable no-inline-assembly */
-
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }
 
     /**
