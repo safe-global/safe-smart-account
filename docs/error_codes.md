@@ -31,7 +31,7 @@
   - **How to debug/solve:** Ensure the number of signatures matches the threshold.
 - `GS021`: Invalid contract signature location: inside static part
   - **Why:** The signature offset points inside the static part of the data, not the dynamic part.
-  - **How to debug/solve:** Check the correctness of the signature array encoding.
+  - **How to debug/solve:** Check the signatures are correctly encoded.
 - `GS022`: Invalid contract signature location: length not present
   - **Why:** The signature offset is out of bounds (no length for the signature).
   - **How to debug/solve:** Ensure the signature offset does not exceed the array length.
