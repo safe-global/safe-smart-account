@@ -51,7 +51,7 @@
 ### General auth related
 - `GS030`: Only owners can approve a hash
   - **Why:** Attempt to approve a hash by a non-owner.
-  - **How to debug/solve:** Only owner addresses should be used for approveHash.
+  - **How to debug/solve:** Only owners can call `approveHash`.
 - `GS031`: Method can only be called from this contract
   - **Why:** A protected method was called externally instead of via an internal call.
   - **How to debug/solve:** Use only internal calls for functions with the `authorized` modifier.
