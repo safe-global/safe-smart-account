@@ -7,9 +7,9 @@
 - `GS001`: Threshold needs to be defined
   - **Why:** The signature threshold is not set (equals 0) when checking signatures.
   - **How to debug/solve:** Make sure the Safe is properly initialized.
-- `GS002`: A call to set up modules couldn't be executed because the destination account was not a contract
-  - **Why:** Attempt to initialize a module at an address that is not a contract.
-  - **How to debug/solve:** Check that the module address points to a deployed contract.
+- `GS002`: Initialization failed because the provided setup initializer address is not a contract
+  - **Why:** During Safe initialization, the `setupModules` function checks if the `to` address (setup initializer) is a contract. If it is not, the transaction reverts with this error. Although the function is named `setupModules`, it is used for general setup, not just modules.
+  - **How to debug/solve:** Ensure the address provided as the setup initializer (the `to` parameter in `setup`) points to a deployed contract, or use the zero address if no additional initialization is needed.
 
 ### General gas/execution related
 - `GS010`: Not enough gas to execute Safe transaction
@@ -21,9 +21,9 @@
 - `GS012`: Could not pay gas costs with token
   - **Why:** Payment for gas in token failed (e.g., token does not support transfer or returns false).
   - **How to debug/solve:** Check that the token supports the transfer standard and the Safe has enough balance.
-- `GS013`: Safe transaction failed when gasPrice and safeTxGas were 0 (Deprecated in v1.5.0)
-  - **Why:** Migration or similar function requiring delegatecall was called outside of delegatecall context or with invalid parameters.
-  - **How to debug/solve:** Only use supported migration scenarios and ensure the call is made via delegatecall.
+- `GS013`: Safe transaction reverted (Deprecated in v1.5.0)
+  - **Why:** The transaction reverted for any reason (not limited to delegatecall or migration scenarios). This is a general revert error for failed transactions when `gasPrice` and `safeTxGas` are 0.
+  - **How to debug/solve:** Check the transaction parameters, contract logic, and ensure all preconditions are met. Review the revert reason for more details.
 
 ### General signature validation related
 - `GS020`: Signatures data too short
