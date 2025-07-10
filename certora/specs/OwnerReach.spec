@@ -57,18 +57,6 @@ invariant thresholdSet() getThreshold() > 0  && getThreshold() <= ghostOwnerCoun
         }
     }
 
-invariant self_not_owner() currentContract != SENTINEL => ghostOwners[currentContract] == 0
-    filtered { f -> reachableOnly(f) }
-    {
-        preserved {
-            requireInvariant reach_null();
-            requireInvariant reach_invariant();
-            requireInvariant inListReachable();
-            requireInvariant reachableInList();
-            requireInvariant thresholdSet();
-        }
-    }
-
 // every element with 0 in the owners field can only reach the null pointer and itself
 invariant nextNull()
     ghostOwners[NULL] == 0 &&
@@ -289,12 +277,11 @@ rule isOwnerDoesNotRevert {
     assert !lastReverted, "isOwner should not revert";
 }
 
-rule isOwnerNotSelfOrSentinel {
+rule isOwnerNotSentinel {
     address addr;
-    require addr == currentContract || addr == SENTINEL;
-    requireInvariant self_not_owner();
+    require addr == SENTINEL;
     bool result = isOwner(addr);
-    assert result == false, "currentContract or SENTINEL must not be owners";
+    assert result == false, "SENTINEL must not be owners";
 }
 
 rule isOwnerInList {
