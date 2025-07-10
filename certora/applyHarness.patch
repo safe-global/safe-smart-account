@@ -1,6 +1,6 @@
 diff -druN Safe.sol Safe.sol
---- Safe.sol	2025-07-10 09:31:37.930159103 +0000
-+++ Safe.sol	2025-07-10 09:52:54.506909237 +0000
+--- Safe.sol	2025-07-10 14:37:56.013460475 +0200
++++ Safe.sol	2025-07-10 14:38:49.982525739 +0200
 @@ -97,22 +97,25 @@
      constructor() {
          // By setting the threshold it is not possible to call setup anymore, so we create a Safe with 0 owners and threshold 1.
@@ -63,8 +63,8 @@ diff -druN Safe.sol Safe.sol
          /* solhint-enable no-inline-assembly */
      }
 diff -druN base/Executor.sol base/Executor.sol
---- base/Executor.sol	2025-07-10 09:25:20.305689268 +0000
-+++ base/Executor.sol	2025-07-10 09:52:54.507466555 +0000
+--- base/Executor.sol	2025-07-10 14:38:24.919495426 +0200
++++ base/Executor.sol	2025-07-10 14:38:49.958598177 +0200
 @@ -27,12 +27,8 @@
          uint256 txGas
      ) internal returns (bool success) {
@@ -81,8 +81,8 @@ diff -druN base/Executor.sol base/Executor.sol
              /* solhint-disable no-inline-assembly */
              /// @solidity memory-safe-assembly
 diff -druN base/FallbackManager.sol base/FallbackManager.sol
---- base/FallbackManager.sol	2025-07-10 09:32:30.275228552 +0000
-+++ base/FallbackManager.sol	2025-07-10 09:57:32.580263318 +0000
+--- base/FallbackManager.sol	2025-07-10 14:38:33.116505339 +0200
++++ base/FallbackManager.sol	2025-07-10 14:38:49.980525737 +0200
 @@ -61,7 +61,8 @@
              // at memory offset 0x40 intact, not going beyond the scratch space, etc).
              // See: <https://docs.soliditylang.org/en/latest/assembly.html#memory-safety>
@@ -94,9 +94,9 @@ diff -druN base/FallbackManager.sol base/FallbackManager.sol
              if iszero(handler) {
                  return(0, 0)
 diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
---- interfaces/ISafe.sol	2025-07-10 09:46:05.750311622 +0000
-+++ interfaces/ISafe.sol	2025-07-10 11:11:58.751118272 +0000
-@@ -149,7 +149,7 @@
+--- interfaces/ISafe.sol	2025-07-10 14:38:45.096519828 +0200
++++ interfaces/ISafe.sol	2025-07-10 14:38:49.982368113 +0200
+@@ -155,7 +155,7 @@
       */
      function domainSeparator() external view returns (bytes32);
  
@@ -105,7 +105,7 @@ diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
       * @notice Returns transaction hash to be signed by owners.
       * @param to Destination address of Safe transaction.
       * @param value Native token value of the Safe transaction.
-@@ -162,7 +162,6 @@
+@@ -168,7 +168,6 @@
       * @param refundReceiver Address of receiver of the gas payment (or 0 for `tx.origin`).
       * @param _nonce Safe transaction nonce.
       * @return Safe transaction hash.
@@ -113,7 +113,7 @@ diff -druN interfaces/ISafe.sol interfaces/ISafe.sol
      function getTransactionHash(
          address to,
          uint256 value,
-@@ -175,6 +174,8 @@
+@@ -181,6 +180,8 @@
          address refundReceiver,
          uint256 _nonce
      ) external view returns (bytes32);

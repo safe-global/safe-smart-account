@@ -55,6 +55,12 @@ interface ISafe is INativeCurrencyPaymentFallback, IModuleManager, IGuardManager
      * @notice Sets an initial storage of the Safe account.
      * @dev This method can only be called once.
      *      ⚠️⚠️⚠️ If a proxy was created without setting up, anyone can call setup and claim the proxy. ⚠️⚠️⚠️
+     *      ⚠️⚠️⚠️ A Safe can set itself as an owner which is a valid setup for EIP-7702 delegations.
+     *      However, if address of the accounts is not an EOA and cannot sign for itself, you can
+     *      potentially block access to the account completely. For example, if you have a `n/n`
+     *      Safe (so `threshold == ownerCount`) and one of the owners is the Safe itself and not
+     *      an EIP-7702 delegated account, then it will not be possible to produce a valid
+     *      signature for the Safe. ⚠️⚠️⚠️
      *      This method emits a {SafeSetup} event with the setup parameters instead of reading from storage,
      *      which may be inaccurate if the delegate call to `to` modifies the owners, threshold or fallback handler.
      * @param _owners Array of initial Safe owners.
