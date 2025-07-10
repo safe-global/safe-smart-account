@@ -6,7 +6,7 @@
   - **How to debug/solve:** Ensure the contract address is correct and does not revert.
 - `GS001`: Threshold needs to be defined
   - **Why:** The signature threshold is not set (equals 0) when checking signatures.
-  - **How to debug/solve:** Make sure the Safe is properly initialized and the threshold is greater than 0.
+  - **How to debug/solve:** Make sure the Safe is properly initialized.
 - `GS002`: A call to set up modules couldn't be executed because the destination account was not a contract
   - **Why:** Attempt to initialize a module at an address that is not a contract.
   - **How to debug/solve:** Check that the module address points to a deployed contract.
