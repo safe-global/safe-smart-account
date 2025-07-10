@@ -33,7 +33,7 @@
   - **Why:** The signature offset points inside the static part of the data, not the dynamic part.
   - **How to debug/solve:** Check the signatures are correctly encoded.
 - `GS022`: Invalid contract signature location: length not present
-  - **Why:** The signature offset is out of bounds (no length for the signature).
+  - **Why:** The signature offset is out of bounds (no length for a contract signature).
   - **How to debug/solve:** Ensure the signature offset does not exceed the array length.
 - `GS023`: Invalid contract signature location: data not complete
   - **Why:** The signature data does not fully fit within the signatures array.
