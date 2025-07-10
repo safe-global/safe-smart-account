@@ -46,7 +46,7 @@
   - **How to debug/solve:** Ensure all required owners have signed the transaction or called approveHash.
 - `GS026`: Invalid owner provided
   - **Why:** An invalid or duplicate owner was found in the signatures array.
-  - **How to debug/solve:** Ensure each owner is unique and valid.
+  - **How to debug/solve:** Ensure each owner is unique and valid, and that the signatures are sorted by owner.
 
 ### General auth related
 - `GS030`: Only owners can approve a hash
