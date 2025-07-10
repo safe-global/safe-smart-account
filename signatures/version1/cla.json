@@ -479,6 +479,14 @@
       "created_at": "2025-07-09T15:28:13Z",
       "repoId": 102186072,
       "pullRequestNo": 1015
+    },
+    {
+      "name": "VolodymyrBg",
+      "id": 189780094,
+      "comment_id": 3056660058,
+      "created_at": "2025-07-10T09:51:40Z",
+      "repoId": 102186072,
+      "pullRequestNo": 1006
     }
   ]
 }
