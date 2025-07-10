@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "./../interfaces/ISafe.sol";
 import {ISignatureValidator} from "./../interfaces/ISignatureValidator.sol";
-import {EIP712Constants} from "./../libraries/EIP712Constants.sol";
+import {ERC712, SAFE_TX_TYPEHASH, SAFE_MSG_TYPEHASH} from "./../libraries/ERC712.sol";
 import {Enum} from "./../libraries/Enum.sol";
 import {TokenCallbackHandler} from "./TokenCallbackHandler.sol";
 
@@ -32,44 +32,32 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
     }
 
     /**
-     * @dev Returns the pre-image of the message hash (see {getMessageHashForSafe}).
-     * @param safe Safe to which the message is targeted.
-     * @param message Message that should be encoded.
-     * @return Encoded message.
-     */
-    function encodeMessageDataForSafe(ISafe safe, bytes memory message) public view returns (bytes memory) {
-        bytes32 safeMessageHash = keccak256(abi.encode(EIP712Constants.SAFE_MSG_TYPEHASH, keccak256(message)));
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash);
-    }
-
-    /**
      * @dev Returns the hash of a message that can be signed by owners.
      * @param safe Safe to which the message is targeted.
      * @param message Message that should be hashed.
      * @return Message hash.
      */
     function getMessageHashForSafe(ISafe safe, bytes memory message) public view returns (bytes32) {
-        return keccak256(encodeMessageDataForSafe(safe, message));
+        return ERC712.getSafeMessageHash(safe.domainSeparator(), message);
     }
 
     /**
      * @notice Implementation of the EIP-1271 signature validation method.
      * @dev This implementation verifies signatures for a `ISafe(msg.sender)`.
-     * @param _dataHash Hash of the data signed.
-     * @param _signature Signature data.
+     * @param dataHash Hash of the data signed.
+     * @param signature Signature data.
      * @return The EIP-1271 magic value if the signature is valid, reverts otherwise.
      */
-    function isValidSignature(bytes32 _dataHash, bytes calldata _signature) public view override returns (bytes4) {
+    function isValidSignature(bytes32 dataHash, bytes calldata signature) public view override returns (bytes4) {
         // Caller should be a Safe.
         ISafe safe = ISafe(payable(msg.sender));
-        bytes memory messageData = encodeMessageDataForSafe(safe, abi.encode(_dataHash));
-        bytes32 messageHash = keccak256(messageData);
-        if (_signature.length == 0) {
-            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
+        bytes32 msgHash = ERC712.getSafeMessageHash(safe.domainSeparator(), abi.encode(dataHash));
+        if (signature.length == 0) {
+            require(safe.signedMessages(msgHash) != 0, "Hash not approved");
         } else {
             // We explicitly do not allow caller approved signatures for EIP-1271 to prevent unexpected behaviour. This
             // is done by setting the executor address to `0` which can never be an owner of the Safe.
-            safe.checkSignatures(address(0), messageHash, _signature);
+            safe.checkSignatures(address(0), msgHash, signature);
         }
         return EIP1271_MAGIC_VALUE;
     }
@@ -170,7 +158,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
     /**
      * @notice Returns the pre-image of the Safe transaction hash (see {Safe.getTransactionHash}).
      * @dev This method is added to the {CompatibilityFallbackHandler} for backwards compatibility with previous versions of Safe.
-     *      For a given Safe, the invariant `getTransactionHash(...) == keccak256(encodeTransactionData(...))` holds true.
+     *      For a given Safe and transaction, the invariant `getTransactionHash(...) == keccak256(encodeTransactionData(...))` holds true.
      * @param to Destination address of the Safe transaction.
      * @param value Native token value of the Safe transaction.
      * @param data Data payload of the Safe transaction.
@@ -200,7 +188,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
         bytes32 domainSeparator = safe.domainSeparator();
         bytes32 safeTxHash = keccak256(
             abi.encode(
-                EIP712Constants.SAFE_TX_TYPEHASH,
+                SAFE_TX_TYPEHASH,
                 to,
                 value,
                 keccak256(data),
@@ -213,6 +201,19 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 nonce
             )
         );
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator, safeTxHash);
+        return abi.encodePacked(bytes2(0x1901), domainSeparator, safeTxHash);
+    }
+
+    /**
+     * @dev Returns the pre-image of the message hash (see {getMessageHashForSafe}).
+     * @dev This method is added to the {CompatibilityFallbackHandler} for backwards compatibility with previous versions of Safe.
+     *      For a given Safe and message, the invariant `getMessageHashForSafe(...) == keccak256(encodeMessageDataForSafe(...))` holds true.
+     * @param safe Safe to which the message is targeted.
+     * @param message Message that should be encoded.
+     * @return Encoded message.
+     */
+    function encodeMessageDataForSafe(ISafe safe, bytes memory message) public view returns (bytes memory) {
+        bytes32 safeMessageHash = keccak256(abi.encode(SAFE_MSG_TYPEHASH, keccak256(message)));
+        return abi.encodePacked(bytes1(0x19), bytes1(0x01), safe.domainSeparator(), safeMessageHash);
     }
 }

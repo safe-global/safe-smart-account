@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.0 <0.9.0;
 
-import {ISafe, EIP712, ISafeSignatureVerifier} from "../handler/extensible/SignatureVerifierMuxer.sol";
+import {ISafe, ISafeSignatureVerifier} from "../handler/extensible/SignatureVerifierMuxer.sol";
+import {ERC712} from "../libraries/ERC712.sol";
 
 /**
  * @title TestSafeSignatureVerifier - A simple test contract that implements the ISafeSignatureVerifier interface
@@ -9,7 +10,7 @@ import {ISafe, EIP712, ISafeSignatureVerifier} from "../handler/extensible/Signa
 contract TestSafeSignatureVerifier is ISafeSignatureVerifier {
     /**
      * Validates a signature for a Safe.
-     * @param _hash of the message to verify
+     * @param hash of the message to verify
      * @param domainSeparator of the message to verify
      * @param typeHash of the message to verify
      * @param encodeData of the message to verify
@@ -18,13 +19,13 @@ contract TestSafeSignatureVerifier is ISafeSignatureVerifier {
     function isValidSafeSignature(
         ISafe,
         address,
-        bytes32 _hash,
+        bytes32 hash,
         bytes32 domainSeparator,
         bytes32 typeHash,
         bytes calldata encodeData,
         bytes calldata
     ) external pure override returns (bytes4 magic) {
-        if (_hash == keccak256(EIP712.encodeMessageData(domainSeparator, typeHash, encodeData))) {
+        if (hash == ERC712.getHash(domainSeparator, typeHash, encodeData)) {
             return 0x1626ba7e;
         }
     }

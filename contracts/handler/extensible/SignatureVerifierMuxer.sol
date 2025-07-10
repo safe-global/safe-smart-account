@@ -2,7 +2,7 @@
 // solhint-disable one-contract-per-file
 pragma solidity >=0.7.0 <0.9.0;
 
-import {EIP712Constants} from "./../../libraries/EIP712Constants.sol";
+import {ERC712} from "./../../libraries/ERC712.sol";
 import {ISafe, ExtensibleBase} from "./ExtensibleBase.sol";
 
 interface ERC1271 {
@@ -18,10 +18,10 @@ interface ERC1271 {
 interface ISafeSignatureVerifier {
     /**
      * @dev If called by `SignatureVerifierMuxer`, the following has already been checked:
-     *      _hash = h(abi.encodePacked("\x19\x01", domainSeparator, h(typeHash || encodeData)));
+     *      hash = h(abi.encodePacked("\x19\x01", domainSeparator, h(typeHash || encodeData)));
      * @param safe The Safe that has delegated the signature verification
      * @param sender The address that originally called the Safe's `isValidSignature` method
-     * @param _hash The EIP-712 hash whose signature will be verified
+     * @param hash The EIP-712 hash whose signature will be verified
      * @param domainSeparator The EIP-712 domainSeparator
      * @param typeHash The EIP-712 typeHash
      * @param encodeData The EIP-712 encoded data
@@ -31,7 +31,7 @@ interface ISafeSignatureVerifier {
     function isValidSafeSignature(
         ISafe safe,
         address sender,
-        bytes32 _hash,
+        bytes32 hash,
         bytes32 domainSeparator,
         bytes32 typeHash,
         bytes calldata encodeData,
@@ -85,11 +85,11 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
     /**
      * @notice Implements ERC1271 interface for smart contract EIP-712 signature validation
      * @dev The signature format is the same as the one used by the Safe contract
-     * @param _hash Hash of the data that is signed
+     * @param hash Hash of the data that is signed
      * @param signature The signature to be verified
      * @return magic Standardised ERC1271 return value
      */
-    function isValidSignature(bytes32 _hash, bytes calldata signature) external view override returns (bytes4 magic) {
+    function isValidSignature(bytes32 hash, bytes calldata signature) external view override returns (bytes4 magic) {
         (ISafe safe, address sender) = _getContext();
 
         // Check if the signature is for an `ISafeSignatureVerifier` and if it is valid for the domain.
@@ -125,44 +125,33 @@ abstract contract SignatureVerifierMuxer is ExtensibleBase, ERC1271, ISignatureV
                     (, , bytes memory encodeData, bytes memory payload) = abi.decode(signature[4:], (bytes32, bytes32, bytes, bytes));
 
                     // Check that the signature is valid for the domain.
-                    if (keccak256(EIP712.encodeMessageData(domainSeparator, typeHash, encodeData)) == _hash) {
+                    if (ERC712.getHash(domainSeparator, typeHash, encodeData) == hash) {
                         // Preserving the context, call the Safe's authorised `ISafeSignatureVerifier` to verify.
-                        return verifier.isValidSafeSignature(safe, sender, _hash, domainSeparator, typeHash, encodeData, payload);
+                        return verifier.isValidSafeSignature(safe, sender, hash, domainSeparator, typeHash, encodeData, payload);
                     }
                 }
             }
         }
 
         // domainVerifier doesn't exist or the signature is invalid for the domain - fall back to the default
-        return defaultIsValidSignature(safe, _hash, signature);
+        return defaultIsValidSignature(safe, hash, signature);
     }
 
     /**
      * Default Safe signature validation (approved hashes/threshold signatures)
      * @param safe The safe being asked to validate the signature
-     * @param _hash Hash of the data that is signed
+     * @param hash Hash of the data that is signed
      * @param signature The signature to be verified
      */
-    function defaultIsValidSignature(ISafe safe, bytes32 _hash, bytes memory signature) internal view returns (bytes4 magic) {
-        bytes memory messageData = EIP712.encodeMessageData(
-            safe.domainSeparator(),
-            EIP712Constants.SAFE_MSG_TYPEHASH,
-            abi.encode(keccak256(abi.encode(_hash)))
-        );
-        bytes32 messageHash = keccak256(messageData);
+    function defaultIsValidSignature(ISafe safe, bytes32 hash, bytes memory signature) internal view returns (bytes4 magic) {
+        bytes32 msgHash = ERC712.getSafeMessageHash(safe.domainSeparator(), abi.encode(hash));
         if (signature.length == 0) {
             // approved hashes
-            require(safe.signedMessages(messageHash) != 0, "Hash not approved");
+            require(safe.signedMessages(msgHash) != 0, "Hash not approved");
         } else {
             // threshold signatures
-            safe.checkSignatures(address(0), messageHash, signature);
+            safe.checkSignatures(address(0), msgHash, signature);
         }
         magic = ERC1271.isValidSignature.selector;
-    }
-}
-
-library EIP712 {
-    function encodeMessageData(bytes32 domainSeparator, bytes32 typeHash, bytes memory message) internal pure returns (bytes memory) {
-        return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator, keccak256(abi.encodePacked(typeHash, message)));
     }
 }

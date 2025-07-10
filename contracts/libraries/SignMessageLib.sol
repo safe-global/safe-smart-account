@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {ISafe} from "./../interfaces/ISafe.sol";
-import {EIP712Constants} from "./EIP712Constants.sol";
+import {ERC712} from "./ERC712.sol";
 import {SafeStorage} from "./SafeStorage.sol";
 
 /**
@@ -29,7 +29,7 @@ contract SignMessageLib is SafeStorage {
      * @return Message hash.
      */
     function getMessageHash(bytes memory message) public view returns (bytes32) {
-        bytes32 safeMessageHash = keccak256(abi.encode(EIP712Constants.SAFE_MSG_TYPEHASH, keccak256(message)));
-        return keccak256(abi.encodePacked(bytes1(0x19), bytes1(0x01), ISafe(payable(address(this))).domainSeparator(), safeMessageHash));
+        ISafe safe = ISafe(payable(address(this)));
+        return ERC712.getSafeMessageHash(safe.domainSeparator(), message);
     }
 }

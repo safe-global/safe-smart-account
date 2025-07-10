@@ -13,7 +13,7 @@ import {StorageAccessible} from "./common/StorageAccessible.sol";
 import {SafeMath} from "./external/SafeMath.sol";
 import {ISafe} from "./interfaces/ISafe.sol";
 import {ISignatureValidator, ISignatureValidatorConstants} from "./interfaces/ISignatureValidator.sol";
-import {EIP712Constants} from "./libraries/EIP712Constants.sol";
+import {ERC712} from "./libraries/ERC712.sol";
 import {Enum} from "./libraries/Enum.sol";
 
 /**
@@ -51,6 +51,12 @@ contract Safe is
     using SafeMath for uint256;
 
     string public constant override VERSION = "1.5.0";
+
+    /**
+     * @dev The EIP-712 type hash for the domain separator.
+     *      Precomputed value of: `keccak256("EIP712Domain(uint256 chainId,address verifyingContract)")`.
+     */
+    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH = 0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218;
 
     uint256 public override nonce;
     bytes32 private _deprecatedDomainSeparator;
@@ -119,7 +125,9 @@ contract Safe is
         bytes32 txHash;
         // Use scope here to limit variable lifetime and prevent `stack too deep` errors
         {
-            txHash = getTransactionHash(
+            txHash = ERC712.getSafeTransactionHash(
+                // Domain
+                domainSeparator(),
                 // Transaction info
                 to,
                 value,
@@ -377,16 +385,24 @@ contract Safe is
     /**
      * @inheritdoc ISafe
      */
-    function domainSeparator() public view override returns (bytes32) {
-        uint256 chainId;
+    function domainSeparator() public view override returns (bytes32 digest) {
+        // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
+        // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
         /* solhint-disable no-inline-assembly */
         /// @solidity memory-safe-assembly
         assembly {
-            chainId := chainid()
+            // Get the free memory pointer
+            let ptr := mload(0x40)
+
+            // Prepare the domain data for hashing in memory.
+            mstore(ptr, DOMAIN_SEPARATOR_TYPEHASH)
+            mstore(add(ptr, 32), chainid())
+            mstore(add(ptr, 64), address())
+
+            // Compute the domain separator.
+            digest := keccak256(ptr, 96)
         }
         /* solhint-enable no-inline-assembly */
-
-        return keccak256(abi.encode(EIP712Constants.DOMAIN_SEPARATOR_TYPEHASH, chainId, this));
     }
 
     /**
@@ -403,65 +419,21 @@ contract Safe is
         address gasToken,
         address refundReceiver,
         uint256 _nonce
-    ) public view override returns (bytes32 txHash) {
-        bytes32 domainHash = domainSeparator();
-        bytes32 safeTxTypehash = EIP712Constants.SAFE_TX_TYPEHASH;
-
-        // We opted for using assembly code here, because the way Solidity compiler we use (0.7.6) allocates memory is
-        // inefficient. We do not need to allocate memory for temporary variables to be used in the keccak256 call.
-        //
-        // WARNING: We do not clean potential dirty bits in types that are less than 256 bits (addresses and Enum.Operation)
-        // The solidity assembly types that are smaller than 256 bit can have dirty high bits according to the spec (see the Warning in https://docs.soliditylang.org/en/latest/assembly.html#access-to-external-variables-functions-and-libraries).
-        // However, we read most of the data from calldata, where the variables are not packed, and the only variable we read from storage is uint256 nonce.
-        // This is not a problem, however, we must consider this for potential future changes.
-        /* solhint-disable no-inline-assembly */
-        /// @solidity memory-safe-assembly
-        assembly {
-            // Get the free memory pointer
-            let ptr := mload(0x40)
-
-            // Step 1: Hash the transaction data
-            // Copy transaction data to memory and hash it
-            calldatacopy(ptr, data.offset, data.length)
-            let calldataHash := keccak256(ptr, data.length)
-
-            // Step 2: Prepare the SafeTX struct for hashing
-            // Layout in memory:
-            // ptr +   0: SAFE_TX_TYPEHASH (constant defining the struct hash)
-            // ptr +  32: to address
-            // ptr +  64: value
-            // ptr +  96: calldataHash
-            // ptr + 128: operation
-            // ptr + 160: safeTxGas
-            // ptr + 192: baseGas
-            // ptr + 224: gasPrice
-            // ptr + 256: gasToken
-            // ptr + 288: refundReceiver
-            // ptr + 320: nonce
-            mstore(ptr, safeTxTypehash)
-            mstore(add(ptr, 32), to)
-            mstore(add(ptr, 64), value)
-            mstore(add(ptr, 96), calldataHash)
-            mstore(add(ptr, 128), operation)
-            mstore(add(ptr, 160), safeTxGas)
-            mstore(add(ptr, 192), baseGas)
-            mstore(add(ptr, 224), gasPrice)
-            mstore(add(ptr, 256), gasToken)
-            mstore(add(ptr, 288), refundReceiver)
-            mstore(add(ptr, 320), _nonce)
-
-            // Step 3: Calculate the final EIP-712 hash
-            // First, hash the SafeTX struct (352 bytes total length)
-            mstore(add(ptr, 64), keccak256(ptr, 352))
-            // Store the EIP-712 prefix (0x1901), note that integers are left-padded
-            // so the EIP-712 encoded data starts at add(ptr, 30)
-            mstore(ptr, 0x1901)
-            // Store the domain separator
-            mstore(add(ptr, 32), domainHash)
-            // Calculate the hash
-            txHash := keccak256(add(ptr, 30), 66)
-        }
-        /* solhint-enable no-inline-assembly */
+    ) external view override returns (bytes32) {
+        return
+            ERC712.getSafeTransactionHash(
+                domainSeparator(),
+                to,
+                value,
+                data,
+                operation,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                _nonce
+            );
     }
 
     /**
