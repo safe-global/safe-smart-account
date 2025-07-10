@@ -2,8 +2,8 @@
 
 ### General init related
 - `GS000`: Could not finish initialization
-  - **Why:** Delegatecall to a module during initialization failed (see `setupModules`).
-  - **How to debug/solve:** Ensure the module address is correct and the called contract does not revert.
+  - **Why:** Delegatecall to the initializer during setup failed.
+  - **How to debug/solve:** Ensure the contract address is correct and does not revert.
 - `GS001`: Threshold needs to be defined
   - **Why:** The signature threshold is not set (equals 0) when checking signatures.
   - **How to debug/solve:** Make sure the Safe is properly initialized and the threshold is greater than 0.
