@@ -43,7 +43,7 @@
   - **How to debug/solve:** Check that the contract signer implements EIP-1271 and returns the correct value.
 - `GS025`: Hash has not been approved
   - **Why:** The transaction hash was not approved by the required number of owners.
-  - **How to debug/solve:** Ensure all required owners have signed the transaction or called approveHash.
+  - **How to debug/solve:** Ensure the owner called the Safe directory or previously approved the has (with `approveHash`).
 - `GS026`: Invalid owner provided
   - **Why:** An invalid or duplicate owner was found in the signatures array.
   - **How to debug/solve:** Ensure each owner is unique and valid, and that the signatures are sorted by owner.
