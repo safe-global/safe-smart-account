@@ -36,6 +36,15 @@ contract SafeProxyFactory {
     }
 
     /**
+     * @notice Retrieve the {SafeProxy} creation codehash based on singleton.
+     * @param singleton Address of the singleton contract that the proxy will delegate calls to.
+     * @dev The returned creation codehash can be used to compute a {SafeProxy} creation address.
+     */
+    function proxyCreationCodehash(address singleton) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(type(SafeProxy).creationCode, uint256(uint160(singleton))));
+    }
+
+    /**
      * @notice Internal method to create a new proxy contract using `CREATE2`. Optionally executes an initializer call to a new proxy.
      * @param _singleton Address of singleton contract. Must be deployed at the time of execution.
      * @param initializer Optional payload for a message call to be sent to a new proxy contract.

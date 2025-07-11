@@ -48,6 +48,57 @@ describe("ProxyFactory", () => {
         };
     });
 
+    describe("proxyCreationCode && proxyCreationCodeHash", () => {
+        it("hash of proxyCreationCode, singleton should be equal to the proxyCreationCodeHash", async () => {
+            const { factory, singleton } = await setupTests();
+            const creationCode = await factory.proxyCreationCode();
+            const creationCodeHash = await factory.proxyCreationCodehash(await singleton.getAddress());
+            const calculatedCreationCodeHash = ethers.keccak256(
+                ethers.solidityPacked(["bytes", "uint256"], [creationCode, await singleton.getAddress()]),
+            );
+            expect(calculatedCreationCodeHash).to.be.eq(creationCodeHash);
+        });
+
+        it("should be possible to predict the create2 address of a proxy with proxyCreationCode", async () => {
+            const { factory, singleton } = await setupTests();
+            const saltNonce = 42n;
+            const singletonAddress = await singleton.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const creationCode = await factory.proxyCreationCode();
+            const salt = ethers.solidityPackedKeccak256(
+                ["bytes32", "uint256"],
+                [ethers.solidityPackedKeccak256(["bytes"], [initCode]), saltNonce],
+            );
+            const deploymentCode = ethers.solidityPacked(["bytes", "uint256"], [creationCode, await singleton.getAddress()]);
+
+            const proxyAddress = await factory.createProxyWithNonce.staticCall(singletonAddress, initCode, saltNonce);
+            const calculatedProxyAddressWithEthers = ethers.getCreate2Address(
+                await factory.getAddress(),
+                salt,
+                ethers.keccak256(deploymentCode),
+            );
+
+            expect(proxyAddress).to.be.eq(calculatedProxyAddressWithEthers);
+        });
+
+        it("should be possible to predict the create2 address of a proxy with proxyCreationCodeHash", async () => {
+            const { factory, singleton } = await setupTests();
+            const saltNonce = 42n;
+            const singletonAddress = await singleton.getAddress();
+            const initCode = singleton.interface.encodeFunctionData("init", []);
+            const creationCodeHash = await factory.proxyCreationCodehash(await singleton.getAddress());
+            const salt = ethers.solidityPackedKeccak256(
+                ["bytes32", "uint256"],
+                [ethers.solidityPackedKeccak256(["bytes"], [initCode]), saltNonce],
+            );
+
+            const proxyAddress = await factory.createProxyWithNonce.staticCall(singletonAddress, initCode, saltNonce);
+            const calculatedProxyAddressWithEthers = ethers.getCreate2Address(await factory.getAddress(), salt, creationCodeHash);
+
+            expect(proxyAddress).to.be.eq(calculatedProxyAddressWithEthers);
+        });
+    });
+
     describe("createProxyWithNonce", () => {
         const saltNonce = 42;
 
