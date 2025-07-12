@@ -91,11 +91,7 @@ export const safeApproveHash = async (
     const signerAddress = await signer.getAddress();
     return {
         signer: signerAddress,
-        data:
-            "0x000000000000000000000000" +
-            signerAddress.slice(2) +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "01",
+        data: `0x000000000000000000000000${signerAddress.slice(2)}0000000000000000000000000000000000000000000000000000000000000000${"01"}`,
     };
 };
 
