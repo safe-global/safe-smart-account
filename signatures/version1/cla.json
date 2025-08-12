@@ -503,6 +503,14 @@
       "created_at": "2025-07-28T13:41:29Z",
       "repoId": 102186072,
       "pullRequestNo": 1026
+    },
+    {
+      "name": "rejected-l",
+      "id": 99460023,
+      "comment_id": 3177753483,
+      "created_at": "2025-08-12T05:25:34Z",
+      "repoId": 102186072,
+      "pullRequestNo": 1031
     }
   ]
 }
