@@ -23,7 +23,7 @@ describe("ProxyFactory", () => {
         }
 
         function revertingInitializer() public {
-            revert("initilalization reverted");
+            revert("initialization reverted");
         }
 
         function masterCopy() public pure returns (address) {
