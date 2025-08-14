@@ -18,7 +18,7 @@ jobs:
                 rule: ["execute", "extensible", "fallback", "guards", "hash", "module", "nativeTokenRefund", "owner", "safe", "safeMigration", "safeToL2Setup", "setup", "signatures"]
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - name: Install python
               uses: actions/setup-python@v5
