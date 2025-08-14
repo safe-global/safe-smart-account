@@ -18,7 +18,7 @@ contract SafeProxyFactory {
 
     /**
      * @notice A new Safe proxy was created.
-     * @dev This event is similar to {ProxyCreation}, but includes additional creation details to faciliate indexing.
+     * @dev This event is similar to {ProxyCreation}, but includes additional creation details to facilitate indexing.
      * @param proxy The address of the created proxy.
      * @param singleton The proxy's initially configured singleton address.
      * @param initializer The initialization payload sent to the proxy after creation.
@@ -28,7 +28,7 @@ contract SafeProxyFactory {
     event ChainSpecificProxyCreationL2(SafeProxy indexed proxy, address singleton, bytes initializer, uint256 saltNonce, uint256 chainId);
 
     /**
-     * @notice Retrive the {SafeProxy} creation code.
+     * @notice Retrieve the {SafeProxy} creation code.
      * @dev The returned creation code can be used to compute a {SafeProxy} creation address.
      */
     function proxyCreationCode() public pure returns (bytes memory) {

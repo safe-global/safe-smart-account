@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @title ERC-165 Inteface
+ * @title ERC-165 Interface
  * @dev More details at <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/IERC165.sol>
  */
 interface IERC165 {
