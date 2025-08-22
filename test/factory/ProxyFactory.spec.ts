@@ -167,9 +167,7 @@ describe("ProxyFactory", () => {
             const { factory, singleton } = await setupTests();
             const singletonAddress = await singleton.getAddress();
             const initCode = singleton.interface.encodeFunctionData("revertingInitializer", []);
-            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith(
-                "initialization reverted",
-            );
+            await expect(factory.createProxyWithNonce(singletonAddress, initCode, saltNonce)).to.be.revertedWith("initialization reverted");
         });
     });
 
