@@ -26,7 +26,7 @@ abstract contract HandlerContext {
     }
 
     /**
-     * @dev Implementation of the {onlySafeFallback} modifier check that the current call is a Safe
+     * @dev Implementation of the {onlySafeFallback} modifier checks that the current call is a Safe
      *      fallback call, and the contract is not called directly. Note that this is only a **best
      *      effort** check and may generate false positives under certain conditions.
      */
