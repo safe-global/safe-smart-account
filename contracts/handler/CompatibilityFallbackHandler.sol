@@ -164,7 +164,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             // try to copy past the `returndatasize` bounds, so we don't need an
             // additional check here. However, do note that this will consume
             // all remaining gas. This is fine (since we don't aim to support
-            // other callers that aren't Safe with the compatibility fallback
+            // other callers that aren't Safes with the compatibility fallback
             // handler).
             let responseEncodedSize := add(mload(0x20), 0x20)
             response := mload(0x40)
