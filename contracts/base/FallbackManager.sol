@@ -29,7 +29,7 @@ abstract contract FallbackManager is SelfAuthorized, IFallbackManager {
         // the call would end in a fallback handler. Since it appends the `msg.sender` address to the calldata, the attacker could craft an address
         // where the first 3 bytes of the previous calldata followed by the first byte of the attacker's address make up a valid function signature.
         // The subsequent call would result in unsanctioned access to Safe's internal protected methods. This happens as Solidity matches the first
-        // 4 bytes of the calldata to a function signature, regardless if more data follow these 4 bytes.
+        // 4 bytes of the calldata to a function signature, regardless if more data follows these 4 bytes.
         if (handler == address(this)) revertWithError("GS400");
 
         /* solhint-disable no-inline-assembly */
