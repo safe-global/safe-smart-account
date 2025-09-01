@@ -136,7 +136,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 0,
                 ptr,
                 calldatasize(),
-                // The `simulateAndRevert` call should always reverts, and
+                // The `simulateAndRevert` call should always revert, and
                 // instead encodes whether or not it was successful in the
                 // return data. The first 32-byte word of the return data
                 // contains the `success` value, and the second 32-byte word
@@ -164,7 +164,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
             // try to copy past the `returndatasize` bounds, so we don't need an
             // additional check here. However, do note that this will consume
             // all remaining gas. This is fine (since we don't aim to support
-            // other callers that aren't Safes with the compatibility fallback
+            // other callers that aren't Safe with the compatibility fallback
             // handler).
             let responseEncodedSize := add(mload(0x20), 0x20)
             response := mload(0x40)
