@@ -67,7 +67,7 @@ abstract contract BaseTransactionGuard is ITransactionGuard {
 
 /**
  * @title Guard Manager
- * @notice A contract managing transaction guards which perform pre and post-checks on Safe transactions.
+ * @notice A contract managing transaction guards which perform pre- and post-checks on Safe transactions.
  * @author Richard Meissner - @rmeissner
  */
 abstract contract GuardManager is SelfAuthorized, IGuardManager {

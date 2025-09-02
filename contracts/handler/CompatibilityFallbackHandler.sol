@@ -136,7 +136,7 @@ contract CompatibilityFallbackHandler is TokenCallbackHandler, ISignatureValidat
                 0,
                 ptr,
                 calldatasize(),
-                // The `simulateAndRevert` call should always reverts, and
+                // The `simulateAndRevert` call should always revert, and
                 // instead encodes whether or not it was successful in the
                 // return data. The first 32-byte word of the return data
                 // contains the `success` value, and the second 32-byte word
