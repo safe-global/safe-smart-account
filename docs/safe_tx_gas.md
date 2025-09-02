@@ -28,7 +28,7 @@ This also results in the `nonce` of this transaction being used, so it is not po
 
 If `gasPrice` is set to `0` then the Safe Smart Account will **not** issue a refund after the Safe transaction execution.
 
-Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, based on this the Safe Smart Account will send along all available cases when no refund is used.
+Therefore it is not necessary to be as strict on the gas being passed along with the execution of the Safe transaction. As no refund is triggered the Safe will not pay for the execution costs, the Safe Smart Account will send along all available gas when no refund is used.
 
 Before execution, the Safe Smart Account always checks if enough gas is available to satisfy the `safeTxGas`. This can be seen in [`Safe.sol`](https://github.com/safe-global/safe-smart-account/blob/c85741a6cda020cce3bc523c169909318717736f/contracts/Safe.sol#L168-L169):
 
