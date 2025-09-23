@@ -268,16 +268,17 @@ export const buildSafeTransaction = (template: {
     refundReceiver?: string;
     nonce: BigNumberish;
 }): SafeTransaction => {
+    // Use nullish coalescing so intentional falsy values (e.g., 0) are preserved
     return {
         to: template.to,
-        value: template.value || 0,
-        data: template.data || "0x",
-        operation: template.operation || 0,
-        safeTxGas: template.safeTxGas || 0,
-        baseGas: template.baseGas || 0,
-        gasPrice: template.gasPrice || 0,
-        gasToken: template.gasToken || AddressZero,
-        refundReceiver: template.refundReceiver || AddressZero,
+        value: template.value ?? 0,
+        data: template.data ?? "0x",
+        operation: template.operation ?? 0,
+        safeTxGas: template.safeTxGas ?? 0,
+        baseGas: template.baseGas ?? 0,
+        gasPrice: template.gasPrice ?? 0,
+        gasToken: template.gasToken ?? AddressZero,
+        refundReceiver: template.refundReceiver ?? AddressZero,
         nonce: template.nonce,
     };
 };
