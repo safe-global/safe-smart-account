@@ -30,7 +30,7 @@ assembly {
 /* solhint-enable no-inline-assembly */
 ```
 
-Note: Make sure to use a unique identifier else unexpected behaviour will occur
+Note: Make sure to use a unique identifier else unexpected behaviour will occur.
 
 ### Code comments
 
